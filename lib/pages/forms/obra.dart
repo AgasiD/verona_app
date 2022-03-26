@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
@@ -52,31 +53,34 @@ class _ObraFormState extends State<ObraForm> {
         ),
         width: double.infinity,
         child: Form(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             children: [
               CustomInput(
                 hintText: 'Nombre del proyecto',
                 icono: Icons.house,
                 textController: txtNombreCtrl,
+                validarInput: (value) => Helper.validNombres(value),
               ),
               CustomInput(
                   hintText: 'Barrio',
                   icono: Icons.holiday_village_outlined,
                   textController: txtBarrioCtrl),
+
               CustomInput(
                 hintText: 'Lote',
                 icono: Icons.format_list_numbered,
                 textController: txtLoteCtrl,
+                validarInput: (value) => Helper.validNumeros(value),
               ),
               CustomInput(
-                hintText: 'Duracion estimada',
+                hintText: 'Duracion estimada (días)',
                 icono: Icons.hourglass_bottom,
                 textController: txtDuracionCtrl,
                 teclado: TextInputType.number,
+                validarInput: (value) => Helper.validNumeros(value),
               ),
-              SizedBox(
-                height: 40,
-              ),
+
               // TODO agregar fotos
             ],
           ),

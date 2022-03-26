@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -49,6 +50,7 @@ class _PropietarioFormState extends State<PropietarioForm> {
         ),
         width: double.infinity,
         child: Form(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             children: [
               CustomInput(
@@ -56,30 +58,34 @@ class _PropietarioFormState extends State<PropietarioForm> {
                 icono: Icons.person,
                 textController: txtNombreCtrl,
                 teclado: TextInputType.text,
+                validarInput: (value) => Helper.validNombres(value),
               ),
               CustomInput(
-                hintText: 'Apellido ',
-                icono: Icons.person,
-                textController: txtApellidoCtrl,
-                teclado: TextInputType.text,
-              ),
+                  hintText: 'Apellido ',
+                  icono: Icons.person,
+                  textController: txtApellidoCtrl,
+                  validarInput: (value) => Helper.validNombres(value),
+                  teclado: TextInputType.text),
               CustomInput(
                 hintText: 'DNI',
                 icono: Icons.assignment_ind_outlined,
                 textController: txtDNICtrl,
                 teclado: TextInputType.number,
+                validarInput: (value) => Helper.validNumeros(value),
               ),
               CustomInput(
                 hintText: 'Numero de telefono',
                 icono: Icons.phone_android,
                 textController: txtTelefonoCtrl,
                 teclado: TextInputType.phone,
+                validarInput: (value) => Helper.validNumeros(value),
               ),
               CustomInput(
                 hintText: 'Correo electronico',
                 icono: Icons.alternate_email,
                 textController: txtMailCtrl,
                 teclado: TextInputType.emailAddress,
+                validarInput: (value) => Helper.validEmail(value),
               ),
             ],
           ),

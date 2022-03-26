@@ -46,4 +46,24 @@ class Helper {
 
     return iconos[icono]!;
   }
+
+  static String? validNumeros(String? value) {
+    if (value == '') {
+      return null;
+    }
+    if (int.tryParse(value!) == null) {
+      return 'Se debe ingresar unicamente números ';
+    }
+  }
+
+  static String? validNombres(String? value) {}
+
+  static String? validEmail(String? value) {
+    final pattern =
+        r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$';
+    RegExp regExp = new RegExp(pattern);
+    return regExp.hasMatch(value ?? '')
+        ? null
+        : 'Ingrese un correo electrónico válido';
+  }
 }

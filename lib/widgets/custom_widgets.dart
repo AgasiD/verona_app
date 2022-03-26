@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, unnecessary_this
+// ignore_for_file: prefer_const_constructors, unnecessary_this, prefer_function_declarations_over_variables
 
 import 'dart:async';
 import 'dart:io';
@@ -7,6 +7,7 @@ import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 
@@ -62,55 +63,85 @@ class CustomInput extends StatefulWidget {
   final TextInputType teclado;
   final TextEditingController textController;
   final double width;
-  final IconButton iconButton;
+  IconButton iconButton;
   final int lines;
-
-  const CustomInput(
-      {Key? key,
-      required this.hintText,
-      required this.icono,
-      this.isPassword = false,
-      this.teclado = TextInputType.text,
-      this.width = double.infinity,
-      this.lines = 1,
-      this.iconButton = const IconButton(onPressed: null, icon: Icon(null)),
-      required this.textController})
-      : super(key: key);
+  String? Function(String?) validarInput;
+  static String? _passedFunction(String? input) {}
+  CustomInput({
+    Key? key,
+    required this.hintText,
+    required this.icono,
+    this.isPassword = false,
+    this.teclado = TextInputType.text,
+    this.width = double.infinity,
+    this.lines = 1,
+    this.iconButton = const IconButton(
+      onPressed: null,
+      icon: Icon(null),
+    ),
+    required this.textController,
+    this.validarInput = _passedFunction,
+  }) : super(key: key);
 
   @override
   State<CustomInput> createState() => _CustomInputState();
 }
 
 class _CustomInputState extends State<CustomInput> {
+  ValidInput inputValid = ValidInput();
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: widget.width,
-      padding: EdgeInsets.only(right: 15),
-      margin: EdgeInsets.only(bottom: 16),
-      child: TextField(
-        controller: widget.textController,
-        maxLines: widget.lines,
-        autocorrect: false,
-        keyboardType: widget.teclado,
-        obscureText: widget.isPassword,
-        decoration: InputDecoration(
-            hintText: widget.hintText,
-            focusedBorder: InputBorder.none,
-            border: InputBorder.none,
-            suffixIcon: widget.iconButton,
-            prefixIcon: Icon(
-              widget.icono,
-              color: Helper.primaryColor,
-            )),
-        onChanged: (text) {
-          setState(() {});
-        },
-      ),
-      // ignore: prefer_const_literals_to_create_immutables
-      decoration: BoxDecoration(boxShadow: [
-        BoxShadow(color: Colors.black45, blurRadius: 5, offset: Offset(0, 3))
-      ], color: Colors.white, borderRadius: BorderRadius.circular(30)),
+    final icon = inputValid.value ? Icons.verified : Icons.cancel;
+    var inputDecoration = InputDecoration(
+        contentPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 13),
+        hintText: widget.hintText,
+        focusedBorder: InputBorder.none,
+        border: InputBorder.none,
+        errorBorder: InputBorder.none,
+        suffixIcon: widget.iconButton,
+        prefixIcon: Icon(
+          widget.icono,
+          color: Helper.primaryColor,
+        ),
+        errorMaxLines: 1);
+    return Column(
+      children: [
+        Container(
+          width: widget.width,
+          padding: EdgeInsets.only(right: 15),
+          margin: EdgeInsets.only(bottom: 15),
+          child: TextFormField(
+            controller: widget.textController,
+            maxLines: widget.lines,
+            autocorrect: false,
+            keyboardType: widget.teclado,
+            obscureText: widget.isPassword,
+            decoration: inputDecoration,
+            onChanged: (text) {
+              inputValid = widget.validarInput(text) == null
+                  ? ValidInput()
+                  : ValidInput(error: widget.validarInput(text)!, value: false);
+              setState(() {});
+            },
+          ),
+          // ignore: prefer_const_literals_to_create_immutables
+          decoration: BoxDecoration(boxShadow: [
+            BoxShadow(
+                color: Colors.black45, blurRadius: 5, offset: Offset(0, 3))
+          ], color: Colors.white, borderRadius: BorderRadius.circular(30)),
+        ),
+        inputValid.value
+            ? Container(
+                height: 22,
+              )
+            : Container(
+                padding: EdgeInsets.only(bottom: 5, left: 25),
+                alignment: Alignment.topLeft,
+                child: Text(
+                  inputValid.error,
+                  style: TextStyle(color: Colors.red),
+                ))
+      ],
     );
   }
 }

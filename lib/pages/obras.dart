@@ -51,7 +51,8 @@ class _ObrasPageState extends State<ObrasPage> {
   @override
   Widget build(BuildContext context) {
     ObraService _obras = Provider.of<ObraService>(context);
-
+    List<Obra> obras = [];
+    List<Obra> obrasFiltradas = [];
     TextEditingController obrasTxtController = new TextEditingController();
     final header;
     Platform.isIOS
@@ -76,27 +77,28 @@ class _ObrasPageState extends State<ObrasPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CustomInput(
-                            width: MediaQuery.of(context).size.width * .95,
-                            hintText: 'Alaska...',
-                            icono: Icons.search,
-                            iconButton: obrasTxtController.value == ''
-                                ? IconButton(
-                                    icon: Icon(Icons.cancel_outlined),
-                                    onPressed: () {
-                                      obrasTxtController.text = '';
-                                    },
-                                  )
-                                : IconButton(
-                                    icon: Icon(Icons.add),
-                                    onPressed: () {
-                                      Navigator.pushNamed(
-                                          context, FormPage.routeName,
-                                          arguments: {
-                                            'formName': ObraForm.routeName
-                                          });
-                                    },
-                                  ),
-                            textController: obrasTxtController),
+                          width: MediaQuery.of(context).size.width * .95,
+                          hintText: 'Alaska...',
+                          icono: Icons.search,
+                          iconButton: obrasTxtController.value == ''
+                              ? IconButton(
+                                  icon: Icon(Icons.cancel_outlined),
+                                  onPressed: () {
+                                    obrasTxtController.text = '';
+                                  },
+                                )
+                              : IconButton(
+                                  icon: Icon(Icons.add),
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, FormPage.routeName,
+                                        arguments: {
+                                          'formName': ObraForm.routeName
+                                        });
+                                  },
+                                ),
+                          textController: obrasTxtController,
+                        ),
                       ],
                     ),
                   ),
@@ -106,16 +108,20 @@ class _ObrasPageState extends State<ObrasPage> {
                         if (snapshot.data == null) {
                           return Container();
                         } else {
-                          final obras = snapshot.data as List<Obra>;
+                          obras = snapshot.data as List<Obra>;
+                          obrasFiltradas =
+                              obras.getRange(0, obras.length).toList();
+
                           return ListView.builder(
                               physics:
                                   NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
                               padding: EdgeInsets.only(top: 25),
                               scrollDirection: Axis.vertical,
                               shrinkWrap: true,
-                              itemCount: obras.length,
+                              itemCount: obrasFiltradas.length,
                               itemBuilder: (BuildContext ctx, index) {
-                                return _obraCard(context, obras[index]);
+                                return _obraCard(
+                                    context, obrasFiltradas[index]);
                               });
                         }
                         ;
@@ -140,9 +146,9 @@ class _ObrasPageState extends State<ObrasPage> {
                 // child: Hero(
                 //   tag: 'obra',
                 child: FadeInImage(
-                    image: NetworkImage(obra.imagen),
-                    placeholder: NetworkImage(
-                        'https://docs.flutter.dev/assets/images/dash/dash-fainting.gif')),
+                    image: AssetImage(
+                        'assets/image.png'), //NetworkImage(obra.imagen),
+                    placeholder: AssetImage('assets/image.png')),
                 // ),
               ),
               ListTile(
