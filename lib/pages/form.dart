@@ -19,6 +19,7 @@ class FormPage extends StatelessWidget {
   late String mensajeConfirmacion;
   late String rutaPrevia;
   late Map<String, String> argRuta;
+  late FormState? formState;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +57,8 @@ class FormPage extends StatelessWidget {
         accion = PropietarioForm.accion;
         mensajeConfirmacion = PropietarioForm.alertMessage;
         rutaPrevia = AgregarPropietariosPage.routeName;
+        argRuta = {"obraId": _service.obra.id};
+
         break;
     }
 
@@ -74,8 +77,10 @@ class FormPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     MainButton(
-                        onPressed: () => openDialogConfirmation(context, accion,
-                            mensajeConfirmacion, rutaPrevia, argRuta),
+                        onPressed: () {
+                          openDialogConfirmation(context, accion,
+                              mensajeConfirmacion, rutaPrevia, argRuta);
+                        },
                         text: 'Aceptar'),
                     SizedBox(
                       height: 10,

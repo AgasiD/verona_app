@@ -65,7 +65,11 @@ class CustomInput extends StatefulWidget {
   final double width;
   IconButton iconButton;
   final int lines;
+  final bool validaError;
   String? Function(String?) validarInput;
+  Function(String) onChange;
+  static void _passedOnChange(String? input) {}
+  String initialValue = '';
   static String? _passedFunction(String? input) {}
   CustomInput({
     Key? key,
@@ -75,12 +79,15 @@ class CustomInput extends StatefulWidget {
     this.teclado = TextInputType.text,
     this.width = double.infinity,
     this.lines = 1,
+    this.validaError = false,
+    this.initialValue = '',
     this.iconButton = const IconButton(
       onPressed: null,
       icon: Icon(null),
     ),
     required this.textController,
     this.validarInput = _passedFunction,
+    this.onChange = _passedOnChange,
   }) : super(key: key);
 
   @override
@@ -93,7 +100,7 @@ class _CustomInputState extends State<CustomInput> {
   Widget build(BuildContext context) {
     final icon = inputValid.value ? Icons.verified : Icons.cancel;
     var inputDecoration = InputDecoration(
-        contentPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 13),
+        contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 13),
         hintText: widget.hintText,
         focusedBorder: InputBorder.none,
         border: InputBorder.none,
@@ -109,7 +116,7 @@ class _CustomInputState extends State<CustomInput> {
         Container(
           width: widget.width,
           padding: EdgeInsets.only(right: 15),
-          margin: EdgeInsets.only(bottom: 15),
+          margin: EdgeInsets.only(bottom: 10),
           child: TextFormField(
             controller: widget.textController,
             maxLines: widget.lines,
@@ -121,6 +128,7 @@ class _CustomInputState extends State<CustomInput> {
               inputValid = widget.validarInput(text) == null
                   ? ValidInput()
                   : ValidInput(error: widget.validarInput(text)!, value: false);
+              widget.onChange(text);
               setState(() {});
             },
           ),
@@ -130,17 +138,19 @@ class _CustomInputState extends State<CustomInput> {
                 color: Colors.black45, blurRadius: 5, offset: Offset(0, 3))
           ], color: Colors.white, borderRadius: BorderRadius.circular(30)),
         ),
-        inputValid.value
-            ? Container(
-                height: 22,
-              )
-            : Container(
-                padding: EdgeInsets.only(bottom: 5, left: 25),
-                alignment: Alignment.topLeft,
-                child: Text(
-                  inputValid.error,
-                  style: TextStyle(color: Colors.red),
-                ))
+        widget.validaError
+            ? inputValid.value
+                ? Container(
+                    height: 22,
+                  )
+                : Container(
+                    padding: EdgeInsets.only(bottom: 5, left: 25),
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      inputValid.error,
+                      style: TextStyle(color: Colors.red),
+                    ))
+            : Container()
       ],
     );
   }
@@ -321,15 +331,10 @@ void openDialogConfirmation(BuildContext context, Function onPressed,
         title: Text(mensaje),
         actions: [
           CupertinoDialogAction(
-//            isDestructiveAction: true,
             child: Text('Confirmar'),
             onPressed: () {
               Navigator.pop(context);
               onPressed(context);
-              Timer(
-                  Duration(milliseconds: 1000),
-                  () => Navigator.of(context)
-                      .popAndPushNamed(routeNueva, arguments: argumentos));
             },
           ),
           CupertinoDialogAction(
@@ -337,6 +342,37 @@ void openDialogConfirmation(BuildContext context, Function onPressed,
             child: Text('Cancelar'),
             onPressed: () => Navigator.pop(context),
           )
+        ],
+      ),
+    );
+  }
+}
+
+void openAlertDialog(BuildContext context, String mensaje) {
+  if (Platform.isAndroid) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(mensaje),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cerrar'),
+                ),
+              ],
+            ));
+  } else {
+    showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(mensaje),
+        actions: [
+          CupertinoDialogAction(
+            child: Text('Cerrar'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ],
       ),
     );

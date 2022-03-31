@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "venoraapp",
+  "private_key_id": "310dce740522705a83ad6c4cf5560ea00661cedb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDUS/SJC3OoN38j\nwbLs1FVb0oDe+JUIOervsOqte9L2fPE+3KZ72XM0T6WC1QoS5xxNHh7+doN4NouI\nrWXesBSQ1UZ8hpQiSd1IdBXlvaQtAtC3TfbqTgpxxpfSP9FroVHC9qo7glQKJZ1G\n3DQmGbhompRDO2anB4ESrqVBSF3JJeOt7P4XUtzx/pz0kOGzZ/SR47j4ALYeOmIn\ng9NNnQT0/sBuzNXCavZ71rMEENaaPJAf8609zqC7iM6CGphx+C6zv5r04FQQoprA\nKOvNjm2UsNPGZCXHSRGU6KlajqC+ZSR3BI5WT4UT/kN0YTgbuf5PST0uF3XwO4Ot\npJMfXwYDAgMBAAECggEAE+fKFjfeXWiHgZHg/EDA5VrckRhSWcYCDjBfiLdIzBDI\nY/Vqn/rL4pzdlXtZNii4tOhjZ2Bmw+5FV6IYIHDdGy/MK9MVVg1PJylI5lSWOk9k\n94YvzFjxGylP3ruNUyytW5aNcDmWz9uM0b75US5tmO1DHcMWxTsey8jxUlvKyctm\nZkQ3/iRhBmJkLXNDWD9vHQt81qqJglP3KbLxngJatMQgz3YPyyeXgrP75WRwALcm\nzIC6i5Pn9Uev8XMhoe19j4v3LmEIJ8K07innhkEQbR3KvmoTf2rJtn6rn8b8GuhA\nPVsSGztx5vMJhVbmoHmgckkefyM+VpfsBkekIXyVaQKBgQD2WLlEr/557Qs1/3y4\na0YK6JlqSMjaJjF1fI+y7AGKexwIPvOQhqa0TW1iaWoskNKWPQ2bctdlFoSd96bT\naGrJTRQL+cK5AJ3fCt5IoA1ZjWbg9oG0MRBurIPtoc2ncScpGVwl5Qyqs1DkbZ0p\n4pLfvK69otj4O/5nOodxQhldSwKBgQDcnac2kw23FnS0pf0YETIQ74JUOitw9xYI\nAcYh7tmvclkJVXPkLztIwWtTvOtrxurSxNoaQxzYyN8pJhFn2Td/JU7LwwcJaMLg\naH9HuvnC6Xi9NykGRx3jlzf0qmBZ6bRRGD0ImzlD+IL9u7rndYd7y8aWnPkhoOW6\nM5Ql0ikfKQKBgQCxUnAZly1wCkbVmY/nF6CVXZSAwt+A15kmXoD5Y5RAYBlvfhDI\naYQ5qLoh6os4hQ5wgoX27RVKeIkBRDBbYH/tYoQZkrCthlodIK+cS0kQuw3gxM/c\nKq0PXTKhrKRh8LslhFGmHVeez/BcXOKSMbtTPXfynPPcyyJ2n9S6m7+yPQKBgQDG\nKoasquLC9tTV/9Ob7rY+KCW1apri2c9cWduTV20J/3iivbNf4F0sOTEjAqulIASG\nVnRi6q3avHRYDe3Mjn0fJG/m78Q+W2/RC4xo7jazMexWalnbXb4nVQnaJ8Bsg1SJ\nE3Cfbm6981gWeq6kghm0xZIYb+AIqPIxk2sbne96IQKBgAcGfsdiJrhtkReWnqvd\nuBEUsM+oDkiYDUtzHbQGo9qlfVlobOcqI/zCaktTs46TQ/IlY11Vl4ldWmHgdjje\n6Uts/2z28n8/re1vDvf8pc8NJVh83uxUAm3G9JgIZ7lJbIZe/TL9vHiAyGqerCdQ\nGEmckV1cY3OiJBJ6BIXjAk6D\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-xg6rf@venoraapp.iam.gserviceaccount.com",
+  "client_id": "104765095202996209902",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-xg6rf%40venoraapp.iam.gserviceaccount.com"
+}

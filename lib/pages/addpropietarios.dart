@@ -22,120 +22,102 @@ class AgregarPropietariosPage extends StatefulWidget {
 
 class _AgregarPropietariosPageState extends State<AgregarPropietariosPage> {
   List<Propietario> agregados = [];
-  //late Obra obra;
-  final propietarios = [];
+  List<Propietario> propietarios = [];
 
-  TextEditingController txtPropietarioCtrl = TextEditingController();
+  //late Obra obra;
 
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context);
+    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
+
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Asociar propietario',
-      ),
-      body: SafeArea(
-        child: Column(children: [
-          Container(
-            margin: EdgeInsets.only(top: 20),
-            width: MediaQuery.of(context).size.width * .95,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CustomInput(
-                    width: MediaQuery.of(context).size.width * .95,
-                    hintText: 'Martín...',
-                    icono: Icons.search,
-                    iconButton: txtPropietarioCtrl.value == ''
-                        ? IconButton(
-                            icon: Icon(Icons.cancel_outlined),
-                            onPressed: () {
-                              txtPropietarioCtrl.text = '';
-                            },
-                          )
-                        : IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () {
-                              Navigator.pushReplacementNamed(
-                                  context, FormPage.routeName, arguments: {
-                                'formName': PropietarioForm.routeName
-                              });
-                            },
-                          ),
-                    textController: txtPropietarioCtrl),
-              ],
-            ),
+        appBar: CustomAppBar(
+          title: 'Asociar propietario',
+        ),
+        body: SafeArea(
+          child: FutureBuilder(
+            future: _usuarioService.obtenerPropietarios(),
+            builder: (context, snapshot) {
+              if (snapshot.data == null) {
+                return Container();
+              } else {
+                final propietarios = snapshot.data as List<Propietario>;
+                return Column(children: [
+                  _SearchListView(
+                      obra: _obraService.obra, propietarios: propietarios),
+                  Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      child: MainButton(
+                          onPressed: () => Navigator.pushReplacementNamed(
+                              context, ObraPage.routeName,
+                              arguments: {'obraId': _obraService.obra.id}),
+                          text: 'Aceptar'))
+                ]);
+              }
+            },
           ),
-          Container(
-            height: MediaQuery.of(context).size.height * .65,
-            child: SingleChildScrollView(
-                child: _CustomListAdded(obra: _obraService.obra)),
-          ),
-          Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              child: MainButton(
-                  onPressed: () => Navigator.pushReplacementNamed(
-                      context, ObraPage.routeName,
-                      arguments: {'obraId': _obraService.obra.id}),
-                  text: 'Aceptar'))
-        ]),
-      ),
-    );
+        ));
   }
 }
 
 class _CustomListAdded extends StatefulWidget {
-  _CustomListAdded({Key? key, required this.obra}) : super(key: key);
+  _CustomListAdded(
+      {Key? key,
+      required this.obra,
+      required this.propietarios,
+      required this.filtro})
+      : super(key: key);
 
   Obra obra;
-
+  List<Propietario> propietarios;
+  String filtro;
   @override
   State<_CustomListAdded> createState() => __CustomListAddedState();
 }
 
 class __CustomListAddedState extends State<_CustomListAdded> {
+  List<Propietario> propietariosFiltrados = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final _ObraService = Provider.of<ObraService>(context, listen: false);
-    final _UsuarioService = Provider.of<UsuarioService>(context, listen: false);
+    this.propietariosFiltrados = widget.propietarios
+        .where((prop) =>
+            prop.nombre.toLowerCase().contains(widget.filtro.toLowerCase()))
+        .toList();
     List<String> asignados =
         widget.obra.propietarios.map((e) => e.dni).toList();
-
-    return FutureBuilder(
-        future: _UsuarioService.obtenerPropietarios(),
-        builder: (context, snapshot) {
-          if (snapshot.data == null) {
-            return Container();
-          } else {
-            final propietarios = snapshot.data as List<Propietario>;
-            return ListView.builder(
-                physics:
-                    NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
-                padding: EdgeInsets.only(top: 25),
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: propietarios.length,
-                itemBuilder: (BuildContext ctx, i) {
-                  final propietario = propietarios[i];
-
-                  final agregado = asignados
-                          .indexWhere((element) => element == propietario.dni) >
-                      -1;
-                  Icon icono = agregado
-                      ? Icon(
-                          Icons.check,
-                          color: Colors.green.shade300,
-                        )
-                      : Icon(Icons.add);
-                  return _customTileAdded(
-                    asignados: asignados,
-                    agregado: agregado,
-                    obra: widget.obra,
-                    propietario: propietario,
-                  );
-                });
-          }
+    return ListView.builder(
+        physics:
+            NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
+        padding: EdgeInsets.only(top: 25),
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        itemCount: widget.propietarios.length,
+        itemBuilder: (BuildContext ctx, i) {
+          final propietario = widget.propietarios[i];
+          final agregado =
+              asignados.indexWhere((element) => element == propietario.dni) >
+                  -1;
+          Icon icono = agregado
+              ? Icon(
+                  Icons.check,
+                  color: Colors.green.shade300,
+                )
+              : Icon(Icons.add);
+          return _customTileAdded(
+            asignados: asignados,
+            agregado: agregado,
+            obra: widget.obra,
+            propietario: propietario,
+          );
         });
   }
 }
@@ -183,7 +165,6 @@ class __customTileAddedState extends State<_customTileAdded> {
                 setState(() {});
               });
             } else {
-              print(widget.obra.id);
               _ObraService.agregarUsuario(
                       widget.obra.id, widget.propietario.dni)
                   .then((value) {
@@ -197,12 +178,80 @@ class __customTileAddedState extends State<_customTileAdded> {
           },
           title: Text(
               '${widget.propietario.nombre} ${widget.propietario.apellido}'),
-          subtitle: Text('${widget.propietario.email}'),
+          subtitle: Text('${widget.propietario.dni}'),
           trailing: icono,
         ),
         Divider(
           height: 1,
         )
+      ],
+    );
+  }
+}
+
+class _SearchListView extends StatefulWidget {
+  _SearchListView({Key? key, required this.obra, required this.propietarios})
+      : super(key: key);
+  Obra obra;
+  List<Propietario> propietarios;
+  @override
+  State<_SearchListView> createState() => __SearchListViewState();
+}
+
+class __SearchListViewState extends State<_SearchListView> {
+  TextEditingController txtPropietarioCtrl = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: EdgeInsets.only(top: 20),
+          width: MediaQuery.of(context).size.width * .95,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CustomInput(
+                width: MediaQuery.of(context).size.width * .95,
+                hintText: 'Martín...',
+                icono: Icons.search,
+                iconButton: txtPropietarioCtrl.value == ''
+                    ? IconButton(
+                        icon: Icon(Icons.cancel_outlined),
+                        onPressed: () {
+                          txtPropietarioCtrl.text = '';
+                        },
+                      )
+                    : IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(
+                              context, FormPage.routeName, arguments: {
+                            'formName': PropietarioForm.routeName
+                          });
+                        },
+                      ),
+                textController: txtPropietarioCtrl,
+                onChange: (text) {
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
+        ),
+        Container(
+          height: MediaQuery.of(context).size.height * .62,
+          child: SingleChildScrollView(
+              child: _CustomListAdded(
+                  obra: widget.obra,
+                  propietarios: widget.propietarios
+                      .where((prop) => prop.nombre
+                          .toLowerCase()
+                          .contains(txtPropietarioCtrl.text.toLowerCase()))
+                      .toList(),
+                  filtro: txtPropietarioCtrl.text)),
+        ),
       ],
     );
   }

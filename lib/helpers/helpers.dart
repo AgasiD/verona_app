@@ -57,6 +57,12 @@ class Helper {
   }
 
   static String? validNombres(String? value) {}
+  static String? campoObligatorio(String? value) {
+    String? data;
+    value == '' ? data = 'Este campo es obligatorio' : data = null;
+
+    return data;
+  }
 
   static String? validEmail(String? value) {
     final pattern =
