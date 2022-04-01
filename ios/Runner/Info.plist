@@ -41,5 +41,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Hola como estas?1</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Hola como estas?2</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Hola como estas?3</string>
 </dict>
 </plist>
