@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
@@ -309,6 +310,27 @@ class SecondaryButton extends StatelessWidget {
   }
 }
 
+openLoadingDialog(BuildContext context, {String mensaje = ''}) {
+  if (Platform.isAndroid) {
+    showDialog(
+        context: context, builder: (context) => Loading(mensaje: mensaje));
+  } else {
+    showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(title: Text(mensaje)),
+    );
+  }
+  return context;
+}
+
+void closeLoadingDialog(BuildContext context) {
+  if (Platform.isAndroid) {
+    Navigator.of(context, rootNavigator: true).pop();
+  } else {
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+}
+
 void openDialogConfirmation(BuildContext context, Function onPressed,
     String mensaje, String routeNueva, Map<String, String> argumentos) {
   if (Platform.isAndroid) {
@@ -321,7 +343,12 @@ void openDialogConfirmation(BuildContext context, Function onPressed,
                   onPressed: () => Navigator.pop(context),
                   child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
                 ),
-                TextButton(onPressed: () {}, child: Text('Confirmar')),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onPressed(context);
+                    },
+                    child: Text('Confirmar')),
               ],
             ));
   } else {
@@ -379,6 +406,35 @@ void openAlertDialog(BuildContext context, String mensaje) {
   }
 }
 
+class Loading extends StatelessWidget {
+  Loading({Key? key, this.mensaje = ''}) : super(key: key);
+  String mensaje;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SpinKitDualRing(color: Helper.primaryColor!),
+          SizedBox(
+            height: 15,
+          ),
+          mensaje != ''
+              ? Text(
+                  mensaje,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      decoration: TextDecoration.none),
+                )
+              : Container()
+        ],
+      ),
+    );
+  }
+}
+
 class Item {
   Item(
       {required this.titulo,
@@ -387,7 +443,8 @@ class Item {
       this.addButton = true,
       this.isExpanded = false,
       this.route = '',
-      this.params = const {'prueba': 1}});
+      this.params = const {'prueba': 1},
+      this.list = 1});
 
   Function accion;
   bool addButton;
@@ -396,4 +453,5 @@ class Item {
   String route;
   Map<String, dynamic> params;
   bool isExpanded;
+  int list;
 }

@@ -1,3 +1,4 @@
+import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/propietario.dart';
 
 class Obra {
@@ -11,9 +12,9 @@ class Obra {
   List<dynamic> diasInactivos;
   int diasTranscurridos;
   List<dynamic> docs;
-  List<dynamic> equipo;
+  List<Miembro> equipo;
   List<dynamic> estadios;
-  String imagen;
+  String imageId;
   int lote;
   List<Propietario> propietarios;
   String? ts;
@@ -29,7 +30,7 @@ class Obra {
     this.docs = const [],
     this.equipo = const [],
     this.estadios = const [],
-    this.imagen = 'https://via.placeholder.com/300x150',
+    this.imageId = '',
     required this.lote,
     this.propietarios = const [],
     ts,
@@ -45,7 +46,7 @@ class Obra {
     this.docs = docs;
     this.equipo = equipo;
     this.estadios = estadios;
-    this.imagen = imagen;
+    this.imageId = imageId;
     this.lote = lote;
     this.ts =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
@@ -62,9 +63,11 @@ class Obra {
         diasInactivos: json["diasInactivos"],
         diasTranscurridos: json["diasTranscurridos"],
         docs: json["docs"],
-        equipo: json["equipo"],
+        equipo: (json["equipo"] as List<dynamic>)
+            .map((e) => Miembro.fromJson(e))
+            .toList(),
         estadios: json["estadios"],
-        imagen: json['imagen'],
+        imageId: json['imageId'] ?? '',
         lote: json["lote"],
         ts: json["ts"],
         propietarios: (json["propietarios"] as List<dynamic>)
@@ -84,7 +87,7 @@ class Obra {
         'docs': this.docs,
         'equipo': this.equipo,
         'estadios': this.estadios,
-        'imagen': this.imagen,
+        'imageId': this.imageId,
         'lote': this.lote,
         'ts': this.ts,
         'propietarios': this.propietarios,
@@ -101,6 +104,22 @@ class Obra {
   quitarPropietario(Propietario prop) {
     if (estaPropietario(prop.dni)) {
       propietarios.removeWhere((element) => element.dni == prop.dni);
+    }
+  }
+
+  estaPersonal(usuarioId) {
+    return equipo.indexWhere((element) => element.dni == usuarioId) > -1;
+  }
+
+  sumarPersonal(Miembro miembro) {
+    !estaPersonal(miembro.dni) ? this.equipo.add(miembro) : false;
+  }
+
+  quitarPersonal(Miembro miembro) {
+    print(miembro.dni);
+    if (estaPersonal(miembro.dni)) {
+      print('esta en equipo');
+      equipo.removeWhere((element) => element.dni == miembro.dni);
     }
   }
 }

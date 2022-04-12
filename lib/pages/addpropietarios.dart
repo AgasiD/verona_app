@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/pages/form.dart';
@@ -40,7 +42,7 @@ class _AgregarPropietariosPageState extends State<AgregarPropietariosPage> {
             future: _usuarioService.obtenerPropietarios(),
             builder: (context, snapshot) {
               if (snapshot.data == null) {
-                return Container();
+                return Loading();
               } else {
                 final propietarios = snapshot.data as List<Propietario>;
                 return Column(children: [
@@ -154,27 +156,32 @@ class __customTileAddedState extends State<_customTileAdded> {
     return Column(
       children: [
         ListTile(
-          onTap: () {
-            if (widget.agregado) {
-              _ObraService.quitarUsuario(widget.obra.id, widget.propietario.dni)
-                  .then((value) {
-                widget.asignados.removeWhere(
-                    (element) => element == widget.propietario.dni);
-                widget.agregado = !widget.agregado;
-                widget.obra.quitarPropietario(widget.propietario);
-                setState(() {});
-              });
-            } else {
-              _ObraService.agregarUsuario(
-                      widget.obra.id, widget.propietario.dni)
-                  .then((value) {
-                widget.asignados.add(widget.propietario.dni);
-                widget.agregado = !widget.agregado;
-                widget.obra.sumarPropietario(widget.propietario);
+          onTap: () async {
+            String mensaje = '';
+            print('PROPIETARIO');
 
-                setState(() {});
-              });
+            print(widget.agregado);
+            if (widget.agregado) {
+              openLoadingDialog(context, mensaje: 'Desasignando propietario');
+              mensaje = 'Propietario quitado';
+              await _ObraService.quitarUsuario(
+                  widget.obra.id, widget.propietario.dni);
+              widget.asignados
+                  .removeWhere((element) => element == widget.propietario.dni);
+              widget.agregado = !widget.agregado;
+              widget.obra.quitarPropietario(widget.propietario);
+            } else {
+              openLoadingDialog(context, mensaje: 'Asociando propietario...');
+              mensaje = 'Propietario asignado';
+              await _ObraService.agregarUsuario(
+                  widget.obra.id, widget.propietario.dni);
+              widget.asignados.add(widget.propietario.dni);
+              widget.agregado = !widget.agregado;
+              widget.obra.sumarPropietario(widget.propietario);
             }
+            closeLoadingDialog(context);
+            Helper.showSnackBar(context, mensaje, TextStyle(fontSize: 15),
+                Duration(milliseconds: 500));
           },
           title: Text(
               '${widget.propietario.nombre} ${widget.propietario.apellido}'),
@@ -227,9 +234,7 @@ class __SearchListViewState extends State<_SearchListView> {
                         icon: Icon(Icons.add),
                         onPressed: () {
                           Navigator.pushReplacementNamed(
-                              context, FormPage.routeName, arguments: {
-                            'formName': PropietarioForm.routeName
-                          });
+                              context, PropietarioForm.routeName);
                         },
                       ),
                 textController: txtPropietarioCtrl,

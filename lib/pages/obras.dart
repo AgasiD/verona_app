@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_const_constructors, unused_local_variable, avoid_unnecessary_containers
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -32,7 +34,7 @@ class _ObrasPageState extends State<ObrasPage> {
 
   void _onRefresh(ObraService _obras) async {
     // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
+    await Future.delayed(Duration(milliseconds: 2000));
     print(' On Refresh! ');
     _obras.obtenerObras();
     setState(() {});
@@ -58,6 +60,7 @@ class _ObrasPageState extends State<ObrasPage> {
     Platform.isIOS
         ? header = WaterDropHeader()
         : header = MaterialClassicHeader();
+
     return Scaffold(
         appBar: CustomAppBar(),
         body: SafeArea(
@@ -71,7 +74,7 @@ class _ObrasPageState extends State<ObrasPage> {
                     future: _obras.obtenerObras(),
                     builder: (context, snapshot) {
                       if (snapshot.data == null) {
-                        return Container();
+                        return Loading();
                       } else {
                         obras = snapshot.data as List<Obra>;
                         obrasFiltradas =
@@ -160,7 +163,7 @@ class __SearchListViewState extends State<_SearchListView> {
                   : IconButton(
                       icon: Icon(Icons.add),
                       onPressed: () {
-                        Navigator.pushNamed(context, FormPage.routeName,
+                        Navigator.pushNamed(context, ObraForm.routeName,
                             arguments: {'formName': ObraForm.routeName});
                       },
                     ),
@@ -190,36 +193,49 @@ class __SearchListViewState extends State<_SearchListView> {
   }
 
   Padding _obraCard(BuildContext context, Obra obra) {
+    final NetworkImage imagen = obra.imageId == ''
+        ? NetworkImage(
+            'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
+        : NetworkImage(
+            //        'https://www.bbva.com/wp-content/uploads/2021/04/casas-ecolo%CC%81gicas_apertura-hogar-sostenibilidad-certificado--1024x629.jpg');
+            'https://drive.google.com/uc?export=view&id=${obra.imageId}');
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
         onTap: () => Navigator.pushNamed(context, ObraPage.routeName,
             arguments: {'nameForm': PedidoForm.routeName, 'obraId': obra.id}),
-        child: Card(
-          elevation: 5,
-          child: Column(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
-                // child: Hero(
-                //   tag: 'obra',
-                child: FadeInImage(
-                    image: AssetImage(
-                        'assets/image.png'), //NetworkImage(obra.imagen),
-                    placeholder: AssetImage('assets/image.png')),
-                // ),
+        child: ClipRRect(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+            child: Card(
+              elevation: 5,
+              child: Column(
+                children: [
+                  Hero(
+                    tag: obra.nombre,
+                    child: FadeInImage(
+                        height: 250,
+                        image: imagen,
+                        imageErrorBuilder: (_, obj, st) {
+                          return Container(
+                              child:
+                                  Image(image: AssetImage('assets/image.png')));
+                        },
+                        placeholder: AssetImage('assets/loading-image.gif')),
+                  ),
+                  ListTile(
+                    title: Text(obra.nombre),
+                    subtitle: Text(
+                        'Tareas preliminares'), //obra.estadios.last.descripcion
+                  )
+                ],
               ),
-              ListTile(
-                title: Text(obra.nombre),
-                subtitle: Text(
-                    'Tareas preliminares'), //obra.estadios.last.descripcion
-              )
-            ],
-          ),
-        ),
+            )),
       ),
     );
+  }
+
+  NetworkImage _CustomNetworkImage(String imageId) {
+    return NetworkImage('https://drive.google.com/uc?id=$imageId');
   }
 }

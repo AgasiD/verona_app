@@ -5,20 +5,33 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/forms/asignar_pedido.dart';
+import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
-class FormPage extends StatelessWidget {
+class FormPage extends StatefulWidget {
   static const routeName = 'form';
+
+  @override
+  State<FormPage> createState() => _FormPageState();
+}
+
+class _FormPageState extends State<FormPage> {
   late String titulo;
+
   late Function accion;
+
   late String formName;
+
   late String mensajeConfirmacion;
+
   late String rutaPrevia;
+
   late Map<String, String> argRuta;
+
   late FormState? formState;
 
   @override
@@ -26,6 +39,7 @@ class FormPage extends StatelessWidget {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final formName = arguments['formName'];
     final _service = Provider.of<ObraService>(context, listen: false);
+
     dynamic formulario;
     switch (formName) {
       case AsignarPedidoForm.routeName:
@@ -45,7 +59,8 @@ class FormPage extends StatelessWidget {
       case ObraForm.routeName:
         formulario = ObraForm();
         titulo = ObraForm.nameForm;
-        accion = ObraForm.accion;
+        accion = () {};
+
         mensajeConfirmacion = ObraForm.alertMessage;
         rutaPrevia = ObraForm.routeName;
         argRuta = {"obraId": _service.obra.id};
@@ -54,11 +69,18 @@ class FormPage extends StatelessWidget {
       case PropietarioForm.routeName:
         formulario = PropietarioForm();
         titulo = PropietarioForm.nameForm;
-        accion = PropietarioForm.accion;
+        accion = () {};
         mensajeConfirmacion = PropietarioForm.alertMessage;
         rutaPrevia = AgregarPropietariosPage.routeName;
         argRuta = {"obraId": _service.obra.id};
-
+        break;
+      case MiembroForm.routeName:
+        formulario = MiembroForm();
+        titulo = MiembroForm.nameForm;
+        accion = MiembroForm.accion;
+        mensajeConfirmacion = MiembroForm.alertMessage;
+        rutaPrevia = ObraForm.routeName;
+        argRuta = {"obraId": _service.obra.id};
         break;
     }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/services/http_service.dart';
@@ -15,7 +16,15 @@ class UsuarioService extends ChangeNotifier {
     return list;
   }
 
-  grabarUsuario(Propietario usuario) async {
+  obtenerPersonal() async {
+    final datos = await this._http.get('$_endpoint/profesionales');
+    final lista = datos["usuarios"];
+    final list =
+        (lista as List<dynamic>).map((json) => Miembro.fromJson(json)).toList();
+    return list;
+  }
+
+  grabarUsuario(dynamic usuario) async {
     final response = await this._http.post(_endpoint, usuario.toJson());
     notifyListeners();
     return response;

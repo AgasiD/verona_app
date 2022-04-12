@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
@@ -25,13 +26,18 @@ class Helper {
   //   return hmacSha256.convert(bytes).toString();
   // }
 
-  static void showSnackBar(BuildContext context, String txt) {
+  static void showSnackBar(
+      BuildContext context, String txt, TextStyle? style, Duration? duracion) {
+    if (duracion == null) {
+      duracion = Duration(seconds: 2);
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: duracion,
       content: Text(
         txt,
         textAlign: TextAlign.center,
-        style: TextStyle(
-            color: Helper.secondaryColor, fontWeight: FontWeight.bold),
+        style: style,
       ),
     ));
   }
@@ -71,5 +77,21 @@ class Helper {
     return regExp.hasMatch(value ?? '')
         ? null
         : 'Ingrese un correo electrónico válido';
+  }
+
+  static String getProfesion(int role) {
+    switch (role) {
+      case 2:
+        return 'Arquitecto';
+      case 3:
+        return 'Propietario';
+      case 4:
+        return 'Obrero';
+      case 5:
+        return 'Encargado de compras';
+      case 6:
+        return 'Delivery';
+    }
+    return 'Admin';
   }
 }

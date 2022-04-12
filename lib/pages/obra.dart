@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
+import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/form.dart';
+import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -26,9 +30,15 @@ class ObraPage extends StatelessWidget {
             future: _service.obtenerObra(obraId),
             builder: (context, snapshot) {
               if (snapshot.data == null) {
-                return Container();
+                return Loading();
               } else {
                 final obra = snapshot.data as Obra;
+                NetworkImage imagen = obra.imageId == ''
+                    ? NetworkImage(
+                        'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
+                    : NetworkImage(
+                        'https://drive.google.com/uc?export=view&id=${obra.imageId}');
+                //'https://www.bbva.com/wp-content/uploads/2021/04/casas-ecolo%CC%81gicas_apertura-hogar-sostenibilidad-certificado--1024x629.jpg');
                 return Container(
                   child: SingleChildScrollView(
                     physics: BouncingScrollPhysics(),
@@ -39,11 +49,19 @@ class ObraPage extends StatelessWidget {
                           child: Stack(
                             children: [
                               Hero(
-                                  tag: 'obra',
-                                  child: Image(
-                                    image: AssetImage('assets/obra.png'),
+                                  tag: obra.nombre,
+                                  child: FadeInImage(
+                                    image: imagen,
+                                    height: 250,
                                     width: MediaQuery.of(context).size.width,
-                                    //height: MediaQuery.of(context).size.height * .4,
+                                    placeholder:
+                                        AssetImage('assets/loading-image.gif'),
+                                    imageErrorBuilder: (_, obj, st) {
+                                      return Container(
+                                          child: Image(
+                                              image: AssetImage(
+                                                  'assets/image.png')));
+                                    },
                                   )),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -155,7 +173,12 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       future: _service.obtenerObra(obraId),
       builder: (context, snapshot) {
         if (snapshot.data == null) {
-          return Container();
+          return Center(
+              child: SpinKitDualRing(
+            size: 20,
+            color: Helper.primaryColor!,
+          ));
+          ;
         } else {
           final obra = snapshot.data as Obra;
           final _data = _generarItems(obra);
@@ -188,15 +211,20 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
     //Desplegable de equipo
     final team = Item(
-        titulo: 'Equipo',
-        accion: () {},
-        values: obra.equipo
-            .map((e) => {
-                  'id': e.dni,
-                  'nombre': e.nombre + ' ' + e.apellido,
-                  'telefono': e.telefono
-                })
-            .toList());
+      list: 2,
+      titulo: 'Equipo',
+      values: obra.equipo
+          .map((e) => {
+                'id': e.dni,
+                'nombre': e.nombre + ' ' + e.apellido,
+                'telefono': e.telefono,
+                'role': e.role
+              })
+          .toList(),
+      accion: () {
+        Navigator.pushReplacementNamed(context, AsignarEquipoPage.routeName);
+      },
+    );
     items.add(team);
 
     //Desplegable de documentacion
@@ -252,6 +280,7 @@ class _CustomExpansionState extends State<_CustomExpansion> {
                     shrinkWrap: true,
                     itemCount: item.values.length,
                     itemBuilder: (_, i) {
+                      bool esEquipo = item.list == 2;
                       return Column(children: [
                         Dismissible(
                             key: Key(item.values[i]['id']),
@@ -271,6 +300,20 @@ class _CustomExpansionState extends State<_CustomExpansion> {
                                   )),
                             ),
                             child: ListTile(
+                                trailing: esEquipo
+                                    ? Chip(
+                                        padding: EdgeInsets.all(0),
+                                        label: Text(
+                                            Helper.getProfesion(
+                                                item.values[i]['role']),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14)),
+                                      )
+                                    : Container(
+                                        width: 1,
+                                        height: 1,
+                                      ),
                                 title: Text(item.values[i]['nombre']),
                                 subtitle:
                                     Text(item.values[i]['telefono'] ?? ''),
