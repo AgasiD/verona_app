@@ -7,6 +7,7 @@ import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
+import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/routes/routes.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/loading_service.dart';
@@ -51,7 +52,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Verona App',
-      initialRoute: LoginPage.routeName,
+      initialRoute: PasswordPage.routeName,
       routes: appRoutes,
     );
   }

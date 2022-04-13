@@ -77,7 +77,8 @@ class _FormPageState extends State<FormPage> {
       case MiembroForm.routeName:
         formulario = MiembroForm();
         titulo = MiembroForm.nameForm;
-        accion = MiembroForm.accion;
+        accion = () {};
+        //MiembroForm.accion;
         mensajeConfirmacion = MiembroForm.alertMessage;
         rutaPrevia = ObraForm.routeName;
         argRuta = {"obraId": _service.obra.id};

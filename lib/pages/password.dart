@@ -2,15 +2,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obras.dart';
+import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:win32/win32.dart';
 
-class LoginPage extends StatelessWidget {
-  static const String routeName = 'login';
+class PasswordPage extends StatelessWidget {
+  static const String routeName = 'password';
 
-  const LoginPage({Key? key}) : super(key: key);
+  const PasswordPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +38,6 @@ class LoginPage extends StatelessWidget {
               _Logo(),
               _Form(),
               _Labels(),
-              Text('Powered by e-Drex©'),
             ],
           ),
         ),
@@ -54,12 +57,8 @@ class _Logo extends StatelessWidget {
         children: [
           Image(
             image: AssetImage('assets/logo.png'),
-            height: 300,
+            height: 290,
           ),
-          // Text(
-          //   Helper.nombre,
-          //   style: TextStyle(fontSize: 35),
-          // )
         ],
       ),
     ));
@@ -74,12 +73,15 @@ class _Form extends StatefulWidget {
 }
 
 class __FormState extends State<_Form> {
+  final emailCtrl = TextEditingController();
+  final passCtrl = TextEditingController();
+  final newPassCtrl = TextEditingController();
+  final reNewPassCtrl = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    final emailCtrl = TextEditingController();
-    final passCtrl = TextEditingController();
+    final _usuarioService = Provider.of<UsuarioService>(context);
+
     return Container(
-        margin: EdgeInsets.only(top: 40),
         padding: EdgeInsets.symmetric(horizontal: 50),
         child: Column(children: [
           CustomInput(
@@ -93,13 +95,71 @@ class __FormState extends State<_Form> {
             textController: passCtrl,
             isPassword: true,
           ),
+          CustomInput(
+            hintText: 'Nueva contraseña',
+            icono: Icons.password_outlined,
+            textController: newPassCtrl,
+            isPassword: true,
+          ),
+          CustomInput(
+            hintText: 'Confirmar contraseña',
+            icono: Icons.password_outlined,
+            textController: reNewPassCtrl,
+            isPassword: true,
+          ),
+          SizedBox(
+            height: 15,
+          ),
           MainButton(
-            text: 'Ingresar',
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, ObrasPage.routeName);
+            text: 'Cambiar contraseña',
+            onPressed: () async {
+              try {
+                final formValid = validarFormulario();
+                print(formValid);
+                if (formValid) {
+                  final body = {
+                    "username": emailCtrl.text,
+                    "password": passCtrl.text,
+                    "newpass": newPassCtrl.text
+                  };
+                  final data = await _usuarioService.changePassword(body);
+                  final datos = data["data"];
+                  print(data["data"]);
+                  if (datos["fallo"]) {
+                    openAlertDialog(context, datos["error"]);
+                  } else {
+                    resetForm();
+                    openAlertDialog(
+                        context, 'La contraseña se cambió correctamente');
+                  }
+                }
+              } catch (err) {
+                openAlertDialog(context, err.toString());
+              }
             },
           )
         ]));
+  }
+
+  validarFormulario() {
+    bool valid = true;
+    if ((newPassCtrl.text.length == 0)) {
+      valid = false;
+      throw ErrorDescription('No se ingresó contraseña');
+    }
+    if ((newPassCtrl.text != reNewPassCtrl.text)) {
+      valid = false;
+      throw ErrorDescription('Las contraseñas no coinciden');
+    }
+
+    return valid;
+  }
+
+  resetForm() {
+    emailCtrl.text = '';
+    passCtrl.text = '';
+    newPassCtrl.text = '';
+    reNewPassCtrl.text = '';
   }
 }
 
@@ -109,17 +169,18 @@ class _Labels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(top: 25),
       child: Column(
         children: [
-          Text('No tenes clave?',
+          Text('Ya tenes clave?',
               style: TextStyle(color: Colors.black45, fontSize: 16)),
           GestureDetector(
             child: Text(
-              'Ingresa por primera vez',
+              'Volvé al log in',
               style: TextStyle(color: Colors.blue.shade500, fontSize: 18),
             ),
             onTap: () {
-              Navigator.pushReplacementNamed(context, 'password');
+              Navigator.pushReplacementNamed(context, LoginPage.routeName);
             },
           )
         ],

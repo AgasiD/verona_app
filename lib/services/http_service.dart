@@ -9,19 +9,19 @@ import 'package:flutter/material.dart';
 
 class HttpService extends ChangeNotifier {
   //bool loading = false;
-  final _baseUrl = 'veronaserver.herokuapp.com';
+  final _baseUrl = 'localhost:8008'; //'veronaserver.herokuapp.com';
   final headers = {"Content-Type": "application/json"};
   HttpService() {}
 
   get(String endpoint) async {
-    final url = Uri.https('$_baseUrl', endpoint);
+    final url = Uri.http('$_baseUrl', endpoint);
     final response = await http.get(url);
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
 
   post(String endpoint, Map<String, dynamic> body) async {
-    final url = Uri.https(_baseUrl, endpoint);
+    final url = Uri.http(_baseUrl, endpoint);
     final response =
         await http.post(url, body: json.encode(body), headers: headers);
     Map<String, dynamic> data = json.decode(response.body);
@@ -29,15 +29,16 @@ class HttpService extends ChangeNotifier {
   }
 
   delete(String endpoint) async {
-    final url = Uri.https('$_baseUrl', endpoint);
+    final url = Uri.http('$_baseUrl', endpoint);
     final response = await http.delete(url);
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
 
   put(String endpoint, Map<String, dynamic> body) async {
-    final url = Uri.https('$_baseUrl', endpoint);
-    final response = await http.put(url, body: json.encode(body));
+    final url = Uri.http('$_baseUrl', endpoint);
+    final response =
+        await http.put(url, body: json.encode(body), headers: headers);
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
@@ -50,7 +51,7 @@ class HttpService extends ChangeNotifier {
     // get file length
     var length = await imageFile.length();
     // string to uri
-    final uri = Uri.https('$_baseUrl', url);
+    final uri = Uri.http('$_baseUrl', url);
 
     // create multipart request
     var request = new http.MultipartRequest("POST", uri);

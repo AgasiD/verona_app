@@ -111,8 +111,7 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                       icon: Icon(Icons.add),
                       onPressed: () {
                         Navigator.pushReplacementNamed(
-                            context, FormPage.routeName,
-                            arguments: {'formName': MiembroForm.routeName});
+                            context, MiembroForm.routeName);
                       },
                     ),
               textController: txtPersonalCtrl,

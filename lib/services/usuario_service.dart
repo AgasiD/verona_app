@@ -29,4 +29,10 @@ class UsuarioService extends ChangeNotifier {
     notifyListeners();
     return response;
   }
+
+  changePassword(Map<String, String> usuario) async {
+    print(usuario);
+    final response = await this._http.put('$_endpoint/password', usuario);
+    return response;
+  }
 }

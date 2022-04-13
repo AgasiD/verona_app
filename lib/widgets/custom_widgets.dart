@@ -26,8 +26,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final hideNotifications =
         ModalRoute.of(context)?.settings.name == NotificacionesPage.routeName;
     return AppBar(
-      title: Text(title),
+      title: Image(
+        image: AssetImage('assets/logo.png'),
+        height: 170,
+      ),
       automaticallyImplyLeading: muestraBackButton,
+      primary: true,
       actions: [
         !hideNotifications
             ? Padding(

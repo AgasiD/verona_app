@@ -18,34 +18,6 @@ class MiembroForm extends StatefulWidget {
   static const String routeName = 'miembro';
   static String nameForm = 'Nuevo miembro';
   static String alertMessage = 'Confirmar nuevo miembro';
-  static Function accion = (BuildContext context) {
-    bool isValid = true;
-    final _service = Provider.of<UsuarioService>(context, listen: false);
-
-    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-    txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
-    txtDNICtrl.text == '' ? isValid = false : true;
-    txtTelefonoCtrl.text == '' ? isValid = false : true;
-    txtMailCtrl.text == '' ? isValid = false : true;
-
-    if (isValid) {
-      final prop = Miembro(
-          nombre: txtNombreCtrl.text,
-          apellido: txtApellidoCtrl.text,
-          dni: txtDNICtrl.text,
-          telefono: txtTelefonoCtrl.text,
-          email: txtMailCtrl.text,
-          role: personalSelected);
-      _service.grabarUsuario(prop);
-      openAlertDialog(context, 'Miembro creado');
-      Timer(
-          Duration(milliseconds: 750),
-          () => Navigator.of(context)
-              .popAndPushNamed(AsignarEquipoPage.routeName));
-    } else {
-      openAlertDialog(context, 'Formulario invalido');
-    }
-  };
   const MiembroForm({Key? key}) : super(key: key);
   @override
   State<MiembroForm> createState() => _MiembroFormState();
@@ -83,93 +55,148 @@ class _MiembroFormState extends State<MiembroForm> {
         child: Text('Repartidor'),
       ),
     ];
-    return SingleChildScrollView(
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 25),
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black45, blurRadius: 5, offset: Offset(0, 3))
-          ],
-          color: Colors.grey.shade100,
-        ),
-        width: double.infinity,
-        child: Form(
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            children: [
-              CustomInput(
-                hintText: 'Nombre',
-                icono: Icons.person,
-                textController: txtNombreCtrl,
-                teclado: TextInputType.text,
-                validaError: true,
-                validarInput: (value) => Helper.campoObligatorio(value),
-              ),
-              CustomInput(
-                  hintText: 'Apellido ',
+    return Scaffold(
+      appBar: CustomAppBar(
+        muestraBackButton: false,
+        title: 'Nuevo miembro',
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 25, horizontal: 15),
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black45, blurRadius: 5, offset: Offset(0, 3))
+            ],
+            color: Colors.grey.shade100,
+          ),
+          width: double.infinity,
+          child: Form(
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              children: [
+                CustomInput(
+                  hintText: 'Nombre',
                   icono: Icons.person,
-                  textController: txtApellidoCtrl,
+                  textController: txtNombreCtrl,
+                  teclado: TextInputType.text,
                   validaError: true,
                   validarInput: (value) => Helper.campoObligatorio(value),
-                  teclado: TextInputType.text),
-              CustomInput(
-                hintText: 'DNI',
-                icono: Icons.assignment_ind_outlined,
-                textController: txtDNICtrl,
-                teclado: TextInputType.number,
-                validaError: true,
-                validarInput: (value) => Helper.validNumeros(value),
-              ),
-              CustomInput(
-                hintText: 'Numero de telefono',
-                icono: Icons.phone_android,
-                textController: txtTelefonoCtrl,
-                teclado: TextInputType.phone,
-                validaError: true,
-                validarInput: (value) => Helper.validNumeros(value),
-              ),
-              CustomInput(
-                hintText: 'Correo electronico',
-                icono: Icons.alternate_email,
-                textController: txtMailCtrl,
-                teclado: TextInputType.emailAddress,
-                validaError: true,
-                validarInput: (value) => Helper.validEmail(value),
-              ),
-              Container(
-                decoration: BoxDecoration(boxShadow: [
-                  BoxShadow(
-                      color: Colors.black45,
-                      blurRadius: 5,
-                      offset: Offset(0, 3))
-                ]),
-                child: DropdownButtonFormField(
-                  value: personalSelected,
-                  decoration: InputDecoration(
-                      label: Text(
-                        'Puesto en equipo',
-                        style: TextStyle(color: Helper.primaryColor),
-                      ),
-                      border: InputBorder.none,
-                      prefixIcon: Icon(
-                        Icons.work_outline_rounded,
-                        color: Helper.primaryColor,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white),
-                  onChanged: (value) {
-                    personalSelected = int.parse(value.toString());
-                  },
-                  items: miembros,
                 ),
-              )
-            ],
+                CustomInput(
+                    hintText: 'Apellido ',
+                    icono: Icons.person,
+                    textController: txtApellidoCtrl,
+                    validaError: true,
+                    validarInput: (value) => Helper.campoObligatorio(value),
+                    teclado: TextInputType.text),
+                CustomInput(
+                  hintText: 'DNI',
+                  icono: Icons.assignment_ind_outlined,
+                  textController: txtDNICtrl,
+                  teclado: TextInputType.number,
+                  validaError: true,
+                  validarInput: (value) => Helper.validNumeros(value),
+                ),
+                CustomInput(
+                  hintText: 'Numero de telefono',
+                  icono: Icons.phone_android,
+                  textController: txtTelefonoCtrl,
+                  teclado: TextInputType.phone,
+                  validaError: true,
+                  validarInput: (value) => Helper.validNumeros(value),
+                ),
+                CustomInput(
+                  hintText: 'Correo electronico',
+                  icono: Icons.alternate_email,
+                  textController: txtMailCtrl,
+                  teclado: TextInputType.emailAddress,
+                  validaError: true,
+                  validarInput: (value) => Helper.validEmail(value),
+                ),
+                Container(
+                  margin: EdgeInsets.only(bottom: 25),
+                  decoration: BoxDecoration(boxShadow: [
+                    BoxShadow(
+                        color: Colors.black45,
+                        blurRadius: 5,
+                        offset: Offset(0, 3))
+                  ]),
+                  child: DropdownButtonFormField(
+                    value: personalSelected,
+                    decoration: InputDecoration(
+                        label: Text(
+                          'Puesto en equipo',
+                          style: TextStyle(color: Helper.primaryColor),
+                        ),
+                        border: InputBorder.none,
+                        prefixIcon: Icon(
+                          Icons.work_outline_rounded,
+                          color: Helper.primaryColor,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white),
+                    onChanged: (value) {
+                      personalSelected = int.parse(value.toString());
+                    },
+                    items: miembros,
+                  ),
+                ),
+                SecondaryButton(
+                    onPressed: () async {
+                      grabarMiembro(context);
+                    },
+                    text: 'Grabar'),
+                SizedBox(height: 10),
+                MainButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    text: 'Cancelar')
+              ],
+            ),
           ),
         ),
       ),
     );
-    ;
+  }
+
+  grabarMiembro(BuildContext context) {
+    bool isValid = true;
+    final _service = Provider.of<UsuarioService>(context, listen: false);
+
+    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+    txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
+    txtDNICtrl.text == '' ? isValid = false : true;
+    txtTelefonoCtrl.text == '' ? isValid = false : true;
+    txtMailCtrl.text == '' ? isValid = false : true;
+
+    if (isValid) {
+      final miembro = Miembro(
+          nombre: txtNombreCtrl.text,
+          apellido: txtApellidoCtrl.text,
+          dni: txtDNICtrl.text,
+          telefono: txtTelefonoCtrl.text,
+          email: txtMailCtrl.text,
+          role: personalSelected);
+      _service.grabarUsuario(miembro);
+      openAlertDialog(context, 'Miembro creado');
+      resetForm();
+      Timer(
+          Duration(milliseconds: 750),
+          () => Navigator.of(context)
+              .popAndPushNamed(AsignarEquipoPage.routeName));
+    } else {
+      openAlertDialog(context, 'Formulario invalido');
+    }
+  }
+
+  void resetForm() {
+    txtNombreCtrl.text = '';
+    txtApellidoCtrl.text = '';
+    txtDNICtrl.text = '';
+    txtTelefonoCtrl.text = '';
+    txtMailCtrl.text = '';
   }
 }
