@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Verona App',
-      initialRoute: PasswordPage.routeName,
+      initialRoute: LoginPage.routeName,
       routes: appRoutes,
     );
   }
