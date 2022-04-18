@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 class HttpService extends ChangeNotifier {
   //bool loading = false;
-  final _baseUrl = 'veronaserver.herokuapp.com'; //'localhost:8008'; //
+  final _baseUrl = 'localhost:8008'; //'veronaserver.herokuapp.com'; //
   final headers = {"Content-Type": "application/json"};
   HttpService() {}
 

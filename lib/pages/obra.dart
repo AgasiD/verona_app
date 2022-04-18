@@ -39,115 +39,204 @@ class ObraPage extends StatelessWidget {
                     : NetworkImage(
                         'https://drive.google.com/uc?export=view&id=${obra.imageId}');
                 //'https://www.bbva.com/wp-content/uploads/2021/04/casas-ecolo%CC%81gicas_apertura-hogar-sostenibilidad-certificado--1024x629.jpg');
+
                 return Container(
-                  child: SingleChildScrollView(
-                    physics: BouncingScrollPhysics(),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Stack(
-                            children: [
-                              Hero(
-                                  tag: obra.nombre,
-                                  child: FadeInImage(
-                                    image: imagen,
-                                    height: 250,
-                                    width: MediaQuery.of(context).size.width,
-                                    placeholder:
-                                        AssetImage('assets/loading-image.gif'),
-                                    imageErrorBuilder: (_, obj, st) {
-                                      return Container(
-                                          child: Image(
-                                              image: AssetImage(
-                                                  'assets/image.png')));
-                                    },
-                                  )),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(Icons.edit),
-                                    splashColor: null,
-                                    splashRadius: 0.1,
-                                  ),
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(Icons.delete),
-                                    splashRadius: 0.1,
-                                  )
-                                ],
-                              )
-                            ],
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 0,
+                        width: MediaQuery.of(context).size.width,
+                        child: Stack(
+                          children: [
+                            Hero(
+                                tag: obra.nombre,
+                                child: FadeInImage(
+                                  image: imagen,
+                                  height: 250,
+                                  width: MediaQuery.of(context).size.width,
+                                  placeholder:
+                                      AssetImage('assets/loading-image.gif'),
+                                  imageErrorBuilder: (_, obj, st) {
+                                    return Container(
+                                        child: Image(
+                                            image: AssetImage(
+                                                'assets/image.png')));
+                                  },
+                                )),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  onPressed: () {},
+                                  icon: Icon(Icons.edit),
+                                  splashColor: null,
+                                  splashRadius: 0.1,
+                                ),
+                                IconButton(
+                                  onPressed: () {},
+                                  icon: Icon(Icons.delete),
+                                  splashRadius: 0.1,
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        top: 200,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(30))),
+                          child: SingleChildScrollView(
+                            child: Column(children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 18.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: Colors.grey[50],
+                                      minRadius: 30,
+                                      foregroundColor: Helper.primaryColor,
+                                      child: IconButton(
+                                        icon: Icon(
+                                          Icons.groups_outlined,
+                                          size: 35,
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pushNamed(
+                                              context, ChatPage.routeName,
+                                              arguments: {
+                                                'chatId': obra.chatI
+                                              });
+                                        },
+                                      ),
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          obra.nombre,
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          obra.barrio,
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              color: Helper.primaryColor),
+                                        ),
+                                        // Text(
+                                        //   'Tareas preliminares ',
+                                        //   style: TextStyle(fontSize: 15),
+                                        // )
+                                      ],
+                                    ),
+                                    CircleAvatar(
+                                      backgroundColor: Colors.grey[50],
+                                      minRadius: 30,
+                                      foregroundColor: Helper.primaryColor,
+                                      child: IconButton(
+                                        icon: Icon(
+                                          Icons.chat,
+                                          size: 35,
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pushNamed(
+                                              context, ChatPage.routeName,
+                                              arguments: {
+                                                'chatId': obra.chatE
+                                              });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.symmetric(vertical: 25),
+                                height: 60,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Column(
+                                      children: [
+                                        Text(
+                                          obra.diasEstimados.toString(),
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          'Dias estimados',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w300),
+                                        )
+                                      ],
+                                    ),
+                                    VerticalDivider(
+                                      width: 25,
+                                      color: Colors.black45,
+                                      indent: 15,
+                                      endIndent: 15,
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          obra.diasTranscurridos.toString(),
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          'Dias transcurridos',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w300),
+                                        )
+                                      ],
+                                    ),
+                                    VerticalDivider(
+                                      width: 25,
+                                      color: Colors.black45,
+                                      indent: 15,
+                                      endIndent: 15,
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          obra.diasInactivos.length.toString(),
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          'Dias inactivos',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w300),
+                                        )
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                              CaracteristicaObra(),
+                            ]),
                           ),
                         ),
-                        Container(
-                          height: 100,
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          width: double.infinity,
-                          color: Colors.grey.shade100,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Etapa:' + 'Tareas preliminares',
-                                style: TextStyle(
-                                  fontSize: 17,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                'Duracion:' +
-                                    '${obra.diasTranscurridos - obra.diasInactivos.length}/${obra.diasEstimados}',
-                                style: TextStyle(
-                                  fontSize: 17,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        CaracteristicaObra(),
-                        Container(
-                          margin: EdgeInsets.symmetric(vertical: 30),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              CircleAvatar(
-                                minRadius: 30,
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.groups_outlined,
-                                    size: 35,
-                                  ),
-                                  onPressed: () {
-                                    Navigator.pushNamed(
-                                        context, ChatPage.routeName);
-                                  },
-                                ),
-                              ),
-                              CircleAvatar(
-                                minRadius: 30,
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.chat,
-                                    size: 35,
-                                  ),
-                                  onPressed: () {
-                                    Navigator.pushNamed(
-                                        context, ChatPage.routeName);
-                                  },
-                                ),
-                              )
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 );
               }
@@ -307,7 +396,7 @@ class _CustomExpansionState extends State<_CustomExpansion> {
                                             Helper.getProfesion(
                                                 item.values[i]['role']),
                                             style: TextStyle(
-                                                color: Colors.white,
+                                                color: Colors.black54,
                                                 fontSize: 14)),
                                       )
                                     : Container(

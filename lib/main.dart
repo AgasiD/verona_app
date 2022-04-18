@@ -9,6 +9,7 @@ import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/routes/routes.dart';
+import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/loading_service.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -28,6 +29,10 @@ class AppState extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => GoogleDriveService(),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ChatService(),
           lazy: false,
         ),
 
