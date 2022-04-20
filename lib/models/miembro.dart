@@ -1,5 +1,6 @@
 class Miembro {
   Miembro({
+    required this.id,
     required this.nombre,
     required this.apellido,
     required this.dni,
@@ -9,6 +10,7 @@ class Miembro {
     this.username = '',
     this.externo = false,
   });
+  String id;
   String nombre;
   String apellido;
   String dni;
@@ -19,6 +21,7 @@ class Miembro {
   bool externo;
 
   factory Miembro.fromJson(Map<String, dynamic> json) => Miembro(
+      id: json['id'],
       nombre: json["nombre"],
       apellido: json["apellido"],
       email: json["email"],

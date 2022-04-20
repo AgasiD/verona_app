@@ -65,7 +65,15 @@ class _AgregarPropietariosPageState extends State<AsignarEquipoPage> {
                   'Repartidor'
                 ];
 
-                return _SearchListGroupView(grupos: grupos, datos: profesiones);
+                final icons = {
+                  'Arquitectos': Icons.architecture_rounded,
+                  'Obreros': Icons.construction_outlined,
+                  'Compradores': Icons.card_travel,
+                  'Repartidor': Icons.delivery_dining_rounded,
+                };
+
+                return _SearchListGroupView(
+                    grupos: grupos, datos: profesiones, icons: icons);
               }
             },
           ),
@@ -74,9 +82,14 @@ class _AgregarPropietariosPageState extends State<AsignarEquipoPage> {
 }
 
 class _SearchListGroupView extends StatefulWidget {
-  _SearchListGroupView({Key? key, required this.grupos, required this.datos})
+  _SearchListGroupView(
+      {Key? key,
+      required this.grupos,
+      required this.datos,
+      required this.icons})
       : super(key: key);
   List<String> grupos;
+  Map<String, IconData> icons;
   Map<String, List<dynamic>> datos;
   @override
   State<_SearchListGroupView> createState() => __SearchListGroupViewState();
@@ -139,8 +152,11 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
               );
             }).toList();
             if (miembros.length == 0) {
-              miembros
-                  .add(Container(child: ListTile(title: Text('Sin personal'))));
+              miembros.add(Container(
+                  child: ListTile(
+                      title: Text(
+                'Sin personal',
+              ))));
             }
 
             final cab = Container(
@@ -149,9 +165,21 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
               height: 50,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: Text(
-                  widget.datos.keys.toList()[index],
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                child: Row(
+                  children: [
+                    Icon(
+                      widget.icons[widget.grupos[index]]!,
+                      color: Helper.primaryColor,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        widget.datos.keys.toList()[index],
+                        style: TextStyle(
+                            fontSize: 17, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               margin: EdgeInsets.all(5),

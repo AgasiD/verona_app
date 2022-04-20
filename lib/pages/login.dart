@@ -2,9 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/obras.dart';
+import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class LoginPage extends StatelessWidget {
@@ -74,10 +78,18 @@ class _Form extends StatefulWidget {
 }
 
 class __FormState extends State<_Form> {
+  late Preferences pref;
+  @override
+  void initState() {
+    super.initState();
+    pref = Preferences();
+  }
+
   @override
   Widget build(BuildContext context) {
     final emailCtrl = TextEditingController();
     final passCtrl = TextEditingController();
+    final _usuario = Provider.of<UsuarioService>(context);
     return Container(
         margin: EdgeInsets.only(top: 40),
         padding: EdgeInsets.symmetric(horizontal: 50),
@@ -95,11 +107,27 @@ class __FormState extends State<_Form> {
           ),
           MainButton(
             text: 'Ingresar',
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, ObrasPage.routeName);
+            onPressed: () async {
+              final response =
+                  await _usuario.validarUsuario(emailCtrl.text, passCtrl.text);
+              print(response);
+              if (response.fallo) {
+                openAlertDialog(context, response.error);
+              } else {
+                _usuario.usuario = Miembro.fromJson(response.data);
+                guardarUserData(_usuario.usuario);
+
+                print(pref.id);
+                Navigator.pushReplacementNamed(context, ObrasPage.routeName);
+              }
             },
           )
         ]));
+  }
+
+  void guardarUserData(Miembro usuario) {
+    pref.id = usuario.id;
+    pref.nombre = '${usuario.nombre} ${usuario.apellido}';
   }
 }
 

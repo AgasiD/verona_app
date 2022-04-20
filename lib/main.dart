@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -13,9 +14,17 @@ import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/loading_service.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 
-void main() => runApp(AppState());
+void main() async {
+  WidgetsFlutterBinding
+      .ensureInitialized(); //espera que los widtes se inicialiicen para seguir
+
+  final pref = new Preferences();
+  await pref.initPrefs();
+  runApp(AppState());
+}
 
 class AppState extends StatelessWidget {
   // Para inyectar services http
@@ -34,6 +43,9 @@ class AppState extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => ChatService(),
           lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SocketService(),
         ),
 
         ChangeNotifierProvider(

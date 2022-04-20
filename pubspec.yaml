@@ -42,6 +42,9 @@ dependencies:
   win32: ^2.5.1
   flutter_spinkit: ^5.1.0
   image_picker: ^0.8.4+11
+  socket_io_client: ^1.0.2
+  socket_io: ^1.0.1
+  shared_preferences: ^2.0.8
   
 
 

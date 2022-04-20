@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
@@ -7,6 +9,7 @@ import 'package:verona_app/services/http_service.dart';
 class UsuarioService extends ChangeNotifier {
   HttpService _http = new HttpService();
   final _endpoint = 'api/usuario';
+  late Miembro usuario;
   obtenerPropietarios() async {
     final datos = await this._http.get('$_endpoint/propietario');
     final lista = datos["usuarios"];
@@ -31,8 +34,13 @@ class UsuarioService extends ChangeNotifier {
   }
 
   changePassword(Map<String, String> usuario) async {
-    print(usuario);
     final response = await this._http.put('$_endpoint/password', usuario);
     return response;
+  }
+
+  validarUsuario(String usuario, String password) async {
+    final body = {"username": usuario, "password": password};
+    final response = await this._http.post('$_endpoint/autenticar', body);
+    return MyResponse.fromJson(response['response']);
   }
 }

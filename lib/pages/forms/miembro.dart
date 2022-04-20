@@ -174,6 +174,7 @@ class _MiembroFormState extends State<MiembroForm> {
 
     if (isValid) {
       final miembro = Miembro(
+          id: '',
           nombre: txtNombreCtrl.text,
           apellido: txtApellidoCtrl.text,
           dni: txtDNICtrl.text,

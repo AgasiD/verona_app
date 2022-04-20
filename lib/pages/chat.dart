@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/services/chat_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 
 import '../models/message.dart';
 import '../widgets/custom_widgets.dart';
@@ -19,15 +21,18 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  final txtController = TextEditingController();
   final focusNode = new FocusNode();
   List<MessageBox> messageList = [];
+  List<Message> messages = [];
+  Preferences _pref = Preferences();
+
   @override
   Widget build(BuildContext context) {
     final _service = Provider.of<ChatService>(context);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final chatId = arguments['chatId'];
-    print(chatId);
+    final txtController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Helper.primaryColor?.withOpacity(0.3),
@@ -35,7 +40,8 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             CircleAvatar(
                 backgroundColor: Helper.primaryColor?.withOpacity(0.3),
-                child: Text('DA', style: TextStyle(color: Colors.white70))),
+                child: Text('${_pref.nombre[0]}',
+                    style: TextStyle(color: Colors.white70))),
           ],
         ),
       ),
@@ -45,52 +51,151 @@ class _ChatPageState extends State<ChatPage> {
             if (snapshot.data == null) {
               return Loading();
             } else {
-              final messages = snapshot.data as List<Message>;
+              messages = snapshot.data as List<Message>;
               messageList = messages
                   .map((e) => MessageBox(
-                      esMsgPropio: e.from == 'Yo',
+                      esMsgPropio: e.from == _pref.id,
                       messageText: e.mensaje,
-                      name: e.from))
+                      name: e.name))
                   .toList();
-              return Container(
-                child: Column(
-                  children: [
-                    Flexible(
-                        child: ListView.builder(
-                      reverse: true,
-                      itemCount: messages.length,
-                      itemBuilder: (_, i) => messageList.reversed.toList()[i],
-                      physics: BouncingScrollPhysics(),
-                    )),
-                    Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          margin: EdgeInsets.only(left: 10, bottom: 5),
-                          child: txtController.text != ''
-                              ? Text(
-                                  'Damian está escribiendo...',
-                                  style: TextStyle(color: Colors.grey.shade500),
-                                )
-                              : SizedBox(),
-                        )),
-                    Divider(
-                      height: 1,
-                      color: Colors.grey,
-                    ),
-                    SafeArea(
-                        child: Container(
-                      height: 50,
-                      child: _inputChat(),
-                    ))
-                  ],
-                ),
-              );
+              return ListMessageBox(
+                  messages: messages,
+                  messageList: messageList,
+                  txtController: txtController,
+                  chatId: chatId);
             }
           }),
     );
   }
+}
 
-  Widget _inputChat() {
+class ListMessageBox extends StatefulWidget {
+  ListMessageBox({
+    Key? key,
+    required this.messages,
+    required this.messageList,
+    required this.txtController,
+    required this.chatId,
+  }) : super(key: key);
+
+  final List<Message> messages;
+  List<MessageBox> messageList;
+  final TextEditingController txtController;
+  final String chatId;
+
+  @override
+  State<ListMessageBox> createState() => _ListMessageBoxState();
+}
+
+class _ListMessageBoxState extends State<ListMessageBox> {
+  Preferences _pref = new Preferences();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final _socket = Provider.of<SocketService>(context, listen: false);
+    _socket.socket.on('nuevo-mensaje', (data) {
+      print('NUEVO MENSAJE');
+      _recibirMensaje(data);
+    }); //Escucha mensajes del servidor
+  }
+
+  void _recibirMensaje(dynamic data) {
+    if (data['id'] == _pref.id) {
+    } else {
+      agregarMensaje(data, false);
+    }
+  }
+
+  void agregarMensaje(dynamic data, bool propio) {
+    final mensaje = Message.fromMap(data);
+    print(mensaje.mensaje);
+    if (mensaje.from != _pref.id && !propio) {
+      print('NUEVO MENSAJE AJENO');
+      widget.messages.add(mensaje);
+      final mBox = MessageBox(
+          esMsgPropio: false, messageText: mensaje.mensaje, name: mensaje.name);
+      widget.messageList.add(mBox);
+      setState(() {});
+    } else if (mensaje.from == _pref.id && propio) {
+      print('NUEVO MENSAJE PROPIO');
+      widget.messages.insert(0, mensaje);
+      final mBox = MessageBox(
+          esMsgPropio: true, messageText: mensaje.mensaje, name: mensaje.name);
+      widget.messageList.add(mBox);
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          Flexible(
+              child: ListView.builder(
+            reverse: true,
+            itemCount: widget.messages.length,
+            itemBuilder: (_, i) => widget.messageList.reversed.toList()[i],
+            physics: BouncingScrollPhysics(),
+          )),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: EdgeInsets.only(left: 10, bottom: 5),
+                child: widget.txtController.text != ''
+                    ? Text(
+                        'Damian está escribiendo...',
+                        style: TextStyle(color: Colors.grey.shade500),
+                      )
+                    : SizedBox(),
+              )),
+          Divider(
+            height: 1,
+            color: Colors.grey,
+          ),
+          SafeArea(
+              child: Container(
+            height: 50,
+            child: _InputChat(
+              chatId: widget.chatId,
+              txtCtrl: widget.txtController,
+              messageList: widget.messages,
+              agregarMensaje: agregarMensaje,
+            ),
+          ))
+        ],
+      ),
+    );
+  }
+}
+
+class _InputChat extends StatefulWidget {
+  _InputChat(
+      {Key? key,
+      required this.chatId,
+      required this.txtCtrl,
+      required this.messageList,
+      required this.agregarMensaje})
+      : super(key: key);
+  String chatId;
+  TextEditingController txtCtrl;
+  List<Message> messageList;
+  final Function agregarMensaje;
+
+  @override
+  State<_InputChat> createState() => __InputChatState();
+}
+
+class __InputChatState extends State<_InputChat> {
+  Preferences _pref = Preferences();
+
+  @override
+  Widget build(BuildContext context) {
+    final focusNode = new FocusNode();
+    final _socket = Provider.of<SocketService>(context);
+
     return SafeArea(
         child: Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
@@ -103,9 +208,9 @@ class _ChatPageState extends State<ChatPage> {
                 border: InputBorder.none,
                 hintText: 'Escriba mensaje',
                 isCollapsed: true),
-            controller: txtController,
+            controller: widget.txtCtrl,
             onSubmitted: (_) {
-              txtController.clear();
+              widget.txtCtrl.clear();
               focusNode.requestFocus(); //para solicitar el foco
             },
             onChanged: (text) {
@@ -116,26 +221,38 @@ class _ChatPageState extends State<ChatPage> {
               child: Platform.isAndroid
                   ? IconButton(
                       icon: Icon(Icons.send),
-                      onPressed: txtController.text == '' ? null : () {},
+                      onPressed: widget.txtCtrl.text == ''
+                          ? null
+                          : () {
+                              enviarMensaje(_socket);
+                            },
                     )
                   : CupertinoButton(
                       child: Text(
                         'Enviar',
                         style: TextStyle(fontSize: 15),
                       ),
-                      onPressed: txtController.text == ''
+                      onPressed: widget.txtCtrl.text == ''
                           ? null
                           : () {
-                              messageList.add(new MessageBox(
-                                  esMsgPropio: true,
-                                  messageText: txtController.text,
-                                  name: 'Damian Agasi'));
-                              txtController.text = '';
-                              setState(() {});
+                              enviarMensaje(_socket);
                             }))
         ],
       ),
     ));
+  }
+
+  void enviarMensaje(SocketService _socket) {
+    final mensaje = Message(
+        chatId: widget.chatId,
+        from: _pref.id,
+        name: _pref.nombre,
+        mensaje: widget.txtCtrl.text,
+        ts: DateTime.now());
+
+    widget.agregarMensaje(mensaje.toMap(), true);
+    _socket.enviarMensaje(mensaje);
+    widget.txtCtrl.text = '';
   }
 }
 

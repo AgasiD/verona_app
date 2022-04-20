@@ -9,10 +9,12 @@ class ChatService extends ChangeNotifier {
 
   Future<List<Message>> loadChat(
       {String chatId = '', int offset = 0, int limit = 20}) async {
+    print('loadData');
     final datos = await this._http.get('$_endpoint/$chatId/$offset/$limit');
-    final messages = datos["messages"] as List<dynamic>;
+    final messages =
+        datos.containsKey('messages') ? datos["messages"] as List<dynamic> : [];
     final mensajes = messages.map((e) => Message.fromMap(e)).toList();
-    print(mensajes.length);
+
     return mensajes;
   }
 }

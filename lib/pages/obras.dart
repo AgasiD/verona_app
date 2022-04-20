@@ -18,6 +18,7 @@ import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/obra.dart';
 
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ObrasPage extends StatefulWidget {
@@ -56,6 +57,8 @@ class _ObrasPageState extends State<ObrasPage> {
   @override
   Widget build(BuildContext context) {
     ObraService _obras = Provider.of<ObraService>(context);
+    final _socketService = Provider.of<SocketService>(context);
+    _socketService.connect();
     final header;
     Platform.isIOS
         ? header = WaterDropHeader()
@@ -192,29 +195,31 @@ class __SearchListViewState extends State<_SearchListView> {
     ]));
   }
 
-  Padding _obraCard(BuildContext context, Obra obra) {
+  Container _obraCard(BuildContext context, Obra obra) {
     final NetworkImage imagen = obra.imageId == ''
         ? NetworkImage(
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
         : NetworkImage(
             //        'https://www.bbva.com/wp-content/uploads/2021/04/casas-ecolo%CC%81gicas_apertura-hogar-sostenibilidad-certificado--1024x629.jpg');
             'https://drive.google.com/uc?export=view&id=${obra.imageId}');
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      height: 300,
+      width: 300,
       child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, ObraPage.routeName,
-            arguments: {'nameForm': PedidoForm.routeName, 'obraId': obra.id}),
-        child: ClipRRect(
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15), topRight: Radius.circular(15)),
-            child: Card(
-              elevation: 5,
-              child: Column(
-                children: [
-                  Hero(
+        onTap: (() => Navigator.pushNamed(context, ObraPage.routeName,
+            arguments: {'obraId': obra.id})),
+        child: Stack(
+          children: [
+            Positioned(
+                top: 0,
+                right: 10,
+                left: 10,
+                height: 235,
+                child: Container(
+                  child: Hero(
                     tag: obra.nombre,
                     child: FadeInImage(
-                        height: 250,
+                        height: 190,
                         image: imagen,
                         imageErrorBuilder: (_, obj, st) {
                           return Container(
@@ -223,14 +228,34 @@ class __SearchListViewState extends State<_SearchListView> {
                         },
                         placeholder: AssetImage('assets/loading-image.gif')),
                   ),
-                  ListTile(
-                    title: Text(obra.nombre),
-                    subtitle: Text(
-                        'Tareas preliminares'), //obra.estadios.last.descripcion
-                  )
-                ],
-              ),
-            )),
+                )),
+            Positioned(
+                top: 195,
+                left: 75,
+                right: 75,
+                height: 75,
+                child: Container(
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(obra.nombre,
+                            style: TextStyle(
+                                fontSize: 21, fontWeight: FontWeight.bold)),
+                        Text('Tareas preliminares')
+                      ]),
+                  width: 100,
+                  decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black45,
+                            blurRadius: 5,
+                            offset: Offset(0, 3))
+                      ],
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                )),
+          ],
+        ),
       ),
     );
   }

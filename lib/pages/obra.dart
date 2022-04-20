@@ -173,13 +173,13 @@ class ObraPage extends StatelessWidget {
                                         Text(
                                           obra.diasEstimados.toString(),
                                           style: TextStyle(
-                                              fontSize: 25,
+                                              fontSize: 23,
                                               fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           'Dias estimados',
                                           style: TextStyle(
-                                              fontSize: 15,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.w300),
                                         )
                                       ],
@@ -195,13 +195,13 @@ class ObraPage extends StatelessWidget {
                                         Text(
                                           obra.diasTranscurridos.toString(),
                                           style: TextStyle(
-                                              fontSize: 25,
+                                              fontSize: 23,
                                               fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           'Dias transcurridos',
                                           style: TextStyle(
-                                              fontSize: 15,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.w300),
                                         )
                                       ],
@@ -217,13 +217,13 @@ class ObraPage extends StatelessWidget {
                                         Text(
                                           obra.diasInactivos.length.toString(),
                                           style: TextStyle(
-                                              fontSize: 25,
+                                              fontSize: 23,
                                               fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           'Dias inactivos',
                                           style: TextStyle(
-                                              fontSize: 15,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.w300),
                                         )
                                       ],
