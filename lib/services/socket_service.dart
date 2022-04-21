@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:socket_io_client/socket_io_client.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/message.dart';
 
 enum ServerStatus { Online, Offline, Connecting }
@@ -30,17 +31,14 @@ class SocketService with ChangeNotifier {
       this._socket.onConnect((_) {
         this._socket.emit('connection', 'App conectada');
         this._serverStatus = ServerStatus.Online;
-//        notifyListeners();
         print('se ha conectado con el servidor');
-        print(this._serverStatus);
+        //print(this._serverStatus);
       });
 
       // Accion al desconectarse del servidor
       this._socket.onDisconnect((_) {
-        print('se ha desconectado el servidor');
         this._serverStatus = ServerStatus.Offline;
-        //notifyListeners();
-        print(this._serverStatus);
+        // notifyListeners();
       });
 
       this._socket.on('server-mensaje',

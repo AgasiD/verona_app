@@ -33,6 +33,7 @@ class HttpService extends ChangeNotifier {
   }
 
   post(String endpoint, Map<String, dynamic> body) async {
+    print('gola');
     if (debugMode) {
       url = Uri.http(_baseUrl, endpoint);
     } else {
@@ -40,6 +41,7 @@ class HttpService extends ChangeNotifier {
     }
     final response =
         await http.post(url, body: json.encode(body), headers: headers);
+    print(response);
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }

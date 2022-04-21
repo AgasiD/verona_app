@@ -8,9 +8,11 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/chats.dart';
 import 'package:verona_app/pages/form.dart';
 import 'package:verona_app/pages/forms/asignar_pedido.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -32,12 +34,13 @@ class ObrasPage extends StatefulWidget {
 class _ObrasPageState extends State<ObrasPage> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+  final _pref = new Preferences();
 
   void _onRefresh(ObraService _obras) async {
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 2000));
     print(' On Refresh! ');
-    _obras.obtenerObras();
+    _obras.obtenerObrasByUser(_pref.id);
     setState(() {});
 
     // if failed,use refreshFailed()
@@ -58,7 +61,7 @@ class _ObrasPageState extends State<ObrasPage> {
   Widget build(BuildContext context) {
     ObraService _obras = Provider.of<ObraService>(context);
     final _socketService = Provider.of<SocketService>(context);
-    _socketService.connect();
+    _socketService.connect(_pref.id);
     final header;
     Platform.isIOS
         ? header = WaterDropHeader()
@@ -66,6 +69,12 @@ class _ObrasPageState extends State<ObrasPage> {
 
     return Scaffold(
         appBar: CustomAppBar(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.pushNamed(context, ChatsPage.routeName);
+          },
+          child: Icon(Icons.chat),
+        ),
         body: SafeArea(
             child: SmartRefresher(
                 enablePullDown: true,
@@ -74,7 +83,7 @@ class _ObrasPageState extends State<ObrasPage> {
                 onRefresh: () => _onRefresh(_obras),
                 header: header,
                 child: FutureBuilder(
-                    future: _obras.obtenerObras(),
+                    future: _obras.obtenerObrasByUser(_pref.id),
                     builder: (context, snapshot) {
                       if (snapshot.data == null) {
                         return Loading();

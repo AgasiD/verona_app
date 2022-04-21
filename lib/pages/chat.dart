@@ -218,25 +218,37 @@ class __InputChatState extends State<_InputChat> {
             },
           )),
           Container(
-              child: Platform.isAndroid
-                  ? IconButton(
-                      icon: Icon(Icons.send),
-                      onPressed: widget.txtCtrl.text == ''
-                          ? null
-                          : () {
-                              enviarMensaje(_socket);
-                            },
-                    )
-                  : CupertinoButton(
-                      child: Text(
-                        'Enviar',
-                        style: TextStyle(fontSize: 15),
-                      ),
-                      onPressed: widget.txtCtrl.text == ''
-                          ? null
-                          : () {
-                              enviarMensaje(_socket);
-                            }))
+              child: Row(
+            children: [
+              IconButton(
+                  onPressed: () {}, icon: Icon(Icons.attach_file_outlined)),
+              Platform.isAndroid
+                  ? widget.txtCtrl.text == ''
+                      ? IconButton(
+                          onPressed: () {}, icon: Icon(Icons.mic_none_rounded))
+                      : IconButton(
+                          icon: Icon(Icons.send),
+                          onPressed: widget.txtCtrl.text == ''
+                              ? null
+                              : () {
+                                  enviarMensaje(_socket);
+                                },
+                        )
+                  : widget.txtCtrl.text == ''
+                      ? IconButton(
+                          onPressed: () {}, icon: Icon(Icons.mic_none_rounded))
+                      : CupertinoButton(
+                          child: Text(
+                            'Enviar',
+                            style: TextStyle(fontSize: 15),
+                          ),
+                          onPressed: widget.txtCtrl.text == ''
+                              ? null
+                              : () {
+                                  enviarMensaje(_socket);
+                                })
+            ],
+          ))
         ],
       ),
     ));

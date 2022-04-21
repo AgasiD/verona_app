@@ -7,10 +7,12 @@ import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/notificaciones.dart';
+import 'package:verona_app/services/socket_service.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -25,6 +27,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final hideNotifications =
         ModalRoute.of(context)?.settings.name == NotificacionesPage.routeName;
+    final _socket = Provider.of<SocketService>(context);
     return AppBar(
       title: Image(
         image: AssetImage('assets/logo.png'),
@@ -32,6 +35,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       automaticallyImplyLeading: muestraBackButton,
       primary: true,
+      // leading: Icon(Icons.connect_without_contact,
+      //     color: _socket.socket.connected ? Colors.green : Colors.red),
       actions: [
         !hideNotifications
             ? Padding(

@@ -3,6 +3,7 @@ import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/chats.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
@@ -25,4 +26,5 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   ObrasPage.routeName: (_) => ObrasPage(),
   PasswordPage.routeName: (_) => PasswordPage(),
   PropietarioForm.routeName: (_) => PropietarioForm(),
+  ChatsPage.routeName: (_) => ChatsPage(),
 };
