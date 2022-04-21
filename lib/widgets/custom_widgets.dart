@@ -11,15 +11,18 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
+import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/services/socket_service.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   bool muestraBackButton;
+  bool muestraLogOut;
   CustomAppBar({
     this.title = 'Verona',
     this.muestraBackButton = false,
+    this.muestraLogOut = false,
     Key? key,
   }) : super(key: key);
 
@@ -35,8 +38,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       automaticallyImplyLeading: muestraBackButton,
       primary: true,
-      // leading: Icon(Icons.connect_without_contact,
-      //     color: _socket.socket.connected ? Colors.green : Colors.red),
+      leading: muestraLogOut
+          ? IconButton(
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, LoginPage.routeName);
+              },
+              icon: Icon(
+                Icons.logout_outlined,
+                size: 30,
+              ),
+            )
+          : null,
       actions: [
         !hideNotifications
             ? Padding(

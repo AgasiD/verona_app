@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -57,6 +58,7 @@ class _ObrasPageState extends State<ObrasPage> {
 
   List<Obra> obras = [];
   List<Obra> obrasFiltradas = [];
+  int cant = 3;
   @override
   Widget build(BuildContext context) {
     ObraService _obras = Provider.of<ObraService>(context);
@@ -68,13 +70,30 @@ class _ObrasPageState extends State<ObrasPage> {
         : header = MaterialClassicHeader();
 
     return Scaffold(
-        appBar: CustomAppBar(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.pushNamed(context, ChatsPage.routeName);
-          },
-          child: Icon(Icons.chat),
+        appBar: CustomAppBar(
+          muestraLogOut: true,
         ),
+        floatingActionButton: Badge(
+            badgeContent: Text(
+              cant.toString(),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            badgeColor: Colors.blue.shade200,
+            animationDuration: Duration(seconds: 1),
+            animationType: BadgeAnimationType.slide,
+            child: FloatingActionButton(
+              backgroundColor: Colors.grey[400],
+              onPressed: () {
+                Navigator.pushNamed(context, ChatsPage.routeName);
+                //cant++;
+                setState(() {});
+              },
+              child: Icon(
+                Icons.chat,
+                color: Colors.white,
+              ),
+            )),
         body: SafeArea(
             child: SmartRefresher(
                 enablePullDown: true,

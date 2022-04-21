@@ -10,7 +10,6 @@ class GoogleDriveService extends ChangeNotifier {
     if (_img != null) {
       final datos = await this._http.upload(_img, _endpoint + "/$fileName");
       print('imagen grabada');
-      print(datos);
       return datos;
     } else {
       print('No se asigno imagen');

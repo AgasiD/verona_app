@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 class HttpService extends ChangeNotifier {
   //bool loading = false;
   final debugMode = true;
-  String _baseUrl = '192.168.0.155:8008'; //'veronaserver.herokuapp.com'; //
+  String _baseUrl = '192.168.0.155:8008';
   final headers = {"Content-Type": "application/json"};
   late Uri url;
   HttpService() {
@@ -33,7 +33,6 @@ class HttpService extends ChangeNotifier {
   }
 
   post(String endpoint, Map<String, dynamic> body) async {
-    print('gola');
     if (debugMode) {
       url = Uri.http(_baseUrl, endpoint);
     } else {
@@ -41,7 +40,6 @@ class HttpService extends ChangeNotifier {
     }
     final response =
         await http.post(url, body: json.encode(body), headers: headers);
-    print(response);
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
@@ -69,7 +67,7 @@ class HttpService extends ChangeNotifier {
     return data;
   }
 
-  upload(XFile imageFile, String url) async {
+  upload(XFile imageFile, String endpoint) async {
     String imgId = '';
     // open a bytestream
     var stream =
@@ -77,10 +75,13 @@ class HttpService extends ChangeNotifier {
     // get file length
     var length = await imageFile.length();
     // string to uri
-    final uri = Uri.https('$_baseUrl', url);
-
+    if (debugMode) {
+      url = Uri.http(_baseUrl, endpoint);
+    } else {
+      url = Uri.https(_baseUrl, endpoint);
+    }
     // create multipart request
-    var request = new http.MultipartRequest("POST", uri);
+    var request = new http.MultipartRequest("POST", url);
 
     // multipart that takes file
     var multipartFile = http.MultipartFile('image', stream, length,

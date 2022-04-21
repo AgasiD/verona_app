@@ -2,6 +2,7 @@ import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/contactos.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ChatsPage extends StatelessWidget {
@@ -11,25 +12,25 @@ class ChatsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final chats = [
       {
-        "id": "-N-dZcZPirpY8unI9CGW",
+        "id": "-N0B8x1nWMhk3Ayh_7i3",
         "nombre": 'Lionel',
         "apellido": 'Messi',
         "cantMensajes": 2,
       },
       {
-        "id": "-N-dZcZPirpY8unI9CGW",
+        "id": "-N0B8x1nWMhk3Ayh_7i3",
         "nombre": 'Neymar JR.',
         "apellido": '0',
         "cantMensajes": 5,
       },
       {
-        "id": "-N-dZcZPirpY8unI9CGW",
+        "id": "-N0B8x1nWMhk3Ayh_7i3",
         "nombre": 'Luis',
         "apellido": 'Suarez',
         "cantMensajes": 0,
       },
       {
-        "id": "-N-dZcZPirpY8unI9CGW",
+        "id": "-N0B8x1nWMhk3Ayh_7i3",
         "nombre": 'Luis',
         "apellido": 'Miguel',
         "cantMensajes": 1,
@@ -39,6 +40,17 @@ class ChatsPage extends StatelessWidget {
       appBar: CustomAppBar(
         muestraBackButton: true,
         title: 'Conversaciones',
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.grey[400],
+        onPressed: () {
+          Navigator.pushNamed(context, ContactsPage.routeName);
+          //cant++;
+        },
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
       body: SingleChildScrollView(
           child: Container(

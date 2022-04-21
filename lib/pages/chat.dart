@@ -8,6 +8,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/socket_service.dart';
+import 'package:vibration/vibration.dart';
 
 import '../models/message.dart';
 import '../widgets/custom_widgets.dart';
@@ -97,6 +98,7 @@ class _ListMessageBoxState extends State<ListMessageBox> {
     final _socket = Provider.of<SocketService>(context, listen: false);
     _socket.socket.on('nuevo-mensaje', (data) {
       print('NUEVO MENSAJE');
+
       _recibirMensaje(data);
     }); //Escucha mensajes del servidor
   }
@@ -105,6 +107,7 @@ class _ListMessageBoxState extends State<ListMessageBox> {
     if (data['id'] == _pref.id) {
     } else {
       agregarMensaje(data, false);
+      Vibration.vibrate(duration: 75, amplitude: 128);
     }
   }
 
@@ -236,17 +239,18 @@ class __InputChatState extends State<_InputChat> {
                         )
                   : widget.txtCtrl.text == ''
                       ? IconButton(
-                          onPressed: () {}, icon: Icon(Icons.mic_none_rounded))
+                          onPressed: _socket.socket.connected ? () {} : null,
+                          icon: Icon(Icons.mic_none_rounded))
                       : CupertinoButton(
                           child: Text(
                             'Enviar',
                             style: TextStyle(fontSize: 15),
                           ),
-                          onPressed: widget.txtCtrl.text == ''
-                              ? null
-                              : () {
+                          onPressed: _socket.socket.connected
+                              ? () {
                                   enviarMensaje(_socket);
-                                })
+                                }
+                              : null)
             ],
           ))
         ],
@@ -314,7 +318,6 @@ class _ChatMessage extends StatelessWidget {
     return Align(
       alignment: !esMsgPropio ? Alignment.centerLeft : Alignment.centerRight,
       child: LimitedBox(
-        maxWidth: 10, // MediaQuery.of(context).size.width * .8,
         child: Container(
           margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
           padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
