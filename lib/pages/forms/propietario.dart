@@ -89,6 +89,7 @@ class _PropietarioFormState extends State<PropietarioForm> {
                     teclado: TextInputType.emailAddress,
                     validaError: true,
                     validarInput: (value) => Helper.validEmail(value),
+                    textInputAction: TextInputAction.done,
                   ),
                   MainButton(
                       onPressed: () {

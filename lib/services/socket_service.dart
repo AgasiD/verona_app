@@ -19,14 +19,16 @@ class SocketService with ChangeNotifier {
   // }
 
   void connect(clientId) {
-    this._socket = IO.io('https://veronaserver.herokuapp.com', {
-      'transports': ['websocket'],
-      'autoConnect': true,
-      'forceNew': true,
-      'extraHeaders': {'x-token': clientId}
-    });
-
-    if (this.socket.disconnected) {
+    print('Estado del servicio ' + this._serverStatus.toString());
+    if (this._serverStatus != ServerStatus.Online) {
+      final url =
+          'https://veronaserver.herokuapp.com'; // 'http://192.168.0.155:8008'; //'https://veronaserver.herokuapp.com
+      this._socket = IO.io(url, {
+        'transports': ['websocket'],
+        'autoConnect': true,
+        'forceNew': true,
+        'extraHeaders': {'x-token': clientId}
+      });
       // Accion al conectarse al servidor
       this._socket.onConnect((_) {
         this._socket.emit('connection', 'App conectada');
@@ -36,7 +38,10 @@ class SocketService with ChangeNotifier {
 
       // Accion al desconectarse del servidor
       this._socket.onDisconnect((_) {
+        print('usuario desconectado');
         this._serverStatus = ServerStatus.Offline;
+        this.socket.disconnect();
+
         // notifyListeners();
       });
     }

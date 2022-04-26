@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/services/http_service.dart';
 
 import '../models/message.dart';
@@ -7,14 +8,20 @@ class ChatService extends ChangeNotifier {
   HttpService _http = new HttpService();
   final _endpoint = 'api/chat';
 
-  Future<List<Message>> loadChat(
+  Future<MyResponse> loadChat(
       {String chatId = '', int offset = 0, int limit = 20}) async {
-    print('loadData');
     final datos = await this._http.get('$_endpoint/$chatId/$offset/$limit');
-    final messages =
-        datos.containsKey('messages') ? datos["messages"] as List<dynamic> : [];
-    final mensajes = messages.map((e) => Message.fromMap(e)).toList();
+    final data = MyResponse.fromJson(datos['response']);
+    return data;
+  }
 
-    return mensajes;
+  Future<MyResponse> crearChat(String idFrom, String idTo) async {
+    final body = {
+      "idFrom": idFrom,
+      "idTo": idTo,
+    };
+    final data = await this._http.post('$_endpoint', body);
+    final response = MyResponse.fromJson(data);
+    return response;
   }
 }

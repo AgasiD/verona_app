@@ -85,10 +85,10 @@ class __FormState extends State<_Form> {
     pref = Preferences();
   }
 
+  final emailCtrl = TextEditingController();
+  final passCtrl = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    final emailCtrl = TextEditingController();
-    final passCtrl = TextEditingController();
     final _usuario = Provider.of<UsuarioService>(context);
     return Container(
         margin: EdgeInsets.only(top: 40),
@@ -104,20 +104,18 @@ class __FormState extends State<_Form> {
             icono: Icons.password_outlined,
             textController: passCtrl,
             isPassword: true,
+            textInputAction: TextInputAction.done,
           ),
           MainButton(
             text: 'Ingresar',
             onPressed: () async {
               final response =
                   await _usuario.validarUsuario(emailCtrl.text, passCtrl.text);
-              print(response);
               if (response.fallo) {
                 openAlertDialog(context, response.error);
               } else {
                 _usuario.usuario = Miembro.fromJson(response.data);
                 guardarUserData(_usuario.usuario);
-
-                print(pref.id);
                 Navigator.pushReplacementNamed(context, ObrasPage.routeName);
               }
             },
@@ -128,6 +126,7 @@ class __FormState extends State<_Form> {
   void guardarUserData(Miembro usuario) {
     pref.id = usuario.id;
     pref.nombre = '${usuario.nombre} ${usuario.apellido}';
+    pref.role = usuario.role;
   }
 }
 
@@ -143,7 +142,7 @@ class _Labels extends StatelessWidget {
               style: TextStyle(color: Colors.black45, fontSize: 16)),
           GestureDetector(
             child: Text(
-              'Ingresa por primera vez',
+              'Generá tu clave',
               style: TextStyle(color: Colors.blue.shade500, fontSize: 18),
             ),
             onTap: () {

@@ -106,6 +106,7 @@ class __FormState extends State<_Form> {
             icono: Icons.password_outlined,
             textController: reNewPassCtrl,
             isPassword: true,
+            textInputAction: TextInputAction.done,
           ),
           SizedBox(
             height: 15,

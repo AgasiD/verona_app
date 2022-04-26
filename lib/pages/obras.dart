@@ -39,9 +39,8 @@ class _ObrasPageState extends State<ObrasPage> {
 
   void _onRefresh(ObraService _obras) async {
     // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 2000));
-    print(' On Refresh! ');
-    _obras.obtenerObrasByUser(_pref.id);
+    // await Future.delayed(Duration(milliseconds: 2000));
+    this.obrasFiltradas = await _obras.obtenerObrasByUser(_pref.id);
     setState(() {});
 
     // if failed,use refreshFailed()
@@ -170,6 +169,7 @@ class __SearchListViewState extends State<_SearchListView> {
 
   @override
   Widget build(BuildContext context) {
+    final _pref = new Preferences();
     return SingleChildScrollView(
         child: Column(children: [
       Container(
@@ -183,20 +183,30 @@ class __SearchListViewState extends State<_SearchListView> {
               width: MediaQuery.of(context).size.width * .95,
               hintText: 'Madrid..',
               icono: Icons.search,
+              textInputAction: TextInputAction.search,
               validaError: false,
-              iconButton: obrasTxtController.value == ''
+              iconButton: obrasTxtController.text != ''
                   ? IconButton(
-                      icon: Icon(Icons.cancel_outlined),
+                      splashColor: null,
+                      icon: Icon(
+                        Icons.cancel_outlined,
+                        color: Colors.red.withAlpha(200),
+                      ),
                       onPressed: () {
                         obrasTxtController.text = '';
+                        obrasFiltradas = widget.obras;
+
+                        setState(() {});
                       },
                     )
                   : IconButton(
-                      icon: Icon(Icons.add),
-                      onPressed: () {
-                        Navigator.pushNamed(context, ObraForm.routeName,
-                            arguments: {'formName': ObraForm.routeName});
-                      },
+                      icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
+                      onPressed: _pref.role == 1
+                          ? () {
+                              Navigator.pushNamed(context, ObraForm.routeName,
+                                  arguments: {'formName': ObraForm.routeName});
+                            }
+                          : null,
                     ),
               textController: obrasTxtController,
               onChange: (text) {
@@ -228,7 +238,6 @@ class __SearchListViewState extends State<_SearchListView> {
         ? NetworkImage(
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
         : NetworkImage(
-            //        'https://www.bbva.com/wp-content/uploads/2021/04/casas-ecolo%CC%81gicas_apertura-hogar-sostenibilidad-certificado--1024x629.jpg');
             'https://drive.google.com/uc?export=view&id=${obra.imageId}');
     return Container(
       height: 300,

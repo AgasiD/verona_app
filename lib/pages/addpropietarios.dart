@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
-import 'package:verona_app/pages/form.dart';
-import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -223,6 +220,7 @@ class __SearchListViewState extends State<_SearchListView> {
                 width: MediaQuery.of(context).size.width * .95,
                 hintText: 'Martín...',
                 icono: Icons.search,
+                textInputAction: TextInputAction.search,
                 iconButton: txtPropietarioCtrl.value == ''
                     ? IconButton(
                         icon: Icon(Icons.cancel_outlined),

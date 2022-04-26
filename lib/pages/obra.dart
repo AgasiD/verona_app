@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
@@ -21,7 +22,7 @@ class ObraPage extends StatelessWidget {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
     final _service = Provider.of<ObraService>(context, listen: false);
-
+    final _pref = new Preferences();
     return Scaffold(
         appBar: CustomAppBar(
           muestraBackButton: true,
@@ -92,6 +93,12 @@ class ObraPage extends StatelessWidget {
                           width: MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
                               color: Colors.grey[50],
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black45,
+                                    blurRadius: 15,
+                                    offset: Offset(0, 0))
+                              ],
                               borderRadius: BorderRadius.vertical(
                                   top: Radius.circular(30))),
                           child: SingleChildScrollView(
@@ -102,24 +109,27 @@ class ObraPage extends StatelessWidget {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    CircleAvatar(
-                                      backgroundColor: Colors.grey[50],
-                                      minRadius: 30,
-                                      foregroundColor: Helper.primaryColor,
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.groups_outlined,
-                                          size: 35,
-                                        ),
-                                        onPressed: () {
-                                          Navigator.pushNamed(
-                                              context, ChatPage.routeName,
-                                              arguments: {
-                                                'chatId': obra.chatI
-                                              });
-                                        },
-                                      ),
-                                    ),
+                                    _pref.role != 3
+                                        ? CircleAvatar(
+                                            backgroundColor: Colors.grey[50],
+                                            minRadius: 30,
+                                            foregroundColor:
+                                                Helper.primaryColor,
+                                            child: IconButton(
+                                              icon: Icon(
+                                                Icons.groups_outlined,
+                                                size: 35,
+                                              ),
+                                              onPressed: () {
+                                                Navigator.pushNamed(
+                                                    context, ChatPage.routeName,
+                                                    arguments: {
+                                                      'chatId': obra.chatI
+                                                    });
+                                              },
+                                            ),
+                                          )
+                                        : Container(width: 60),
                                     Column(
                                       children: [
                                         Text(
@@ -331,6 +341,7 @@ class _CustomExpansion extends StatefulWidget {
 }
 
 class _CustomExpansionState extends State<_CustomExpansion> {
+  final _pref = new Preferences();
   @override
   Widget build(BuildContext context) {
     return ExpansionPanelList(
@@ -348,7 +359,7 @@ class _CustomExpansionState extends State<_CustomExpansion> {
                 padding: EdgeInsets.only(left: 15),
                 alignment: Alignment.centerLeft,
                 child: ListTile(
-                    trailing: item.addButton
+                    trailing: item.addButton && _pref.role == 1
                         ? IconButton(
                             icon: Icon(Icons.add),
                             onPressed: () {

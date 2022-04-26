@@ -9,35 +9,31 @@ import 'package:flutter/material.dart';
 
 class HttpService extends ChangeNotifier {
   //bool loading = false;
-  final debugMode = true;
+  final isProduction = true;
   String _baseUrl = '192.168.0.155:8008';
   final headers = {"Content-Type": "application/json"};
   late Uri url;
   HttpService() {
-    if (debugMode) {
-      _baseUrl = '192.168.0.155:8008';
-    } else {
-      _baseUrl = 'veronaserver.herokuapp.com';
-    }
+    isProduction
+        ? _baseUrl = 'veronaserver.herokuapp.com'
+        : _baseUrl = '192.168.0.155:8008';
   }
 
   get(String endpoint) async {
-    if (debugMode) {
-      url = Uri.http(_baseUrl, endpoint);
-    } else {
-      url = Uri.https(_baseUrl, endpoint);
-    }
+    this.isProduction
+        ? url = Uri.https(_baseUrl, endpoint)
+        : url = Uri.http(_baseUrl, endpoint);
+
     final response = await http.get(url);
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
 
   post(String endpoint, Map<String, dynamic> body) async {
-    if (debugMode) {
-      url = Uri.http(_baseUrl, endpoint);
-    } else {
-      url = Uri.https(_baseUrl, endpoint);
-    }
+    isProduction
+        ? url = Uri.https(_baseUrl, endpoint)
+        : url = Uri.http(_baseUrl, endpoint);
+
     final response =
         await http.post(url, body: json.encode(body), headers: headers);
     Map<String, dynamic> data = json.decode(response.body);
@@ -45,22 +41,18 @@ class HttpService extends ChangeNotifier {
   }
 
   delete(String endpoint) async {
-    if (debugMode) {
-      url = Uri.http(_baseUrl, endpoint);
-    } else {
-      url = Uri.https(_baseUrl, endpoint);
-    }
+    isProduction
+        ? url = Uri.https(_baseUrl, endpoint)
+        : url = Uri.http(_baseUrl, endpoint);
     final response = await http.delete(url);
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
 
   put(String endpoint, Map<String, dynamic> body) async {
-    if (debugMode) {
-      url = Uri.http(_baseUrl, endpoint);
-    } else {
-      url = Uri.https(_baseUrl, endpoint);
-    }
+    isProduction
+        ? url = Uri.https(_baseUrl, endpoint)
+        : url = Uri.http(_baseUrl, endpoint);
     final response =
         await http.put(url, body: json.encode(body), headers: headers);
     Map<String, dynamic> data = json.decode(response.body);
@@ -75,10 +67,10 @@ class HttpService extends ChangeNotifier {
     // get file length
     var length = await imageFile.length();
     // string to uri
-    if (debugMode) {
-      url = Uri.http(_baseUrl, endpoint);
-    } else {
+    if (isProduction) {
       url = Uri.https(_baseUrl, endpoint);
+    } else {
+      url = Uri.http(_baseUrl, endpoint);
     }
     // create multipart request
     var request = new http.MultipartRequest("POST", url);

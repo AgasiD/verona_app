@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:vibration/vibration.dart';
@@ -26,48 +27,95 @@ class _ChatPageState extends State<ChatPage> {
   List<MessageBox> messageList = [];
   List<Message> messages = [];
   Preferences _pref = Preferences();
-
+  String chatName = 'Sin nombre';
   @override
   Widget build(BuildContext context) {
     final _service = Provider.of<ChatService>(context);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final chatId = arguments['chatId'];
     final txtController = TextEditingController();
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Helper.primaryColor?.withOpacity(0.3),
-        title: Column(
-          children: [
-            CircleAvatar(
-                backgroundColor: Helper.primaryColor?.withOpacity(0.3),
-                child: Text('${_pref.nombre[0]}',
-                    style: TextStyle(color: Colors.white70))),
-          ],
-        ),
-      ),
-      body: FutureBuilder(
+    return Container(
+      child: FutureBuilder(
           future: _service.loadChat(chatId: chatId),
           builder: (context, snapshot) {
             if (snapshot.data == null) {
-              return Loading();
+              return Loading(
+                mensaje: 'Recuperando mensajes...',
+              );
             } else {
-              messages = snapshot.data as List<Message>;
-              messageList = messages
-                  .map((e) => MessageBox(
-                      esMsgPropio: e.from == _pref.id,
-                      messageText: e.mensaje,
-                      name: e.name))
-                  .toList();
-              return ListMessageBox(
-                  messages: messages,
-                  messageList: messageList,
-                  txtController: txtController,
-                  chatId: chatId);
+              final response = snapshot.data as MyResponse;
+              if (response.fallo) {
+                openAlertDialog(context, response.error);
+                return Container();
+              } else {
+                chatName = response.data['chatName'];
+                final messagesRes = response.data['message'] as List<dynamic>;
+                final messages = messagesRes;
+                final mensajes =
+                    messages.map((e) => Message.fromMap(e)).toList();
+
+                messageList = mensajes
+                    .map((e) => MessageBox(
+                        esMsgPropio: e.from == _pref.id,
+                        messageText: e.mensaje,
+                        name: e.name,
+                        ts: e.ts))
+                    .toList();
+                final appbar = _CustomChatBar(chatName: chatName);
+                return Scaffold(
+                    appBar: appbar,
+                    body: ListMessageBox(
+                        messages: mensajes,
+                        messageList: messageList,
+                        txtController: txtController,
+                        chatId: chatId));
+              }
             }
           }),
     );
   }
+}
+
+class _CustomChatBar extends StatefulWidget implements PreferredSizeWidget {
+  _CustomChatBar({
+    Key? key,
+    this.chatName = '',
+  }) : super(key: key);
+
+  String chatName;
+
+  @override
+  State<_CustomChatBar> createState() => _CustomChatBarState();
+
+  @override
+  // TODO: implement preferredSize
+  Size get preferredSize => new Size.fromHeight(50);
+}
+
+class _CustomChatBarState extends State<_CustomChatBar> {
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: Helper.primaryColor?.withOpacity(0.3),
+      title: Column(
+        children: [
+          Text('${widget.chatName}', style: TextStyle(color: Colors.white70))
+          // CircleAvatar(
+          //     backgroundColor: Helper.primaryColor?.withOpacity(0.3),
+          //     child: )),
+        ],
+      ),
+    );
+  }
+
+  void setChatName(String chatName) {
+    this.widget.chatName = chatName;
+    setState(() {});
+  }
+
+  @override
+  // TODO: implement preferredSize
+  Size get preferredSize => throw UnimplementedError();
 }
 
 class ListMessageBox extends StatefulWidget {
@@ -115,17 +163,23 @@ class _ListMessageBoxState extends State<ListMessageBox> {
     final mensaje = Message.fromMap(data);
     print(mensaje.mensaje);
     if (mensaje.from != _pref.id && !propio) {
-      print('NUEVO MENSAJE AJENO');
+      print('NUEVO MENSAJE RECIBIDO');
       widget.messages.add(mensaje);
       final mBox = MessageBox(
-          esMsgPropio: false, messageText: mensaje.mensaje, name: mensaje.name);
+          esMsgPropio: false,
+          messageText: mensaje.mensaje,
+          name: mensaje.name,
+          ts: mensaje.ts);
       widget.messageList.add(mBox);
       setState(() {});
     } else if (mensaje.from == _pref.id && propio) {
       print('NUEVO MENSAJE PROPIO');
       widget.messages.insert(0, mensaje);
       final mBox = MessageBox(
-          esMsgPropio: true, messageText: mensaje.mensaje, name: mensaje.name);
+          esMsgPropio: true,
+          messageText: mensaje.mensaje,
+          name: mensaje.name,
+          ts: mensaje.ts);
       widget.messageList.add(mBox);
       setState(() {});
     }
@@ -206,6 +260,7 @@ class __InputChatState extends State<_InputChat> {
         children: [
           Flexible(
               child: TextField(
+            textInputAction: TextInputAction.send,
             focusNode: focusNode,
             decoration: InputDecoration(
                 border: InputBorder.none,
@@ -264,7 +319,9 @@ class __InputChatState extends State<_InputChat> {
         from: _pref.id,
         name: _pref.nombre,
         mensaje: widget.txtCtrl.text,
-        ts: DateTime.now());
+        ts: DateTime.utc(
+                2022, 1, 1, DateTime.now().hour, DateTime.now().minute, 0, 0, 0)
+            .millisecond);
 
     widget.agregarMensaje(mensaje.toMap(), true);
     _socket.enviarMensaje(mensaje);
@@ -277,12 +334,14 @@ class MessageBox extends StatelessWidget {
       {Key? key,
       required this.esMsgPropio,
       required this.messageText,
-      required this.name})
+      required this.name,
+      required this.ts})
       : super(key: key);
 
   final bool esMsgPropio;
   final String messageText;
   final String name;
+  final int ts;
 
   @override
   Widget build(BuildContext context) {
@@ -292,60 +351,119 @@ class MessageBox extends StatelessWidget {
         backgroundColor: Colors.red.shade300,
       ),
       _ChatMessage(
-          esMsgPropio: esMsgPropio, name: name, messageText: messageText)
+          esMsgPropio: esMsgPropio,
+          name: name,
+          messageText: messageText,
+          ts: ts)
     ];
 
     return Container(
         child: _ChatMessage(
-            esMsgPropio: esMsgPropio, name: name, messageText: messageText));
+            esMsgPropio: esMsgPropio,
+            name: name,
+            messageText: messageText,
+            ts: ts));
   }
 }
 
-class _ChatMessage extends StatelessWidget {
-  const _ChatMessage(
+class _ChatMessage extends StatefulWidget {
+  _ChatMessage(
       {Key? key,
       required this.esMsgPropio,
       required this.messageText,
-      required this.name})
+      required this.name,
+      required this.ts})
       : super(key: key);
 
   final bool esMsgPropio;
   final String messageText;
   final String name;
+  final int ts;
+
+  @override
+  State<_ChatMessage> createState() => _ChatMessageState();
+}
+
+class _ChatMessageState extends State<_ChatMessage> {
+  int shade = 100;
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: !esMsgPropio ? Alignment.centerLeft : Alignment.centerRight,
-      child: LimitedBox(
-        child: Container(
-          margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          decoration: BoxDecoration(
-              color: esMsgPropio
-                  ? Helper.primaryColor?.withOpacity(0.3)
-                  : Colors.red.shade100,
-              borderRadius: BorderRadius.circular(7)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              !esMsgPropio
-                  ? Text(
-                      name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  : SizedBox(),
-              SizedBox(
-                height: 4,
-              ),
-              Text(
-                messageText,
-              ),
-            ],
+    return GestureDetector(
+        onLongPress: () {
+          print('reenviar');
+          shade = 200;
+          setState(() {});
+        },
+        onLongPressEnd: (long) {
+          print('reenviar');
+          shade = 100;
+          setState(() {});
+        },
+        child: Align(
+          alignment: !widget.esMsgPropio
+              ? Alignment.centerLeft
+              : Alignment.centerRight,
+          child: LimitedBox(
+            child: Column(
+              crossAxisAlignment: widget.esMsgPropio
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+              children: [
+                Stack(
+                  children: [
+                    Positioned(
+                        bottom: 15,
+                        right: widget.esMsgPropio ? 5 : null,
+                        left: widget.esMsgPropio ? null : 5,
+                        width: 20,
+                        height: 10,
+                        child: Transform.rotate(
+                            angle: 10.0,
+                            child: Container(
+                              color: widget.esMsgPropio
+                                  ? Colors.grey[shade * 2]
+                                  : Colors.red[shade],
+                            ))),
+                    Container(
+                      margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      decoration: BoxDecoration(
+                          color: widget.esMsgPropio
+                              ? Colors.grey[shade * 2]
+                              : Colors.red[shade],
+                          borderRadius: BorderRadius.circular(7)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          !widget.esMsgPropio
+                              ? Text(
+                                  widget.name,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                )
+                              : SizedBox(),
+                          SizedBox(
+                            height: 4,
+                          ),
+                          Text(
+                            widget.messageText,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                    margin: EdgeInsets.only(
+                        bottom: 10, left: 25, right: 25, top: 0),
+                    child: Text(
+                        '${DateTime(widget.ts).hour.toString()}:${DateTime(widget.ts).minute.toString()}',
+                        style: TextStyle(color: Colors.grey)))
+              ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }

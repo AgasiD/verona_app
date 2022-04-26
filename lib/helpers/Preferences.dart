@@ -29,6 +29,14 @@ class Preferences {
     _prefs.setString('id', id);
   }
 
+  int get role {
+    return _prefs.getInt('role') ?? 0;
+  }
+
+  set role(int role) {
+    _prefs.setInt('role', role);
+  }
+
   String get nombre {
     return _prefs.getString('nombre') ?? '';
   }

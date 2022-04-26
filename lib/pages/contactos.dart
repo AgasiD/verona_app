@@ -1,9 +1,11 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -50,8 +52,11 @@ class _ContactTile extends StatefulWidget {
 }
 
 class __ContactTileState extends State<_ContactTile> {
+  final _pref = new Preferences();
   @override
   Widget build(BuildContext context) {
+    final _chat = Provider.of<ChatService>(context);
+
     return Column(
       children: [
         ListTile(
@@ -68,7 +73,9 @@ class __ContactTileState extends State<_ContactTile> {
           ),
           title: Text('${widget.personal.nombre} ${widget.personal.apellido}'),
           trailing: Icon(Icons.arrow_forward_ios_rounded),
-          onTap: () {
+          onTap: () async {
+            // Generar Chat
+            final chatId = _chat.crearChat(_pref.id, widget.personal.id);
             // Navigator.pushNamed(context, ChatPage.routeName,
             //     arguments: {'chatId': widget.chat["id"]});
           },

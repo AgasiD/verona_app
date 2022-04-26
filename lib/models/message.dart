@@ -6,7 +6,7 @@ class Message {
   String from;
   String name;
   String mensaje;
-  DateTime ts;
+  int ts;
   Message(
       {this.messageId = '',
       required this.chatId,
@@ -27,7 +27,7 @@ class Message {
         chatId: json["chatId"],
         from: json["from"],
         mensaje: json["mensaje"],
-        ts: DateTime.now(), //DateTime(json["ts"]),
+        ts: json.containsKey('ts') ? json["ts"] : 1,
       );
 
   toMap() => {
@@ -35,7 +35,7 @@ class Message {
         'chatId': this.chatId,
         'from': this.from,
         'mensaje': this.mensaje,
-        'ts': this.ts.toString(),
+        'ts': this.ts,
         'name': this.name
       };
 }

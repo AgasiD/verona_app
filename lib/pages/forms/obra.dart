@@ -103,6 +103,7 @@ class _ObraFormState extends State<ObraForm> {
                     validarInput: (value) {
                       return Helper.validNumeros(value);
                     },
+                    textInputAction: TextInputAction.done,
                   ),
                   Container(
                     alignment: Alignment.centerLeft,

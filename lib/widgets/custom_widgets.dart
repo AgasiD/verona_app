@@ -93,6 +93,7 @@ class CustomInput extends StatefulWidget {
   static void _passedOnChange(String? input) {}
   String initialValue = '';
   static String? _passedFunction(String? input) {}
+  TextInputAction textInputAction;
   CustomInput({
     Key? key,
     required this.hintText,
@@ -103,6 +104,7 @@ class CustomInput extends StatefulWidget {
     this.lines = 1,
     this.validaError = false,
     this.initialValue = '',
+    this.textInputAction = TextInputAction.next,
     this.iconButton = const IconButton(
       onPressed: null,
       icon: Icon(null),
@@ -146,6 +148,7 @@ class _CustomInputState extends State<CustomInput> {
             keyboardType: widget.teclado,
             obscureText: widget.isPassword,
             decoration: inputDecoration,
+            textInputAction: widget.textInputAction,
             onChanged: (text) {
               inputValid = widget.validarInput(text) == null
                   ? ValidInput()
@@ -223,7 +226,7 @@ class _CustomInputAreaState extends State<CustomInputArea> {
           border: InputBorder.none,
         ),
         onChanged: (text) {
-          setState(() {});
+          // setState(() {});
         },
       ),
       // ignore: prefer_const_literals_to_create_immutables
@@ -445,7 +448,7 @@ class Loading extends StatelessWidget {
               ? Text(
                   mensaje,
                   style: TextStyle(
-                      color: Colors.white,
+                      color: Helper.primaryColor,
                       fontSize: 15,
                       decoration: TextDecoration.none),
                 )

@@ -112,6 +112,7 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
             CustomInput(
               width: MediaQuery.of(context).size.width * .95,
               hintText: 'Martín...',
+              textInputAction: TextInputAction.search,
               icono: Icons.search,
               iconButton: txtPersonalCtrl.value == ''
                   ? IconButton(

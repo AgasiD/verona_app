@@ -114,6 +114,7 @@ class _MiembroFormState extends State<MiembroForm> {
                   teclado: TextInputType.emailAddress,
                   validaError: true,
                   validarInput: (value) => Helper.validEmail(value),
+                  textInputAction: TextInputAction.done,
                 ),
                 Container(
                   margin: EdgeInsets.only(bottom: 25),
