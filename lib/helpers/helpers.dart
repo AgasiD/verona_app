@@ -8,7 +8,7 @@ class Helper {
   static Color? primaryColor = Colors.grey.shade500; //Color(0xff222222);
   static Color? secondaryColor = Color(0xffFFD100);
   static String nombre = 'Verona';
-  //static double maxWidth = MediaQuery.of(context).size.width
+  //static double maxWidth = MediaQuery.of(context).size.wi dth
   //static AssetImage splashImage = AssetImage('assets/icon/do-splash.png');
   static String version = '1.4.0';
 
@@ -91,6 +91,8 @@ class Helper {
         return 'Encargado de compras';
       case 6:
         return 'Delivery';
+      case 7:
+        return 'PM';
     }
     return 'Admin';
   }

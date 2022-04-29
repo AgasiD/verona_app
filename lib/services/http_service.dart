@@ -4,13 +4,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:async/async.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:flutter/material.dart';
 
 class HttpService extends ChangeNotifier {
   //bool loading = false;
-  final isProduction = true;
-  String _baseUrl = '192.168.0.155:8008';
+  final isProduction = false;
+  String _baseUrl = 'veronaserver.herokuapp.com';
   final headers = {"Content-Type": "application/json"};
   late Uri url;
   HttpService() {

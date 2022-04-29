@@ -35,8 +35,8 @@ class _MiembroFormState extends State<MiembroForm> {
   Widget build(BuildContext context) {
     final miembros = [
       DropdownMenuItem<int>(
-        value: 1,
-        child: Text('Arquitecto interno'),
+        value: 7,
+        child: Text('PM'),
       ),
       DropdownMenuItem<int>(
         value: 2,

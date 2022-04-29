@@ -10,8 +10,9 @@ import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ContactsPage extends StatelessWidget {
-  const ContactsPage({Key? key}) : super(key: key);
+  ContactsPage({Key? key}) : super(key: key);
   static const String routeName = 'Contactos';
+  final _pref = new Preferences();
   @override
   Widget build(BuildContext context) {
     final _usuarios = Provider.of<UsuarioService>(context);
@@ -30,7 +31,9 @@ class ContactsPage extends StatelessWidget {
                   if (snapshot.data == null) {
                     return Loading(mensaje: 'Cargando contactos');
                   } else {
-                    final contactos = snapshot.data as List<dynamic>;
+                    final contactos = (snapshot.data as List<dynamic>)
+                        .where((e) => e.id != _pref.id)
+                        .toList();
                     return ListView.builder(
                         itemCount: contactos.length,
                         itemBuilder: (_, index) {
@@ -75,9 +78,21 @@ class __ContactTileState extends State<_ContactTile> {
           trailing: Icon(Icons.arrow_forward_ios_rounded),
           onTap: () async {
             // Generar Chat
-            final chatId = _chat.crearChat(_pref.id, widget.personal.id);
-            // Navigator.pushNamed(context, ChatPage.routeName,
-            //     arguments: {'chatId': widget.chat["id"]});
+
+            final response =
+                await _chat.crearChat(_pref.id, widget.personal.id);
+            if (response.fallo) {
+              openAlertDialog(context, 'Error al crear el chat',
+                  subMensaje: response.error);
+            } else {
+              print(response.data);
+              Navigator.pushNamed(context, ChatPage.routeName, arguments: {
+                'chatId': response.data['chatId'],
+                'chatName': response.data['chatName'],
+                // 'contactoId': response.data.contacto,
+                // 'nombre': response.data.nombre
+              });
+            }
           },
         ),
         Divider()

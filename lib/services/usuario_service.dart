@@ -27,9 +27,16 @@ class UsuarioService extends ChangeNotifier {
     return list;
   }
 
+  obtenerUsuario(id) async {
+    final datos = await this._http.get('$_endpoint/obtenerUsuario/$id');
+    final response = datos["response"];
+    final usuario = MyResponse.fromJson(response);
+    return usuario;
+  }
+
   grabarUsuario(dynamic usuario) async {
     final response = await this._http.post(_endpoint, usuario.toJson());
-    notifyListeners();
+    // notifyListeners();
     return response;
   }
 

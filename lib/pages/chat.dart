@@ -33,8 +33,10 @@ class _ChatPageState extends State<ChatPage> {
     final _service = Provider.of<ChatService>(context);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final chatId = arguments['chatId'];
+
     final txtController = TextEditingController();
     return Container(
+      color: Colors.white,
       child: FutureBuilder(
           future: _service.loadChat(chatId: chatId),
           builder: (context, snapshot) {
@@ -49,6 +51,7 @@ class _ChatPageState extends State<ChatPage> {
                 return Container();
               } else {
                 chatName = response.data['chatName'];
+                chatName == '' ? chatName = arguments['chatName'] : false;
                 final messagesRes = response.data['message'] as List<dynamic>;
                 final messages = messagesRes;
                 final mensajes =
@@ -95,14 +98,28 @@ class _CustomChatBar extends StatefulWidget implements PreferredSizeWidget {
 class _CustomChatBarState extends State<_CustomChatBar> {
   @override
   Widget build(BuildContext context) {
+    final _socketService = Provider.of<SocketService>(context);
+    _socketService.socket.connect();
     return AppBar(
       backgroundColor: Helper.primaryColor?.withOpacity(0.3),
-      title: Column(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('${widget.chatName}', style: TextStyle(color: Colors.white70))
-          // CircleAvatar(
-          //     backgroundColor: Helper.primaryColor?.withOpacity(0.3),
-          //     child: )),
+          Column(
+            children: [
+              Text('${widget.chatName}',
+                  style: TextStyle(color: Colors.white70))
+            ],
+          ),
+          _socketService.socket.connected
+              ? CircleAvatar(
+                  maxRadius: 5,
+                  backgroundColor: Colors.green[400],
+                )
+              : CircleAvatar(
+                  maxRadius: 5,
+                  backgroundColor: Colors.red[400],
+                )
         ],
       ),
     );
@@ -155,7 +172,7 @@ class _ListMessageBoxState extends State<ListMessageBox> {
     if (data['id'] == _pref.id) {
     } else {
       agregarMensaje(data, false);
-      Vibration.vibrate(duration: 75, amplitude: 128);
+      // Vibration.vibrate(duration: 75, amplitude: 128);
     }
   }
 
@@ -286,11 +303,12 @@ class __InputChatState extends State<_InputChat> {
                           onPressed: () {}, icon: Icon(Icons.mic_none_rounded))
                       : IconButton(
                           icon: Icon(Icons.send),
-                          onPressed: widget.txtCtrl.text == ''
-                              ? null
-                              : () {
-                                  enviarMensaje(_socket);
-                                },
+                          onPressed: () {
+                            _socket.socket.connected
+                                ? enviarMensaje(_socket)
+                                : openAlertDialog(
+                                    context, 'No hay conexión con el servidor');
+                          },
                         )
                   : widget.txtCtrl.text == ''
                       ? IconButton(
@@ -301,11 +319,12 @@ class __InputChatState extends State<_InputChat> {
                             'Enviar',
                             style: TextStyle(fontSize: 15),
                           ),
-                          onPressed: _socket.socket.connected
-                              ? () {
-                                  enviarMensaje(_socket);
-                                }
-                              : null)
+                          onPressed: () {
+                            _socket.socket.connected
+                                ? enviarMensaje(_socket)
+                                : openAlertDialog(
+                                    context, 'No hay conexión con el servidor');
+                          })
             ],
           ))
         ],

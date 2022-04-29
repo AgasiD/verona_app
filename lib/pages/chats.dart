@@ -1,8 +1,13 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/contactos.dart';
+import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ChatsPage extends StatelessWidget {
@@ -10,32 +15,6 @@ class ChatsPage extends StatelessWidget {
   static const String routeName = 'Chats';
   @override
   Widget build(BuildContext context) {
-    final chats = [
-      {
-        "id": "-N0B8x1nWMhk3Ayh_7i3",
-        "nombre": 'Lionel',
-        "apellido": 'Messi',
-        "cantMensajes": 2,
-      },
-      {
-        "id": "-N0B8x1nWMhk3Ayh_7i3",
-        "nombre": 'Neymar JR.',
-        "apellido": '0',
-        "cantMensajes": 5,
-      },
-      {
-        "id": "-N0B8x1nWMhk3Ayh_7i3",
-        "nombre": 'Luis',
-        "apellido": 'Suarez',
-        "cantMensajes": 0,
-      },
-      {
-        "id": "-N0B8x1nWMhk3Ayh_7i3",
-        "nombre": 'Luis',
-        "apellido": 'Miguel',
-        "cantMensajes": 1,
-      },
-    ];
     return Scaffold(
       appBar: CustomAppBar(
         muestraBackButton: true,
@@ -53,15 +32,61 @@ class ChatsPage extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-          child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: 1000,
-        child: ListView.builder(
-            itemCount: chats.length,
-            itemBuilder: (_, index) {
-              return _ChatTile(chat: chats[index]);
-            }),
-      )),
+          child: Container(height: 400, child: _ContactList())),
+    );
+  }
+}
+
+class _ContactList extends StatelessWidget {
+  const _ContactList({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final _usuarioService = Provider.of<UsuarioService>(context);
+    final _pref = new Preferences();
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: FutureBuilder(
+        future: _usuarioService.obtenerUsuario(_pref.id),
+        builder: (_, snapshot) {
+          if (snapshot.data == null) {
+            return Loading(
+              mensaje: 'Recuperando conversaciones',
+            );
+          } else {
+            final response = snapshot.data as MyResponse;
+            final usuario = Miembro.fromJson(response.data);
+            usuario.chats = usuario.chats
+                .where((element) => element['individual'] == true)
+                .toList();
+            if (response.fallo) {
+              openAlertDialog(context, 'No se pudo recuperar los datos',
+                  subMensaje: response.error);
+              return Container();
+            } else {
+              if (usuario.chats.length > 0) {
+                return ListView.builder(
+                    itemCount: usuario.chats.length,
+                    itemBuilder: (_, index) {
+                      return _ChatTile(chat: usuario.chats[index]);
+                    });
+              } else {
+                return Container(
+                  margin: EdgeInsets.only(top: 300),
+                  child: Center(
+                    child: Text(
+                      'Aún no hay conversaciones activas ',
+                      style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+                    ),
+                  ),
+                );
+              }
+            }
+          }
+        },
+      ),
     );
   }
 }
@@ -80,26 +105,26 @@ class __ChatTileState extends State<_ChatTile> {
     return Column(
       children: [
         ListTile(
-          subtitle: Text('Hola como estas?'),
+          subtitle: Text('Sin mensaje'),
           leading: CircleAvatar(
             backgroundColor: Colors.grey[200],
             child: Text(
-              '${widget.chat['nombre'].toString()[0]}${widget.chat['apellido'].toString()[0]} ',
+              '${widget.chat['nombre'].toString()[0]} ',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Helper.primaryColor,
               ),
             ),
           ),
-          title: Text(
-              '${widget.chat["nombre"].toString()} ${widget.chat["apellido"].toString()}'),
+          title: Text('${widget.chat["nombre"].toString()} '),
           trailing: Container(
             width: 80,
             // alignment: Alignment.center,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                widget.chat["cantMensajes"] != 0
+                // widget.chat["cantMensajes"] != 0
+                0 != 0
                     ? Container(
                         width: 40,
                         height: 20,
@@ -121,8 +146,10 @@ class __ChatTileState extends State<_ChatTile> {
             ),
           ),
           onTap: () {
-            Navigator.pushNamed(context, ChatPage.routeName,
-                arguments: {'chatId': widget.chat["id"]});
+            Navigator.pushNamed(context, ChatPage.routeName, arguments: {
+              'chatId': widget.chat["chat"],
+              'chatName': widget.chat["nombre"],
+            });
           },
         ),
         Divider()

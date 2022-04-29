@@ -9,6 +9,7 @@ class Miembro {
     required this.role,
     this.username = '',
     this.externo = false,
+    this.chats = const [],
   });
   String id;
   String nombre;
@@ -19,6 +20,7 @@ class Miembro {
   String username;
   int role;
   bool externo;
+  List<dynamic> chats;
 
   factory Miembro.fromJson(Map<String, dynamic> json) => Miembro(
       id: json['id'],
@@ -28,6 +30,7 @@ class Miembro {
       telefono: json["telefono"],
       dni: json["dni"],
       role: json["role"],
+      chats: json.containsKey('chats') ? json["chats"] : [],
       username: json['username']);
 
   Map<String, dynamic> toJson() => {

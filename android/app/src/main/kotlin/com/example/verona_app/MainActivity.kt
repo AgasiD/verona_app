@@ -1,4 +1,4 @@
-package com.example.verona_app
+package com.edrex.veronaapp
 
 import io.flutter.embedding.android.FlutterActivity
 

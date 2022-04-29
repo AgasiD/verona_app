@@ -16,6 +16,7 @@ class ObraService extends ChangeNotifier {
   }
 
   obtenerObrasByUser(String userId) async {
+    print('obtenerByUser');
     final datos = await this._http.get('$_endpoint/byuser/$userId');
     final lista = datos["obras"];
     final listObras =
@@ -33,21 +34,21 @@ class ObraService extends ChangeNotifier {
 
   grabarObra(Obra obra) async {
     final response = await this._http.post(_endpoint, obra.toMap());
-    notifyListeners();
+    // notifyListeners();
     //this.obra = obra;
     return response;
   }
 
   Future<dynamic> agregarUsuario(obraId, String dni) async {
     final response = await this._http.put('$_endpoint/$obraId/$dni', {});
-    notifyListeners();
+    // notifyListeners();
     return response;
   }
 
   Future<dynamic> quitarUsuario(obraId, String dni) async {
     final response =
         await this._http.put('$_endpoint/quitarUsuario/$obraId/$dni', {});
-    notifyListeners();
+    // notifyListeners();
     return response;
   }
 }

@@ -101,8 +101,8 @@ class _FormPageState extends State<FormPage> {
                   children: [
                     MainButton(
                         onPressed: () {
-                          openDialogConfirmation(context, accion,
-                              mensajeConfirmacion, rutaPrevia, argRuta);
+                          openDialogConfirmation(
+                              context, accion, mensajeConfirmacion);
                         },
                         text: 'Aceptar'),
                     SizedBox(

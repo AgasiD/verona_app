@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:badges/badges.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -55,23 +56,37 @@ class _ObrasPageState extends State<ObrasPage> {
     _refreshController.loadComplete();
   }
 
+  @override
+  void initState() {
+    final _socketService = Provider.of<SocketService>(context, listen: false);
+    _socketService.connect(_pref.id);
+    super.initState();
+  }
+
   List<Obra> obras = [];
   List<Obra> obrasFiltradas = [];
   int cant = 3;
   @override
   Widget build(BuildContext context) {
-    ObraService _obras = Provider.of<ObraService>(context);
-    final _socketService = Provider.of<SocketService>(context);
-    _socketService.connect(_pref.id);
+    ObraService _obras = Provider.of<ObraService>(context, listen: false);
+    final _socketService = Provider.of<SocketService>(context, listen: false);
     final header;
     Platform.isIOS
         ? header = WaterDropHeader()
         : header = MaterialClassicHeader();
+    final textStyle = TextStyle(fontSize: 16, color: Colors.grey[600]);
+    final menu = [
+      'Proximamente',
+      'Proximamente',
+      'Proximamente',
+      'Proximamente',
+      'Proximamente',
+      'Proximamente',
+    ];
 
     return Scaffold(
-        appBar: CustomAppBar(
-          muestraLogOut: true,
-        ),
+        drawer: CustomDrawer(textStyle: textStyle, menu: menu),
+        appBar: CustomAppBar(),
         floatingActionButton: Badge(
             badgeContent: Text(
               cant.toString(),
@@ -253,17 +268,20 @@ class __SearchListViewState extends State<_SearchListView> {
                 left: 10,
                 height: 235,
                 child: Container(
-                  child: Hero(
-                    tag: obra.nombre,
-                    child: FadeInImage(
-                        height: 190,
-                        image: imagen,
-                        imageErrorBuilder: (_, obj, st) {
-                          return Container(
-                              child:
-                                  Image(image: AssetImage('assets/image.png')));
-                        },
-                        placeholder: AssetImage('assets/loading-image.gif')),
+                  child: ClipRRect(
+                    //borderRadius: BorderRadius.all(Radius.circular(40)),
+                    child: Hero(
+                      tag: obra.nombre,
+                      child: FadeInImage(
+                          height: 190,
+                          image: imagen,
+                          imageErrorBuilder: (_, obj, st) {
+                            return Container(
+                                child: Image(
+                                    image: AssetImage('assets/image.png')));
+                          },
+                          placeholder: AssetImage('assets/loading-image.gif')),
+                    ),
                   ),
                 )),
             Positioned(

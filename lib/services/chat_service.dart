@@ -15,13 +15,13 @@ class ChatService extends ChangeNotifier {
     return data;
   }
 
-  Future<MyResponse> crearChat(String idFrom, String idTo) async {
+  Future<MyResponse> crearChat(String idFrom, String to) async {
     final body = {
       "idFrom": idFrom,
-      "idTo": idTo,
+      "idTo": to,
     };
     final data = await this._http.post('$_endpoint', body);
-    final response = MyResponse.fromJson(data);
+    final response = MyResponse.fromJson(data['response']);
     return response;
   }
 }

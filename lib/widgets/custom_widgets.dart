@@ -18,11 +18,9 @@ import 'package:verona_app/services/socket_service.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   bool muestraBackButton;
-  bool muestraLogOut;
   CustomAppBar({
     this.title = 'Verona',
     this.muestraBackButton = false,
-    this.muestraLogOut = false,
     Key? key,
   }) : super(key: key);
 
@@ -38,17 +36,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       automaticallyImplyLeading: muestraBackButton,
       primary: true,
-      leading: muestraLogOut
-          ? IconButton(
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, LoginPage.routeName);
-              },
-              icon: Icon(
-                Icons.logout_outlined,
-                size: 30,
-              ),
-            )
-          : null,
       actions: [
         !hideNotifications
             ? Padding(
@@ -76,6 +63,69 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => new Size.fromHeight(50);
+}
+
+class CustomDrawer extends StatelessWidget {
+  const CustomDrawer({
+    Key? key,
+    required this.textStyle,
+    required this.menu,
+  }) : super(key: key);
+
+  final TextStyle textStyle;
+  final List<String> menu;
+
+  @override
+  Widget build(BuildContext context) {
+    final _socketService = Provider.of<SocketService>(context);
+    return Drawer(
+        child: SafeArea(
+      child: Container(
+        child: Stack(
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text(
+                'Estado del servidor',
+                style: textStyle,
+              ),
+              _socketService.socket.connected
+                  ? Icon(
+                      Icons.signal_cellular_alt,
+                      color: Colors.green,
+                    )
+                  : Icon(
+                      Icons.signal_cellular_connected_no_internet_4_bar,
+                      color: Colors.red,
+                    )
+            ]),
+            Positioned(
+              bottom: 20,
+              left: 85,
+              child: TextButton(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [Text('Cerrar sesion'), Icon(Icons.logout)]),
+                onPressed: () {},
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
+              child: Column(
+                  children: menu
+                      .map((e) => TextButton(
+                            child: Text(
+                              '- $e',
+                              style: textStyle,
+                            ),
+                            onPressed: () {},
+                          ))
+                      .toList()),
+            )
+          ],
+        ),
+      ),
+    ));
+  }
 }
 
 class CustomInput extends StatefulWidget {
@@ -355,8 +405,8 @@ void closeLoadingDialog(BuildContext context) {
   }
 }
 
-void openDialogConfirmation(BuildContext context, Function onPressed,
-    String mensaje, String routeNueva, Map<String, String> argumentos) {
+void openDialogConfirmation(
+    BuildContext context, Function onPressed, String mensaje) {
   if (Platform.isAndroid) {
     showDialog(
         context: context,
@@ -399,7 +449,8 @@ void openDialogConfirmation(BuildContext context, Function onPressed,
   }
 }
 
-void openAlertDialog(BuildContext context, String mensaje) {
+void openAlertDialog(BuildContext context, String mensaje,
+    {String? subMensaje}) {
   if (Platform.isAndroid) {
     showDialog(
         context: context,
@@ -417,6 +468,9 @@ void openAlertDialog(BuildContext context, String mensaje) {
       context: context,
       builder: (_) => CupertinoAlertDialog(
         title: Text(mensaje),
+        content: subMensaje != null && subMensaje != ''
+            ? Text(subMensaje!)
+            : Container(),
         actions: [
           CupertinoDialogAction(
             child: Text('Cerrar'),

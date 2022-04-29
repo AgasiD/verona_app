@@ -39,7 +39,6 @@ class ObraPage extends StatelessWidget {
                         'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
                     : NetworkImage(
                         'https://drive.google.com/uc?export=view&id=${obra.imageId}');
-                //'https://www.bbva.com/wp-content/uploads/2021/04/casas-ecolo%CC%81gicas_apertura-hogar-sostenibilidad-certificado--1024x629.jpg');
 
                 return Container(
                   child: Stack(
@@ -53,7 +52,7 @@ class ObraPage extends StatelessWidget {
                                 tag: obra.nombre,
                                 child: FadeInImage(
                                   image: imagen,
-                                  height: 250,
+                                  // height: 250,
                                   width: MediaQuery.of(context).size.width,
                                   placeholder:
                                       AssetImage('assets/loading-image.gif'),
@@ -68,17 +67,17 @@ class ObraPage extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.edit),
-                                  splashColor: null,
-                                  splashRadius: 0.1,
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.delete),
-                                  splashRadius: 0.1,
-                                )
+                                // IconButton(
+                                //   onPressed: () {},
+                                //   icon: Icon(Icons.edit),
+                                //   splashColor: null,
+                                //   splashRadius: 0.1,
+                                // ),
+                                // IconButton(
+                                //   onPressed: () {},
+                                //   icon: Icon(Icons.delete),
+                                //   splashRadius: 0.1,
+                                // )
                               ],
                             )
                           ],
@@ -160,11 +159,14 @@ class ObraPage extends StatelessWidget {
                                           size: 35,
                                         ),
                                         onPressed: () {
-                                          Navigator.pushNamed(
-                                              context, ChatPage.routeName,
-                                              arguments: {
-                                                'chatId': obra.chatE
-                                              });
+                                          openDialogConfirmation(context,
+                                              (ctx) {
+                                            Navigator.pushNamed(
+                                                ctx, ChatPage.routeName,
+                                                arguments: {
+                                                  'chatId': obra.chatE
+                                                });
+                                          }, 'Abrirá chat con propietarios');
                                         },
                                       ),
                                     ),

@@ -87,6 +87,7 @@ class __FormState extends State<_Form> {
 
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
+  String text = 'Ingresar';
   @override
   Widget build(BuildContext context) {
     final _usuario = Provider.of<UsuarioService>(context);
@@ -107,8 +108,10 @@ class __FormState extends State<_Form> {
             textInputAction: TextInputAction.done,
           ),
           MainButton(
-            text: 'Ingresar',
+            text: text,
             onPressed: () async {
+              text = 'Cargando...';
+              setState(() {});
               final response =
                   await _usuario.validarUsuario(emailCtrl.text, passCtrl.text);
               if (response.fallo) {
@@ -118,6 +121,8 @@ class __FormState extends State<_Form> {
                 guardarUserData(_usuario.usuario);
                 Navigator.pushReplacementNamed(context, ObrasPage.routeName);
               }
+              text = 'Ingresar';
+              setState(() {});
             },
           )
         ]));
