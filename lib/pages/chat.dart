@@ -3,11 +3,14 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/services/chat_service.dart';
+import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:vibration/vibration.dart';
 
@@ -28,6 +31,7 @@ class _ChatPageState extends State<ChatPage> {
   List<Message> messages = [];
   Preferences _pref = Preferences();
   String chatName = 'Sin nombre';
+
   @override
   Widget build(BuildContext context) {
     final _service = Provider.of<ChatService>(context);
@@ -38,7 +42,7 @@ class _ChatPageState extends State<ChatPage> {
     return Container(
       color: Colors.white,
       child: FutureBuilder(
-          future: _service.loadChat(chatId: chatId),
+          future: _service.loadChat(chatId: chatId, limit: 25, offset: 0),
           builder: (context, snapshot) {
             if (snapshot.data == null) {
               return Loading(
@@ -154,12 +158,47 @@ class ListMessageBox extends StatefulWidget {
 }
 
 class _ListMessageBoxState extends State<ListMessageBox> {
-  Preferences _pref = new Preferences();
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+  final _pref = new Preferences();
+
+  late final header;
+  int offset = 0;
+
+  void _onLoad(
+      ChatService _chatService, String chatId, int offset, int limit) async {
+    final response = await _chatService.loadChat(
+        chatId: chatId, limit: Helper.limit, offset: offset);
+
+    if (response.fallo) {
+      _refreshController.loadFailed();
+    } else {
+      final mensajesNuevos = (response.data['message'] as List<dynamic>);
+
+      mensajesNuevos.reversed.forEach((element) {
+        widget.messages.insert(0, Message.fromMap(element));
+      });
+      widget.messageList = widget.messages
+          .map((e) => MessageBox(
+              esMsgPropio: e.from == _pref.id,
+              messageText: e.mensaje,
+              name: e.name,
+              ts: e.ts))
+          .toList();
+
+      _refreshController.loadComplete();
+      setState(() {});
+    }
+  }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+
+    Platform.isIOS
+        ? header = WaterDropHeader()
+        : header = MaterialClassicHeader();
+
     final _socket = Provider.of<SocketService>(context, listen: false);
     _socket.socket.on('nuevo-mensaje', (data) {
       print('NUEVO MENSAJE');
@@ -178,7 +217,6 @@ class _ListMessageBoxState extends State<ListMessageBox> {
 
   void agregarMensaje(dynamic data, bool propio) {
     final mensaje = Message.fromMap(data);
-    print(mensaje.mensaje);
     if (mensaje.from != _pref.id && !propio) {
       print('NUEVO MENSAJE RECIBIDO');
       widget.messages.add(mensaje);
@@ -188,7 +226,11 @@ class _ListMessageBoxState extends State<ListMessageBox> {
           name: mensaje.name,
           ts: mensaje.ts);
       widget.messageList.add(mBox);
-      setState(() {});
+      if (this.mounted) {
+        setState(() {
+          // Your state change code goes here
+        });
+      }
     } else if (mensaje.from == _pref.id && propio) {
       print('NUEVO MENSAJE PROPIO');
       widget.messages.insert(0, mensaje);
@@ -198,21 +240,55 @@ class _ListMessageBoxState extends State<ListMessageBox> {
           name: mensaje.name,
           ts: mensaje.ts);
       widget.messageList.add(mBox);
-      setState(() {});
+      if (this.mounted) {
+        setState(() {
+          // Your state change code goes here
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final _chatService = Provider.of<ChatService>(context, listen: false);
     return Container(
+      width: MediaQuery.of(context).size.width,
+      margin: EdgeInsets.only(top: 30),
       child: Column(
         children: [
           Flexible(
-              child: ListView.builder(
-            reverse: true,
-            itemCount: widget.messages.length,
-            itemBuilder: (_, i) => widget.messageList.reversed.toList()[i],
-            physics: BouncingScrollPhysics(),
+              child: SmartRefresher(
+            enablePullDown: false,
+            enablePullUp: true,
+            controller: _refreshController,
+            onLoading: () {
+              offset = offset + 25;
+              _onLoad(_chatService, widget.chatId, offset, Helper.limit);
+            },
+            header: header,
+            footer: CustomFooter(
+              builder: (BuildContext context, LoadStatus? mode) {
+                Widget body = Text('');
+
+                if (mode == LoadStatus.loading) {
+                  body = CupertinoActivityIndicator();
+                } else if (mode == LoadStatus.failed) {
+                  body = Text("Load Failed!Click retry!");
+                } else if (mode == LoadStatus.canLoading) {
+                  body = Text("Cargar mas mensajes...");
+                }
+                ;
+                return Container(
+                  child: Center(child: body),
+                );
+              },
+            ),
+            child: ListView.builder(
+              reverse: true,
+              itemCount: widget.messages.length,
+              itemBuilder: (_, i) => widget.messageList.reversed.toList()[i],
+              physics: BouncingScrollPhysics(),
+            ),
           )),
           Align(
               alignment: Alignment.centerLeft,
@@ -338,9 +414,7 @@ class __InputChatState extends State<_InputChat> {
         from: _pref.id,
         name: _pref.nombre,
         mensaje: widget.txtCtrl.text,
-        ts: DateTime.utc(
-                2022, 1, 1, DateTime.now().hour, DateTime.now().minute, 0, 0, 0)
-            .millisecond);
+        ts: DateTime.now().millisecondsSinceEpoch);
 
     widget.agregarMensaje(mensaje.toMap(), true);
     _socket.enviarMensaje(mensaje);
@@ -408,6 +482,22 @@ class _ChatMessageState extends State<_ChatMessage> {
 
   @override
   Widget build(BuildContext context) {
+    var tiempoMensaje = DateTime.fromMillisecondsSinceEpoch(widget.ts);
+
+    var fecha = DateFormat('dd/MM/yyyy').format(tiempoMensaje);
+    final hora = tiempoMensaje.hour.toString();
+    final minutos = tiempoMensaje.minute < 10
+        ? '0${tiempoMensaje.minute}'
+        : tiempoMensaje.minute.toString();
+    final fechaMensaje;
+    if (widget.ts < DateTime.now().millisecondsSinceEpoch - 24 * 3600000) {
+      //mostrar
+      fechaMensaje = '$fecha  ${hora}:${minutos}';
+    } else {
+      //no mostrar fecha
+      fechaMensaje = '${hora}:${minutos}';
+    }
+
     return GestureDetector(
         onLongPress: () {
           print('reenviar');
@@ -477,8 +567,7 @@ class _ChatMessageState extends State<_ChatMessage> {
                 Container(
                     margin: EdgeInsets.only(
                         bottom: 10, left: 25, right: 25, top: 0),
-                    child: Text(
-                        '${DateTime(widget.ts).hour.toString()}:${DateTime(widget.ts).minute.toString()}',
+                    child: Text('${fechaMensaje}',
                         style: TextStyle(color: Colors.grey)))
               ],
             ),

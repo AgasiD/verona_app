@@ -7,6 +7,7 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/contactos.dart';
+import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -44,6 +45,7 @@ class _ContactList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _chatService = Provider.of<ChatService>(context);
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _pref = new Preferences();
     return Container(
@@ -147,7 +149,7 @@ class __ChatTileState extends State<_ChatTile> {
           ),
           onTap: () {
             Navigator.pushNamed(context, ChatPage.routeName, arguments: {
-              'chatId': widget.chat["chat"],
+              'chatId': widget.chat["chatId"],
               'chatName': widget.chat["nombre"],
             });
           },

@@ -85,12 +85,9 @@ class __ContactTileState extends State<_ContactTile> {
               openAlertDialog(context, 'Error al crear el chat',
                   subMensaje: response.error);
             } else {
-              print(response.data);
               Navigator.pushNamed(context, ChatPage.routeName, arguments: {
                 'chatId': response.data['chatId'],
                 'chatName': response.data['chatName'],
-                // 'contactoId': response.data.contacto,
-                // 'nombre': response.data.nombre
               });
             }
           },

@@ -8,6 +8,7 @@ class Helper {
   static Color? primaryColor = Colors.grey.shade500; //Color(0xff222222);
   static Color? secondaryColor = Color(0xffFFD100);
   static String nombre = 'Verona';
+  static int limit = 25;
   //static double maxWidth = MediaQuery.of(context).size.wi dth
   //static AssetImage splashImage = AssetImage('assets/icon/do-splash.png');
   static String version = '1.4.0';
