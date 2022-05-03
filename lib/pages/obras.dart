@@ -249,7 +249,7 @@ class __SearchListViewState extends State<_SearchListView> {
   }
 
   Container _obraCard(BuildContext context, Obra obra) {
-    final NetworkImage imagen = obra.imageId == ''
+    final NetworkImage imagen = obra.imageId != ''
         ? NetworkImage(
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
         : NetworkImage(

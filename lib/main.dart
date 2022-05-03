@@ -1,8 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -13,20 +14,30 @@ import 'package:verona_app/routes/routes.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/loading_service.dart';
+import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding
       .ensureInitialized(); //espera que los widtes se inicialiicen para seguir
+
+  // inicializa servicio notificaciones
+  await NotificationService.initializeApp();
 
   final pref = new Preferences();
   await pref.initPrefs();
   runApp(AppState());
 }
 
-class AppState extends StatelessWidget {
+class AppState extends StatefulWidget {
+  @override
+  State<AppState> createState() => _AppStateState();
+}
+
+class _AppStateState extends State<AppState> {
   // Para inyectar services http
   @override
   Widget build(BuildContext context) {
@@ -38,6 +49,10 @@ class AppState extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => GoogleDriveService(),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationService(),
           lazy: false,
         ),
         ChangeNotifierProvider(
@@ -64,12 +79,32 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final GlobalKey<ScaffoldMessengerState> messengerKey =
+      new GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<NavigatorState> navigatorKey =
+      new GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService.messagesStream.listen((message) {
+      print('-----------NUEVA NOTIFICACION-----------');
+
+      final snackBar = SnackBar(
+        content: Text(message),
+      );
+      messengerKey.currentState?.showSnackBar(snackBar);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Verona App',
       initialRoute: LoginPage.routeName,
+      navigatorKey: navigatorKey, // Navegar
+      scaffoldMessengerKey: messengerKey, // Snacks
       routes: appRoutes,
     );
   }

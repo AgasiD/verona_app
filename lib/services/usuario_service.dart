@@ -50,4 +50,10 @@ class UsuarioService extends ChangeNotifier {
     final response = await this._http.post('$_endpoint/autenticar', body);
     return MyResponse.fromJson(response['response']);
   }
+
+  setTokenDevice(String usuarioId, String tokenDevice) async {
+    final body = {"usuarioId": usuarioId, "tokenDevice": tokenDevice};
+    final response = await this._http.post('$_endpoint/tokenDevice', body);
+    return MyResponse.fromJson(response['response']);
+  }
 }

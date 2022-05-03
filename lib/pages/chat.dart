@@ -54,6 +54,7 @@ class _ChatPageState extends State<ChatPage> {
                 openAlertDialog(context, response.error);
                 return Container();
               } else {
+                final members = response.data["members"];
                 chatName = response.data['chatName'];
                 chatName == '' ? chatName = arguments['chatName'] : false;
                 final messagesRes = response.data['message'] as List<dynamic>;

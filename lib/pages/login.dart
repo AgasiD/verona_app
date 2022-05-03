@@ -8,6 +8,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/obras.dart';
+import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -91,6 +92,7 @@ class __FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     final _usuario = Provider.of<UsuarioService>(context);
+    final _notification = Provider.of<NotificationService>(context);
     return Container(
         margin: EdgeInsets.only(top: 40),
         padding: EdgeInsets.symmetric(horizontal: 50),
@@ -119,6 +121,14 @@ class __FormState extends State<_Form> {
               } else {
                 _usuario.usuario = Miembro.fromJson(response.data);
                 guardarUserData(_usuario.usuario);
+
+                final tokenResponse = await _usuario.setTokenDevice(
+                    _usuario.usuario.id, NotificationService.token!);
+                if (tokenResponse.fallo) {
+                  openAlertDialog(context,
+                      'No fue posible guardar el dispositivo utilizado');
+                }
+
                 Navigator.pushReplacementNamed(context, ObrasPage.routeName);
               }
               text = 'Ingresar';
