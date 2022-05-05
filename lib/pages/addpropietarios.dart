@@ -155,9 +155,6 @@ class __customTileAddedState extends State<_customTileAdded> {
         ListTile(
           onTap: () async {
             String mensaje = '';
-            print('PROPIETARIO');
-
-            print(widget.agregado);
             if (widget.agregado) {
               openLoadingDialog(context, mensaje: 'Desasignando propietario');
               mensaje = 'Propietario quitado';

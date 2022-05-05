@@ -4,23 +4,16 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:badges/badges.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
-import 'package:provider/single_child_widget.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import 'package:verona_app/helpers/Preferences.dart';
-import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/chats.dart';
-import 'package:verona_app/pages/form.dart';
-import 'package:verona_app/pages/forms/asignar_pedido.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/obra.dart';
-
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -39,13 +32,12 @@ class _ObrasPageState extends State<ObrasPage> {
   final _pref = new Preferences();
 
   void _onRefresh(ObraService _obras) async {
-    // monitor network fetch
-    // await Future.delayed(Duration(milliseconds: 2000));
     this.obrasFiltradas = await _obras.obtenerObrasByUser(_pref.id);
     setState(() {});
-
     // if failed,use refreshFailed()
+    print(this.obrasFiltradas.length);
     _refreshController.refreshCompleted();
+    // _obras.notifyListeners();
   }
 
   void _onLoading() async {
@@ -65,10 +57,10 @@ class _ObrasPageState extends State<ObrasPage> {
 
   List<Obra> obras = [];
   List<Obra> obrasFiltradas = [];
-  int cant = 3;
+  int cant = 0;
   @override
   Widget build(BuildContext context) {
-    ObraService _obras = Provider.of<ObraService>(context, listen: false);
+    ObraService _obras = Provider.of<ObraService>(context);
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final header;
     Platform.isIOS
@@ -88,6 +80,7 @@ class _ObrasPageState extends State<ObrasPage> {
         drawer: CustomDrawer(textStyle: textStyle, menu: menu),
         appBar: CustomAppBar(),
         floatingActionButton: Badge(
+            showBadge: cant > 0,
             badgeContent: Text(
               cant.toString(),
               style:
@@ -115,18 +108,7 @@ class _ObrasPageState extends State<ObrasPage> {
                 controller: _refreshController,
                 onRefresh: () => _onRefresh(_obras),
                 header: header,
-                child: FutureBuilder(
-                    future: _obras.obtenerObrasByUser(_pref.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.data == null) {
-                        return Loading();
-                      } else {
-                        obras = snapshot.data as List<Obra>;
-                        obrasFiltradas =
-                            obras.getRange(0, obras.length).toList();
-                        return _SearchListView(obras: obras);
-                      }
-                    }))));
+                child: _SearchListView(obras: obras))));
   }
 
   Padding _obraCard(BuildContext context, Obra obra) {
@@ -175,15 +157,16 @@ class _SearchListView extends StatefulWidget {
 TextEditingController obrasTxtController = new TextEditingController();
 
 class __SearchListViewState extends State<_SearchListView> {
-  List<Obra> obrasFiltradas = [];
+  late List<Obra> obras;
+  late List<Obra> obrasFiltradas;
   @override
   void initState() {
     super.initState();
-    this.obrasFiltradas = this.widget.obras;
   }
 
   @override
   Widget build(BuildContext context) {
+    final _obras = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     return SingleChildScrollView(
         child: Column(children: [
@@ -209,8 +192,6 @@ class __SearchListViewState extends State<_SearchListView> {
                       ),
                       onPressed: () {
                         obrasTxtController.text = '';
-                        obrasFiltradas = widget.obras;
-
                         setState(() {});
                       },
                     )
@@ -235,16 +216,38 @@ class __SearchListViewState extends State<_SearchListView> {
           ],
         ),
       ),
-      ListView.builder(
-          physics:
-              NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
-          padding: EdgeInsets.only(top: 25),
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          itemCount: obrasFiltradas.length,
-          itemBuilder: (BuildContext ctx, index) {
-            return _obraCard(context, obrasFiltradas[index]);
-          })
+      FutureBuilder(
+          future: _obras.obtenerObrasByUser(_pref.id),
+          builder: ((context, snapshot) {
+            if (snapshot.data == null) {
+              return Loading(mensaje: 'Recuperando obras');
+            } else {
+              obras = snapshot.data as List<Obra>;
+              obrasFiltradas = obras;
+              if (obras.length > 0) {
+                return ListView.builder(
+                    physics:
+                        NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
+                    padding: EdgeInsets.only(top: 25),
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: obrasFiltradas.length,
+                    itemBuilder: (BuildContext ctx, index) {
+                      return _obraCard(context, obrasFiltradas[index]);
+                    });
+              } else {
+                return Container(
+                  margin: EdgeInsets.only(top: 300),
+                  child: Center(
+                    child: Text(
+                      'Aún no hay obras asignadas ',
+                      style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+                    ),
+                  ),
+                );
+              }
+            }
+          }))
     ]));
   }
 

@@ -54,7 +54,7 @@ class _ChatPageState extends State<ChatPage> {
                 openAlertDialog(context, response.error);
                 return Container();
               } else {
-                final members = response.data["members"];
+                final members = response.data["members"] as List<dynamic>;
                 chatName = response.data['chatName'];
                 chatName == '' ? chatName = arguments['chatName'] : false;
                 final messagesRes = response.data['message'] as List<dynamic>;
@@ -73,6 +73,7 @@ class _ChatPageState extends State<ChatPage> {
                 return Scaffold(
                     appBar: appbar,
                     body: ListMessageBox(
+                        members: members,
                         messages: mensajes,
                         messageList: messageList,
                         txtController: txtController,
@@ -143,6 +144,7 @@ class _CustomChatBarState extends State<_CustomChatBar> {
 class ListMessageBox extends StatefulWidget {
   ListMessageBox({
     Key? key,
+    required this.members,
     required this.messages,
     required this.messageList,
     required this.txtController,
@@ -151,6 +153,7 @@ class ListMessageBox extends StatefulWidget {
 
   final List<Message> messages;
   List<MessageBox> messageList;
+  List<dynamic> members;
   final TextEditingController txtController;
   final String chatId;
 
@@ -202,8 +205,6 @@ class _ListMessageBoxState extends State<ListMessageBox> {
 
     final _socket = Provider.of<SocketService>(context, listen: false);
     _socket.socket.on('nuevo-mensaje', (data) {
-      print('NUEVO MENSAJE');
-
       _recibirMensaje(data);
     }); //Escucha mensajes del servidor
   }
@@ -212,28 +213,28 @@ class _ListMessageBoxState extends State<ListMessageBox> {
     if (data['id'] == _pref.id) {
     } else {
       agregarMensaje(data, false);
-      // Vibration.vibrate(duration: 75, amplitude: 128);
+      //Vibration.vibrate(duration: 75, amplitude: 128);
     }
   }
 
   void agregarMensaje(dynamic data, bool propio) {
     final mensaje = Message.fromMap(data);
     if (mensaje.from != _pref.id && !propio) {
-      print('NUEVO MENSAJE RECIBIDO');
-      widget.messages.add(mensaje);
-      final mBox = MessageBox(
-          esMsgPropio: false,
-          messageText: mensaje.mensaje,
-          name: mensaje.name,
-          ts: mensaje.ts);
-      widget.messageList.add(mBox);
-      if (this.mounted) {
-        setState(() {
-          // Your state change code goes here
-        });
+      if (mensaje.chatId == widget.chatId) {
+        widget.messages.add(mensaje);
+        final mBox = MessageBox(
+            esMsgPropio: false,
+            messageText: mensaje.mensaje,
+            name: mensaje.name,
+            ts: mensaje.ts);
+        widget.messageList.add(mBox);
+        if (this.mounted) {
+          setState(() {
+            // Your state change code goes here
+          });
+        }
       }
     } else if (mensaje.from == _pref.id && propio) {
-      print('NUEVO MENSAJE PROPIO');
       widget.messages.insert(0, mensaje);
       final mBox = MessageBox(
           esMsgPropio: true,
@@ -313,6 +314,7 @@ class _ListMessageBoxState extends State<ListMessageBox> {
               chatId: widget.chatId,
               txtCtrl: widget.txtController,
               messageList: widget.messages,
+              members: widget.members,
               agregarMensaje: agregarMensaje,
             ),
           ))
@@ -328,9 +330,11 @@ class _InputChat extends StatefulWidget {
       required this.chatId,
       required this.txtCtrl,
       required this.messageList,
+      required this.members,
       required this.agregarMensaje})
       : super(key: key);
   String chatId;
+  List<dynamic> members;
   TextEditingController txtCtrl;
   List<Message> messageList;
   final Function agregarMensaje;
@@ -415,6 +419,7 @@ class __InputChatState extends State<_InputChat> {
         from: _pref.id,
         name: _pref.nombre,
         mensaje: widget.txtCtrl.text,
+        members: widget.members,
         ts: DateTime.now().millisecondsSinceEpoch);
 
     widget.agregarMensaje(mensaje.toMap(), true);

@@ -8,12 +8,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
+import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/socket_service.dart';
+import 'package:verona_app/services/usuario_service.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -26,6 +29,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    int cant = 0;
     final hideNotifications =
         ModalRoute.of(context)?.settings.name == NotificacionesPage.routeName;
     final _socket = Provider.of<SocketService>(context);
@@ -41,7 +45,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ? Padding(
                 padding: EdgeInsets.only(right: 15, top: 5),
                 child: Badge(
-                  badgeContent: Text('3'),
+                  showBadge: cant > 0,
+                  badgeContent: Text(cant.toString()),
                   badgeColor: Colors.red.shade100,
                   child: IconButton(
                     padding: EdgeInsets.zero,
@@ -78,6 +83,9 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
+    final _usuarioService = Provider.of<UsuarioService>(context);
+    final _pref = new Preferences();
+    final tokenDevice = NotificationService.token;
     return Drawer(
         child: SafeArea(
       child: Container(
@@ -105,7 +113,16 @@ class CustomDrawer extends StatelessWidget {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [Text('Cerrar sesion'), Icon(Icons.logout)]),
-                onPressed: () {},
+                onPressed: () async {
+                  final response = await _usuarioService.deleteDevice(
+                      _pref.id, tokenDevice!);
+                  if (response.fallo) {
+                    openAlertDialog(
+                        context, 'No se ha desasociado el dispositivo',
+                        subMensaje: response.error);
+                  }
+                  Navigator.pushReplacementNamed(context, LoginPage.routeName);
+                },
               ),
             ),
             Padding(
@@ -489,25 +506,28 @@ class Loading extends StatelessWidget {
   String mensaje;
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SpinKitDualRing(color: Helper.primaryColor!),
-          SizedBox(
-            height: 15,
-          ),
-          mensaje != ''
-              ? Text(
-                  mensaje,
-                  style: TextStyle(
-                      color: Helper.primaryColor,
-                      fontSize: 15,
-                      decoration: TextDecoration.none),
-                )
-              : Container()
-        ],
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SpinKitDualRing(color: Helper.primaryColor!),
+            SizedBox(
+              height: 15,
+            ),
+            mensaje != ''
+                ? Text(
+                    mensaje,
+                    style: TextStyle(
+                        color: Helper.primaryColor,
+                        fontSize: 15,
+                        decoration: TextDecoration.none),
+                  )
+                : Container()
+          ],
+        ),
       ),
     );
   }

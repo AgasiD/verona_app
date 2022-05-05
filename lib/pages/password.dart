@@ -116,7 +116,6 @@ class __FormState extends State<_Form> {
             onPressed: () async {
               try {
                 final formValid = validarFormulario();
-                print(formValid);
                 if (formValid) {
                   final body = {
                     "username": emailCtrl.text,
@@ -125,7 +124,6 @@ class __FormState extends State<_Form> {
                   };
                   final data = await _usuarioService.changePassword(body);
                   final datos = data["data"];
-                  print(data["data"]);
                   if (datos["fallo"]) {
                     openAlertDialog(context, datos["error"]);
                   } else {

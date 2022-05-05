@@ -33,7 +33,9 @@ class ChatsPage extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-          child: Container(height: 400, child: _ContactList())),
+          child: Container(
+              height: MediaQuery.of(context).size.height,
+              child: _ContactList())),
     );
   }
 }
@@ -107,7 +109,7 @@ class __ChatTileState extends State<_ChatTile> {
     return Column(
       children: [
         ListTile(
-          subtitle: Text('Sin mensaje'),
+          subtitle: Text('Sin previsualizacion'),
           leading: CircleAvatar(
             backgroundColor: Colors.grey[200],
             child: Text(

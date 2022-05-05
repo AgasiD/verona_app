@@ -17,32 +17,28 @@ class ContactsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final _usuarios = Provider.of<UsuarioService>(context);
     return Scaffold(
-        appBar: CustomAppBar(
-          muestraBackButton: true,
-          title: 'Contactos',
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: 1000,
-              child: FutureBuilder(
-                future: _usuarios.obtenerPersonal(),
-                builder: (_, snapshot) {
-                  if (snapshot.data == null) {
-                    return Loading(mensaje: 'Cargando contactos');
-                  } else {
-                    final contactos = (snapshot.data as List<dynamic>)
-                        .where((e) => e.id != _pref.id)
-                        .toList();
-                    return ListView.builder(
-                        itemCount: contactos.length,
-                        itemBuilder: (_, index) {
-                          return _ContactTile(personal: contactos[index]);
-                        });
-                  }
-                },
-              )),
-        ));
+      appBar: CustomAppBar(
+        muestraBackButton: true,
+        title: 'Contactos',
+      ),
+      body: FutureBuilder(
+        future: _usuarios.obtenerPersonal(),
+        builder: (_, snapshot) {
+          if (snapshot.data == null) {
+            return Loading(mensaje: 'Cargando contactos');
+          } else {
+            final contactos = (snapshot.data as List<dynamic>)
+                .where((e) => e.id != _pref.id)
+                .toList();
+            return ListView.builder(
+                itemCount: contactos.length,
+                itemBuilder: (_, index) {
+                  return _ContactTile(personal: contactos[index]);
+                });
+          }
+        },
+      ),
+    );
   }
 }
 

@@ -239,7 +239,6 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
 
             await _obraService.agregarUsuario(
                 _obraService.obra.id, widget.personal.dni);
-            print(widget.personal.dni);
             _obraService.obra.sumarPersonal(widget.personal);
             snackText =
                 '${widget.personal.nombre} ${widget.personal.apellido} fue asignado al equipo';

@@ -116,9 +116,7 @@ class Obra {
   }
 
   quitarPersonal(Miembro miembro) {
-    print(miembro.dni);
     if (estaPersonal(miembro.dni)) {
-      print('esta en equipo');
       equipo.removeWhere((element) => element.dni == miembro.dni);
     }
   }

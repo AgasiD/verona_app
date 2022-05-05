@@ -87,13 +87,33 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    NotificationService.messagesStream.listen((message) {
+
+    NotificationService.messagesStream.listen((notif) {
       print('-----------NUEVA NOTIFICACION-----------');
 
-      final snackBar = SnackBar(
-        content: Text(message),
-      );
-      messengerKey.currentState?.showSnackBar(snackBar);
+      Navigator.of(navigatorKey.currentContext!).popUntil((route) {
+        final snackBar = SnackBar(
+          content: Text(notif.notification!.title ?? 'Sin titulo'),
+        );
+        if (!route.settings.name!.contains('chat')) {
+          messengerKey.currentState?.showSnackBar(snackBar);
+        } else {
+          Map<String, dynamic> args =
+              route.settings.arguments as Map<String, dynamic>;
+          final chatId = args["chatId"];
+          final data = notif.data;
+          if (data['chatId'] != chatId) {
+            messengerKey.currentState?.showSnackBar(snackBar);
+          }
+        }
+        return true;
+      });
+
+      //Si es una nueva obra
+      if (notif.data["type"] == 'new-obra') {
+        final _obraService = Provider.of<ObraService>(context, listen: false);
+        _obraService.notifyListeners();
+      }
     });
   }
 

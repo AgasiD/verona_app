@@ -7,12 +7,14 @@ class Message {
   String name;
   String mensaje;
   int ts;
+  List<dynamic> members;
   Message(
       {this.messageId = '',
       required this.chatId,
       required this.from,
       required this.name,
       required this.mensaje,
+      required this.members,
       required this.ts}) {
     this.chatId = chatId;
     this.from = from;
@@ -28,6 +30,7 @@ class Message {
         from: json["from"],
         mensaje: json["mensaje"],
         ts: json.containsKey('ts') ? json["ts"] : 1,
+        members: json.containsKey('members') ? json["members"] : [],
       );
 
   toMap() => {
@@ -36,6 +39,7 @@ class Message {
         'from': this.from,
         'mensaje': this.mensaje,
         'ts': this.ts,
-        'name': this.name
+        'name': this.name,
+        'members': this.members
       };
 }

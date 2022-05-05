@@ -22,7 +22,7 @@ class SocketService with ChangeNotifier {
     print('Estado del servicio ' + this._serverStatus.toString());
     if (this._serverStatus != ServerStatus.Online) {
       final url =
-          'http://192.168.0.155:8008'; // 'https://veronaserver.herokuapp.com'; //
+          'http://192.168.0.155:8008'; //'https://veronaserver.herokuapp.com'; //
       this._socket = IO.io(url, {
         'transports': ['websocket'],
         'autoConnect': true,
@@ -31,7 +31,6 @@ class SocketService with ChangeNotifier {
       });
       // Accion al conectarse al servidor
       this._socket.onConnect((_) {
-        this._socket.emit('connection', 'App conectada');
         this._serverStatus = ServerStatus.Online;
         print('se ha conectado con el servidor');
         notifyListeners();
