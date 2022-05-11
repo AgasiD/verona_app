@@ -128,7 +128,8 @@ class __FormState extends State<_Form> {
                   openAlertDialog(context,
                       'No fue posible guardar el dispositivo utilizado');
                 }
-
+                final _pref = new Preferences();
+                _pref.logged = true;
                 Navigator.pushReplacementNamed(context, ObrasPage.routeName);
               }
               text = 'Ingresar';

@@ -10,6 +10,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/login.dart';
@@ -29,10 +30,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    int cant = 0;
+    final _usuarioService = Provider.of<UsuarioService>(context);
+    final _pref = new Preferences();
     final hideNotifications =
         ModalRoute.of(context)?.settings.name == NotificacionesPage.routeName;
-    final _socket = Provider.of<SocketService>(context);
+
     return AppBar(
       title: Image(
         image: AssetImage('assets/logo.png'),
@@ -42,32 +44,60 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       primary: true,
       actions: [
         !hideNotifications
-            ? Padding(
-                padding: EdgeInsets.only(right: 15, top: 5),
-                child: Badge(
-                  showBadge: cant > 0,
-                  badgeContent: Text(cant.toString()),
-                  badgeColor: Colors.red.shade100,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    icon: Icon(
-                      Icons.notifications,
-                      size: 30,
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(
-                          context, NotificacionesPage.routeName);
-                    },
-                  ),
-                ))
+            ? FutureBuilder(
+                future: _usuarioService.obtenerNotificaciones(_pref.id),
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    int cant = 0;
+                    return _NotificationButton(
+                      cant: cant,
+                    );
+                  } else {
+                    final response = snapshot.data as MyResponse;
+                    int cant = (response.data as List<dynamic>)
+                        .where((e) => !e['leido'])
+                        .length;
+                    return _NotificationButton(cant: cant);
+                  }
+                })
             : Container()
       ],
-      backgroundColor: Helper.primaryColor,
+      backgroundColor: Color.fromARGB(132, 252, 252, 252),
     );
   }
 
   @override
   Size get preferredSize => new Size.fromHeight(50);
+}
+
+class _NotificationButton extends StatelessWidget {
+  const _NotificationButton({
+    Key? key,
+    required this.cant,
+  }) : super(key: key);
+
+  final int cant;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: EdgeInsets.only(right: 15, top: 5),
+        child: Badge(
+          showBadge: cant > 0,
+          badgeContent: Text(cant.toString()),
+          badgeColor: Colors.red.shade100,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              Icons.notifications,
+              size: 30,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, NotificacionesPage.routeName);
+            },
+          ),
+        ));
+  }
 }
 
 class CustomDrawer extends StatelessWidget {
@@ -78,7 +108,7 @@ class CustomDrawer extends StatelessWidget {
   }) : super(key: key);
 
   final TextStyle textStyle;
-  final List<String> menu;
+  final List<Map<String, String>> menu;
 
   @override
   Widget build(BuildContext context) {
@@ -111,8 +141,8 @@ class CustomDrawer extends StatelessWidget {
               left: 85,
               child: TextButton(
                 child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [Text('Cerrar sesion'), Icon(Icons.logout)]),
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [Text('Cerrar sesion   '), Icon(Icons.logout)]),
                 onPressed: () async {
                   final response = await _usuarioService.deleteDevice(
                       _pref.id, tokenDevice!);
@@ -121,20 +151,27 @@ class CustomDrawer extends StatelessWidget {
                         context, 'No se ha desasociado el dispositivo',
                         subMensaje: response.error);
                   }
+                  _pref.logged = false;
                   Navigator.pushReplacementNamed(context, LoginPage.routeName);
                 },
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 35),
               child: Column(
                   children: menu
                       .map((e) => TextButton(
-                            child: Text(
-                              '- $e',
-                              style: textStyle,
-                            ),
-                            onPressed: () {},
+                            child: Row(children: [
+                              Icon(Icons.person_add_alt_sharp),
+                              Text(
+                                '${e["name"]}',
+                                style: textStyle,
+                              ),
+                            ]),
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                  context, e["route"].toString());
+                            },
                           ))
                       .toList()),
             )
@@ -142,6 +179,113 @@ class CustomDrawer extends StatelessWidget {
         ),
       ),
     ));
+  }
+}
+
+class CustomFormInput extends StatefulWidget {
+  final String hintText;
+  final IconData icono;
+  final bool isPassword;
+  final TextInputType teclado;
+  final TextEditingController textController;
+  final double width;
+  IconButton iconButton;
+  final int lines;
+  final bool validaError;
+  String? Function(String?) validarInput;
+  Function(String) onChange;
+  static void _passedOnChange(String? input) {}
+  String initialValue = '';
+  static String? _passedFunction(String? input) {}
+  TextInputAction textInputAction;
+  CustomFormInput({
+    Key? key,
+    required this.hintText,
+    required this.icono,
+    this.isPassword = false,
+    this.teclado = TextInputType.text,
+    this.width = double.infinity,
+    this.lines = 1,
+    this.validaError = false,
+    this.initialValue = '',
+    this.textInputAction = TextInputAction.next,
+    this.iconButton = const IconButton(
+      onPressed: null,
+      icon: Icon(null),
+    ),
+    required this.textController,
+    this.validarInput = _passedFunction,
+    this.onChange = _passedOnChange,
+  }) : super(key: key);
+
+  @override
+  State<CustomFormInput> createState() => _CustomFormInputState();
+}
+
+class _CustomFormInputState extends State<CustomFormInput> {
+  ValidInput inputValid = ValidInput();
+  @override
+  Widget build(BuildContext context) {
+    final icon = inputValid.value ? Icons.verified : Icons.cancel;
+    var inputDecoration = InputDecoration(
+        contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 13),
+        hintText: widget.hintText,
+        focusedBorder: InputBorder.none,
+        border: InputBorder.none,
+        errorBorder: InputBorder.none,
+        hintStyle: TextStyle(color: Color.fromARGB(255, 185, 185, 185)),
+        suffixIcon: widget.iconButton,
+        // prefixIcon: Icon(
+        //   widget.icono,
+        //   color: Helper.primaryColor,
+        // ),
+        errorMaxLines: 1);
+    return Column(
+      children: [
+        Container(
+          width: widget.width,
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          margin: EdgeInsets.only(bottom: 10),
+
+          child: TextFormField(
+            controller: widget.textController,
+            maxLines: widget.lines,
+            autocorrect: false,
+            keyboardType: widget.teclado,
+            obscureText: widget.isPassword,
+            decoration: inputDecoration,
+            textInputAction: widget.textInputAction,
+            //enabled: false,
+
+            onChanged: (text) {
+              inputValid = widget.validarInput(text) == null
+                  ? ValidInput()
+                  : ValidInput(error: widget.validarInput(text)!, value: false);
+              widget.onChange(text);
+              setState(() {});
+            },
+          ),
+          // ignore: prefer_const_literals_to_create_immutables
+          decoration: BoxDecoration(
+            color: Color.fromARGB(171, 250, 250, 250),
+            border: Border.all(color: Helper.primaryColor!, width: 1),
+          ),
+        ),
+        widget.validaError
+            ? inputValid.value
+                ? Container(
+                    height: 22,
+                  )
+                : Container(
+                    padding: EdgeInsets.only(bottom: 5, left: 25),
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      inputValid.error,
+                      style: TextStyle(color: Colors.red),
+                    ))
+            : Container()
+      ],
+    );
   }
 }
 
@@ -326,10 +470,10 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialButton(
       onPressed: this.onPressed,
-      color: this.color,
+      color: this.color.withOpacity(.7),
       elevation: 2,
       highlightElevation: 5,
-      shape: StadiumBorder(), // Bordes redondeados
+      //shape: StadiumBorder(), // Bordes redondeados
 
       child: Container(
         width: width,

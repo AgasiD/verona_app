@@ -3,9 +3,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class Helper {
   static Color? primaryColor = Colors.grey.shade500; //Color(0xff222222);
+  static Color? primaryColorOpacity =
+      Color.fromARGB(255, 212, 212, 212); //Color(0xff222222);
   static Color? secondaryColor = Color(0xffFFD100);
   static String nombre = 'Verona';
   static int limit = 25;
@@ -19,6 +22,14 @@ class Helper {
   static getHeight(BuildContext context) {
     return MediaQuery.of(context).size.height;
   }
+
+  static BoxDecoration formDecoration = BoxDecoration(
+    image: DecorationImage(
+      image: AssetImage("assets/background.jpg"),
+      opacity: .3,
+      fit: BoxFit.cover,
+    ),
+  );
 
   // static String getHash(String nombre, String pass) {
   //   var key = utf8.encode(nombre);
@@ -80,6 +91,35 @@ class Helper {
         : 'Ingrese un correo electrónico válido';
   }
 
+  static String diaSemana(int dia) {
+    String diaSemana = '';
+    switch (dia) {
+      case 1:
+        diaSemana = 'Lunes';
+        break;
+      case 2:
+        diaSemana = 'Martes';
+        break;
+      case 3:
+        diaSemana = 'Miercoles';
+        break;
+
+      case 4:
+        diaSemana = 'Jueves';
+        break;
+      case 5:
+        diaSemana = 'Viernes';
+        break;
+      case 6:
+        diaSemana = 'Sabado';
+        break;
+      case 7:
+        diaSemana = 'Domingo';
+        break;
+    }
+    return diaSemana;
+  }
+
   static String getProfesion(int role) {
     switch (role) {
       case 2:
@@ -96,5 +136,28 @@ class Helper {
         return 'PM';
     }
     return 'Admin';
+  }
+
+  static String getFechaHoraFromTS(int ts) {
+    final tiempoMensaje = DateTime.fromMillisecondsSinceEpoch(ts);
+
+    var fecha = DateFormat('dd/MM/yy').format(tiempoMensaje);
+    final hora = tiempoMensaje.hour.toString();
+    final minutos = tiempoMensaje.minute < 10
+        ? '0${tiempoMensaje.minute}'
+        : tiempoMensaje.minute.toString();
+    final fechaMensaje;
+    if (ts < DateTime.now().millisecondsSinceEpoch - 24 * 3600000 * 7) {
+      //mostrar fecha
+      fechaMensaje = '$fecha  ${hora}:${minutos}';
+    } else if (ts < DateTime.now().millisecondsSinceEpoch - 24 * 3600000) {
+      //mostrar dia
+      fechaMensaje =
+          '${Helper.diaSemana(tiempoMensaje.weekday).substring(0, 3)} ${hora}:${minutos}';
+    } else {
+      //no mostrar fecha ni dia
+      fechaMensaje = '${hora}:${minutos}';
+    }
+    return fechaMensaje;
   }
 }

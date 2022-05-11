@@ -9,6 +9,7 @@ import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/form.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
+import 'package:verona_app/pages/inactividades.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -224,21 +225,32 @@ class ObraPage extends StatelessWidget {
                                       indent: 15,
                                       endIndent: 15,
                                     ),
-                                    Column(
-                                      children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context,
+                                            InactividadesPage.routeName,
+                                            arguments: {'obraId': obraId});
+                                      },
+                                      style: ButtonStyle(
+                                        padding: MaterialStateProperty.all<
+                                            EdgeInsets>(EdgeInsets.all(0)),
+                                      ),
+                                      child: Column(children: [
                                         Text(
                                           obra.diasInactivos.length.toString(),
                                           style: TextStyle(
+                                              color: Colors.black,
                                               fontSize: 23,
                                               fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           'Dias inactivos',
                                           style: TextStyle(
+                                              color: Colors.black,
                                               fontSize: 13,
                                               fontWeight: FontWeight.w300),
                                         )
-                                      ],
+                                      ]),
                                     )
                                   ],
                                 ),
@@ -327,6 +339,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       },
     );
     items.add(team);
+    //Desplegable de
 
     //Desplegable de documentacion
 

@@ -17,26 +17,22 @@ class ChatsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        muestraBackButton: true,
-        title: 'Conversaciones',
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.grey[400],
-        onPressed: () {
-          Navigator.pushNamed(context, ContactsPage.routeName);
-          //cant++;
-        },
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
+        appBar: CustomAppBar(
+          muestraBackButton: true,
+          title: 'Conversaciones',
         ),
-      ),
-      body: SingleChildScrollView(
-          child: Container(
-              height: MediaQuery.of(context).size.height,
-              child: _ContactList())),
-    );
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.grey[400],
+          onPressed: () {
+            Navigator.pushNamed(context, ContactsPage.routeName);
+            //cant++;
+          },
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+        ),
+        body: _ContactList());
   }
 }
 
@@ -50,47 +46,41 @@ class _ContactList extends StatelessWidget {
     final _chatService = Provider.of<ChatService>(context);
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _pref = new Preferences();
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      child: FutureBuilder(
-        future: _usuarioService.obtenerUsuario(_pref.id),
-        builder: (_, snapshot) {
-          if (snapshot.data == null) {
-            return Loading(
-              mensaje: 'Recuperando conversaciones',
-            );
+    return FutureBuilder(
+      future: _usuarioService.obtenerUsuario(_pref.id),
+      builder: (_, snapshot) {
+        if (snapshot.data == null) {
+          return Loading(
+            mensaje: 'Recuperando conversaciones',
+          );
+        } else {
+          final response = snapshot.data as MyResponse;
+          final usuario = Miembro.fromJson(response.data);
+          usuario.chats = usuario.chats
+              .where((element) => element['individual'] == true)
+              .toList();
+          if (response.fallo) {
+            openAlertDialog(context, 'No se pudo recuperar los datos',
+                subMensaje: response.error);
+            return Container();
           } else {
-            final response = snapshot.data as MyResponse;
-            final usuario = Miembro.fromJson(response.data);
-            usuario.chats = usuario.chats
-                .where((element) => element['individual'] == true)
-                .toList();
-            if (response.fallo) {
-              openAlertDialog(context, 'No se pudo recuperar los datos',
-                  subMensaje: response.error);
-              return Container();
+            if (usuario.chats.length > 0) {
+              return ListView.builder(
+                  itemCount: usuario.chats.length,
+                  itemBuilder: (_, index) {
+                    return _ChatTile(chat: usuario.chats[index]);
+                  });
             } else {
-              if (usuario.chats.length > 0) {
-                return ListView.builder(
-                    itemCount: usuario.chats.length,
-                    itemBuilder: (_, index) {
-                      return _ChatTile(chat: usuario.chats[index]);
-                    });
-              } else {
-                return Container(
-                  margin: EdgeInsets.only(top: 300),
-                  child: Center(
-                    child: Text(
-                      'Aún no hay conversaciones activas ',
-                      style: TextStyle(fontSize: 20, color: Colors.grey[400]),
-                    ),
-                  ),
-                );
-              }
+              return Center(
+                child: Text(
+                  'Aún no hay conversaciones activas ',
+                  style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+                ),
+              );
             }
           }
-        },
-      ),
+        }
+      },
     );
   }
 }

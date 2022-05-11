@@ -5,9 +5,11 @@ import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/chats.dart';
 import 'package:verona_app/pages/contactos.dart';
+import 'package:verona_app/pages/forms/inactividad.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
+import 'package:verona_app/pages/inactividades.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obra.dart';
@@ -21,6 +23,8 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   ChatsPage.routeName: (_) => ChatsPage(),
   ContactsPage.routeName: (_) => ContactsPage(),
   FormPage.routeName: (_) => FormPage(),
+  InactividadesPage.routeName: (_) => InactividadesPage(),
+  InactividadesForm.routeName: (_) => InactividadesForm(),
   LoginPage.routeName: (_) => LoginPage(),
   MiembroForm.routeName: (_) => MiembroForm(),
   NotificacionesPage.routeName: (_) => NotificacionesPage(),

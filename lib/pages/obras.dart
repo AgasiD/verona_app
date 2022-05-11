@@ -11,8 +11,10 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/chats.dart';
+import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
+import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -35,7 +37,7 @@ class _ObrasPageState extends State<ObrasPage> {
     this.obrasFiltradas = await _obras.obtenerObrasByUser(_pref.id);
     setState(() {});
     // if failed,use refreshFailed()
-    print(this.obrasFiltradas.length);
+    print('obras filtradas ' + this.obrasFiltradas.length.toString());
     _refreshController.refreshCompleted();
     // _obras.notifyListeners();
   }
@@ -68,12 +70,8 @@ class _ObrasPageState extends State<ObrasPage> {
         : header = MaterialClassicHeader();
     final textStyle = TextStyle(fontSize: 16, color: Colors.grey[600]);
     final menu = [
-      'Proximamente',
-      'Proximamente',
-      'Proximamente',
-      'Proximamente',
-      'Proximamente',
-      'Proximamente',
+      {'name': 'Nuevo propietario', 'route': PropietarioForm.routeName},
+      {'name': 'Nuevo personal', 'route': MiembroForm.routeName},
     ];
 
     return Scaffold(
@@ -169,86 +167,92 @@ class __SearchListViewState extends State<_SearchListView> {
     final _obras = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     return SingleChildScrollView(
-        child: Column(children: [
-      Container(
-        margin: EdgeInsets.only(top: 20),
-        width: MediaQuery.of(context).size.width * .95,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CustomInput(
-              width: MediaQuery.of(context).size.width * .95,
-              hintText: 'Madrid..',
-              icono: Icons.search,
-              textInputAction: TextInputAction.search,
-              validaError: false,
-              iconButton: obrasTxtController.text != ''
-                  ? IconButton(
-                      splashColor: null,
-                      icon: Icon(
-                        Icons.cancel_outlined,
-                        color: Colors.red.withAlpha(200),
-                      ),
-                      onPressed: () {
-                        obrasTxtController.text = '';
-                        setState(() {});
-                      },
-                    )
-                  : IconButton(
-                      icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
-                      onPressed: _pref.role == 1
-                          ? () {
-                              Navigator.pushNamed(context, ObraForm.routeName,
-                                  arguments: {'formName': ObraForm.routeName});
-                            }
-                          : null,
-                    ),
-              textController: obrasTxtController,
-              onChange: (text) {
-                obrasFiltradas = widget.obras
-                    .where((obra) =>
-                        obra.nombre.toLowerCase().contains(text.toLowerCase()))
-                    .toList();
-                setState(() {});
-              },
-            ),
-          ],
-        ),
-      ),
-      FutureBuilder(
-          future: _obras.obtenerObrasByUser(_pref.id),
-          builder: ((context, snapshot) {
-            if (snapshot.data == null) {
-              return Loading(mensaje: 'Recuperando obras');
-            } else {
-              obras = snapshot.data as List<Obra>;
-              obrasFiltradas = obras;
-              if (obras.length > 0) {
-                return ListView.builder(
-                    physics:
-                        NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
-                    padding: EdgeInsets.only(top: 25),
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemCount: obrasFiltradas.length,
-                    itemBuilder: (BuildContext ctx, index) {
-                      return _obraCard(context, obrasFiltradas[index]);
-                    });
+        child: FutureBuilder(
+            future: _obras.obtenerObrasByUser(_pref.id),
+            builder: ((context, snapshot) {
+              if (snapshot.data == null) {
+                return Loading(mensaje: 'Recuperando obras');
               } else {
-                return Container(
-                  margin: EdgeInsets.only(top: 300),
-                  child: Center(
-                    child: Text(
-                      'Aún no hay obras asignadas ',
-                      style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+                obras = snapshot.data as List<Obra>;
+                obrasFiltradas = obras;
+                if (obras.length > 0) {
+                  return Column(children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 20),
+                      width: MediaQuery.of(context).size.width * .95,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CustomInput(
+                            width: MediaQuery.of(context).size.width * .95,
+                            hintText: 'Madrid..',
+                            icono: Icons.search,
+                            textInputAction: TextInputAction.search,
+                            validaError: false,
+                            iconButton: obrasTxtController.text != ''
+                                ? IconButton(
+                                    splashColor: null,
+                                    icon: Icon(
+                                      Icons.cancel_outlined,
+                                      color: Colors.red.withAlpha(200),
+                                    ),
+                                    onPressed: () {
+                                      obrasTxtController.text = '';
+                                      setState(() {});
+                                    },
+                                  )
+                                : IconButton(
+                                    icon: _pref.role == 1
+                                        ? Icon(Icons.add)
+                                        : Container(),
+                                    onPressed: _pref.role == 1
+                                        ? () {
+                                            Navigator.pushNamed(
+                                                context, ObraForm.routeName,
+                                                arguments: {
+                                                  'formName': ObraForm.routeName
+                                                });
+                                          }
+                                        : null,
+                                  ),
+                            textController: obrasTxtController,
+                            onChange: (text) {
+                              obrasFiltradas = widget.obras
+                                  .where((obra) => obra.nombre
+                                      .toLowerCase()
+                                      .contains(text.toLowerCase()))
+                                  .toList();
+                              setState(() {});
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
+                    ListView.builder(
+                        physics:
+                            NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
+                        padding: EdgeInsets.only(top: 25),
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: obrasFiltradas.length,
+                        itemBuilder: (BuildContext ctx, index) {
+                          return _obraCard(context, obrasFiltradas[index]);
+                        })
+                  ]);
+                } else {
+                  return Container(
+                    margin: EdgeInsets.only(top: 300),
+                    child: Center(
+                      child: Text(
+                        'Aún no hay obras asignadas ',
+                        style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+                      ),
+                    ),
+                  );
+                }
               }
-            }
-          }))
-    ]));
+            })));
   }
 
   Container _obraCard(BuildContext context, Obra obra) {

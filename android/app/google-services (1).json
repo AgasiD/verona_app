@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "901380457861",
+    "firebase_url": "https://venoraapp-default-rtdb.firebaseio.com",
+    "project_id": "venoraapp",
+    "storage_bucket": "venoraapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901380457861:android:e925126b0a813f644270ec",
+        "android_client_info": {
+          "package_name": "com.edrex.veronapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "901380457861-ansfe1et3qfhs7gj6cfht168c0u2ugc9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA46_dWbH_BvcDT0AdV0rjjbO_jiBLaX5k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "901380457861-ansfe1et3qfhs7gj6cfht168c0u2ugc9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "901380457861-6tf5jd9urt84f6sr9n1g0t8f4ndc7ip8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.edrex.veronapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

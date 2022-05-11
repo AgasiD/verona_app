@@ -9,32 +9,38 @@ import 'package:verona_app/models/message.dart';
 enum ServerStatus { Online, Offline, Connecting }
 
 class SocketService with ChangeNotifier {
-  ServerStatus _serverStatus = ServerStatus.Connecting;
+  ServerStatus _serverStatus = ServerStatus.Offline;
   late IO.Socket _socket;
   ServerStatus get serverStatus => this._serverStatus;
   IO.Socket get socket => this._socket;
 
-  // SocketService() {
-  //   initConfig();
-  // }
-
   void connect(clientId) {
     print('Estado del servicio ' + this._serverStatus.toString());
+
     if (this._serverStatus != ServerStatus.Online) {
       final url =
           'http://192.168.0.155:8008'; //'https://veronaserver.herokuapp.com'; //
       this._socket = IO.io(url, {
         'transports': ['websocket'],
-        'autoConnect': true,
+        'autoConnect': false,
         'forceNew': true,
         'extraHeaders': {'x-token': clientId}
       });
+      if (this.serverStatus == ServerStatus.Offline) {
+        this._serverStatus = ServerStatus.Connecting;
+        this._socket.connect();
+      }
       // Accion al conectarse al servidor
-      this._socket.onConnect((_) {
-        this._serverStatus = ServerStatus.Online;
-        print('se ha conectado con el servidor');
-        notifyListeners();
-      });
+      print(this._serverStatus != ServerStatus.Online &&
+          this.serverStatus != ServerStatus.Connecting);
+      if (this._serverStatus != ServerStatus.Online &&
+          this.serverStatus != ServerStatus.Connecting) {
+        this._socket.onConnect((_) {
+          this._serverStatus = ServerStatus.Online;
+          print('----------CONECTADO CON EL SERVIDOR----------');
+          notifyListeners();
+        });
+      }
 
       // Accion al desconectarse del servidor
       this._socket.onDisconnect((_) {

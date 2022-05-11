@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/services/http_service.dart';
 
@@ -49,5 +51,16 @@ class ObraService extends ChangeNotifier {
         await this._http.put('$_endpoint/quitarUsuario/$obraId/$dni', {});
     // notifyListeners();
     return response;
+  }
+
+  Future<MyResponse> nuevaInactividad(
+      String obraId, Inactividad inactividad) async {
+    print(obraId);
+    final datos = await this
+        ._http
+        .post('$_endpoint/inactividad/$obraId', inactividad.toMap());
+    final response = datos["response"];
+    final notificaciones = MyResponse.fromJson(response);
+    return notificaciones;
   }
 }

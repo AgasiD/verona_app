@@ -10,6 +10,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/services/chat_service.dart';
+import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:vibration/vibration.dart';
@@ -105,7 +106,7 @@ class _CustomChatBarState extends State<_CustomChatBar> {
   @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
-    _socketService.socket.connect();
+    // _socketService.socket.connect();
     return AppBar(
       backgroundColor: Helper.primaryColor?.withOpacity(0.3),
       title: Row(
@@ -198,7 +199,6 @@ class _ListMessageBoxState extends State<ListMessageBox> {
   @override
   void initState() {
     super.initState();
-
     Platform.isIOS
         ? header = WaterDropHeader()
         : header = MaterialClassicHeader();
@@ -488,21 +488,7 @@ class _ChatMessageState extends State<_ChatMessage> {
 
   @override
   Widget build(BuildContext context) {
-    var tiempoMensaje = DateTime.fromMillisecondsSinceEpoch(widget.ts);
-
-    var fecha = DateFormat('dd/MM/yyyy').format(tiempoMensaje);
-    final hora = tiempoMensaje.hour.toString();
-    final minutos = tiempoMensaje.minute < 10
-        ? '0${tiempoMensaje.minute}'
-        : tiempoMensaje.minute.toString();
-    final fechaMensaje;
-    if (widget.ts < DateTime.now().millisecondsSinceEpoch - 24 * 3600000) {
-      //mostrar
-      fechaMensaje = '$fecha  ${hora}:${minutos}';
-    } else {
-      //no mostrar fecha
-      fechaMensaje = '${hora}:${minutos}';
-    }
+    final fechaMensaje = Helper.getFechaHoraFromTS(widget.ts);
 
     return GestureDetector(
         onLongPress: () {

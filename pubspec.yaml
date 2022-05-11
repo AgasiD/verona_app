@@ -50,7 +50,9 @@ dependencies:
   intl: ^0.17.0
   firebase_core: ^1.16.0
   firebase_messaging: ^11.3.0
-
+  flutter_app_badger: ^1.4.0
+  flutter_datetime_picker: ^1.5.1
+  file_picker: ^4.5.1
 
   
 dev_dependencies:
@@ -88,6 +90,8 @@ flutter:
     - assets/image.png
     - assets/loading-image.gif
     - assets/isotipo.png
+    - assets/background.jpg
+    - assets/background2.jpg
 
   #   - images/a_dot_ham.jpeg
 

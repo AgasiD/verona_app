@@ -52,4 +52,16 @@ class Preferences {
   set permiso(int permiso) {
     _prefs.setInt('permiso', permiso);
   }
+
+  int get badgeNotifications {
+    return _prefs.getInt('badgeNotifications') ?? 0;
+  }
+
+  set badgeNotifications(int badgeNotifications) {
+    _prefs.setInt('badgeNotifications', badgeNotifications);
+  }
+
+  deletePreferences() {
+    logged = false;
+  }
 }
