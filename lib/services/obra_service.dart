@@ -61,6 +61,21 @@ class ObraService extends ChangeNotifier {
         .post('$_endpoint/inactividad/$obraId', inactividad.toMap());
     final response = datos["response"];
     final notificaciones = MyResponse.fromJson(response);
+    print('notifly listener 6');
+    notifyListeners();
+    return notificaciones;
+  }
+
+  Future<MyResponse> editInactividad(
+      String obraId, Inactividad inactividad) async {
+    print(obraId);
+    final datos = await this
+        ._http
+        .put('$_endpoint/inactividad/$obraId', inactividad.toMap());
+    final response = datos["response"];
+    final notificaciones = MyResponse.fromJson(response);
+    print('notifly listener 6');
+    notifyListeners();
     return notificaciones;
   }
 }

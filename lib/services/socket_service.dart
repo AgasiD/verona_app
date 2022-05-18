@@ -38,6 +38,7 @@ class SocketService with ChangeNotifier {
         this._socket.onConnect((_) {
           this._serverStatus = ServerStatus.Online;
           print('----------CONECTADO CON EL SERVIDOR----------');
+          print('notifly listener 7');
           notifyListeners();
         });
       }
@@ -47,6 +48,7 @@ class SocketService with ChangeNotifier {
         print('usuario desconectado');
         this._serverStatus = ServerStatus.Offline;
         this.socket.disconnect();
+        print('notifly listener 8');
         notifyListeners();
       });
     }

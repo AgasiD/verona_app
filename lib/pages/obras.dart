@@ -53,7 +53,7 @@ class _ObrasPageState extends State<ObrasPage> {
   @override
   void initState() {
     final _socketService = Provider.of<SocketService>(context, listen: false);
-    _socketService.connect(_pref.id);
+    //_socketService.connect(_pref.id);
     super.initState();
   }
 

@@ -10,6 +10,7 @@ import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/form.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/inactividades.dart';
+import 'package:verona_app/pages/pedidos.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -174,88 +175,20 @@ class ObraPage extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              Container(
-                                margin: EdgeInsets.symmetric(vertical: 25),
-                                height: 60,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Text(
-                                          obra.diasEstimados.toString(),
-                                          style: TextStyle(
-                                              fontSize: 23,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          'Dias estimados',
-                                          style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w300),
-                                        )
-                                      ],
-                                    ),
-                                    VerticalDivider(
-                                      width: 25,
-                                      color: Colors.black45,
-                                      indent: 15,
-                                      endIndent: 15,
-                                    ),
-                                    Column(
-                                      children: [
-                                        Text(
-                                          obra.diasTranscurridos.toString(),
-                                          style: TextStyle(
-                                              fontSize: 23,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          'Dias transcurridos',
-                                          style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w300),
-                                        )
-                                      ],
-                                    ),
-                                    VerticalDivider(
-                                      width: 25,
-                                      color: Colors.black45,
-                                      indent: 15,
-                                      endIndent: 15,
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pushNamed(context,
-                                            InactividadesPage.routeName,
-                                            arguments: {'obraId': obraId});
-                                      },
-                                      style: ButtonStyle(
-                                        padding: MaterialStateProperty.all<
-                                            EdgeInsets>(EdgeInsets.all(0)),
-                                      ),
-                                      child: Column(children: [
-                                        Text(
-                                          obra.diasInactivos.length.toString(),
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 23,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          'Dias inactivos',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w300),
-                                        )
-                                      ]),
-                                    )
-                                  ],
-                                ),
-                              ),
+                              _DiasView(obra: obra, obraId: obraId),
                               CaracteristicaObra(),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ElevatedButton(
+                                      child: Text('Pedido de materiales'),
+                                      onPressed: () {
+                                        Navigator.pushNamed(
+                                            context, PedidosPage.routeName,
+                                            arguments: {'obraId': obraId});
+                                      })
+                                ],
+                              )
                             ]),
                           ),
                         ),
@@ -265,6 +198,94 @@ class ObraPage extends StatelessWidget {
                 );
               }
             }));
+  }
+}
+
+class _DiasView extends StatelessWidget {
+  const _DiasView({
+    Key? key,
+    required this.obra,
+    required this.obraId,
+  }) : super(key: key);
+
+  final Obra obra;
+  final String obraId;
+
+  @override
+  Widget build(BuildContext context) {
+    final _service = Provider.of<ObraService>(context);
+
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 25),
+      height: 60,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Column(
+            children: [
+              Text(
+                obra.diasEstimados.toString(),
+                style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'Dias estimados',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),
+              )
+            ],
+          ),
+          VerticalDivider(
+            width: 25,
+            color: Colors.black45,
+            indent: 15,
+            endIndent: 15,
+          ),
+          Column(
+            children: [
+              Text(
+                obra.diasTranscurridos.toString(),
+                style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'Dias transcurridos',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),
+              )
+            ],
+          ),
+          VerticalDivider(
+            width: 25,
+            color: Colors.black45,
+            indent: 15,
+            endIndent: 15,
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, InactividadesPage.routeName,
+                  arguments: {'obraId': obraId});
+            },
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0)),
+            ),
+            child: Column(children: [
+              Text(
+                obra.diasInactivos.length.toString(),
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'Dias inactivos',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w300),
+              )
+            ]),
+          )
+        ],
+      ),
+    );
   }
 }
 

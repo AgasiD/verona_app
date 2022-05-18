@@ -8,6 +8,7 @@ import 'package:verona_app/pages/contactos.dart';
 import 'package:verona_app/pages/forms/inactividad.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
+import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/inactividades.dart';
 import 'package:verona_app/pages/login.dart';
@@ -15,6 +16,7 @@ import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/pages/password.dart';
+import 'package:verona_app/pages/pedidos.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   AgregarPropietariosPage.routeName: (_) => AgregarPropietariosPage(),
@@ -32,5 +34,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   ObraPage.routeName: (_) => ObraPage(),
   ObrasPage.routeName: (_) => ObrasPage(),
   PasswordPage.routeName: (_) => PasswordPage(),
+  PedidosPage.routeName: (_) => PedidosPage(),
+  PedidoForm.routeName: (_) => PedidoForm(),
   PropietarioForm.routeName: (_) => PropietarioForm(),
 };

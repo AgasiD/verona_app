@@ -30,7 +30,7 @@ class _NotificationsList extends StatelessWidget {
     {'media': Icons.photo_size_select_actual_rounded},
     {'doc': Icons.document_scanner_outlined},
     {'pedido': Icons.list_alt_rounded},
-    {'inactividad': Icons.work_off_outlined},
+    {'inactivity': Icons.work_off_outlined},
     {'obra': Icons.house}
   ];
   @override

@@ -28,6 +28,7 @@ class UsuarioService extends ChangeNotifier {
   }
 
   obtenerUsuario(id) async {
+    print('obtener usuario');
     final datos = await this._http.get('$_endpoint/obtenerUsuario/$id');
     final response = datos["response"];
     final usuario = MyResponse.fromJson(response);

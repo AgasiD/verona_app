@@ -195,7 +195,8 @@ class CustomFormInput extends StatefulWidget {
   String? Function(String?) validarInput;
   Function(String) onChange;
   static void _passedOnChange(String? input) {}
-  String initialValue = '';
+  String initialValue;
+  bool enable;
   static String? _passedFunction(String? input) {}
   TextInputAction textInputAction;
   CustomFormInput({
@@ -208,6 +209,7 @@ class CustomFormInput extends StatefulWidget {
     this.lines = 1,
     this.validaError = false,
     this.initialValue = '',
+    this.enable = true,
     this.textInputAction = TextInputAction.next,
     this.iconButton = const IconButton(
       onPressed: null,
@@ -248,6 +250,7 @@ class _CustomFormInputState extends State<CustomFormInput> {
           margin: EdgeInsets.only(bottom: 10),
 
           child: TextFormField(
+            enabled: widget.enable,
             controller: widget.textController,
             maxLines: widget.lines,
             autocorrect: false,
@@ -255,8 +258,6 @@ class _CustomFormInputState extends State<CustomFormInput> {
             obscureText: widget.isPassword,
             decoration: inputDecoration,
             textInputAction: widget.textInputAction,
-            //enabled: false,
-
             onChanged: (text) {
               inputValid = widget.validarInput(text) == null
                   ? ValidInput()

@@ -1,28 +1,17 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
-import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/pages/Form.dart';
-import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/chat.dart';
-import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/login.dart';
-import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/obras.dart';
-import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/routes/routes.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
-import 'package:verona_app/services/loading_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
-import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding
@@ -113,6 +102,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             if (notif.data["type"] == 'new-obra') {
               final _obraService =
                   Provider.of<ObraService>(context, listen: false);
+              print('notifly listener 1');
               _obraService.notifyListeners();
             }
             navigatorKey.currentState!.pushNamed(ObraPage.routeName,
@@ -141,11 +131,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         final _usuarioService =
             Provider.of<UsuarioService>(context, listen: false);
         if (notif.data["type"] == 'message') {
+          print('notifly listener 2');
           _usuarioService.notifyListeners();
         }
         //Si es una nueva obra
         if (notif.data["type"] == 'new-obra') {
           final _obraService = Provider.of<ObraService>(context, listen: false);
+          print('notifly listener 3');
+          _obraService.notifyListeners();
+          _usuarioService.notifyListeners();
+        }
+        if (notif.data["type"] == 'inactivity') {
+          final _obraService = Provider.of<ObraService>(context, listen: false);
+          print('notifly listener 4');
           _obraService.notifyListeners();
           _usuarioService.notifyListeners();
         }
