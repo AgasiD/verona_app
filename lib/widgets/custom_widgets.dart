@@ -2,22 +2,94 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
 
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/form%20copy.dart';
+import 'package:verona_app/models/form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
+
+class CustomPainterAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  final String title;
+  bool muestraBackButton;
+  CustomPainterAppBar({
+    this.title = 'Verona',
+    this.muestraBackButton = false,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: double.infinity,
+        width: double.infinity,
+        // decoration: BoxDecoration(
+        //     boxShadow: [BoxShadow(offset: Offset(1, 1), blurRadius: 10)]),
+        child: CustomPaint(
+          painter: _CustomPaintBar(),
+        ));
+  }
+
+  @override
+  Size get preferredSize => new Size.fromHeight(50);
+}
+
+class _CustomPaintBar extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) async {
+    final paint = Paint();
+    paint.color = Colors.black38;
+    paint.style = PaintingStyle.stroke; //bordes PaintingStyle.fill; relleno
+    paint.strokeWidth = 2;
+
+    final path = new Path();
+
+    ByteData bd = await rootBundle.load("assets/background.jpg");
+
+    // final Uint8List bytes = Uint8List.view(bd.buffer);
+    // ui.Image myBackground = await decodeImageFromList(bytes);
+    // canvas.drawImage(myBackground, Offset.zero, paint);
+
+    // path.moveTo(0, 0);
+    // path.lineTo(0, size.height * .8);
+    // path.lineTo(10, size.height * .8);
+    // path.arcToPoint(Offset(20, size.height * .8 - 10),
+    //     clockwise: false, radius: Radius.circular(12));
+    // path.lineTo(20, size.height * .4);
+    // path.arcToPoint(Offset(30, size.height * .4 - 10),
+    //     clockwise: true, radius: Radius.circular(12));
+    // path.lineTo(80, size.height * .4 - 10);
+    // path.arcToPoint(Offset(90, size.height * .4 - 20),
+    //     clockwise: false, radius: Radius.circular(12));
+    // path.lineTo(90, size.height * .15 + 10);
+    // path.arcToPoint(Offset(100, size.height * .15),
+    //     clockwise: true, radius: Radius.circular(12));
+    // path.lineTo(size.width, size.height * .15);
+    // path.lineTo(size.width, 0);
+
+    // canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -34,7 +106,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final _pref = new Preferences();
     final hideNotifications =
         ModalRoute.of(context)?.settings.name == NotificacionesPage.routeName;
-
     return AppBar(
       title: Image(
         image: AssetImage('assets/logo.png'),
@@ -42,26 +113,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       automaticallyImplyLeading: muestraBackButton,
       primary: true,
-      actions: [
-        !hideNotifications
-            ? FutureBuilder(
-                future: _usuarioService.obtenerNotificaciones(_pref.id),
-                builder: (context, snapshot) {
-                  if (snapshot.data == null) {
-                    int cant = 0;
-                    return _NotificationButton(
-                      cant: cant,
-                    );
-                  } else {
-                    final response = snapshot.data as MyResponse;
-                    int cant = (response.data as List<dynamic>)
-                        .where((e) => !e['leido'])
-                        .length;
-                    return _NotificationButton(cant: cant);
-                  }
-                })
-            : Container()
-      ],
+      actions: [!hideNotifications ? _NotificationButton() : Container()],
       backgroundColor: Color.fromARGB(132, 252, 252, 252),
     );
   }
@@ -70,21 +122,33 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => new Size.fromHeight(50);
 }
 
-class _NotificationButton extends StatelessWidget {
+class _NotificationButton extends StatefulWidget {
   const _NotificationButton({
     Key? key,
-    required this.cant,
   }) : super(key: key);
 
-  final int cant;
+  @override
+  State<_NotificationButton> createState() => _NotificationButtonState();
+}
+
+class _NotificationButtonState extends State<_NotificationButton> {
+  late SocketService _socketService;
+  int cant = 0;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    _socketService = Provider.of<SocketService>(context);
+
     return Padding(
         padding: EdgeInsets.only(right: 15, top: 5),
         child: Badge(
-          showBadge: cant > 0,
-          badgeContent: Text(cant.toString()),
+          showBadge: _socketService.unreadNotifications > 0,
+          badgeContent: Text(_socketService.unreadNotifications.toString()),
           badgeColor: Colors.red.shade100,
           child: IconButton(
             padding: EdgeInsets.zero,
@@ -92,7 +156,7 @@ class _NotificationButton extends StatelessWidget {
               Icons.notifications,
               size: 30,
             ),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pushNamed(context, NotificacionesPage.routeName);
             },
           ),
@@ -115,7 +179,6 @@ class CustomDrawer extends StatelessWidget {
     final _socketService = Provider.of<SocketService>(context);
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _pref = new Preferences();
-    final tokenDevice = NotificationService.token;
     return Drawer(
         child: SafeArea(
       child: Container(
@@ -144,13 +207,13 @@ class CustomDrawer extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [Text('Cerrar sesion   '), Icon(Icons.logout)]),
                 onPressed: () async {
-                  final response = await _usuarioService.deleteDevice(
-                      _pref.id, tokenDevice!);
-                  if (response.fallo) {
-                    openAlertDialog(
-                        context, 'No se ha desasociado el dispositivo',
-                        subMensaje: response.error);
-                  }
+                  // final response = await _usuarioService.deleteDevice(
+                  //     _pref.id, tokenDevice!);
+                  // if (response.fallo) {
+                  //   openAlertDialog(
+                  //       context, 'No se ha desasociado el dispositivo',
+                  //       subMensaje: response.error);
+                  // }
                   _pref.logged = false;
                   Navigator.pushReplacementNamed(context, LoginPage.routeName);
                 },

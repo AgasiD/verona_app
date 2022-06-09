@@ -177,18 +177,18 @@ class ObraPage extends StatelessWidget {
                               ),
                               _DiasView(obra: obra, obraId: obraId),
                               CaracteristicaObra(),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ElevatedButton(
-                                      child: Text('Pedido de materiales'),
-                                      onPressed: () {
-                                        Navigator.pushNamed(
-                                            context, PedidosPage.routeName,
-                                            arguments: {'obraId': obraId});
-                                      })
-                                ],
-                              )
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment.center,
+                              //   children: [
+                              //     ElevatedButton(
+                              //         child: Text('Pedido de materiales'),
+                              //         onPressed: () {
+                              //           Navigator.pushNamed(
+                              //               context, PedidosPage.routeName,
+                              //               arguments: {'obraId': obraId});
+                              //         })
+                              //   ],
+                              // )
                             ]),
                           ),
                         ),

@@ -22,7 +22,6 @@ class ChatService extends ChangeNotifier {
     };
     final data = await this._http.post('$_endpoint', body);
     final response = MyResponse.fromJson(data['response']);
-    print('notifly listener 5');
     notifyListeners();
     return response;
   }

@@ -122,12 +122,12 @@ class __FormState extends State<_Form> {
                 _usuario.usuario = Miembro.fromJson(response.data);
                 guardarUserData(_usuario.usuario);
 
-                final tokenResponse = await _usuario.setTokenDevice(
-                    _usuario.usuario.id, NotificationService.token!);
-                if (tokenResponse.fallo) {
-                  openAlertDialog(context,
-                      'No fue posible guardar el dispositivo utilizado');
-                }
+                // final tokenResponse = await _usuario.setTokenDevice(
+                //     _usuario.usuario.id, NotificationService.token!);
+                // if (tokenResponse.fallo) {
+                //   openAlertDialog(context,
+                //       'No fue posible guardar el dispositivo utilizado');
+                // }
                 final _pref = new Preferences();
                 _pref.logged = true;
                 Navigator.pushReplacementNamed(context, ObrasPage.routeName);
@@ -140,7 +140,7 @@ class __FormState extends State<_Form> {
   }
 
   void guardarUserData(Miembro usuario) {
-    pref.id = usuario.id;
+    pref.id = usuario.dni;
     pref.nombre = '${usuario.nombre} ${usuario.apellido}';
     pref.role = usuario.role;
   }

@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -52,8 +53,6 @@ class _ObrasPageState extends State<ObrasPage> {
 
   @override
   void initState() {
-    final _socketService = Provider.of<SocketService>(context, listen: false);
-    //_socketService.connect(_pref.id);
     super.initState();
   }
 
@@ -64,6 +63,7 @@ class _ObrasPageState extends State<ObrasPage> {
   Widget build(BuildContext context) {
     ObraService _obras = Provider.of<ObraService>(context);
     final _socketService = Provider.of<SocketService>(context, listen: false);
+
     final header;
     Platform.isIOS
         ? header = WaterDropHeader()
@@ -256,7 +256,7 @@ class __SearchListViewState extends State<_SearchListView> {
   }
 
   Container _obraCard(BuildContext context, Obra obra) {
-    final NetworkImage imagen = obra.imageId != ''
+    final NetworkImage imagen = obra.imageId == ''
         ? NetworkImage(
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
         : NetworkImage(

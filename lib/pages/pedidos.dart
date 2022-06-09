@@ -12,7 +12,8 @@ class PedidosPage extends StatelessWidget {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
     return Scaffold(
-      appBar: CustomAppBar(
+      extendBodyBehindAppBar: true,
+      body: CustomPainterAppBar(
         muestraBackButton: true,
         title: 'Pedidos de obra',
       ),

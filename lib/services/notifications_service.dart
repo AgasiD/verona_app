@@ -5,68 +5,35 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 
 class NotificationService extends ChangeNotifier {
-  static FirebaseMessaging messaging = FirebaseMessaging.instance;
-  static StreamController<RemoteMessage> _messageStream =
-      new StreamController.broadcast();
-  static Stream<RemoteMessage> get messagesStream => _messageStream.stream;
-  static String? token;
   Preferences _pref = new Preferences();
   int _notificationsCount = new Preferences().badgeNotifications;
 
-  static Future initializeApp() async {
-    // Push Notifications
-    await Firebase.initializeApp();
-    await requestPermission();
-
-    // Handlers
-    FirebaseMessaging.onBackgroundMessage(_onBackground);
-    // Foreground message
-    FirebaseMessaging.onMessage.listen(_onForeground);
-
-    FirebaseMessaging.onMessageOpenedApp.listen(_onTerminated);
-
-    // Local Notifications
-  }
-
-  // Apple / Web
-  static requestPermission() async {
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      carPlay: false,
-      announcement: false,
-      criticalAlert: false,
-      provisional: false,
+  Future showNotificationWithSound(
+      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+      String title,
+      String body,
+      String payload) async {
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+        'your channel id', 'your channel name',
+        channelDescription: 'your channel description',
+        importance: Importance.max,
+        priority: Priority.high);
+    var iOSPlatformChannelSpecifics =
+        new IOSNotificationDetails(sound: "pulse.aiff");
+    var platformChannelSpecifics = new NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: payload,
     );
-
-    token = await FirebaseMessaging.instance.getToken();
-  }
-
-  static Future _onForeground(RemoteMessage message) async {
-    // when the app is in use or open
-    if (message.notification != null) {}
-    _messageStream.add(message);
-  }
-
-  static Future _onBackground(RemoteMessage message) async {
-    // when the app is in second plane
-    // bool _support = await FlutterAppBadger.isAppBadgeSupported();
-    print('_onBackground');
-    _messageStream.add(message);
-  }
-
-  static Future _onTerminated(RemoteMessage message) async {
-    print('_onTerminated');
-    message.data["navega"] = true;
-    _messageStream.add(message);
-  }
-
-  static closeStreams() {
-    _messageStream.close();
   }
 
   sumNotificationBadge() {

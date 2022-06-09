@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
@@ -11,8 +12,11 @@ import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+
+import '../helpers/Preferences.dart';
 
 class AsignarEquipoPage extends StatefulWidget {
   static final routeName = 'asignarequipo';
@@ -217,6 +221,8 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context);
+    final _socketService = Provider.of<SocketService>(context, listen: false);
+
     bool asignado = _obraService.obra.equipo
             .where((element) => element.dni == widget.personal.dni)
             .length >
@@ -237,7 +243,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
           if (!asignado) {
             openLoadingDialog(context, mensaje: 'Asignando usuario...');
 
-            await _obraService.agregarUsuario(
+            await _socketService.agregarUsuario(
                 _obraService.obra.id, widget.personal.dni);
             _obraService.obra.sumarPersonal(widget.personal);
             snackText =
@@ -245,7 +251,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
           } else {
             openLoadingDialog(context, mensaje: 'Desasociando...');
 
-            await _obraService.quitarUsuario(
+            await _socketService.quitarUsuario(
                 _obraService.obra.id, widget.personal.dni);
             _obraService.obra.quitarPersonal(widget.personal);
           }

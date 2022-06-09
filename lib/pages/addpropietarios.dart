@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/obra.dart';
+import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -49,9 +52,11 @@ class _AgregarPropietariosPageState extends State<AgregarPropietariosPage> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                       child: MainButton(
-                          onPressed: () => Navigator.pushReplacementNamed(
-                              context, ObraPage.routeName,
-                              arguments: {'obraId': _obraService.obra.id}),
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(
+                                context, ObraPage.routeName,
+                                arguments: {'obraId': _obraService.obra.id});
+                          },
                           text: 'Aceptar'))
                 ]);
               }
@@ -143,6 +148,7 @@ class __customTileAddedState extends State<_customTileAdded> {
   Widget build(BuildContext context) {
     final _ObraService = Provider.of<ObraService>(context, listen: false);
     final _UsuarioService = Provider.of<UsuarioService>(context, listen: false);
+    final _socketService = Provider.of<SocketService>(context, listen: false);
 
     Icon icono = widget.agregado
         ? Icon(
@@ -158,7 +164,7 @@ class __customTileAddedState extends State<_customTileAdded> {
             if (widget.agregado) {
               openLoadingDialog(context, mensaje: 'Desasignando propietario');
               mensaje = 'Propietario quitado';
-              await _ObraService.quitarUsuario(
+              _socketService.quitarUsuario(
                   widget.obra.id, widget.propietario.dni);
               widget.asignados
                   .removeWhere((element) => element == widget.propietario.dni);

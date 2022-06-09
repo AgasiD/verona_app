@@ -4,6 +4,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/obra.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -36,6 +37,8 @@ class _NotificationsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context);
+    final _socketService = Provider.of<SocketService>(context, listen: false);
+
     final _pref = new Preferences();
     return FutureBuilder(
         future: _usuarioService.obtenerNotificaciones(_pref.id),
@@ -49,10 +52,9 @@ class _NotificationsList extends StatelessWidget {
               return Container();
             } else {
               final notificaciones = response.data;
+              print(notificaciones.length);
               if (notificaciones.length > 0) {
-                _usuarioService.leerNotificaciones(_pref.id).then((value) {
-                  //_usuarioService.notifyListeners();
-                });
+                _socketService.leerNotificaciones(_pref.id);
                 return Container(
                   margin: EdgeInsets.only(top: 15),
                   child: ListView.builder(

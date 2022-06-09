@@ -11,6 +11,7 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class InactividadesForm extends StatelessWidget {
@@ -45,9 +46,10 @@ class _FormState extends State<_Form> {
   DateTime now = DateTime.now();
   Preferences _pref = new Preferences();
   late ObraService _obraService;
+  late SocketService _socketService;
   String inactividadId = '';
   late String obraId;
-  String textAction = 'Agregar evidencia';
+  String textAction = 'Nueva inactividad';
 
   bool edit = false;
   @override
@@ -56,6 +58,9 @@ class _FormState extends State<_Form> {
     String formattedDate = DateFormat('dd/MM/yyyy').format(now);
     txtCtrlDate.text = formattedDate.toString();
     _obraService = Provider.of<ObraService>(context, listen: false);
+    _socketService = Provider.of<SocketService>(context, listen: false);
+    final _pref = new Preferences();
+    _socketService.connect(_pref.id);
   }
 
   @override
@@ -65,7 +70,7 @@ class _FormState extends State<_Form> {
     if (arguments.containsKey('id')) {
       inactividadId = arguments['id'];
       edit = true;
-      textAction = 'Editar evidencia';
+      textAction = 'Editar inactividad';
     }
 
     DateTime selectedDate = DateTime.now();
@@ -124,30 +129,30 @@ class _FormState extends State<_Form> {
                             SizedBox(
                               height: 15,
                             ),
-                            CustomFormInput(
-                                // enable: edit,
-                                hintText: ('nombre Archivo').toUpperCase(),
-                                icono: Icons.abc,
-                                iconButton: IconButton(
-                                    icon: Icon(Icons.file_present_outlined),
-                                    onPressed: () async {
-                                      FilePickerResult? result =
-                                          await FilePicker.platform
-                                              .pickFiles(allowMultiple: true);
+                            // CustomFormInput(
+                            //     // enable: edit,
+                            //     hintText: ('nombre Archivo').toUpperCase(),
+                            //     icono: Icons.abc,
+                            //     iconButton: IconButton(
+                            //         icon: Icon(Icons.file_present_outlined),
+                            //         onPressed: () async {
+                            //           FilePickerResult? result =
+                            //               await FilePicker.platform
+                            //                   .pickFiles(allowMultiple: true);
 
-                                      if (result != null) {
-                                        List<File> files = result.paths
-                                            .map((path) => File(path!))
-                                            .toList();
-                                        print(files[0].path);
-                                      } else {
-                                        // User canceled the picker
-                                      }
-                                    }),
-                                textController: txtCtrlFile),
-                            SizedBox(
-                              height: 15,
-                            ),
+                            //           if (result != null) {
+                            //             List<File> files = result.paths
+                            //                 .map((path) => File(path!))
+                            //                 .toList();
+                            //             print(files[0].path);
+                            //           } else {
+                            //             // User canceled the picker
+                            //           }
+                            //         }),
+                            //     textController: txtCtrlFile),
+                            // SizedBox(
+                            //   height: 15,
+                            // ),
                             CustomFormInput(
                                 // enable: edit,
                                 hintText: ('Fecha').toUpperCase(),
@@ -162,31 +167,31 @@ class _FormState extends State<_Form> {
                                       );
                                     }),
                                 textController: txtCtrlDate),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    //height: 24,
-                                    width: 19,
-                                    child: Checkbox(
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.padded,
-                                      value: esPrivado,
-                                      onChanged: (value) {
-                                        esPrivado = !esPrivado;
-                                        setState(() {});
-                                      },
-                                      activeColor: Helper.secondaryColor,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    'Privado',
-                                    style: TextStyle(fontSize: 17),
-                                  )
-                                ]),
+                            // Row(
+                            //     mainAxisAlignment: MainAxisAlignment.start,
+                            //     children: [
+                            //       SizedBox(
+                            //         //height: 24,
+                            //         width: 19,
+                            //         child: Checkbox(
+                            //           materialTapTargetSize:
+                            //               MaterialTapTargetSize.padded,
+                            //           value: esPrivado,
+                            //           onChanged: (value) {
+                            //             esPrivado = !esPrivado;
+                            //             setState(() {});
+                            //           },
+                            //           activeColor: Helper.secondaryColor,
+                            //         ),
+                            //       ),
+                            //       SizedBox(
+                            //         width: 10,
+                            //       ),
+                            //       Text(
+                            //         'Privado',
+                            //         style: TextStyle(fontSize: 17),
+                            //       )
+                            //     ]),
                           ]),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -273,28 +278,28 @@ class _FormState extends State<_Form> {
               SizedBox(
                 height: 15,
               ),
-              CustomFormInput(
-                  // enable: edit,
-                  hintText: ('nombre Archivo').toUpperCase(),
-                  icono: Icons.abc,
-                  iconButton: IconButton(
-                      icon: Icon(Icons.file_present_outlined),
-                      onPressed: () async {
-                        FilePickerResult? result = await FilePicker.platform
-                            .pickFiles(allowMultiple: true);
+              // CustomFormInput(
+              //     // enable: edit,
+              //     hintText: ('nombre Archivo').toUpperCase(),
+              //     icono: Icons.abc,
+              //     iconButton: IconButton(
+              //         icon: Icon(Icons.file_present_outlined),
+              //         onPressed: () async {
+              //           FilePickerResult? result = await FilePicker.platform
+              //               .pickFiles(allowMultiple: true);
 
-                        if (result != null) {
-                          List<File> files =
-                              result.paths.map((path) => File(path!)).toList();
-                          print(files[0].path);
-                        } else {
-                          // User canceled the picker
-                        }
-                      }),
-                  textController: txtCtrlFile),
-              SizedBox(
-                height: 15,
-              ),
+              //           if (result != null) {
+              //             List<File> files =
+              //                 result.paths.map((path) => File(path!)).toList();
+              //             print(files[0].path);
+              //           } else {
+              //             // User canceled the picker
+              //           }
+              //         }),
+              //     textController: txtCtrlFile),
+              // SizedBox(
+              //   height: 15,
+              // ),
               CustomFormInput(
                   // enable: edit,
                   hintText: ('Fecha').toUpperCase(),
@@ -309,28 +314,28 @@ class _FormState extends State<_Form> {
                         );
                       }),
                   textController: txtCtrlDate),
-              Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                SizedBox(
-                  //height: 24,
-                  width: 19,
-                  child: Checkbox(
-                    materialTapTargetSize: MaterialTapTargetSize.padded,
-                    value: esPrivado,
-                    onChanged: (value) {
-                      esPrivado = !esPrivado;
-                      setState(() {});
-                    },
-                    activeColor: Helper.secondaryColor,
-                  ),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  'Privado',
-                  style: TextStyle(fontSize: 17),
-                )
-              ]),
+              // Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              //   SizedBox(
+              //     //height: 24,
+              //     width: 19,
+              //     child: Checkbox(
+              //       materialTapTargetSize: MaterialTapTargetSize.padded,
+              //       value: esPrivado,
+              //       onChanged: (value) {
+              //         esPrivado = !esPrivado;
+              //         setState(() {});
+              //       },
+              //       activeColor: Helper.secondaryColor,
+              //     ),
+              //   ),
+              //   SizedBox(
+              //     width: 10,
+              //   ),
+              //   Text(
+              //     'Privado',
+              //     style: TextStyle(fontSize: 17),
+              //   )
+              // ])
             ]),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -355,22 +360,21 @@ class _FormState extends State<_Form> {
                           usuarioId: _pref.id,
                           privado: esPrivado);
                       MyResponse response;
-                      if (!edit) {
+                      if (edit) {
                         response = await _obraService.editInactividad(
                             obraId, inactividad);
                       } else {
-                        response = await _obraService.nuevaInactividad(
-                            obraId, inactividad);
+                        _socketService.agregarInactividad(inactividad, obraId);
                       }
                       closeLoadingDialog(context);
 
-                      if (response.fallo) {
-                        openAlertDialog(
-                            context, 'No se pudo grabar la inactividad',
-                            subMensaje: response.error);
-                      } else {
-                        openAlertDialog(context, 'Inactividad generada');
-                      }
+                      // if (response.fallo) {
+                      //   openAlertDialog(
+                      //       context, 'No se pudo grabar la inactividad',
+                      //       subMensaje: response.error);
+                      // } else {
+                      openAlertDialog(context, 'Inactividad generada');
+                      // }
                     }, '¿Seguro que desea generar la inactividad?');
                   },
                   text: 'Guardar',

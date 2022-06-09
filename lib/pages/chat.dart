@@ -26,7 +26,7 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final focusNode = new FocusNode();
   List<MessageBox> messageList = [];
   List<Message> messages = [];
@@ -68,6 +68,7 @@ class _ChatPageState extends State<ChatPage> {
                         esMsgPropio: e.from == _pref.id,
                         messageText: e.mensaje,
                         name: e.name,
+                        animatorController: null,
                         ts: e.ts))
                     .toList();
                 final appbar = _CustomChatBar(chatName: chatName);
@@ -106,7 +107,6 @@ class _CustomChatBarState extends State<_CustomChatBar> {
   @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
-    // _socketService.socket.connect();
     return AppBar(
       backgroundColor: Helper.primaryColor?.withOpacity(0.3),
       title: Row(
@@ -162,7 +162,8 @@ class ListMessageBox extends StatefulWidget {
   State<ListMessageBox> createState() => _ListMessageBoxState();
 }
 
-class _ListMessageBoxState extends State<ListMessageBox> {
+class _ListMessageBoxState extends State<ListMessageBox>
+    with TickerProviderStateMixin {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   final _pref = new Preferences();
@@ -188,9 +189,9 @@ class _ListMessageBoxState extends State<ListMessageBox> {
               esMsgPropio: e.from == _pref.id,
               messageText: e.mensaje,
               name: e.name,
+              animatorController: null,
               ts: e.ts))
           .toList();
-
       _refreshController.loadComplete();
       setState(() {});
     }
@@ -222,31 +223,23 @@ class _ListMessageBoxState extends State<ListMessageBox> {
     if (mensaje.from != _pref.id && !propio) {
       if (mensaje.chatId == widget.chatId) {
         widget.messages.add(mensaje);
-        final mBox = MessageBox(
-            esMsgPropio: false,
-            messageText: mensaje.mensaje,
-            name: mensaje.name,
-            ts: mensaje.ts);
-        widget.messageList.add(mBox);
-        if (this.mounted) {
-          setState(() {
-            // Your state change code goes here
-          });
-        }
       }
     } else if (mensaje.from == _pref.id && propio) {
       widget.messages.insert(0, mensaje);
-      final mBox = MessageBox(
-          esMsgPropio: true,
-          messageText: mensaje.mensaje,
-          name: mensaje.name,
-          ts: mensaje.ts);
-      widget.messageList.add(mBox);
-      if (this.mounted) {
-        setState(() {
-          // Your state change code goes here
-        });
-      }
+    }
+    final mBox = MessageBox(
+        esMsgPropio: propio,
+        messageText: mensaje.mensaje,
+        name: mensaje.name,
+        animatorController: AnimationController(
+            vsync: this, duration: Duration(milliseconds: 200)),
+        ts: mensaje.ts);
+    widget.messageList.add(mBox);
+    mBox.animatorController!.forward();
+    if (this.mounted) {
+      setState(() {
+        // Your state change code goes here
+      });
     }
   }
 
@@ -292,17 +285,17 @@ class _ListMessageBoxState extends State<ListMessageBox> {
               physics: BouncingScrollPhysics(),
             ),
           )),
-          Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                margin: EdgeInsets.only(left: 10, bottom: 5),
-                child: widget.txtController.text != ''
-                    ? Text(
-                        'Damian está escribiendo...',
-                        style: TextStyle(color: Colors.grey.shade500),
-                      )
-                    : SizedBox(),
-              )),
+          // Align(
+          //     alignment: Alignment.centerLeft,
+          //     child: Container(
+          //       margin: EdgeInsets.only(left: 10, bottom: 5),
+          //       child: widget.txtController.text != ''
+          //           ? Text(
+          //               'Damian está escribiendo...',
+          //               style: TextStyle(color: Colors.grey.shade500),
+          //             )
+          //           : SizedBox(),
+          //     )),
           Divider(
             height: 1,
             color: Colors.grey,
@@ -434,6 +427,7 @@ class MessageBox extends StatelessWidget {
       required this.esMsgPropio,
       required this.messageText,
       required this.name,
+      this.animatorController,
       required this.ts})
       : super(key: key);
 
@@ -441,6 +435,7 @@ class MessageBox extends StatelessWidget {
   final String messageText;
   final String name;
   final int ts;
+  final AnimationController? animatorController;
 
   @override
   Widget build(BuildContext context) {
@@ -455,13 +450,27 @@ class MessageBox extends StatelessWidget {
           messageText: messageText,
           ts: ts)
     ];
+    var textbox;
+    animatorController == null
+        ? textbox = Container(
+            child: _ChatMessage(
+                esMsgPropio: esMsgPropio,
+                name: name,
+                messageText: messageText,
+                ts: ts))
+        : textbox = FadeTransition(
+            opacity: animatorController!,
+            child: SizeTransition(
+                sizeFactor: CurvedAnimation(
+                    curve: Curves.easeIn, parent: animatorController!),
+                child: Container(
+                    child: _ChatMessage(
+                        esMsgPropio: esMsgPropio,
+                        name: name,
+                        messageText: messageText,
+                        ts: ts))));
 
-    return Container(
-        child: _ChatMessage(
-            esMsgPropio: esMsgPropio,
-            name: name,
-            messageText: messageText,
-            ts: ts));
+    return textbox;
   }
 }
 
