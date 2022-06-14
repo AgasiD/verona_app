@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../pages/chat.dart';
+
 class Message {
   String messageId;
   String chatId;
@@ -42,4 +44,10 @@ class Message {
         'name': this.name,
         'members': this.members
       };
+  MessageBox toWidget(id) => MessageBox(
+      esMsgPropio: from == id,
+      messageText: mensaje,
+      name: name,
+      animatorController: null,
+      ts: ts);
 }

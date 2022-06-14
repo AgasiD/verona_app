@@ -76,7 +76,7 @@ class __ContactTileState extends State<_ContactTile> {
             // Generar Chat
 
             final response =
-                await _chat.crearChat(_pref.id, widget.personal.id);
+                await _chat.crearChat(_pref.id, widget.personal.dni);
             if (response.fallo) {
               openAlertDialog(context, 'Error al crear el chat',
                   subMensaje: response.error);

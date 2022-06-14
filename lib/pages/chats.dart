@@ -11,11 +11,17 @@ import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
+import '../services/socket_service.dart';
+
 class ChatsPage extends StatelessWidget {
   const ChatsPage({Key? key}) : super(key: key);
   static const String routeName = 'Chats';
   @override
   Widget build(BuildContext context) {
+    final _socketService = Provider.of<SocketService>(context, listen: false);
+    final _pref = new Preferences();
+    _socketService.connect(_pref.id);
+
     return Scaffold(
         appBar: CustomAppBar(
           muestraBackButton: true,
@@ -96,6 +102,10 @@ class _ChatTile extends StatefulWidget {
 class __ChatTileState extends State<_ChatTile> {
   @override
   Widget build(BuildContext context) {
+    final _chatService = Provider.of<ChatService>(context, listen: false);
+    final _socketService = Provider.of<SocketService>(context, listen: false);
+    final _pref = new Preferences();
+    _socketService.connect(_pref.id);
     return Column(
       children: [
         ListTile(
@@ -140,6 +150,7 @@ class __ChatTileState extends State<_ChatTile> {
             ),
           ),
           onTap: () {
+            _chatService.chatId = widget.chat["chatId"];
             Navigator.pushNamed(context, ChatPage.routeName, arguments: {
               'chatId': widget.chat["chatId"],
               'chatName': widget.chat["nombre"],

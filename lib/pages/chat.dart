@@ -32,58 +32,71 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   List<Message> messages = [];
   Preferences _pref = Preferences();
   String chatName = 'Sin nombre';
+  late ChatService _chatService = Provider.of<ChatService>(context);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _chatService = Provider.of<ChatService>(context, listen: false);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final _service = Provider.of<ChatService>(context);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final chatId = arguments['chatId'];
 
     final txtController = TextEditingController();
-    return Container(
-      color: Colors.white,
-      child: FutureBuilder(
-          future: _service.loadChat(chatId: chatId, limit: 25, offset: 0),
-          builder: (context, snapshot) {
-            if (snapshot.data == null) {
-              return Loading(
-                mensaje: 'Recuperando mensajes...',
-              );
-            } else {
-              final response = snapshot.data as MyResponse;
-              if (response.fallo) {
-                openAlertDialog(context, response.error);
-                return Container();
-              } else {
-                final members = response.data["members"] as List<dynamic>;
-                chatName = response.data['chatName'];
-                chatName == '' ? chatName = arguments['chatName'] : false;
-                final messagesRes = response.data['message'] as List<dynamic>;
-                final messages = messagesRes;
-                final mensajes =
-                    messages.map((e) => Message.fromMap(e)).toList();
 
-                messageList = mensajes
-                    .map((e) => MessageBox(
-                        esMsgPropio: e.from == _pref.id,
-                        messageText: e.mensaje,
-                        name: e.name,
-                        animatorController: null,
-                        ts: e.ts))
-                    .toList();
-                final appbar = _CustomChatBar(chatName: chatName);
+    return Container(
+        child: FutureBuilder(
+            future: _chatService.loadChat(
+                chatId: _chatService.chatId, limit: 25, offset: 0),
+            builder: (_, snapshot) {
+              if (snapshot.data == null) {
+                return Loading(
+                  mensaje: 'Recuperando mensajes...',
+                );
+              } else {
+                _chatService.chat.chatName == ''
+                    ? chatName = arguments['chatName']
+                    : false;
+
                 return Scaffold(
-                    appBar: appbar,
+                    appBar: _CustomChatBar(chatName: chatName),
                     body: ListMessageBox(
-                        members: members,
-                        messages: mensajes,
-                        messageList: messageList,
+                        members: _chatService.chat.members,
                         txtController: txtController,
                         chatId: chatId));
               }
-            }
-          }),
-    );
+            })
+
+        //       } else {
+        //         final response = snapshot.data as MyResponse;
+        //         if (response.fallo) {
+        //           openAlertDialog(context, response.error);
+        //           return Container();
+        //         } else {
+        //           final members = response.data["members"] as List<dynamic>;
+        //           chatName = response.data['chatName'];
+        //           chatName == '' ? chatName = arguments['chatName'] : false;
+        //           final messagesRes = response.data['message'] as List<dynamic>;
+        //           final messages = messagesRes;
+        //           final mensajes =
+        //               messages.map((e) => Message.fromMap(e)).toList();
+
+        //           final appbar = _CustomChatBar(chatName: chatName);
+        //           return Scaffold(
+        //               appBar: appbar,
+        //               body: ListMessageBox(
+        //                   members: members,
+        //                   messages: mensajes,
+        //                   txtController: txtController,
+        //                   chatId: chatId));
+        //         }
+        //       }
+        //     }),
+        );
   }
 }
 
@@ -146,14 +159,10 @@ class ListMessageBox extends StatefulWidget {
   ListMessageBox({
     Key? key,
     required this.members,
-    required this.messages,
-    required this.messageList,
     required this.txtController,
     required this.chatId,
   }) : super(key: key);
 
-  final List<Message> messages;
-  List<MessageBox> messageList;
   List<dynamic> members;
   final TextEditingController txtController;
   final String chatId;
@@ -167,9 +176,13 @@ class _ListMessageBoxState extends State<ListMessageBox>
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   final _pref = new Preferences();
+  late ChatService _chatService;
+  late List<Message> mensajes;
 
   late final header;
   int offset = 0;
+
+  List<MessageBox> mensajesBox = [];
 
   void _onLoad(
       ChatService _chatService, String chatId, int offset, int limit) async {
@@ -182,70 +195,109 @@ class _ListMessageBoxState extends State<ListMessageBox>
       final mensajesNuevos = (response.data['message'] as List<dynamic>);
 
       mensajesNuevos.reversed.forEach((element) {
-        widget.messages.insert(0, Message.fromMap(element));
+        // widget.messages.insert(0, Message.fromMap(element));
       });
-      widget.messageList = widget.messages
-          .map((e) => MessageBox(
-              esMsgPropio: e.from == _pref.id,
-              messageText: e.mensaje,
-              name: e.name,
-              animatorController: null,
-              ts: e.ts))
-          .toList();
+      // widget.messageList = widget.messages
+      //     .map((e) => MessageBox(
+      //         esMsgPropio: e.from == _pref.id,
+      //         messageText: e.mensaje,
+      //         name: e.name,
+      //         animatorController: null,
+      //         ts: e.ts))
+      //     .toList();
       _refreshController.loadComplete();
       setState(() {});
     }
   }
 
+  late SocketService _socketService;
   @override
   void initState() {
     super.initState();
+    _chatService = Provider.of<ChatService>(context, listen: false);
+
     Platform.isIOS
         ? header = WaterDropHeader()
         : header = MaterialClassicHeader();
 
-    final _socket = Provider.of<SocketService>(context, listen: false);
-    _socket.socket.on('nuevo-mensaje', (data) {
+    mensajes =
+        _chatService.chat.messages.map((e) => Message.fromMap(e)).toList();
+
+    _socketService = Provider.of<SocketService>(context, listen: false);
+
+    _socketService.socket.on('nuevo-mensaje', (data) {
+      //Escucha mensajes del servidor
+      print('nuevo mensaje recibido');
       _recibirMensaje(data);
-    }); //Escucha mensajes del servidor
+    });
+    cargarHistorial();
   }
 
   void _recibirMensaje(dynamic data) {
-    if (data['id'] == _pref.id) {
+    final mensaje = Message.fromMap(data);
+    if (mensaje.chatId == _chatService.chat.chatId) {
+      //si el mensaje pertenece al chat actual
+
+      if (mensaje.from == _pref.id) {
+        //si es mensaje propio
+        print('Es mensaje propio');
+      } else {
+        print('agrega mensaje');
+        agregarMensaje(mensaje, false);
+        //Vibration.vibrate(duration: 75, amplitude: 128);
+
+      }
     } else {
-      agregarMensaje(data, false);
-      //Vibration.vibrate(duration: 75, amplitude: 128);
+      // no hacer nada
+
     }
   }
 
   void agregarMensaje(dynamic data, bool propio) {
-    final mensaje = Message.fromMap(data);
-    if (mensaje.from != _pref.id && !propio) {
-      if (mensaje.chatId == widget.chatId) {
-        widget.messages.add(mensaje);
-      }
-    } else if (mensaje.from == _pref.id && propio) {
-      widget.messages.insert(0, mensaje);
-    }
-    final mBox = MessageBox(
-        esMsgPropio: propio,
-        messageText: mensaje.mensaje,
-        name: mensaje.name,
-        animatorController: AnimationController(
-            vsync: this, duration: Duration(milliseconds: 200)),
-        ts: mensaje.ts);
-    widget.messageList.add(mBox);
-    mBox.animatorController!.forward();
     if (this.mounted) {
-      setState(() {
-        // Your state change code goes here
-      });
+      print(data);
+      final mensaje = data;
+      // if (mensaje.from != _pref.id && !propio) {
+      //   if (mensaje.chatId == widget.chatId) {
+      //     // widget.messages.add(mensaje);
+      //   }
+      // } else if (mensaje.from == _pref.id && propio) {
+      //   // widget.messages.insert(0, mensaje);
+      // }
+
+      mensajes.insert(0, mensaje);
+      final mBox = MessageBox(
+          esMsgPropio: propio,
+          messageText: mensaje.mensaje,
+          name: mensaje.name,
+          animatorController: AnimationController(
+              vsync: this, duration: Duration(milliseconds: 200)),
+          ts: mensaje.ts);
+      // widget.messageList.add(mBox);
+      mBox.animatorController!.forward();
+      mensajesBox.add(mBox);
+      // if (this.mounted) {
+      setState(() {});
     }
+    //  }
+  }
+
+  void cargarHistorial() {
+    this.mensajesBox = mensajes.map((e) => e.toWidget(_pref.id)).toList();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _socketService.socket.off('nuevo-mensaje');
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context, listen: false);
+    _socketService.connect(_pref.id);
+
     return Container(
       width: MediaQuery.of(context).size.width,
       margin: EdgeInsets.only(top: 30),
@@ -280,22 +332,11 @@ class _ListMessageBoxState extends State<ListMessageBox>
             ),
             child: ListView.builder(
               reverse: true,
-              itemCount: widget.messages.length,
-              itemBuilder: (_, i) => widget.messageList.reversed.toList()[i],
+              itemCount: mensajesBox.length,
+              itemBuilder: (_, i) => mensajesBox.reversed.toList()[i],
               physics: BouncingScrollPhysics(),
             ),
           )),
-          // Align(
-          //     alignment: Alignment.centerLeft,
-          //     child: Container(
-          //       margin: EdgeInsets.only(left: 10, bottom: 5),
-          //       child: widget.txtController.text != ''
-          //           ? Text(
-          //               'Damian está escribiendo...',
-          //               style: TextStyle(color: Colors.grey.shade500),
-          //             )
-          //           : SizedBox(),
-          //     )),
           Divider(
             height: 1,
             color: Colors.grey,
@@ -304,10 +345,9 @@ class _ListMessageBoxState extends State<ListMessageBox>
               child: Container(
             height: 50,
             child: _InputChat(
-              chatId: widget.chatId,
               txtCtrl: widget.txtController,
-              messageList: widget.messages,
-              members: widget.members,
+              messageList: [], //widget.messages,
+
               agregarMensaje: agregarMensaje,
             ),
           ))
@@ -320,14 +360,10 @@ class _ListMessageBoxState extends State<ListMessageBox>
 class _InputChat extends StatefulWidget {
   _InputChat(
       {Key? key,
-      required this.chatId,
       required this.txtCtrl,
       required this.messageList,
-      required this.members,
       required this.agregarMensaje})
       : super(key: key);
-  String chatId;
-  List<dynamic> members;
   TextEditingController txtCtrl;
   List<Message> messageList;
   final Function agregarMensaje;
@@ -338,12 +374,12 @@ class _InputChat extends StatefulWidget {
 
 class __InputChatState extends State<_InputChat> {
   Preferences _pref = Preferences();
-
+  late ChatService _chatService;
   @override
   Widget build(BuildContext context) {
     final focusNode = new FocusNode();
     final _socket = Provider.of<SocketService>(context);
-
+    _chatService = Provider.of<ChatService>(context);
     return SafeArea(
         child: Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
@@ -408,14 +444,14 @@ class __InputChatState extends State<_InputChat> {
 
   void enviarMensaje(SocketService _socket) {
     final mensaje = Message(
-        chatId: widget.chatId,
+        chatId: _chatService.chatId,
         from: _pref.id,
         name: _pref.nombre,
         mensaje: widget.txtCtrl.text,
-        members: widget.members,
+        members: _chatService.chat.members,
         ts: DateTime.now().millisecondsSinceEpoch);
 
-    widget.agregarMensaje(mensaje.toMap(), true);
+    widget.agregarMensaje(mensaje, true);
     _socket.enviarMensaje(mensaje);
     widget.txtCtrl.text = '';
   }

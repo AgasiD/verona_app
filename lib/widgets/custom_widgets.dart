@@ -215,6 +215,7 @@ class CustomDrawer extends StatelessWidget {
                   //       subMensaje: response.error);
                   // }
                   _pref.logged = false;
+                  _socketService.disconnect();
                   Navigator.pushReplacementNamed(context, LoginPage.routeName);
                 },
               ),

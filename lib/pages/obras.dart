@@ -54,6 +54,9 @@ class _ObrasPageState extends State<ObrasPage> {
   @override
   void initState() {
     super.initState();
+    final _socketService = Provider.of<SocketService>(context, listen: false);
+    final _pref = new Preferences();
+    // _socketService.connect(_pref.id);
   }
 
   List<Obra> obras = [];
@@ -63,7 +66,7 @@ class _ObrasPageState extends State<ObrasPage> {
   Widget build(BuildContext context) {
     ObraService _obras = Provider.of<ObraService>(context);
     final _socketService = Provider.of<SocketService>(context, listen: false);
-
+    _socketService.connect(_pref.id);
     final header;
     Platform.isIOS
         ? header = WaterDropHeader()
@@ -256,7 +259,7 @@ class __SearchListViewState extends State<_SearchListView> {
   }
 
   Container _obraCard(BuildContext context, Obra obra) {
-    final NetworkImage imagen = obra.imageId == ''
+    final NetworkImage imagen = obra.imageId != ''
         ? NetworkImage(
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
         : NetworkImage(

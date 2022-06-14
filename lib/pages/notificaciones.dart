@@ -38,8 +38,8 @@ class _NotificationsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _socketService = Provider.of<SocketService>(context, listen: false);
-
     final _pref = new Preferences();
+    _socketService.connect(_pref.id);
     return FutureBuilder(
         future: _usuarioService.obtenerNotificaciones(_pref.id),
         builder: (context, snapshot) {

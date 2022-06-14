@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     // Future initializeApp() async {
     var initializationSettingsAndroid =
-        new AndroidInitializationSettings('app_icon');
+        new AndroidInitializationSettings('@mipmap/launcher_icon');
     var initializationSettingsIOS = new IOSInitializationSettings();
     var initializationSettings = new InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
@@ -225,6 +225,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    ObraService _obrasService = Provider.of<ObraService>(context);
+
     final _pref = new Preferences();
     late String initalRoute;
     initalRoute = !_pref.logged ? LoginPage.routeName : ObrasPage.routeName;
@@ -240,14 +242,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         Navigator.of(navigatorKey.currentContext!).popUntil((route) {
           if (!route.settings.name!.contains('chat')) {
             // si NO se encuentra actualmente en un chat
-
-            final notificationText = data.toString().split(';');
-            _notificationService.showNotificationWithSound(
-                flutterLocalNotificationsPlugin,
-                notificationText[0],
-                notificationText[1],
-                notificationText[2]);
-            _notificationService.sumNotificationBadge();
+            if (data != null) {
+              final notificationText = data.toString().split(';');
+              _notificationService.showNotificationWithSound(
+                  flutterLocalNotificationsPlugin,
+                  notificationText[0],
+                  notificationText[1],
+                  notificationText[2]);
+              _notificationService.sumNotificationBadge();
+            }
           }
           return true;
         });
@@ -259,7 +262,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         _usuarioService.notifyListeners();
       });
 
-      _socket.socket.on('new-obra', (data) {});
+      _socket.socket.on('new-obra', (data) {
+        _obrasService.notifyListeners();
+        print('new obra');
+      });
       _socket.socket.on('inactivity', (data) {});
     }
 
