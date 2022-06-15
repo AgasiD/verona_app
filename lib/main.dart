@@ -1,10 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/pages/chat.dart';
-import 'package:verona_app/pages/inactividades.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/obras.dart';
@@ -79,7 +77,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> navigatorKey =
       new GlobalKey<NavigatorState>();
   static late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-
   @override
   void initState() {
     super.initState();
@@ -87,121 +84,75 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     final _pref = new Preferences();
 
-    // Future initializeApp() async {
-    var initializationSettingsAndroid =
-        new AndroidInitializationSettings('@mipmap/launcher_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
-    // }
+    NotificationService.messagesStream.listen((notif) {
+      //SOLO SE DISPARA CUANDO ESTA LA APP ABIERTA
+      print('-----------NUEVA NOTIFICACION-----------');
+      final type = notif.data["type"];
+      if (notif.data["navega"] ?? false) {
+        switch (type) {
+          case 'message':
+            navigatorKey.currentState!.pushNamed(ChatPage.routeName,
+                arguments: {
+                  "chatId": notif.data["chatId"],
+                  "chatName": notif.data["chatName"]
+                });
+            break;
+          case 'new-obra':
+            //Si es una nueva obra
+            if (notif.data["type"] == 'new-obra') {
+              final _obraService =
+                  Provider.of<ObraService>(context, listen: false);
+              _obraService.notifyListeners();
+            }
+            navigatorKey.currentState!.pushNamed(ObraPage.routeName,
+                arguments: {"obraId": notif.data["obraId"]});
+            break;
+        }
+      } else {
+        // si no navega y
+        Navigator.of(navigatorKey.currentContext!).popUntil((route) {
+          final snackBar = SnackBar(
+            content: Text(notif.notification!.title ?? 'Sin titulo'),
+          );
+          if (!route.settings.name!.contains('chat')) {
+            messengerKey.currentState?.showSnackBar(snackBar);
+          } else {
+            Map<String, dynamic> args =
+                route.settings.arguments as Map<String, dynamic>;
+            final chatId = args["chatId"];
+            final data = notif.data;
+            if (data['chatId'] != chatId) {
+              messengerKey.currentState?.showSnackBar(snackBar);
+            }
+          }
+          return true;
+        });
 
-    //SOLO SE DISPARA CUANDO ESTA LA APP ABIERTA
-    // print('-----------NUEVA NOTIFICACION-----------');
-    // final type = notif.data["type"];
-    // if (notif.data["navega"] ?? false) {
-    //   switch (type) {
-    //     case 'message':
-    //       navigatorKey.currentState!.pushNamed(ChatPage.routeName, arguments: {
-    //         "chatId": notif.data["chatId"],
-    //         "chatName": notif.data["chatName"]
-    //       });
-    //       break;
-    //     case 'new-obra':
-    //       //Si es una nueva obra
-    //       if (notif.data["type"] == 'new-obra') {
-    //         final _obraService =
-    //             Provider.of<ObraService>(context, listen: false);
-    //         print('notifly listener 1');
-    //         _obraService.notifyListeners();
-    //       }
-    //       navigatorKey.currentState!.pushNamed(ObraPage.routeName,
-    //           arguments: {"obraId": notif.data["obraId"]});
-    //       break;
-    //   }
-    // } else {
-    //   Navigator.of(navigatorKey.currentContext!).popUntil((route) {
-    //     final snackBar = SnackBar(
-    //       content: Text(notif.notification!.title ?? 'Sin titulo'),
-    //     );
-    //     if (!route.settings.name!.contains('chat')) {
-    //       messengerKey.currentState?.showSnackBar(snackBar);
-    //     } else {
-    //       Map<String, dynamic> args =
-    //           route.settings.arguments as Map<String, dynamic>;
-    //       final chatId = args["chatId"];
-    //       final data = notif.data;
-    //       if (data['chatId'] != chatId) {
-    //         messengerKey.currentState?.showSnackBar(snackBar);
-    //       }
-    //     }
-    //     return true;
-    //   });
-    // }
-  }
-
-  Future onSelectNotification(String? payload) async {
-    print(payload);
-    final type_value = payload!.split(':');
-    print(type_value[1]);
-    switch (type_value[0]) {
-      case 'inactivity':
-        final _obraService = Provider.of<ObraService>(context, listen: false);
+        //Si es un nuevo mensaje o cambios en obra
         final _usuarioService =
             Provider.of<UsuarioService>(context, listen: false);
-        _obraService.notifyListeners();
-        _usuarioService.notifyListeners();
-        this.navigatorKey.currentState?.pushNamed(InactividadesPage.routeName,
-            arguments: {"obraId": type_value[1]});
-
-        break;
-      case 'new-obra':
-        final _obraService = Provider.of<ObraService>(context, listen: false);
-        final _usuarioService =
-            Provider.of<UsuarioService>(context, listen: false);
-        _obraService.notifyListeners();
-        _usuarioService.notifyListeners();
-        navigatorKey.currentState!.pushNamed(ObraPage.routeName,
-            arguments: {"obraId": type_value[1]});
-        break;
-      case 'message':
-        // navigatorKey.currentState!.pushNamed(ChatPage.routeName, arguments: {
-        //     "chatId": notif.data["chatId"],
-        //     "chatName": notif.data["chatName"]
-        //   });
-        break;
-    }
-  }
-
-  void onDidReceiveLocalNotification(
-      int? id, String? title, String? body, String? payload) async {
-    // display a dialog with the notification details, tap ok to go to another page
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: Text(title ?? 'title'),
-        content: Text(body ?? 'body'),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: Text('Ok'),
-            onPressed: () async {
-              Navigator.of(context, rootNavigator: true).pop();
-              print('onDidReceiveLocalNotification');
-            },
-          )
-        ],
-      ),
-    );
+        if (notif.data["type"] == 'message') {
+          _usuarioService.notifyListeners();
+        }
+        //Si es una nueva obra
+        if (notif.data["type"] == 'new-obra') {
+          final _obraService = Provider.of<ObraService>(context, listen: false);
+          _obraService.notifyListeners();
+          _usuarioService.notifyListeners();
+        }
+        if (notif.data["type"] == 'inactivity') {
+          final _obraService = Provider.of<ObraService>(context, listen: false);
+          _obraService.notifyListeners();
+          _usuarioService.notifyListeners();
+        }
+      }
+    });
   }
 
   bool _isInForeground = true;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Para detectar si la app vuelve a primer plano
     super.didChangeAppLifecycleState(state);
     _isInForeground = state == AppLifecycleState.resumed;
 
@@ -244,11 +195,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             // si NO se encuentra actualmente en un chat
             if (data != null) {
               final notificationText = data.toString().split(';');
-              _notificationService.showNotificationWithSound(
-                  flutterLocalNotificationsPlugin,
-                  notificationText[0],
-                  notificationText[1],
-                  notificationText[2]);
               _notificationService.sumNotificationBadge();
             }
           }
@@ -264,7 +210,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
       _socket.socket.on('new-obra', (data) {
         _obrasService.notifyListeners();
-        print('new obra');
       });
       _socket.socket.on('inactivity', (data) {});
     }

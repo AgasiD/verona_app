@@ -41,6 +41,7 @@ class SocketService with ChangeNotifier {
       print('----------CONECTADO CON EL SERVIDOR----------');
       notifyListeners();
     });
+
     obtenerNotificaciones(clientId);
     // Accion al desconectarse del servidor
     this._socket.onDisconnect((_) {

@@ -207,13 +207,13 @@ class CustomDrawer extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [Text('Cerrar sesion   '), Icon(Icons.logout)]),
                 onPressed: () async {
-                  // final response = await _usuarioService.deleteDevice(
-                  //     _pref.id, tokenDevice!);
-                  // if (response.fallo) {
-                  //   openAlertDialog(
-                  //       context, 'No se ha desasociado el dispositivo',
-                  //       subMensaje: response.error);
-                  // }
+                  final response = await _usuarioService.deleteDevice(
+                      _pref.id, NotificationService.token!);
+                  if (response.fallo) {
+                    openAlertDialog(
+                        context, 'No se ha desasociado el dispositivo',
+                        subMensaje: response.error);
+                  }
                   _pref.logged = false;
                   _socketService.disconnect();
                   Navigator.pushReplacementNamed(context, LoginPage.routeName);
