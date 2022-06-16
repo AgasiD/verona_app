@@ -26,7 +26,7 @@ class LoginPage extends StatelessWidget {
       esWeb = true;
     }
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Helper.brandColors[2], //Colors.white, //
       body: SafeArea(
           child: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
@@ -36,38 +36,21 @@ class LoginPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _Logo(),
+              Logo(
+                ring: true,
+                size: 200,
+              ),
               _Form(),
               _Labels(),
-              Text('Powered by e-Drex©'),
+              Text(
+                'Powered by e-Drex©',
+                style: TextStyle(color: Helper.brandColors[4]),
+              ),
             ],
           ),
         ),
       )),
     );
-  }
-}
-
-class _Logo extends StatelessWidget {
-  const _Logo({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-        child: Container(
-      child: Column(
-        children: [
-          Image(
-            image: AssetImage('assets/logo.png'),
-            height: 300,
-          ),
-          // Text(
-          //   Helper.nombre,
-          //   style: TextStyle(fontSize: 35),
-          // )
-        ],
-      ),
-    ));
   }
 }
 
@@ -89,12 +72,12 @@ class __FormState extends State<_Form> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   String text = 'Ingresar';
+
   @override
   Widget build(BuildContext context) {
     final _usuario = Provider.of<UsuarioService>(context);
     final _notification = Provider.of<NotificationService>(context);
     return Container(
-        margin: EdgeInsets.only(top: 40),
         padding: EdgeInsets.symmetric(horizontal: 50),
         child: Column(children: [
           CustomInput(
@@ -109,7 +92,9 @@ class __FormState extends State<_Form> {
             isPassword: true,
             textInputAction: TextInputAction.done,
           ),
+          SizedBox(height: 50),
           MainButton(
+            color: Helper.brandColors[7],
             text: text,
             onPressed: () async {
               text = 'Cargando...';
@@ -122,12 +107,12 @@ class __FormState extends State<_Form> {
                 _usuario.usuario = Miembro.fromJson(response.data);
                 guardarUserData(_usuario.usuario);
 
-                final tokenResponse = await _usuario.setTokenDevice(
-                    _usuario.usuario.id, NotificationService.token!);
-                if (tokenResponse.fallo) {
-                  openAlertDialog(context,
-                      'No fue posible guardar el dispositivo utilizado');
-                }
+                // final tokenResponse = await _usuario.setTokenDevice(
+                //     _usuario.usuario.id, NotificationService.token!);
+                // if (tokenResponse.fallo) {
+                //   openAlertDialog(context,
+                //       'No fue posible guardar el dispositivo utilizado');
+                // }
                 final _pref = new Preferences();
                 _pref.logged = true;
                 Navigator.pushReplacementNamed(context, ObrasPage.routeName);
@@ -154,11 +139,11 @@ class _Labels extends StatelessWidget {
     return Container(
       child: Column(
         children: [
-          Text('No tenes clave?',
-              style: TextStyle(color: Colors.black45, fontSize: 16)),
+          Text('¿Aún no tenés clave?',
+              style: TextStyle(color: Helper.brandColors[3], fontSize: 16)),
           GestureDetector(
             child: Text(
-              'Generá tu clave',
+              'Generala aquí',
               style: TextStyle(color: Colors.blue.shade500, fontSize: 18),
             ),
             onTap: () {

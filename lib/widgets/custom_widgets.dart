@@ -17,8 +17,10 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
+import 'package:verona_app/pages/chats.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
+import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -178,6 +180,7 @@ class CustomDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
     final _usuarioService = Provider.of<UsuarioService>(context);
+    final _notificationService = Provider.of<NotificationService>(context);
     final _pref = new Preferences();
     return Drawer(
         child: SafeArea(
@@ -207,13 +210,13 @@ class CustomDrawer extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [Text('Cerrar sesion   '), Icon(Icons.logout)]),
                 onPressed: () async {
-                  final response = await _usuarioService.deleteDevice(
-                      _pref.id, NotificationService.token!);
-                  if (response.fallo) {
-                    openAlertDialog(
-                        context, 'No se ha desasociado el dispositivo',
-                        subMensaje: response.error);
-                  }
+                  // final response = await _usuarioService.deleteDevice(
+                  //     _pref.id, _notificationService.token!);
+                  // if (response.fallo) {
+                  //   openAlertDialog(
+                  //       context, 'No se ha desasociado el dispositivo',
+                  //       subMensaje: response.error);
+                  // }
                   _pref.logged = false;
                   _socketService.disconnect();
                   Navigator.pushReplacementNamed(context, LoginPage.routeName);
@@ -370,6 +373,7 @@ class CustomInput extends StatefulWidget {
   String initialValue = '';
   static String? _passedFunction(String? input) {}
   TextInputAction textInputAction;
+  final Color iconColor = Colors.black;
   CustomInput({
     Key? key,
     required this.hintText,
@@ -408,8 +412,9 @@ class _CustomInputState extends State<CustomInput> {
         suffixIcon: widget.iconButton,
         prefixIcon: Icon(
           widget.icono,
-          color: Helper.primaryColor,
+          color: Helper.brandColors[9].withOpacity(.6),
         ),
+        hintStyle: TextStyle(color: Helper.brandColors[3]),
         errorMaxLines: 1);
     return Column(
       children: [
@@ -425,6 +430,7 @@ class _CustomInputState extends State<CustomInput> {
             obscureText: widget.isPassword,
             decoration: inputDecoration,
             textInputAction: widget.textInputAction,
+            style: TextStyle(color: Helper.brandColors[5]),
             onChanged: (text) {
               inputValid = widget.validarInput(text) == null
                   ? ValidInput()
@@ -434,10 +440,17 @@ class _CustomInputState extends State<CustomInput> {
             },
           ),
           // ignore: prefer_const_literals_to_create_immutables
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(
-                color: Colors.black45, blurRadius: 5, offset: Offset(0, 3))
-          ], color: Colors.white, borderRadius: BorderRadius.circular(30)),
+          decoration: BoxDecoration(
+            border: Border.all(color: Helper.brandColors[9], width: .2),
+            borderRadius: BorderRadius.circular(7),
+            color: Helper.brandColors[1],
+            boxShadow: [
+              BoxShadow(
+                  color: Helper.brandColors[0],
+                  blurRadius: 4,
+                  offset: Offset(10, 8))
+            ],
+          ),
         ),
         widget.validaError
             ? inputValid.value
@@ -533,11 +546,12 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialButton(
+    return ElevatedButton(
       onPressed: this.onPressed,
-      color: this.color.withOpacity(.7),
-      elevation: 2,
-      highlightElevation: 5,
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all(color),
+        shadowColor: MaterialStateProperty.all(Helper.brandColors[1]),
+      ),
       //shape: StadiumBorder(), // Bordes redondeados
 
       child: Container(
@@ -558,6 +572,7 @@ class MainButton extends StatelessWidget {
   final double width;
   final double fontSize;
   final Function() onPressed;
+  final Color color;
 
   const MainButton({
     Key? key,
@@ -566,6 +581,7 @@ class MainButton extends StatelessWidget {
     this.fontSize = 22,
     required this.onPressed,
     required this.text,
+    this.color = Colors.white,
   }) : super(key: key);
 
   @override
@@ -576,8 +592,36 @@ class MainButton extends StatelessWidget {
       text: this.text,
       fontSize: this.fontSize,
       height: this.height,
-      color: Helper.primaryColor!,
+      color: color,
     );
+  }
+}
+
+class Logo extends StatelessWidget {
+  final bool ring;
+  final double size;
+  const Logo({
+    Key? key,
+    this.ring = false,
+    this.size = 200,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final decoration = ring
+        ? BoxDecoration(
+            border: Border.all(color: Helper.brandColors[8], width: 3),
+            borderRadius: BorderRadius.circular(10000))
+        : null;
+    return Center(
+        child: Container(
+      width: size,
+      height: size,
+      decoration: decoration,
+      child: Image(
+        image: AssetImage('assets/isotipo2.png'),
+      ),
+    ));
   }
 }
 
@@ -587,14 +631,15 @@ class SecondaryButton extends StatelessWidget {
   final double width;
   final double fontSize;
   final Function() onPressed;
-
+  final Color color;
   const SecondaryButton({
     Key? key,
-    this.width = double.infinity,
+    this.width = 70,
     this.height = 50,
-    this.fontSize = 22,
+    this.fontSize = 18,
     required this.onPressed,
     required this.text,
+    this.color = Colors.white,
   }) : super(key: key);
 
   @override
@@ -605,7 +650,7 @@ class SecondaryButton extends StatelessWidget {
       text: this.text,
       fontSize: this.fontSize,
       height: this.height,
-      color: Helper.secondaryColor!,
+      color: this.color,
     );
   }
 }
@@ -761,4 +806,80 @@ class Item {
   Map<String, dynamic> params;
   bool isExpanded;
   int list;
+}
+
+class CustomNavigatorFooter extends StatelessWidget {
+  CustomNavigatorFooter({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(color: Helper.brandColors[1]),
+      padding: EdgeInsets.only(top: 20),
+      alignment: Alignment.topCenter,
+      height: 100,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          CustomNavigatorButton(
+              showNotif: false,
+              icono: Icons.arrow_back,
+              accion: () => Navigator.pop(context)),
+          CustomNavigatorButton(
+              showNotif: false,
+              icono: Icons.person_outline,
+              accion: () => Navigator.pushNamed(context, ObrasPage.routeName)),
+          CustomNavigatorButton(
+              showNotif: true,
+              icono: Icons.notifications_none_rounded,
+              accion: () =>
+                  Navigator.pushNamed(context, NotificacionesPage.routeName)),
+          CustomNavigatorButton(
+              showNotif: true,
+              icono: Icons.message_outlined,
+              accion: () => Navigator.pushNamed(context, ChatsPage.routeName)),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomNavigatorButton extends StatelessWidget {
+  final IconData icono;
+  final bool showNotif;
+  final Function() accion;
+  const CustomNavigatorButton(
+      {Key? key,
+      required this.icono,
+      required this.accion,
+      required this.showNotif})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    double size = 45;
+    return Container(
+        height: size,
+        width: size,
+        decoration: BoxDecoration(
+            border: Border.all(color: Helper.brandColors[8], width: .2),
+            color: Helper.brandColors[2],
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black54, blurRadius: 5, offset: Offset(12, 8))
+            ],
+            borderRadius: BorderRadius.all(Radius.circular(size / 2))),
+        child: Badge(
+          showBadge: showNotif,
+          badgeColor: Helper.brandColors[8],
+          child: IconButton(
+            onPressed: accion,
+            icon: Icon(
+              this.icono,
+              size: 27,
+              color: Helper.brandColors[9].withOpacity(.6),
+            ),
+          ),
+        ));
+  }
 }

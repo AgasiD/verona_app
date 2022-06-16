@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:verona_app/helpers/Preferences.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/chats.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
@@ -79,37 +80,17 @@ class _ObrasPageState extends State<ObrasPage> {
 
     return Scaffold(
         drawer: CustomDrawer(textStyle: textStyle, menu: menu),
-        appBar: CustomAppBar(),
-        floatingActionButton: Badge(
-            showBadge: cant > 0,
-            badgeContent: Text(
-              cant.toString(),
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-            badgeColor: Colors.blue.shade200,
-            animationDuration: Duration(seconds: 1),
-            animationType: BadgeAnimationType.slide,
-            child: FloatingActionButton(
-              backgroundColor: Colors.grey[400],
-              onPressed: () {
-                Navigator.pushNamed(context, ChatsPage.routeName);
-                //cant++;
-                setState(() {});
-              },
-              child: Icon(
-                Icons.chat,
-                color: Colors.white,
-              ),
-            )),
-        body: SafeArea(
-            child: SmartRefresher(
-                enablePullDown: true,
-                enablePullUp: false,
-                controller: _refreshController,
-                onRefresh: () => _onRefresh(_obras),
-                header: header,
-                child: _SearchListView(obras: obras))));
+        body: Container(
+          color: Helper.brandColors[1],
+          child: SafeArea(
+              child: SmartRefresher(
+                  enablePullDown: true,
+                  enablePullUp: false,
+                  controller: _refreshController,
+                  onRefresh: () => _onRefresh(_obras),
+                  header: header,
+                  child: _SearchListView(obras: obras))),
+        ));
   }
 
   Padding _obraCard(BuildContext context, Obra obra) {
@@ -206,6 +187,7 @@ class __SearchListViewState extends State<_SearchListView> {
                                     },
                                   )
                                 : IconButton(
+                                    color: Helper.brandColors[4],
                                     icon: _pref.role == 1
                                         ? Icon(Icons.add)
                                         : Container(),

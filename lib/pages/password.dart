@@ -112,6 +112,7 @@ class __FormState extends State<_Form> {
             height: 15,
           ),
           MainButton(
+            color: Helper.brandColors[7],
             text: 'Cambiar contraseña',
             onPressed: () async {
               try {

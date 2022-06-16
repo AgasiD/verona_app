@@ -14,12 +14,7 @@ class NotificacionesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: CustomAppBar(
-          title: 'Notificaciones',
-          muestraBackButton: true,
-        ),
-        body: _NotificationsList());
+    return Scaffold(body: _NotificationsList());
   }
 }
 

@@ -6,10 +6,22 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Helper {
-  static Color? primaryColor = Colors.grey.shade500; //Color(0xff222222);
+  static Color? primaryColor = Color(0x1E1E22); //Color(0xff222222);
   static Color? primaryColorOpacity =
       Color.fromARGB(255, 212, 212, 212); //Color(0xff222222);
   static Color? secondaryColor = Color(0xffFFD100);
+  static List<Color> brandColors = [
+    Color(0xff141418),
+    Color(0xff1E1E22),
+    Color(0xff2D2D31),
+    Color(0xffB9B9B9),
+    Color(0xffCDCDCD),
+    Color(0xffF2F2F7),
+    Color(0xff8C6E5A),
+    Color(0xffAA826E),
+    Color(0xffB1770B),
+    Color(0xffF8DE31),
+  ];
   static String nombre = 'Verona';
   static int limit = 25;
   //static double maxWidth = MediaQuery.of(context).size.wi dth
@@ -31,6 +43,11 @@ class Helper {
     ),
   );
 
+  static Shader getGradient(List<Color> colores) {
+    final Shader linearGradient = LinearGradient(colors: colores)
+        .createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+    return linearGradient;
+  }
   // static String getHash(String nombre, String pass) {
   //   var key = utf8.encode(nombre);
   //   var bytes = utf8.encode(pass);

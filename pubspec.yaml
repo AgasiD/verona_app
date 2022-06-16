@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.15.0  <3.0.0"
+  sdk: ">=2.17.0  <3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -54,6 +54,8 @@ dependencies:
   flutter_datetime_picker: ^1.5.1
   flutter_local_notifications: ^9.6.0
   file_picker: ^4.5.1
+  dropdown_button2: ^1.6.2
+
   
 
   
@@ -92,6 +94,7 @@ flutter:
     - assets/image.png
     - assets/loading-image.gif
     - assets/isotipo.png
+    - assets/isotipo2.png
     - assets/background.jpg
     - assets/background2.jpg
 
