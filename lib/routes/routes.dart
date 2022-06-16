@@ -17,6 +17,7 @@ import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/pages/pedidos.dart';
+import 'package:verona_app/pages/prueba.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   AgregarPropietariosPage.routeName: (_) => AgregarPropietariosPage(),
@@ -37,4 +38,5 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   PedidosPage.routeName: (_) => PedidosPage(),
   PedidoForm.routeName: (_) => PedidoForm(),
   PropietarioForm.routeName: (_) => PropietarioForm(),
+  Prueba.routeName: (_) => Prueba(),
 };

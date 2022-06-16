@@ -21,10 +21,6 @@ class InactividadesForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        muestraBackButton: true,
-      ),
-      extendBodyBehindAppBar: true,
       body: _Form(),
     );
   }
@@ -92,7 +88,7 @@ class _FormState extends State<_Form> {
                   padding: EdgeInsets.symmetric(horizontal: 35),
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
-                  decoration: Helper.formDecoration,
+                  // decoration: Helper.formDecoration,
                   child: SafeArea(
                       child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -129,30 +125,6 @@ class _FormState extends State<_Form> {
                             SizedBox(
                               height: 15,
                             ),
-                            // CustomFormInput(
-                            //     // enable: edit,
-                            //     hintText: ('nombre Archivo').toUpperCase(),
-                            //     icono: Icons.abc,
-                            //     iconButton: IconButton(
-                            //         icon: Icon(Icons.file_present_outlined),
-                            //         onPressed: () async {
-                            //           FilePickerResult? result =
-                            //               await FilePicker.platform
-                            //                   .pickFiles(allowMultiple: true);
-
-                            //           if (result != null) {
-                            //             List<File> files = result.paths
-                            //                 .map((path) => File(path!))
-                            //                 .toList();
-                            //             print(files[0].path);
-                            //           } else {
-                            //             // User canceled the picker
-                            //           }
-                            //         }),
-                            //     textController: txtCtrlFile),
-                            // SizedBox(
-                            //   height: 15,
-                            // ),
                             CustomFormInput(
                                 // enable: edit,
                                 hintText: ('Fecha').toUpperCase(),
@@ -167,31 +139,6 @@ class _FormState extends State<_Form> {
                                       );
                                     }),
                                 textController: txtCtrlDate),
-                            // Row(
-                            //     mainAxisAlignment: MainAxisAlignment.start,
-                            //     children: [
-                            //       SizedBox(
-                            //         //height: 24,
-                            //         width: 19,
-                            //         child: Checkbox(
-                            //           materialTapTargetSize:
-                            //               MaterialTapTargetSize.padded,
-                            //           value: esPrivado,
-                            //           onChanged: (value) {
-                            //             esPrivado = !esPrivado;
-                            //             setState(() {});
-                            //           },
-                            //           activeColor: Helper.secondaryColor,
-                            //         ),
-                            //       ),
-                            //       SizedBox(
-                            //         width: 10,
-                            //       ),
-                            //       Text(
-                            //         'Privado',
-                            //         style: TextStyle(fontSize: 17),
-                            //       )
-                            //     ]),
                           ]),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -245,109 +192,52 @@ class _FormState extends State<_Form> {
         padding: EdgeInsets.symmetric(horizontal: 35),
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        decoration: Helper.formDecoration,
+        decoration: BoxDecoration(color: Helper.brandColors[1]),
         child: SafeArea(
             child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-              Row(
-                children: [
-                  Container(
-                      alignment: Alignment.center,
-                      width: 165,
-                      height: 35,
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              width: .5, color: Helper.primaryColor!),
-                          color: Color.fromARGB(96, 212, 202, 104)),
-                      child: Text(
-                        (textAction).toUpperCase(),
-                        style: TextStyle(fontSize: 15),
-                      ))
-                ],
-              ),
-              SizedBox(
-                height: 13,
-              ),
-              CustomFormInput(
-                  // enable: edit,
-                  hintText: ('Nombre').toUpperCase(),
-                  icono: Icons.abc,
-                  textController: txtCtrlName),
-              SizedBox(
-                height: 15,
-              ),
-              // CustomFormInput(
-              //     // enable: edit,
-              //     hintText: ('nombre Archivo').toUpperCase(),
-              //     icono: Icons.abc,
-              //     iconButton: IconButton(
-              //         icon: Icon(Icons.file_present_outlined),
-              //         onPressed: () async {
-              //           FilePickerResult? result = await FilePicker.platform
-              //               .pickFiles(allowMultiple: true);
-
-              //           if (result != null) {
-              //             List<File> files =
-              //                 result.paths.map((path) => File(path!)).toList();
-              //             print(files[0].path);
-              //           } else {
-              //             // User canceled the picker
-              //           }
-              //         }),
-              //     textController: txtCtrlFile),
-              // SizedBox(
-              //   height: 15,
-              // ),
-              CustomFormInput(
-                  // enable: edit,
-                  hintText: ('Fecha').toUpperCase(),
-                  icono: Icons.abc,
-                  iconButton: IconButton(
-                      icon: Icon(Icons.calendar_today),
-                      onPressed: () {
-                        selectDate(
-                          context,
-                          txtCtrlDate,
-                          selectedDate,
-                        );
-                      }),
-                  textController: txtCtrlDate),
-              // Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-              //   SizedBox(
-              //     //height: 24,
-              //     width: 19,
-              //     child: Checkbox(
-              //       materialTapTargetSize: MaterialTapTargetSize.padded,
-              //       value: esPrivado,
-              //       onChanged: (value) {
-              //         esPrivado = !esPrivado;
-              //         setState(() {});
-              //       },
-              //       activeColor: Helper.secondaryColor,
-              //     ),
-              //   ),
-              //   SizedBox(
-              //     width: 10,
-              //   ),
-              //   Text(
-              //     'Privado',
-              //     style: TextStyle(fontSize: 17),
-              //   )
-              // ])
-            ]),
+            Logo(),
+            SizedBox(
+              height: 40,
+            ),
+            Text(
+              'NUEVO INACTIVIDAD',
+              style: TextStyle(
+                  foreground: Paint()
+                    ..shader = Helper.getGradient(
+                        [Helper.brandColors[8], Helper.brandColors[9]]),
+                  fontSize: 23),
+            ),
+            SizedBox(
+              height: 40,
+            ),
+            CustomInput(
+                hintText: 'NOMBRE',
+                icono: Icons.more_horiz,
+                textController: txtCtrlName),
+            CustomFormInput(
+              // enable: edit,
+              hintText: ('Fecha').toUpperCase(),
+              icono: Icons.abc,
+              textController: txtCtrlDate,
+              iconButton: IconButton(
+                  icon: Icon(Icons.calendar_today),
+                  onPressed: () {
+                    selectDate(
+                      context,
+                      txtCtrlDate,
+                      selectedDate,
+                    );
+                  }),
+            ),
+            SizedBox(
+              height: 50,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SecondaryButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  text: 'Cancelar',
-                  width: 100,
-                ),
                 MainButton(
+                  color: Helper.brandColors[8],
                   onPressed: () async {
                     openDialogConfirmation(context, (context) async {
                       openLoadingDialog(context,
@@ -379,7 +269,14 @@ class _FormState extends State<_Form> {
                   },
                   text: 'Guardar',
                   width: 100,
-                )
+                ),
+                SecondaryButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    text: 'Cancelar',
+                    width: 100,
+                    color: Helper.brandColors[2]),
               ],
             )
           ],

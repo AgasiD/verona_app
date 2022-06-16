@@ -35,14 +35,6 @@ class Helper {
     return MediaQuery.of(context).size.height;
   }
 
-  static BoxDecoration formDecoration = BoxDecoration(
-    image: DecorationImage(
-      image: AssetImage("assets/background.jpg"),
-      opacity: .3,
-      fit: BoxFit.cover,
-    ),
-  );
-
   static Shader getGradient(List<Color> colores) {
     final Shader linearGradient = LinearGradient(colors: colores)
         .createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));

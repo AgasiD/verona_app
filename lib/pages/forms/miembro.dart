@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +14,6 @@ import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 
 class MiembroForm extends StatefulWidget {
   static const String routeName = 'miembro';
@@ -29,7 +29,7 @@ final TextEditingController txtApellidoCtrl = TextEditingController();
 final TextEditingController txtDNICtrl = TextEditingController();
 final TextEditingController txtTelefonoCtrl = TextEditingController();
 final TextEditingController txtMailCtrl = TextEditingController();
-int personalSelected = 2;
+String personalSelected = '2';
 
 class _MiembroFormState extends State<MiembroForm> {
   @override
@@ -44,29 +44,30 @@ class _MiembroFormState extends State<MiembroForm> {
 class _Form extends StatelessWidget {
   _Form({Key? key}) : super(key: key);
   final miembros = [
-    DropdownMenuItem<int>(
-      value: 7,
+    DropdownMenuItem<String>(
+      value: '7',
       child: Text('PM'),
     ),
-    DropdownMenuItem<int>(
-      value: 2,
+    DropdownMenuItem<String>(
+      value: '2',
       child: Text('Arquitecto'),
     ),
-    DropdownMenuItem<int>(
-      value: 4,
+    DropdownMenuItem<String>(
+      value: '4',
       child: Text('Obrero'),
     ),
-    DropdownMenuItem<int>(
-      value: 5,
+    DropdownMenuItem<String>(
+      value: '5',
       child: Text('Encargado de compras'),
     ),
-    DropdownMenuItem<int>(
-      value: 6,
+    DropdownMenuItem<String>(
+      value: '6',
       child: Text('Repartidor'),
     ),
   ];
   @override
   Widget build(BuildContext context) {
+    final colorHint = Helper.brandColors[3];
     return Container(
       color: Helper.brandColors[2],
       padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
@@ -138,29 +139,60 @@ class _Form extends StatelessWidget {
                       textInputAction: TextInputAction.done,
                     ),
                     Container(
-                        margin: EdgeInsets.only(bottom: 25),
-                        child: 
-                       DropdownButtonFormField2() 
-                        // DropdownButtonFormField(
-                        //   value: personalSelected,
-                        //   decoration: InputDecoration(
-                              
-                        //       label: Text(
-                        //         'Puesto en equipo',
-                        //         style: TextStyle(color: Helper.primaryColor),
-                        //       ),
-                        //       border: InputBorder.none,
-                        //       prefixIcon: Icon(
-                        //         Icons.work_outline_rounded,
-                        //         color: Helper.primaryColor,
-                        //       ),
-                        //       filled: true,
-                        //       fillColor: Colors.white),
-                        //   onChanged: (value) {
-                        //     personalSelected = int.parse(value.toString());
-                        //   },
-                        //   items: miembros,
-                        // )),
+                      margin: EdgeInsets.only(bottom: 25),
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                              color: Helper.brandColors[0],
+                              blurRadius: 4,
+                              offset: Offset(10, 8))
+                        ],
+                      ),
+                      child: DropdownButtonFormField2(
+                        items: miembros,
+                        style: TextStyle(
+                            color: Helper.brandColors[5], fontSize: 16),
+                        iconSize: 30,
+                        buttonHeight: 60,
+                        buttonPadding: EdgeInsets.only(left: 20, right: 10),
+                        decoration: InputDecoration(
+                            focusColor: Helper.brandColors[9],
+                            contentPadding: EdgeInsets.zero,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7),
+                              borderSide: BorderSide(
+                                  color: Helper.brandColors[9], width: .2),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7),
+                              borderSide: BorderSide(
+                                  color: Helper.brandColors[9], width: .5),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7),
+                              borderSide: BorderSide(
+                                  color: Helper.brandColors[9], width: 2.0),
+                            ),
+                            fillColor: Helper.brandColors[1],
+                            filled: true),
+                        hint: Text(
+                          'Seleccione puesto',
+                          style: TextStyle(fontSize: 16, color: colorHint),
+                        ),
+                        icon: Icon(
+                          Icons.arrow_drop_down,
+                          color: colorHint,
+                        ),
+                        dropdownDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Helper.brandColors[2],
+                        ),
+                        onChanged: (value) {
+                          //Do something when changing the item if you want.
+                        },
+                        onSaved: (value) {},
+                      ),
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -213,7 +245,7 @@ class _Form extends StatelessWidget {
           dni: txtDNICtrl.text,
           telefono: txtTelefonoCtrl.text,
           email: txtMailCtrl.text,
-          role: personalSelected);
+          role: int.parse(personalSelected));
       _service.grabarUsuario(miembro);
       openAlertDialog(context, 'Miembro creado');
       resetForm();

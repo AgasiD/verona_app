@@ -17,34 +17,41 @@ class ContactsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final _usuarios = Provider.of<UsuarioService>(context);
     return Scaffold(
-      appBar: CustomAppBar(
-        muestraBackButton: true,
-        title: 'Contactos',
+      body: Container(
+        color: Helper.brandColors[1],
+        child: SafeArea(
+          child: FutureBuilder(
+            future: _usuarios.obtenerPersonal(),
+            builder: (_, snapshot) {
+              if (snapshot.data == null) {
+                return Loading(mensaje: 'Cargando contactos');
+              } else {
+                final contactos = (snapshot.data as List<dynamic>)
+                    .where((e) => e.id != _pref.id)
+                    .toList();
+                return ListView.builder(
+                    itemCount: contactos.length,
+                    itemBuilder: (_, index) {
+                      return _ContactTile(
+                        personal: contactos[index],
+                        index: index,
+                      );
+                    });
+              }
+            },
+          ),
+        ),
       ),
-      body: FutureBuilder(
-        future: _usuarios.obtenerPersonal(),
-        builder: (_, snapshot) {
-          if (snapshot.data == null) {
-            return Loading(mensaje: 'Cargando contactos');
-          } else {
-            final contactos = (snapshot.data as List<dynamic>)
-                .where((e) => e.id != _pref.id)
-                .toList();
-            return ListView.builder(
-                itemCount: contactos.length,
-                itemBuilder: (_, index) {
-                  return _ContactTile(personal: contactos[index]);
-                });
-          }
-        },
-      ),
+      bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
 }
 
 class _ContactTile extends StatefulWidget {
-  _ContactTile({Key? key, required this.personal}) : super(key: key);
+  _ContactTile({Key? key, required this.personal, required this.index})
+      : super(key: key);
   Miembro personal;
+  int index;
 
   @override
   State<_ContactTile> createState() => __ContactTileState();
@@ -52,44 +59,77 @@ class _ContactTile extends StatefulWidget {
 
 class __ContactTileState extends State<_ContactTile> {
   final _pref = new Preferences();
+  bool esPar = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.index % 2 == 0) {
+      esPar = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final _chat = Provider.of<ChatService>(context);
-
-    return Column(
-      children: [
-        ListTile(
-          subtitle: Text(Helper.getProfesion(widget.personal.role)),
-          leading: CircleAvatar(
-            backgroundColor: Colors.grey[200],
-            child: Text(
-              '${widget.personal.nombre[0]}${widget.personal.apellido[0]} ',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Helper.primaryColor,
+    final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+                color: _color, borderRadius: BorderRadius.circular(10)),
+            child: ListTile(
+              leading: Container(
+                padding: EdgeInsets.all(1),
+                decoration: BoxDecoration(
+                    color:
+                        !esPar ? Helper.brandColors[8].withOpacity(.8) : null,
+                    borderRadius: BorderRadius.circular(100)),
+                child: CircleAvatar(
+                  backgroundColor: Helper.brandColors[0],
+                  child: Text(
+                    '${widget.personal.nombre[0]}${widget.personal.apellido[0]} ',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Helper.brandColors[5],
+                    ),
+                  ),
+                ),
               ),
+              title:
+                  Text('${widget.personal.nombre} ${widget.personal.apellido}',
+                      style: TextStyle(
+                        color: Helper.brandColors[5],
+                      )),
+              subtitle: Text(
+                Helper.getProfesion(widget.personal.role),
+                style: TextStyle(color: Helper.brandColors[9].withOpacity(.8)),
+              ),
+              trailing: Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Helper.brandColors[3],
+              ),
+              onTap: () async {
+                // Generar Chat
+
+                final response =
+                    await _chat.crearChat(_pref.id, widget.personal.dni);
+                if (response.fallo) {
+                  openAlertDialog(context, 'Error al crear el chat',
+                      subMensaje: response.error);
+                } else {
+                  Navigator.pushNamed(context, ChatPage.routeName, arguments: {
+                    'chatId': response.data['chatId'],
+                    'chatName': response.data['chatName'],
+                  });
+                }
+              },
             ),
           ),
-          title: Text('${widget.personal.nombre} ${widget.personal.apellido}'),
-          trailing: Icon(Icons.arrow_forward_ios_rounded),
-          onTap: () async {
-            // Generar Chat
-
-            final response =
-                await _chat.crearChat(_pref.id, widget.personal.dni);
-            if (response.fallo) {
-              openAlertDialog(context, 'Error al crear el chat',
-                  subMensaje: response.error);
-            } else {
-              Navigator.pushNamed(context, ChatPage.routeName, arguments: {
-                'chatId': response.data['chatId'],
-                'chatName': response.data['chatName'],
-              });
-            }
-          },
-        ),
-        Divider()
-      ],
+        ],
+      ),
     );
   }
 }

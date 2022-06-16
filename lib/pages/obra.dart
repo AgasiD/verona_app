@@ -380,89 +380,97 @@ class _CustomExpansionState extends State<_CustomExpansion> {
   final _pref = new Preferences();
   @override
   Widget build(BuildContext context) {
-    return ExpansionPanelList(
-      expandedHeaderPadding: EdgeInsets.symmetric(vertical: 0),
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          widget.data[index].isExpanded = !isExpanded;
-        });
-      },
-      elevation: 4,
-      children: widget.data.map<ExpansionPanel>((Item item) {
-        return ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return Container(
-                padding: EdgeInsets.only(left: 15),
-                alignment: Alignment.centerLeft,
-                child: ListTile(
-                    trailing: item.addButton && _pref.role == 1
-                        ? IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () {
-                              item.accion();
-                            })
-                        : null,
-                    title: Text(
-                      item.titulo,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )));
-          },
-          body: SingleChildScrollView(
-              child: Column(children: [
-            item.values.length > 0
-                ? ListView.builder(
-                    physics:
-                        NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
-                    shrinkWrap: true,
-                    itemCount: item.values.length,
-                    itemBuilder: (_, i) {
-                      bool esEquipo = item.list == 2;
-                      return Column(children: [
-                        Dismissible(
-                            key: Key(item.values[i]['id']),
-                            direction: DismissDirection.endToStart,
-                            onDismissed: (id) {
-                              item.values.remove(item.values.singleWhere(
-                                  (element) => element['id'] == id));
-                            },
-                            background: Container(
-                              padding: EdgeInsets.only(left: 5),
-                              color: Colors.red,
-                              child: const Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    'Eliminar',
-                                    style: TextStyle(color: Colors.white),
-                                  )),
-                            ),
-                            child: ListTile(
-                                trailing: esEquipo
-                                    ? Chip(
-                                        padding: EdgeInsets.all(0),
-                                        label: Text(
-                                            Helper.getProfesion(
-                                                item.values[i]['role']),
-                                            style: TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 14)),
-                                      )
-                                    : Container(
-                                        width: 1,
-                                        height: 1,
-                                      ),
-                                title: Text(item.values[i]['nombre']),
-                                subtitle:
-                                    Text(item.values[i]['telefono'] ?? ''),
-                                //trailing: const Icon(Icons.delete),
-                                onTap: () {}))
-                      ]);
-                    },
-                  )
-                : Container(),
-          ])),
-          isExpanded: item.isExpanded,
-        );
-      }).toList(),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ExpansionPanelList(
+        expandedHeaderPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        expansionCallback: (int index, bool isExpanded) {
+          setState(() {
+            widget.data[index].isExpanded = !isExpanded;
+          });
+        },
+        elevation: 4,
+        children: widget.data.map<ExpansionPanel>((Item item) {
+          return ExpansionPanel(
+            backgroundColor: Helper.brandColors[2],
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return Container(
+                  decoration:
+                      BoxDecoration(border: Border.all(color: Colors.red)),
+                  padding: EdgeInsets.only(left: 15),
+                  alignment: Alignment.centerLeft,
+                  child: ListTile(
+                      trailing: item.addButton && _pref.role == 1
+                          ? IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: () {
+                                item.accion();
+                              })
+                          : null,
+                      title: Text(
+                        item.titulo,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Helper.brandColors[3]),
+                      )));
+            },
+            body: SingleChildScrollView(
+                child: Column(children: [
+              item.values.length > 0
+                  ? ListView.builder(
+                      physics:
+                          NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
+                      shrinkWrap: true,
+                      itemCount: item.values.length,
+                      itemBuilder: (_, i) {
+                        bool esEquipo = item.list == 2;
+                        return Column(children: [
+                          Dismissible(
+                              key: Key(item.values[i]['id']),
+                              direction: DismissDirection.endToStart,
+                              onDismissed: (id) {
+                                item.values.remove(item.values.singleWhere(
+                                    (element) => element['id'] == id));
+                              },
+                              background: Container(
+                                padding: EdgeInsets.only(left: 5),
+                                color: Colors.red,
+                                child: const Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      'Eliminar',
+                                      style: TextStyle(color: Colors.white),
+                                    )),
+                              ),
+                              child: ListTile(
+                                  trailing: esEquipo
+                                      ? Chip(
+                                          padding: EdgeInsets.all(0),
+                                          label: Text(
+                                              Helper.getProfesion(
+                                                  item.values[i]['role']),
+                                              style: TextStyle(
+                                                  color: Colors.black54,
+                                                  fontSize: 14)),
+                                        )
+                                      : Container(
+                                          width: 1,
+                                          height: 1,
+                                        ),
+                                  title: Text(item.values[i]['nombre']),
+                                  subtitle:
+                                      Text(item.values[i]['telefono'] ?? ''),
+                                  //trailing: const Icon(Icons.delete),
+                                  onTap: () {}))
+                        ]);
+                      },
+                    )
+                  : Container(),
+            ])),
+            isExpanded: item.isExpanded,
+          );
+        }).toList(),
+      ),
     );
   }
 }
