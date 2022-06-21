@@ -26,9 +26,7 @@ class ObraPage extends StatelessWidget {
     final _service = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
     return Scaffold(
-        appBar: CustomAppBar(
-          muestraBackButton: true,
-        ),
+        bottomNavigationBar: CustomNavigatorFooter(),
         body: FutureBuilder(
             future: _service.obtenerObra(obraId),
             builder: (context, snapshot) {
@@ -93,7 +91,7 @@ class ObraPage extends StatelessWidget {
                         child: Container(
                           width: MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
-                              color: Colors.grey[50],
+                              color: Helper.brandColors[2],
                               boxShadow: [
                                 BoxShadow(
                                     color: Colors.black45,
@@ -392,27 +390,26 @@ class _CustomExpansionState extends State<_CustomExpansion> {
         elevation: 4,
         children: widget.data.map<ExpansionPanel>((Item item) {
           return ExpansionPanel(
+            canTapOnHeader: true,
             backgroundColor: Helper.brandColors[2],
             headerBuilder: (BuildContext context, bool isExpanded) {
-              return Container(
-                  decoration:
-                      BoxDecoration(border: Border.all(color: Colors.red)),
-                  padding: EdgeInsets.only(left: 15),
-                  alignment: Alignment.centerLeft,
-                  child: ListTile(
-                      trailing: item.addButton && _pref.role == 1
-                          ? IconButton(
-                              icon: Icon(Icons.add),
-                              onPressed: () {
-                                item.accion();
-                              })
-                          : null,
-                      title: Text(
-                        item.titulo,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Helper.brandColors[3]),
-                      )));
+              return ListTile(
+                  trailing: item.addButton && _pref.role == 1
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.add,
+                            color: Helper.brandColors[8],
+                          ),
+                          onPressed: () {
+                            item.accion();
+                          })
+                      : null,
+                  title: Text(
+                    item.titulo,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Helper.brandColors[3]),
+                  ));
             },
             body: SingleChildScrollView(
                 child: Column(children: [
@@ -434,7 +431,7 @@ class _CustomExpansionState extends State<_CustomExpansion> {
                               },
                               background: Container(
                                 padding: EdgeInsets.only(left: 5),
-                                color: Colors.red,
+                                color: Colors.blue,
                                 child: const Align(
                                     alignment: Alignment.centerRight,
                                     child: Text(
@@ -442,26 +439,51 @@ class _CustomExpansionState extends State<_CustomExpansion> {
                                       style: TextStyle(color: Colors.white),
                                     )),
                               ),
-                              child: ListTile(
-                                  trailing: esEquipo
-                                      ? Chip(
-                                          padding: EdgeInsets.all(0),
-                                          label: Text(
-                                              Helper.getProfesion(
-                                                  item.values[i]['role']),
-                                              style: TextStyle(
-                                                  color: Colors.black54,
-                                                  fontSize: 14)),
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                      trailing: esEquipo
+                                          ? Chip(
+                                              padding: EdgeInsets.all(0),
+                                              label: Text(
+                                                  Helper.getProfesion(
+                                                      item.values[i]['role']),
+                                                  style: TextStyle(
+                                                      color: Colors.black54,
+                                                      fontSize: 14)),
+                                            )
+                                          : Container(
+                                              width: 1,
+                                              height: 1,
+                                            ),
+                                      title: Text(item.values[i]['nombre'],
+                                          style: TextStyle(
+                                              color: Helper.brandColors[8],
+                                              fontSize: 14)),
+                                      subtitle: Text(
+                                          item.values[i]['telefono'] ?? '',
+                                          style: TextStyle(
+                                              color: Helper.brandColors[3],
+                                              fontSize: 14)),
+                                      //trailing: const Icon(Icons.delete),
+                                      onTap: () {}),
+                                  i != item.values.length - 1
+                                      ? Divider(
+                                          color: Helper.brandColors[8],
+                                          height: 0,
+                                          thickness: .5,
+                                          indent: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              3,
+                                          endIndent: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              3,
                                         )
-                                      : Container(
-                                          width: 1,
-                                          height: 1,
-                                        ),
-                                  title: Text(item.values[i]['nombre']),
-                                  subtitle:
-                                      Text(item.values[i]['telefono'] ?? ''),
-                                  //trailing: const Icon(Icons.delete),
-                                  onTap: () {}))
+                                      : Container()
+                                ],
+                              ))
                         ]);
                       },
                     )
