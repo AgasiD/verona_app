@@ -173,6 +173,7 @@ class __customTileAddedState extends State<_customTileAdded> {
             } else {
               openLoadingDialog(context, mensaje: 'Asociando propietario...');
               mensaje = 'Propietario asignado';
+              print(widget.propietario.dni);
               await _ObraService.agregarUsuario(
                   widget.obra.id, widget.propietario.dni);
               widget.asignados.add(widget.propietario.dni);
@@ -182,6 +183,7 @@ class __customTileAddedState extends State<_customTileAdded> {
             closeLoadingDialog(context);
             Helper.showSnackBar(context, mensaje, TextStyle(fontSize: 15),
                 Duration(milliseconds: 500));
+            setState(() {});
           },
           title: Text(
               '${widget.propietario.nombre} ${widget.propietario.apellido}'),

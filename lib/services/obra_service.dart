@@ -42,7 +42,7 @@ class ObraService extends ChangeNotifier {
 
   Future<dynamic> agregarUsuario(obraId, String dni) async {
     final response = await this._http.put('$_endpoint/$obraId/$dni', {});
-    // notifyListeners();
+    notifyListeners();
     return response;
   }
 

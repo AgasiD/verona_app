@@ -10,6 +10,8 @@ import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/form.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/inactividades.dart';
+import 'package:verona_app/pages/listas/equipo.dart';
+import 'package:verona_app/pages/listas/propietarios.dart';
 import 'package:verona_app/pages/pedidos.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -63,23 +65,6 @@ class ObraPage extends StatelessWidget {
                                                 'assets/image.png')));
                                   },
                                 )),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // IconButton(
-                                //   onPressed: () {},
-                                //   icon: Icon(Icons.edit),
-                                //   splashColor: null,
-                                //   splashRadius: 0.1,
-                                // ),
-                                // IconButton(
-                                //   onPressed: () {},
-                                //   icon: Icon(Icons.delete),
-                                //   splashRadius: 0.1,
-                                // )
-                              ],
-                            )
                           ],
                         ),
                       ),
@@ -175,18 +160,6 @@ class ObraPage extends StatelessWidget {
                               ),
                               _DiasView(obra: obra, obraId: obraId),
                               CaracteristicaObra(),
-                              // Row(
-                              //   mainAxisAlignment: MainAxisAlignment.center,
-                              //   children: [
-                              //     ElevatedButton(
-                              //         child: Text('Pedido de materiales'),
-                              //         onPressed: () {
-                              //           Navigator.pushNamed(
-                              //               context, PedidosPage.routeName,
-                              //               arguments: {'obraId': obraId});
-                              //         })
-                              //   ],
-                              // )
                             ]),
                           ),
                         ),
@@ -224,11 +197,17 @@ class _DiasView extends StatelessWidget {
             children: [
               Text(
                 obra.diasEstimados.toString(),
-                style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                    color: Helper.brandColors[8]),
               ),
               Text(
                 'Dias estimados',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: Helper.brandColors[5]),
               )
             ],
           ),
@@ -242,11 +221,17 @@ class _DiasView extends StatelessWidget {
             children: [
               Text(
                 obra.diasTranscurridos.toString(),
-                style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                    color: Helper.brandColors[8]),
               ),
               Text(
                 'Dias transcurridos',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: Helper.brandColors[5]),
               )
             ],
           ),
@@ -268,16 +253,16 @@ class _DiasView extends StatelessWidget {
               Text(
                 obra.diasInactivos.length.toString(),
                 style: TextStyle(
-                    color: Colors.black,
                     fontSize: 23,
-                    fontWeight: FontWeight.bold),
+                    fontWeight: FontWeight.bold,
+                    color: Helper.brandColors[8]),
               ),
               Text(
                 'Dias inactivos',
                 style: TextStyle(
-                    color: Colors.black,
+                    color: Helper.brandColors[5],
                     fontSize: 13,
-                    fontWeight: FontWeight.w300),
+                    fontWeight: FontWeight.w400),
               )
             ]),
           )
@@ -326,41 +311,57 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
     List<Item> items = [];
     //Desplegable de propietarios
     final propietarios = Item(
+        icon: Icons.key,
         titulo: 'Propietarios',
-        route: AgregarPropietariosPage.routeName,
+        route: PropietariosList.routeName,
         accion: () {
-          Navigator.pushReplacementNamed(
-              context, AgregarPropietariosPage.routeName);
+          Navigator.pushNamed(context, PropietariosList.routeName,
+              arguments: {'obraId': obra.id});
+          return 1;
         },
-        values: obra.propietarios
-            .map((e) => {
-                  'id': e.dni,
-                  'nombre': e.nombre + ' ' + e.apellido,
-                  'telefono': e.telefono
-                })
-            .toList());
+        values: [].toList());
     items.add(propietarios);
 
     //Desplegable de equipo
     final team = Item(
+      icon: Icons.groups_rounded,
       list: 2,
       titulo: 'Equipo',
-      values: obra.equipo
-          .map((e) => {
-                'id': e.dni,
-                'nombre': e.nombre + ' ' + e.apellido,
-                'telefono': e.telefono,
-                'role': e.role
-              })
-          .toList(),
+      values: [].toList(),
       accion: () {
-        Navigator.pushReplacementNamed(context, AsignarEquipoPage.routeName);
+        Navigator.pushNamed(context, EquipoList.routeName,
+            arguments: {'obraId': obra.id});
+        return 1;
       },
     );
     items.add(team);
-    //Desplegable de
 
-    //Desplegable de documentacion
+    //Desplegable de docs
+    final doc = Item(
+      icon: Icons.file_copy,
+      list: 2,
+      titulo: 'Documentos',
+      values: [].toList(),
+      accion: () {
+        Navigator.pushNamed(context, EquipoList.routeName,
+            arguments: {'obraId': obra.id});
+        return 1;
+      },
+    );
+    items.add(doc);
+
+    final status = Item(
+      icon: Icons.account_tree,
+      list: 2,
+      titulo: 'Etapas',
+      values: [].toList(),
+      accion: () {
+        Navigator.pushNamed(context, EquipoList.routeName,
+            arguments: {'obraId': obra.id});
+        return 1;
+      },
+    );
+    items.add(status);
 
     return items;
   }
@@ -380,119 +381,66 @@ class _CustomExpansionState extends State<_CustomExpansion> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: ExpansionPanelList(
-        expandedHeaderPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() {
-            widget.data[index].isExpanded = !isExpanded;
-          });
-        },
-        elevation: 4,
-        children: widget.data.map<ExpansionPanel>((Item item) {
-          return ExpansionPanel(
-            canTapOnHeader: true,
-            backgroundColor: Helper.brandColors[2],
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return ListTile(
-                  trailing: item.addButton && _pref.role == 1
-                      ? IconButton(
-                          icon: Icon(
-                            Icons.add,
-                            color: Helper.brandColors[8],
-                          ),
-                          onPressed: () {
-                            item.accion();
-                          })
-                      : null,
-                  title: Text(
-                    item.titulo,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Helper.brandColors[3]),
-                  ));
-            },
-            body: SingleChildScrollView(
-                child: Column(children: [
-              item.values.length > 0
-                  ? ListView.builder(
-                      physics:
-                          NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
-                      shrinkWrap: true,
-                      itemCount: item.values.length,
-                      itemBuilder: (_, i) {
-                        bool esEquipo = item.list == 2;
-                        return Column(children: [
-                          Dismissible(
-                              key: Key(item.values[i]['id']),
-                              direction: DismissDirection.endToStart,
-                              onDismissed: (id) {
-                                item.values.remove(item.values.singleWhere(
-                                    (element) => element['id'] == id));
-                              },
-                              background: Container(
-                                padding: EdgeInsets.only(left: 5),
-                                color: Colors.blue,
-                                child: const Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      'Eliminar',
-                                      style: TextStyle(color: Colors.white),
-                                    )),
-                              ),
-                              child: Column(
-                                children: [
-                                  ListTile(
-                                      trailing: esEquipo
-                                          ? Chip(
-                                              padding: EdgeInsets.all(0),
-                                              label: Text(
-                                                  Helper.getProfesion(
-                                                      item.values[i]['role']),
-                                                  style: TextStyle(
-                                                      color: Colors.black54,
-                                                      fontSize: 14)),
-                                            )
-                                          : Container(
-                                              width: 1,
-                                              height: 1,
-                                            ),
-                                      title: Text(item.values[i]['nombre'],
-                                          style: TextStyle(
-                                              color: Helper.brandColors[8],
-                                              fontSize: 14)),
-                                      subtitle: Text(
-                                          item.values[i]['telefono'] ?? '',
-                                          style: TextStyle(
-                                              color: Helper.brandColors[3],
-                                              fontSize: 14)),
-                                      //trailing: const Icon(Icons.delete),
-                                      onTap: () {}),
-                                  i != item.values.length - 1
-                                      ? Divider(
-                                          color: Helper.brandColors[8],
-                                          height: 0,
-                                          thickness: .5,
-                                          indent: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              3,
-                                          endIndent: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              3,
-                                        )
-                                      : Container()
-                                ],
-                              ))
-                        ]);
-                      },
-                    )
-                  : Container(),
-            ])),
-            isExpanded: item.isExpanded,
-          );
-        }).toList(),
+      child: Column(
+        children: widget.data
+            .map((e) => CaracteristicaButton(
+                  action: e.accion,
+                  text: e.titulo,
+                  icon: e.icon,
+                ))
+            .toList(),
       ),
     );
+  }
+}
+
+class CaracteristicaButton extends StatelessWidget {
+  CaracteristicaButton(
+      {Key? key, required this.action, required this.text, required this.icon})
+      : super(key: key);
+
+  String text;
+  IconData icon;
+  Function() action;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+      decoration: BoxDecoration(
+        border: Border.all(color: Helper.brandColors[8], width: 1),
+        borderRadius: BorderRadius.circular(8),
+        color: Helper.brandColors[1],
+        boxShadow: [
+          BoxShadow(
+              color: Helper.brandColors[0],
+              blurRadius: 4,
+              offset: Offset(15, 12))
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: this.action,
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(Helper.brandColors[1]),
+          shadowColor: MaterialStateProperty.all(Helper.brandColors[1]),
+        ),
+        child: ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Icon(
+            this.icon,
+            color: Helper.brandColors[8],
+            size: 28,
+          ),
+          trailing: Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: Helper.brandColors[3],
+          ),
+          title:
+              Text(text, style: TextStyle(color: Colors.white, fontSize: 17)),
+        ),
+      ),
+    );
+    ;
   }
 }

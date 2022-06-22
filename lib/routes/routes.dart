@@ -11,6 +11,8 @@ import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/inactividades.dart';
+import 'package:verona_app/pages/listas/equipo.dart';
+import 'package:verona_app/pages/listas/propietarios.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obra.dart';
@@ -25,6 +27,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   ChatPage.routeName: (_) => ChatPage(),
   ChatsPage.routeName: (_) => ChatsPage(),
   ContactsPage.routeName: (_) => ContactsPage(),
+  EquipoList.routeName: (_) => EquipoList(),
   FormPage.routeName: (_) => FormPage(),
   InactividadesPage.routeName: (_) => InactividadesPage(),
   InactividadesForm.routeName: (_) => InactividadesForm(),
@@ -38,5 +41,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   PedidosPage.routeName: (_) => PedidosPage(),
   PedidoForm.routeName: (_) => PedidoForm(),
   PropietarioForm.routeName: (_) => PropietarioForm(),
+  PropietariosList.routeName: (_) => PropietariosList(),
   Prueba.routeName: (_) => Prueba(),
 };

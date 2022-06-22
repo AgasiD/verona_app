@@ -169,4 +169,8 @@ class Helper {
     }
     return fechaMensaje;
   }
+
+  static toCustomTile(text1, text2, text3) {
+    return {"title": text1, "subtitle": text2, "avatar": text3};
+  }
 }

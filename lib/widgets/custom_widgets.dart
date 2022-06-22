@@ -62,29 +62,6 @@ class _CustomPaintBar extends CustomPainter {
     final path = new Path();
 
     ByteData bd = await rootBundle.load("assets/background.jpg");
-
-    // final Uint8List bytes = Uint8List.view(bd.buffer);
-    // ui.Image myBackground = await decodeImageFromList(bytes);
-    // canvas.drawImage(myBackground, Offset.zero, paint);
-
-    // path.moveTo(0, 0);
-    // path.lineTo(0, size.height * .8);
-    // path.lineTo(10, size.height * .8);
-    // path.arcToPoint(Offset(20, size.height * .8 - 10),
-    //     clockwise: false, radius: Radius.circular(12));
-    // path.lineTo(20, size.height * .4);
-    // path.arcToPoint(Offset(30, size.height * .4 - 10),
-    //     clockwise: true, radius: Radius.circular(12));
-    // path.lineTo(80, size.height * .4 - 10);
-    // path.arcToPoint(Offset(90, size.height * .4 - 20),
-    //     clockwise: false, radius: Radius.circular(12));
-    // path.lineTo(90, size.height * .15 + 10);
-    // path.arcToPoint(Offset(100, size.height * .15),
-    //     clockwise: true, radius: Radius.circular(12));
-    // path.lineTo(size.width, size.height * .15);
-    // path.lineTo(size.width, 0);
-
-    // canvas.drawPath(path, paint);
   }
 
   @override
@@ -592,7 +569,7 @@ class MainButton extends StatelessWidget {
       text: this.text,
       fontSize: this.fontSize,
       height: this.height,
-      color: color,
+      color: this.color,
     );
   }
 }
@@ -791,6 +768,7 @@ class Item {
   Item(
       {required this.titulo,
       required this.accion,
+      required this.icon,
       this.values = const [],
       this.addButton = true,
       this.isExpanded = false,
@@ -798,7 +776,7 @@ class Item {
       this.params = const {'prueba': 1},
       this.list = 1});
 
-  Function accion;
+  Function() accion;
   bool addButton;
   List<dynamic> values;
   String titulo;
@@ -806,6 +784,7 @@ class Item {
   Map<String, dynamic> params;
   bool isExpanded;
   int list;
+  IconData icon;
 }
 
 class CustomNavigatorFooter extends StatelessWidget {
@@ -881,5 +860,113 @@ class CustomNavigatorButton extends StatelessWidget {
             ),
           ),
         ));
+  }
+}
+
+class CustomListView extends StatefulWidget {
+  CustomListView({Key? key, required this.data, required this.padding})
+      : super(key: key);
+  List<dynamic> data;
+  double padding;
+
+  @override
+  State<CustomListView> createState() => _CustomListViewState();
+}
+
+class _CustomListViewState extends State<CustomListView> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: MediaQuery.of(context).size.height,
+        child: ListView.builder(
+            itemCount: widget.data.length,
+            itemBuilder: (_, index) {
+              bool esPar = false;
+              if (index % 2 == 0) {
+                esPar = true;
+              }
+              return CustomListTile(
+                esPar: esPar,
+                title: widget.data[index]['title'],
+                subtitle: widget.data[index]['subtitle'],
+                avatar: widget.data[index]['avatar'],
+                onTap: false,
+                padding: widget.padding,
+              );
+            }));
+  }
+}
+
+class CustomListTile extends StatelessWidget {
+  bool esPar;
+  String title;
+  String subtitle;
+  String avatar;
+  bool onTap;
+  double padding;
+  Function()? actionOnTap;
+  CustomListTile(
+      {Key? key,
+      required this.esPar,
+      required this.title,
+      required this.subtitle,
+      required this.avatar,
+      this.padding = 20,
+      this.onTap = false,
+      this.actionOnTap = null})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: this.padding),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+                color: _color, borderRadius: BorderRadius.circular(10)),
+            child: ListTile(
+              leading: Container(
+                padding: EdgeInsets.all(1),
+                decoration: BoxDecoration(
+                    color:
+                        !esPar ? Helper.brandColors[8].withOpacity(.8) : null,
+                    borderRadius: BorderRadius.circular(100)),
+                child: CircleAvatar(
+                  backgroundColor: Helper.brandColors[0],
+                  child: Text(
+                    avatar,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Helper.brandColors[5],
+                    ),
+                  ),
+                ),
+              ),
+              title: Text(title,
+                  style: TextStyle(
+                    color: Helper.brandColors[5],
+                  )),
+              subtitle: Text(
+                subtitle,
+                style: TextStyle(color: Helper.brandColors[8].withOpacity(.8)),
+              ),
+              trailing: onTap
+                  ? Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Helper.brandColors[3],
+                    )
+                  : null,
+              onTap: () async {
+                // Generar Chat
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+    ;
   }
 }
