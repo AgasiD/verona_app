@@ -77,6 +77,7 @@ class __FormState extends State<_Form> {
   Widget build(BuildContext context) {
     final _usuario = Provider.of<UsuarioService>(context);
     final _notification = Provider.of<NotificationService>(context);
+
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 50),
         child: Column(children: [
@@ -106,13 +107,12 @@ class __FormState extends State<_Form> {
               } else {
                 _usuario.usuario = Miembro.fromJson(response.data);
                 guardarUserData(_usuario.usuario);
-
-                // final tokenResponse = await _usuario.setTokenDevice(
-                //     _usuario.usuario.id, NotificationService.token!);
-                // if (tokenResponse.fallo) {
-                //   openAlertDialog(context,
-                //       'No fue posible guardar el dispositivo utilizado');
-                // }
+                final tokenResponse = await _usuario.setTokenDevice(
+                    _usuario.usuario.id, NotificationService.token!);
+                if (tokenResponse.fallo) {
+                  openAlertDialog(context,
+                      'No fue posible guardar el dispositivo utilizado');
+                }
                 final _pref = new Preferences();
                 _pref.logged = true;
                 Navigator.pushReplacementNamed(context, ObrasPage.routeName);

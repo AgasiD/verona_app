@@ -7,7 +7,7 @@ import 'package:verona_app/services/http_service.dart';
 class ObraService extends ChangeNotifier {
   HttpService _http = new HttpService();
   final _endpoint = 'api/obra';
-  Obra obra = Obra(nombre: '', barrio: '', diasEstimados: 0, lote: 0);
+  Obra obra = Obra(nombre: '', barrio: '', diasEstimados: 0, lote: '');
 
   obtenerObras() async {
     final datos = await this._http.get(_endpoint);
@@ -40,6 +40,12 @@ class ObraService extends ChangeNotifier {
     return response;
   }
 
+  actualizarObra(Obra obra) async {
+    final response = await this._http.put(_endpoint, obra.toMap());
+    notifyListeners();
+    return response;
+  }
+
   Future<dynamic> agregarUsuario(obraId, String dni) async {
     final response = await this._http.put('$_endpoint/$obraId/$dni', {});
     notifyListeners();
@@ -61,7 +67,7 @@ class ObraService extends ChangeNotifier {
         .post('$_endpoint/inactividad/$obraId', inactividad.toMap());
     final response = datos["response"];
     final notificaciones = MyResponse.fromJson(response);
-    print('notifly listener 6');
+
     notifyListeners();
     return notificaciones;
   }
@@ -74,7 +80,6 @@ class ObraService extends ChangeNotifier {
         .put('$_endpoint/inactividad/$obraId', inactividad.toMap());
     final response = datos["response"];
     final notificaciones = MyResponse.fromJson(response);
-    print('notifly listener 6');
     notifyListeners();
     return notificaciones;
   }

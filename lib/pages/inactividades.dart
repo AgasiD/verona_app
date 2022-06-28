@@ -21,12 +21,11 @@ class InactividadesPage extends StatelessWidget {
     final _obraService = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, InactividadesForm.routeName,
-              arguments: {'obraId': obraId});
-        },
-        child: Icon(Icons.add),
+      floatingActionButton: CustomNavigatorButton(
+        accion: () => Navigator.pushNamed(context, InactividadesForm.routeName,
+            arguments: {'obraId': obraId}),
+        icono: Icons.add,
+        showNotif: false,
       ),
       body: Container(
         color: Helper.brandColors[1],

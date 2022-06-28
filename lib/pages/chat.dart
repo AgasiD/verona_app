@@ -3,17 +3,13 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/services/chat_service.dart';
-import 'package:verona_app/services/notifications_service.dart';
-import 'package:verona_app/services/obra_service.dart';
+
 import 'package:verona_app/services/socket_service.dart';
-import 'package:vibration/vibration.dart';
 
 import '../models/message.dart';
 import '../widgets/custom_widgets.dart';
@@ -49,54 +45,56 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     final txtController = TextEditingController();
 
     return Container(
-        child: FutureBuilder(
-            future: _chatService.loadChat(
-                chatId: _chatService.chatId, limit: 25, offset: 0),
-            builder: (_, snapshot) {
-              if (snapshot.data == null) {
-                return Loading(
-                  mensaje: 'Recuperando mensajes...',
-                );
-              } else {
-                _chatService.chat.chatName == ''
-                    ? chatName = arguments['chatName']
-                    : false;
+      color: Colors.white,
+      child: FutureBuilder(
+          future: _chatService.loadChat(chatId: chatId, limit: 25, offset: 0),
+          builder: (_, snapshot) {
+            print(snapshot.data);
+            if (snapshot.data == null) {
+              return Loading(
+                mensaje: 'Recuperando mensajes...',
+              );
+            } else {
+              _chatService.chat.chatName == ''
+                  ? chatName = arguments['chatName']
+                  : false;
 
-                return Scaffold(
-                    appBar: _CustomChatBar(chatName: chatName),
-                    body: ListMessageBox(
-                        members: _chatService.chat.members,
-                        txtController: txtController,
-                        chatId: chatId));
-              }
-            })
+              return Scaffold(
+                  appBar: _CustomChatBar(chatName: chatName),
+                  body: ListMessageBox(
+                      members: _chatService.chat.members,
+                      txtController: txtController,
+                      chatId: chatId));
+            }
+          }
 
-        //       } else {
-        //         final response = snapshot.data as MyResponse;
-        //         if (response.fallo) {
-        //           openAlertDialog(context, response.error);
-        //           return Container();
-        //         } else {
-        //           final members = response.data["members"] as List<dynamic>;
-        //           chatName = response.data['chatName'];
-        //           chatName == '' ? chatName = arguments['chatName'] : false;
-        //           final messagesRes = response.data['message'] as List<dynamic>;
-        //           final messages = messagesRes;
-        //           final mensajes =
-        //               messages.map((e) => Message.fromMap(e)).toList();
+          //       } else {
+          //         final response = snapshot.data as MyResponse;
+          //         if (response.fallo) {
+          //           openAlertDialog(context, response.error);
+          //           return Container();
+          //         } else {
+          //           final members = response.data["members"] as List<dynamic>;
+          //           chatName = response.data['chatName'];
+          //           chatName == '' ? chatName = arguments['chatName'] : false;
+          //           final messagesRes = response.data['message'] as List<dynamic>;
+          //           final messages = messagesRes;
+          //           final mensajes =
+          //               messages.map((e) => Message.fromMap(e)).toList();
 
-        //           final appbar = _CustomChatBar(chatName: chatName);
-        //           return Scaffold(
-        //               appBar: appbar,
-        //               body: ListMessageBox(
-        //                   members: members,
-        //                   messages: mensajes,
-        //                   txtController: txtController,
-        //                   chatId: chatId));
-        //         }
-        //       }
-        //     }),
-        );
+          //           final appbar = _CustomChatBar(chatName: chatName);
+          //           return Scaffold(
+          //               appBar: appbar,
+          //               body: ListMessageBox(
+          //                   members: members,
+          //                   messages: mensajes,
+          //                   txtController: txtController,
+          //                   chatId: chatId));
+          //         }
+          //       }
+          //     }),
+          ),
+    );
   }
 }
 

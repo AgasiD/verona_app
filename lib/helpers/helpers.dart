@@ -173,4 +173,17 @@ class Helper {
   static toCustomTile(text1, text2, text3) {
     return {"title": text1, "subtitle": text2, "avatar": text3};
   }
+
+  static textGradient(colors, text, {fontsize = 25.0}) {
+    Shader linearGradient = LinearGradient(
+      colors: colors,
+    ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+    return Text(
+      text,
+      style: new TextStyle(
+          fontSize: fontsize,
+          fontWeight: FontWeight.bold,
+          foreground: Paint()..shader = linearGradient),
+    );
+  }
 }

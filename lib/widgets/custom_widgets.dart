@@ -1,9 +1,6 @@
 // ignore_for_file: prefer_const_constructors, unnecessary_this, prefer_function_declarations_over_variables
 
-import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui show Image;
 
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,11 +10,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/form%20copy.dart';
-import 'package:verona_app/models/form.dart';
-import 'package:verona_app/pages/addpropietarios.dart';
-import 'package:verona_app/pages/chats.dart';
+
+import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obras.dart';
@@ -40,8 +35,6 @@ class CustomPainterAppBar extends StatelessWidget
     return Container(
         height: double.infinity,
         width: double.infinity,
-        // decoration: BoxDecoration(
-        //     boxShadow: [BoxShadow(offset: Offset(1, 1), blurRadius: 10)]),
         child: CustomPaint(
           painter: _CustomPaintBar(),
         ));
@@ -126,7 +119,7 @@ class _NotificationButtonState extends State<_NotificationButton> {
     return Padding(
         padding: EdgeInsets.only(right: 15, top: 5),
         child: Badge(
-          showBadge: _socketService.unreadNotifications > 0,
+          showBadge: false, // _socketService.unreadNotifications > 0,
           badgeContent: Text(_socketService.unreadNotifications.toString()),
           badgeColor: Colors.red.shade100,
           child: IconButton(
@@ -336,7 +329,7 @@ class _CustomFormInputState extends State<CustomFormInput> {
 
 class CustomInput extends StatefulWidget {
   final String hintText;
-  final IconData icono;
+  final IconData? icono;
   final bool isPassword;
   final TextInputType teclado;
   final TextEditingController textController;
@@ -376,6 +369,119 @@ class CustomInput extends StatefulWidget {
 }
 
 class _CustomInputState extends State<CustomInput> {
+  ValidInput inputValid = ValidInput();
+  @override
+  Widget build(BuildContext context) {
+    final icon = inputValid.value ? Icons.verified : Icons.cancel;
+    var inputDecoration = InputDecoration(
+        contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 13),
+        hintText: widget.hintText,
+        focusedBorder: InputBorder.none,
+        border: InputBorder.none,
+        errorBorder: InputBorder.none,
+        suffixIcon: widget.iconButton,
+        prefixIcon: Icon(
+          widget.icono,
+          color: Helper.brandColors[9].withOpacity(.6),
+        ),
+        hintStyle: TextStyle(color: Helper.brandColors[3]),
+        errorMaxLines: 1);
+    return Column(
+      children: [
+        Container(
+          width: widget.width,
+          padding: EdgeInsets.only(right: 15),
+          margin: EdgeInsets.only(bottom: 10),
+          child: TextFormField(
+            controller: widget.textController,
+            maxLines: widget.lines,
+            autocorrect: false,
+            keyboardType: widget.teclado,
+            obscureText: widget.isPassword,
+            decoration: inputDecoration,
+            textInputAction: widget.textInputAction,
+            style: TextStyle(color: Helper.brandColors[5]),
+            onChanged: (text) {
+              inputValid = widget.validarInput(text) == null
+                  ? ValidInput()
+                  : ValidInput(error: widget.validarInput(text)!, value: false);
+              widget.onChange(text);
+              setState(() {});
+            },
+          ),
+          // ignore: prefer_const_literals_to_create_immutables
+          decoration: BoxDecoration(
+            border: Border.all(color: Helper.brandColors[9], width: .2),
+            borderRadius: BorderRadius.circular(7),
+            color: Helper.brandColors[1],
+            boxShadow: [
+              BoxShadow(
+                  color: Helper.brandColors[0],
+                  blurRadius: 4,
+                  offset: Offset(10, 8))
+            ],
+          ),
+        ),
+        widget.validaError
+            ? inputValid.value
+                ? Container(
+                    height: 22,
+                  )
+                : Container(
+                    padding: EdgeInsets.only(bottom: 5, left: 25),
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      inputValid.error,
+                      style: TextStyle(color: Colors.red),
+                    ))
+            : Container()
+      ],
+    );
+  }
+}
+
+class CustomAreaInput extends StatefulWidget {
+  final String hintText;
+  final IconData icono;
+  final bool isPassword;
+  final TextInputType teclado;
+  final TextEditingController textController;
+  final double width;
+  IconButton iconButton;
+  final int lines;
+  final bool validaError;
+  String? Function(String?) validarInput;
+  Function(String) onChange;
+  static void _passedOnChange(String? input) {}
+  String initialValue = '';
+  static String? _passedFunction(String? input) {}
+  TextInputAction textInputAction;
+  final Color iconColor = Colors.black;
+  CustomAreaInput({
+    Key? key,
+    required this.hintText,
+    required this.icono,
+    this.isPassword = false,
+    this.teclado = TextInputType.text,
+    this.width = double.infinity,
+    this.lines = 1,
+    this.validaError = false,
+    this.initialValue = '',
+    this.textInputAction = TextInputAction.next,
+    this.iconButton = const IconButton(
+      onPressed: null,
+      icon: Icon(null),
+    ),
+    required this.textController,
+    this.validarInput = _passedFunction,
+    this.onChange = _passedOnChange,
+  }) : super(key: key);
+
+  @override
+  State<CustomInput> createState() => _CustomAreaInputState();
+}
+
+class _CustomAreaInputState extends State<CustomInput> {
   ValidInput inputValid = ValidInput();
   @override
   Widget build(BuildContext context) {
@@ -803,11 +909,16 @@ class CustomNavigatorFooter extends StatelessWidget {
           CustomNavigatorButton(
               showNotif: false,
               icono: Icons.arrow_back,
-              accion: () => Navigator.pop(context)),
+              accion: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              }),
           CustomNavigatorButton(
               showNotif: false,
               icono: Icons.person_outline,
-              accion: () => Navigator.pushNamed(context, ObrasPage.routeName)),
+              accion: () =>
+                  Navigator.pushReplacementNamed(context, ObrasPage.routeName)),
           CustomNavigatorButton(
               showNotif: true,
               icono: Icons.notifications_none_rounded,
@@ -816,7 +927,7 @@ class CustomNavigatorFooter extends StatelessWidget {
           CustomNavigatorButton(
               showNotif: true,
               icono: Icons.message_outlined,
-              accion: () => Navigator.pushNamed(context, ChatsPage.routeName)),
+              accion: () => Navigator.pushNamed(context, ChatList.routeName)),
         ],
       ),
     );
@@ -849,7 +960,7 @@ class CustomNavigatorButton extends StatelessWidget {
             ],
             borderRadius: BorderRadius.all(Radius.circular(size / 2))),
         child: Badge(
-          showBadge: showNotif,
+          showBadge: false, // showNotif,
           badgeColor: Helper.brandColors[8],
           child: IconButton(
             onPressed: accion,
@@ -864,11 +975,23 @@ class CustomNavigatorButton extends StatelessWidget {
 }
 
 class CustomListView extends StatefulWidget {
-  CustomListView({Key? key, required this.data, required this.padding})
+  CustomListView(
+      {Key? key,
+      required this.data,
+      required this.padding,
+      this.tapeable = false,
+      this.actionOnTap = null,
+      this.fontSize = 17,
+      this.textAvatar = true,
+      this.iconAvatar = Icons.abc})
       : super(key: key);
   List<dynamic> data;
+  Function()? actionOnTap;
   double padding;
-
+  bool tapeable;
+  bool textAvatar;
+  double fontSize;
+  IconData iconAvatar;
   @override
   State<CustomListView> createState() => _CustomListViewState();
 }
@@ -886,11 +1009,15 @@ class _CustomListViewState extends State<CustomListView> {
                 esPar = true;
               }
               return CustomListTile(
+                fontSize: widget.fontSize,
+                textAvatar: widget.textAvatar,
+                iconAvatar: widget.iconAvatar,
                 esPar: esPar,
                 title: widget.data[index]['title'],
                 subtitle: widget.data[index]['subtitle'],
                 avatar: widget.data[index]['avatar'],
-                onTap: false,
+                onTap: widget.tapeable,
+                actionOnTap: widget.actionOnTap,
                 padding: widget.padding,
               );
             }));
@@ -903,7 +1030,10 @@ class CustomListTile extends StatelessWidget {
   String subtitle;
   String avatar;
   bool onTap;
+  bool textAvatar;
   double padding;
+  double fontSize;
+  IconData iconAvatar;
   Function()? actionOnTap;
   CustomListTile(
       {Key? key,
@@ -911,8 +1041,11 @@ class CustomListTile extends StatelessWidget {
       required this.title,
       required this.subtitle,
       required this.avatar,
+      this.textAvatar = true,
+      this.iconAvatar = Icons.abc,
       this.padding = 20,
       this.onTap = false,
+      this.fontSize = 10,
       this.actionOnTap = null})
       : super(key: key);
 
@@ -936,32 +1069,34 @@ class CustomListTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100)),
                 child: CircleAvatar(
                   backgroundColor: Helper.brandColors[0],
-                  child: Text(
-                    avatar,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Helper.brandColors[5],
-                    ),
-                  ),
+                  child: textAvatar
+                      ? Text(
+                          avatar,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Helper.brandColors[5],
+                          ),
+                        )
+                      : Icon(iconAvatar),
                 ),
               ),
               title: Text(title,
                   style: TextStyle(
-                    color: Helper.brandColors[5],
-                  )),
-              subtitle: Text(
-                subtitle,
-                style: TextStyle(color: Helper.brandColors[8].withOpacity(.8)),
-              ),
+                      color: Helper.brandColors[5], fontSize: fontSize)),
+              subtitle: this.subtitle != ''
+                  ? Text(
+                      subtitle,
+                      style: TextStyle(
+                          color: Helper.brandColors[8].withOpacity(.8)),
+                    )
+                  : null,
               trailing: onTap
                   ? Icon(
                       Icons.arrow_forward_ios_rounded,
                       color: Helper.brandColors[3],
                     )
                   : null,
-              onTap: () async {
-                // Generar Chat
-              },
+              onTap: actionOnTap,
             ),
           ),
         ],

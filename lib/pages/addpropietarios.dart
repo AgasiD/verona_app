@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/obra.dart';
-import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
-import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -34,10 +31,9 @@ class _AgregarPropietariosPageState extends State<AgregarPropietariosPage> {
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
 
     return Scaffold(
-        appBar: CustomAppBar(
-          title: 'Asociar propietario',
-        ),
-        body: SafeArea(
+      body: Container(
+        color: Helper.brandColors[1],
+        child: SafeArea(
           child: FutureBuilder(
             future: _usuarioService.obtenerPropietarios(),
             builder: (context, snapshot) {
@@ -52,6 +48,7 @@ class _AgregarPropietariosPageState extends State<AgregarPropietariosPage> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                       child: MainButton(
+                          color: Helper.brandColors[0],
                           onPressed: () {
                             Navigator.pushReplacementNamed(
                                 context, ObraPage.routeName,
@@ -62,7 +59,10 @@ class _AgregarPropietariosPageState extends State<AgregarPropietariosPage> {
               }
             },
           ),
-        ));
+        ),
+      ),
+      bottomNavigationBar: CustomNavigatorFooter(),
+    );
   }
 }
 
@@ -115,7 +115,7 @@ class __CustomListAddedState extends State<_CustomListAdded> {
                   Icons.check,
                   color: Colors.green.shade300,
                 )
-              : Icon(Icons.add);
+              : Icon(Icons.add, color: Helper.brandColors[3]);
           return _customTileAdded(
             asignados: asignados,
             agregado: agregado,
@@ -147,15 +147,13 @@ class __customTileAddedState extends State<_customTileAdded> {
   @override
   Widget build(BuildContext context) {
     final _ObraService = Provider.of<ObraService>(context, listen: false);
-    final _UsuarioService = Provider.of<UsuarioService>(context, listen: false);
-    final _socketService = Provider.of<SocketService>(context, listen: false);
 
     Icon icono = widget.agregado
         ? Icon(
             Icons.check,
             color: Colors.green.shade300,
           )
-        : Icon(Icons.add);
+        : Icon(Icons.add, color: Helper.brandColors[3]);
     return Column(
       children: [
         ListTile(
@@ -164,7 +162,7 @@ class __customTileAddedState extends State<_customTileAdded> {
             if (widget.agregado) {
               openLoadingDialog(context, mensaje: 'Desasignando propietario');
               mensaje = 'Propietario quitado';
-              _socketService.quitarUsuario(
+              await _ObraService.quitarUsuario(
                   widget.obra.id, widget.propietario.dni);
               widget.asignados
                   .removeWhere((element) => element == widget.propietario.dni);
@@ -186,8 +184,12 @@ class __customTileAddedState extends State<_customTileAdded> {
             setState(() {});
           },
           title: Text(
-              '${widget.propietario.nombre} ${widget.propietario.apellido}'),
-          subtitle: Text('${widget.propietario.dni}'),
+            '${widget.propietario.nombre} ${widget.propietario.apellido}',
+            style: TextStyle(
+                color: Helper.brandColors[3], fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text('${widget.propietario.dni}',
+              style: TextStyle(color: Helper.brandColors[3])),
           trailing: icono,
         ),
         Divider(
@@ -234,7 +236,10 @@ class __SearchListViewState extends State<_SearchListView> {
                         },
                       )
                     : IconButton(
-                        icon: Icon(Icons.add),
+                        icon: Icon(
+                          Icons.add,
+                          color: Helper.brandColors[3],
+                        ),
                         onPressed: () {
                           Navigator.pushReplacementNamed(
                               context, PropietarioForm.routeName);

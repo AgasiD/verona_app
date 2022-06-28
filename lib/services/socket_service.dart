@@ -23,7 +23,7 @@ class SocketService with ChangeNotifier {
   int unreadNotifications = 0;
   void connect(clientId) {
     final url =
-        'http://192.168.0.155:8008'; //'https://veronaserver.herokuapp.com'; //
+        'https://veronaserver.herokuapp.com'; //'http://192.168.0.155:8008'; //
     if (this._serverStatus == ServerStatus.Offline) {
       this._serverStatus = ServerStatus.Connecting;
       this._socket = IO.io(url, {

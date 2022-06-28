@@ -3,16 +3,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/pages/chats.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
@@ -79,18 +76,20 @@ class _ObrasPageState extends State<ObrasPage> {
     ];
 
     return Scaffold(
-        drawer: CustomDrawer(textStyle: textStyle, menu: menu),
-        body: Container(
-          color: Helper.brandColors[1],
-          child: SafeArea(
-              child: SmartRefresher(
-                  enablePullDown: true,
-                  enablePullUp: false,
-                  controller: _refreshController,
-                  onRefresh: () => _onRefresh(_obras),
-                  header: header,
-                  child: _SearchListView(obras: obras))),
-        ));
+      drawer: CustomDrawer(textStyle: textStyle, menu: menu),
+      body: Container(
+        color: Helper.brandColors[1],
+        child: SafeArea(
+            child: SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: false,
+                controller: _refreshController,
+                onRefresh: () => _onRefresh(_obras),
+                header: header,
+                child: _SearchListView(obras: obras))),
+      ),
+      bottomNavigationBar: CustomNavigatorFooter(),
+    );
   }
 
   Padding _obraCard(BuildContext context, Obra obra) {
@@ -159,155 +158,167 @@ class __SearchListViewState extends State<_SearchListView> {
               } else {
                 obras = snapshot.data as List<Obra>;
                 obrasFiltradas = obras;
-                if (obras.length > 0) {
-                  return Column(children: [
-                    Container(
-                      margin: EdgeInsets.only(top: 20),
-                      width: MediaQuery.of(context).size.width * .95,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomInput(
-                            width: MediaQuery.of(context).size.width * .95,
-                            hintText: 'Madrid..',
-                            icono: Icons.search,
-                            textInputAction: TextInputAction.search,
-                            validaError: false,
-                            iconButton: obrasTxtController.text != ''
-                                ? IconButton(
-                                    splashColor: null,
-                                    icon: Icon(
-                                      Icons.cancel_outlined,
-                                      color: Colors.red.withAlpha(200),
-                                    ),
-                                    onPressed: () {
-                                      obrasTxtController.text = '';
-                                      setState(() {});
-                                    },
-                                  )
-                                : IconButton(
-                                    color: Helper.brandColors[4],
-                                    icon: _pref.role == 1
-                                        ? Icon(Icons.add)
-                                        : Container(),
-                                    onPressed: _pref.role == 1
-                                        ? () {
-                                            Navigator.pushNamed(
-                                                context, ObraForm.routeName,
-                                                arguments: {
-                                                  'formName': ObraForm.routeName
-                                                });
-                                          }
-                                        : null,
-                                  ),
-                            textController: obrasTxtController,
-                            onChange: (text) {
-                              obrasFiltradas = widget.obras
-                                  .where((obra) => obra.nombre
-                                      .toLowerCase()
-                                      .contains(text.toLowerCase()))
-                                  .toList();
-                              setState(() {});
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    ListView.builder(
-                        physics:
-                            NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
-                        padding: EdgeInsets.only(top: 25),
-                        scrollDirection: Axis.vertical,
-                        shrinkWrap: true,
-                        itemCount: obrasFiltradas.length,
-                        itemBuilder: (BuildContext ctx, index) {
-                          return _obraCard(context, obrasFiltradas[index]);
-                        })
-                  ]);
-                } else {
-                  return Container(
-                    margin: EdgeInsets.only(top: 300),
-                    child: Center(
-                      child: Text(
-                        'Aún no hay obras asignadas ',
-                        style: TextStyle(fontSize: 20, color: Colors.grey[400]),
-                      ),
-                    ),
-                  );
-                }
+                return _CustomObras(
+                  obras: obras,
+                  obrasFiltradas: obras,
+                );
               }
             })));
   }
+}
 
-  Container _obraCard(BuildContext context, Obra obra) {
-    final NetworkImage imagen = obra.imageId != ''
-        ? NetworkImage(
-            'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-        : NetworkImage(
-            'https://drive.google.com/uc?export=view&id=${obra.imageId}');
-    return Container(
-      height: 300,
-      width: 300,
-      child: GestureDetector(
-        onTap: (() => Navigator.pushNamed(context, ObraPage.routeName,
-            arguments: {'obraId': obra.id})),
-        child: Stack(
+class _CustomObras extends StatefulWidget {
+  List<Obra> obras;
+  List<Obra> obrasFiltradas;
+  _CustomObras({Key? key, required this.obras, required this.obrasFiltradas})
+      : super(key: key);
+
+  @override
+  State<_CustomObras> createState() => _CustomObrasState();
+}
+
+class _CustomObrasState extends State<_CustomObras> {
+  final _pref = new Preferences();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Container(
+        margin: EdgeInsets.only(top: 20),
+        width: MediaQuery.of(context).size.width * .95,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Positioned(
-                top: 0,
-                right: 10,
-                left: 10,
-                height: 235,
-                child: Container(
-                  child: ClipRRect(
-                    //borderRadius: BorderRadius.all(Radius.circular(40)),
-                    child: Hero(
-                      tag: obra.nombre,
-                      child: FadeInImage(
-                          height: 190,
-                          image: imagen,
-                          imageErrorBuilder: (_, obj, st) {
-                            return Container(
-                                child: Image(
-                                    image: AssetImage('assets/image.png')));
-                          },
-                          placeholder: AssetImage('assets/loading-image.gif')),
+            CustomInput(
+              width: MediaQuery.of(context).size.width * .95,
+              hintText: 'Madrid...',
+              icono: Icons.search,
+              textInputAction: TextInputAction.search,
+              validaError: false,
+              iconButton: obrasTxtController.text != ''
+                  ? IconButton(
+                      splashColor: null,
+                      icon: Icon(
+                        Icons.cancel_outlined,
+                        color: Colors.red.withAlpha(200),
+                      ),
+                      onPressed: () {
+                        obrasTxtController.text = '';
+                        widget.obrasFiltradas = widget.obras;
+                        setState(() {});
+                      },
+                    )
+                  : IconButton(
+                      color: Helper.brandColors[4],
+                      icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
+                      onPressed: _pref.role == 1
+                          ? () {
+                              Navigator.pushNamed(context, ObraForm.routeName,
+                                  arguments: {'formName': ObraForm.routeName});
+                            }
+                          : null,
                     ),
-                  ),
-                )),
-            Positioned(
-                top: 195,
-                left: 75,
-                right: 75,
-                height: 75,
-                child: Container(
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(obra.nombre,
-                            style: TextStyle(
-                                fontSize: 21, fontWeight: FontWeight.bold)),
-                        Text('Tareas preliminares')
-                      ]),
-                  width: 100,
-                  decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black45,
-                            blurRadius: 5,
-                            offset: Offset(0, 3))
-                      ],
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.all(Radius.circular(20))),
-                )),
+              textController: obrasTxtController,
+              onChange: (text) {
+                widget.obrasFiltradas = widget.obras
+                    .where((obra) =>
+                        obra.nombre.toLowerCase().contains(text.toLowerCase()))
+                    .toList();
+                setState(() {});
+              },
+            ),
           ],
         ),
       ),
-    );
+      widget.obras.length > 0
+          ? ListView.builder(
+              physics:
+                  NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
+              padding: EdgeInsets.only(top: 25),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: widget.obrasFiltradas.length,
+              itemBuilder: (BuildContext ctx, index) {
+                return _obraCard(context, widget.obrasFiltradas[index]);
+              })
+          : Center(
+              child: Text(
+                'Aún no hay obras asignadas ',
+                style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+              ),
+            ),
+    ]);
   }
+}
 
-  NetworkImage _CustomNetworkImage(String imageId) {
-    return NetworkImage('https://drive.google.com/uc?id=$imageId');
-  }
+Container _obraCard(BuildContext context, Obra obra) {
+  final NetworkImage imagen = obra.imageId == ''
+      ? NetworkImage(
+          'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
+      : NetworkImage(
+          'https://drive.google.com/uc?export=view&id=${obra.imageId}');
+  return Container(
+    height: 300,
+    width: 300,
+    child: GestureDetector(
+      onTap: (() => Navigator.pushNamed(context, ObraPage.routeName,
+          arguments: {'obraId': obra.id})),
+      child: Stack(
+        children: [
+          Positioned(
+              top: 0,
+              right: 10,
+              left: 10,
+              height: 235,
+              child: Container(
+                child: ClipRRect(
+                  //borderRadius: BorderRadius.all(Radius.circular(40)),
+                  child: Hero(
+                    tag: obra.nombre,
+                    child: FadeInImage(
+                        height: 190,
+                        image: imagen,
+                        imageErrorBuilder: (_, obj, st) {
+                          return Container(
+                              child:
+                                  Image(image: AssetImage('assets/image.png')));
+                        },
+                        placeholder: AssetImage('assets/loading-image.gif')),
+                  ),
+                ),
+              )),
+          Positioned(
+              top: 195,
+              left: 75,
+              right: 75,
+              height: 75,
+              child: Container(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(obra.nombre,
+                          style: TextStyle(
+                              fontSize: 21, fontWeight: FontWeight.bold)),
+                      Text('Tareas preliminares')
+                    ]),
+                width: 100,
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black45,
+                          blurRadius: 5,
+                          offset: Offset(0, 3))
+                    ],
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+              )),
+        ],
+      ),
+    ),
+  );
+}
+
+NetworkImage _CustomNetworkImage(String imageId) {
+  return NetworkImage('https://drive.google.com/uc?id=$imageId');
 }

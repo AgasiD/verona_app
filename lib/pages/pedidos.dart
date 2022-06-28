@@ -17,12 +17,11 @@ class PedidosPage extends StatelessWidget {
         muestraBackButton: true,
         title: 'Pedidos de obra',
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, PedidoForm.routeName,
-              arguments: {'obraId': obraId});
-        },
-        child: Icon(Icons.add),
+      floatingActionButton: CustomNavigatorButton(
+        accion: () => Navigator.pushNamed(context, PedidoForm.routeName,
+            arguments: {'obraId': obraId}),
+        icono: Icons.add,
+        showNotif: false,
       ),
     );
   }

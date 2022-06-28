@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/propietario.dart';
 
@@ -8,6 +9,7 @@ class Obra {
   String barrio;
   String chatE;
   String chatI;
+  String descripcion;
   int diasEstimados;
   List<dynamic> diasInactivos;
   int diasTranscurridos;
@@ -15,7 +17,7 @@ class Obra {
   List<Miembro> equipo;
   List<dynamic> estadios;
   String imageId;
-  int lote;
+  String lote;
   List<Propietario> propietarios;
   String? ts;
   Obra({
@@ -33,6 +35,7 @@ class Obra {
     this.imageId = '',
     required this.lote,
     this.propietarios = const [],
+    this.descripcion = 'Sin descripción',
     ts,
   }) {
     this.nombre = nombre;
@@ -48,6 +51,7 @@ class Obra {
     this.estadios = estadios;
     this.imageId = imageId;
     this.lote = lote;
+    this.descripcion = descripcion;
     this.ts =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
@@ -63,6 +67,7 @@ class Obra {
         diasInactivos: json["diasInactivos"],
         diasTranscurridos: json["diasTranscurridos"],
         docs: json["docs"],
+        descripcion: json['descripcion'] ?? 'Sin descripción',
         equipo: (json["equipo"] as List<dynamic>)
             .map((e) => Miembro.fromJson(e))
             .toList(),
@@ -91,6 +96,7 @@ class Obra {
         'lote': this.lote,
         'ts': this.ts,
         'propietarios': this.propietarios,
+        'descripcion': this.descripcion
       };
 
   estaPropietario(usuarioId) {

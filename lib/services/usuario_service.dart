@@ -28,11 +28,9 @@ class UsuarioService extends ChangeNotifier {
   }
 
   obtenerUsuario(id) async {
-    print('obtener usuario');
     final datos = await this._http.get('$_endpoint/obtenerUsuario/$id');
     final response = datos["response"];
-    final usuario = MyResponse.fromJson(response);
-    return usuario;
+    return response;
   }
 
   obtenerNotificaciones(usuarioId) async {
@@ -69,6 +67,7 @@ class UsuarioService extends ChangeNotifier {
   }
 
   setTokenDevice(String usuarioId, String tokenDevice) async {
+    print('setTokenDevice');
     final body = {"usuarioId": usuarioId, "tokenDevice": tokenDevice};
     final response = await this._http.post('$_endpoint/tokenDevice', body);
     return MyResponse.fromJson(response['response']);

@@ -4,15 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/pages/addpropietarios.dart';
-import 'package:verona_app/pages/asignar_equipo.dart';
+
 import 'package:verona_app/pages/chat.dart';
-import 'package:verona_app/pages/form.dart';
-import 'package:verona_app/pages/forms/miembro.dart';
+import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/inactividades.dart';
 import 'package:verona_app/pages/listas/equipo.dart';
 import 'package:verona_app/pages/listas/propietarios.dart';
-import 'package:verona_app/pages/pedidos.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -25,7 +22,7 @@ class ObraPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-    final _service = Provider.of<ObraService>(context, listen: false);
+    final _service = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     return Scaffold(
         bottomNavigationBar: CustomNavigatorFooter(),
@@ -43,14 +40,18 @@ class ObraPage extends StatelessWidget {
                         'https://drive.google.com/uc?export=view&id=${obra.imageId}');
 
                 return Container(
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 0,
-                        width: MediaQuery.of(context).size.width,
-                        child: Stack(
-                          children: [
-                            Hero(
+                    color: Helper.brandColors[1],
+                    child: CustomScrollView(
+                      slivers: <Widget>[
+                        SliverAppBar(
+                          automaticallyImplyLeading: false,
+                          backgroundColor: Helper.brandColors[2],
+                          pinned: false,
+                          snap: false,
+                          floating: false,
+                          expandedHeight: 220.0,
+                          flexibleSpace: FlexibleSpaceBar(
+                            background: Hero(
                                 tag: obra.nombre,
                                 child: FadeInImage(
                                   image: imagen,
@@ -65,108 +66,94 @@ class ObraPage extends StatelessWidget {
                                                 'assets/image.png')));
                                   },
                                 )),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        top: 200,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          decoration: BoxDecoration(
-                              color: Helper.brandColors[2],
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black45,
-                                    blurRadius: 15,
-                                    offset: Offset(0, 0))
-                              ],
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(30))),
-                          child: SingleChildScrollView(
-                            child: Column(children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 18.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _pref.role != 3
-                                        ? CircleAvatar(
-                                            backgroundColor: Colors.grey[50],
-                                            minRadius: 30,
-                                            foregroundColor:
-                                                Helper.primaryColor,
-                                            child: IconButton(
-                                              icon: Icon(
-                                                Icons.groups_outlined,
-                                                size: 35,
-                                              ),
-                                              onPressed: () {
-                                                Navigator.pushNamed(
-                                                    context, ChatPage.routeName,
-                                                    arguments: {
-                                                      'chatId': obra.chatI
-                                                    });
-                                              },
-                                            ),
-                                          )
-                                        : Container(width: 60),
-                                    Column(
-                                      children: [
-                                        Text(
-                                          obra.nombre,
-                                          style: TextStyle(
-                                              fontSize: 25,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          obra.barrio,
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              color: Helper.primaryColor),
-                                        ),
-                                        // Text(
-                                        //   'Tareas preliminares ',
-                                        //   style: TextStyle(fontSize: 15),
-                                        // )
-                                      ],
-                                    ),
-                                    CircleAvatar(
-                                      backgroundColor: Colors.grey[50],
-                                      minRadius: 30,
-                                      foregroundColor: Helper.primaryColor,
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.chat,
-                                          size: 35,
-                                        ),
-                                        onPressed: () {
-                                          openDialogConfirmation(context,
-                                              (ctx) {
-                                            Navigator.pushNamed(
-                                                ctx, ChatPage.routeName,
-                                                arguments: {
-                                                  'chatId': obra.chatE
-                                                });
-                                          }, 'Abrirá chat con propietarios');
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              _DiasView(obra: obra, obraId: obraId),
-                              CaracteristicaObra(),
-                            ]),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                              return Container(
+                                width: MediaQuery.of(context).size.width,
+                                child: SingleChildScrollView(
+                                  child: Column(children: [
+                                    _ObraBigrafy(
+                                      nombre: obra.nombre,
+                                      barrio: obra.barrio,
+                                      descripcion: obra.descripcion,
+                                      lote: obra.lote.toString(),
+                                      obraId: obraId,
+                                    ),
+                                    CaracteristicaObra(),
+                                    _DiasView(obra: obra, obraId: obraId),
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 25.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          _pref.role != 3
+                                              ? CustomNavigatorButton(
+                                                  icono: Icons.groups_outlined,
+                                                  accion: () {
+                                                    Navigator.pushNamed(context,
+                                                        ChatPage.routeName,
+                                                        arguments: {
+                                                          'chatId': obra.chatI
+                                                        });
+                                                  },
+                                                  showNotif: true,
+                                                )
+                                              : Container(width: 60),
+                                          CustomNavigatorButton(
+                                            icono: Icons.chat,
+                                            accion: () {
+                                              openDialogConfirmation(context,
+                                                  (ctx) {
+                                                Navigator.pushNamed(
+                                                    ctx, ChatPage.routeName,
+                                                    arguments: {
+                                                      'chatId': obra.chatE
+                                                    });
+                                              }, 'Abrirá chat con propietarios');
+                                            },
+                                            showNotif: true,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ]),
+                                ),
+                              );
+                            },
+                            childCount: 1,
+                          ),
+                        ),
+                      ],
+
+                      // Positioned(
+                      //   top: 0,
+                      //   width: MediaQuery.of(context).size.width,
+                      //   child: Stack(
+                      //     children: [
+                      //       Hero(
+                      //           tag: obra.nombre,
+                      //           child: FadeInImage(
+                      //             image: imagen,
+                      //             // height: 250,
+                      //             width: MediaQuery.of(context).size.width,
+                      //             placeholder:
+                      //                 AssetImage('assets/loading-image.gif'),
+                      //             imageErrorBuilder: (_, obj, st) {
+                      //               return Container(
+                      //                   child: Image(
+                      //                       image: AssetImage(
+                      //                           'assets/image.png')));
+                      //             },
+                      //           )),
+                      //     ],
+                      //   ),
+                      // ),
+                    ));
               }
             }));
   }
@@ -187,7 +174,7 @@ class _DiasView extends StatelessWidget {
     final _service = Provider.of<ObraService>(context);
 
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 25),
+      margin: EdgeInsets.only(top: 25),
       height: 60,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -342,11 +329,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       list: 2,
       titulo: 'Documentos',
       values: [].toList(),
-      accion: () {
-        Navigator.pushNamed(context, EquipoList.routeName,
-            arguments: {'obraId': obra.id});
-        return 1;
-      },
+      accion: () {},
     );
     items.add(doc);
 
@@ -355,13 +338,18 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       list: 2,
       titulo: 'Etapas',
       values: [].toList(),
-      accion: () {
-        Navigator.pushNamed(context, EquipoList.routeName,
-            arguments: {'obraId': obra.id});
-        return 1;
-      },
+      accion: () {},
     );
     items.add(status);
+
+    final pedidos = Item(
+      icon: Icons.request_page_outlined,
+      list: 2,
+      titulo: 'Pedidos',
+      values: [].toList(),
+      accion: () {},
+    );
+    items.add(pedidos);
 
     return items;
   }
@@ -377,19 +365,18 @@ class _CustomExpansion extends StatefulWidget {
 
 class _CustomExpansionState extends State<_CustomExpansion> {
   final _pref = new Preferences();
+
   @override
   Widget build(BuildContext context) {
+    List<Widget> children =
+        List.from(widget.data.map((e) => CaracteristicaButton(
+              action: e.accion,
+              text: e.titulo,
+              icon: e.icon,
+            )));
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: widget.data
-            .map((e) => CaracteristicaButton(
-                  action: e.accion,
-                  text: e.titulo,
-                  icon: e.icon,
-                ))
-            .toList(),
-      ),
+      child: Column(children: children),
     );
   }
 }
@@ -442,5 +429,97 @@ class CaracteristicaButton extends StatelessWidget {
       ),
     );
     ;
+  }
+}
+
+class _ObraBigrafy extends StatelessWidget {
+  String nombre;
+  String barrio;
+  String lote;
+  String descripcion;
+  String obraId;
+
+  _ObraBigrafy({
+    Key? key,
+    required this.nombre,
+    required this.barrio,
+    required this.descripcion,
+    required this.lote,
+    required this.obraId,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final _pref = new Preferences();
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 15),
+      padding: EdgeInsets.symmetric(horizontal: 21),
+      child: Column(children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.location_on_outlined,
+                  color: Helper.brandColors[8],
+                  size: 40,
+                ),
+                Text(this.barrio,
+                    style: TextStyle(
+                        color: Helper.brandColors[5],
+                        fontSize: 20,
+                        fontWeight: FontWeight.w100)),
+              ],
+            ), // Barrio del proyecto
+            _pref.role == 1
+                ? IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, ObraForm.routeName,
+                          arguments: {'obraId': obraId});
+                    },
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      color: Helper.brandColors[8],
+                      size: 25,
+                    ),
+                  )
+                : Container()
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Helper.textGradient(
+                [Helper.brandColors[8], Helper.brandColors[9]], this.nombre,
+                fontsize: 42.0),
+            // Text(
+            //   this.nombre,
+            //   style: TextStyle(color: Helper.brandColors[8], fontSize: 42),
+            // ), // Nombre del proyecto
+            Container(
+              margin: EdgeInsets.only(left: 20),
+              child: Text(this.lote,
+                  style: TextStyle(color: Helper.brandColors[5], fontSize: 17)),
+            ) // Lote del proyecto
+          ],
+        ),
+        Divider(
+          color: Helper.brandColors[8],
+          thickness: 1,
+        ),
+        Text(
+          this.descripcion,
+          style: TextStyle(color: Helper.brandColors[3], fontSize: 16),
+        ),
+        SizedBox(
+          height: 25,
+        )
+      ]),
+    );
   }
 }

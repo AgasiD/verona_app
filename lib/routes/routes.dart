@@ -3,7 +3,6 @@ import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
-import 'package:verona_app/pages/chats.dart';
 import 'package:verona_app/pages/contactos.dart';
 import 'package:verona_app/pages/forms/inactividad.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
@@ -11,6 +10,7 @@ import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/inactividades.dart';
+import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/listas/equipo.dart';
 import 'package:verona_app/pages/listas/propietarios.dart';
 import 'package:verona_app/pages/login.dart';
@@ -25,7 +25,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   AgregarPropietariosPage.routeName: (_) => AgregarPropietariosPage(),
   AsignarEquipoPage.routeName: (_) => AsignarEquipoPage(),
   ChatPage.routeName: (_) => ChatPage(),
-  ChatsPage.routeName: (_) => ChatsPage(),
+  ChatList.routeName: (_) => ChatList(),
   ContactsPage.routeName: (_) => ContactsPage(),
   EquipoList.routeName: (_) => EquipoList(),
   FormPage.routeName: (_) => FormPage(),

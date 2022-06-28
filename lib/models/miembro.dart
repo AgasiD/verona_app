@@ -23,7 +23,7 @@ class Miembro {
   List<dynamic> chats;
 
   factory Miembro.fromJson(Map<String, dynamic> json) => Miembro(
-      id: json['id'],
+      id: json['id'] ?? '',
       nombre: json["nombre"],
       apellido: json["apellido"],
       email: json["email"],

@@ -27,8 +27,14 @@ class ContactsPage extends StatelessWidget {
                 return Loading(mensaje: 'Cargando contactos');
               } else {
                 final contactos = (snapshot.data as List<dynamic>)
-                    .where((e) => e.id != _pref.id)
+                    .where((e) => e.dni != _pref.id)
                     .toList();
+                contactos.sort((a, b) {
+                  return a.nombre
+                      .toLowerCase()
+                      .compareTo(b.nombre.toLowerCase());
+                });
+
                 return ListView.builder(
                     itemCount: contactos.length,
                     itemBuilder: (_, index) {
@@ -74,7 +80,7 @@ class __ContactTileState extends State<_ContactTile> {
     final _chat = Provider.of<ChatService>(context);
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           Container(
@@ -90,7 +96,8 @@ class __ContactTileState extends State<_ContactTile> {
                 child: CircleAvatar(
                   backgroundColor: Helper.brandColors[0],
                   child: Text(
-                    '${widget.personal.nombre[0]}${widget.personal.apellido[0]} ',
+                    (widget.personal.nombre[0] + widget.personal.apellido[0])
+                        .toUpperCase(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Helper.brandColors[5],
