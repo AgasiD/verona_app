@@ -6,6 +6,7 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/contactos.dart';
+import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -21,6 +22,7 @@ class ChatList extends StatelessWidget {
     final _pref = new Preferences();
     _socketService.connect(_pref.id);
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
+    final _chatService = Provider.of<ChatService>(context);
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
@@ -46,12 +48,13 @@ class ChatList extends StatelessWidget {
                     return ListView.builder(
                         itemCount: usuario.chats.length,
                         itemBuilder: ((context, index) {
+                          final esPar = index % 2 == 0;
                           final arg = {
                             'chatId': usuario.chats[index]['chatId'],
                             'chatName': usuario.chats[index]['nombre'],
                           };
                           return CustomListTile(
-                            esPar: true,
+                            esPar: esPar,
                             title: usuario.chats[index]['nombre'],
                             subtitle: 'Ultimo mensaje',
                             avatar: (usuario.chats[index]['nombre'][0] +

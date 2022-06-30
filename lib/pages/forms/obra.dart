@@ -63,13 +63,23 @@ class _ObraFormState extends State<ObraForm> {
                               mensaje: 'Cargando obra',
                             );
                           } else {
-                            print(' Obra no nll');
                             return _Form(obra: snapshot.data as Obra);
                           }
                         }))),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    txtNombreCtrl.text = '';
+    txtBarrioCtrl.text = '';
+    txtLoteCtrl.text = '';
+    txtDuracionCtrl.text = '';
+    txtDescripCtrl.text = '';
   }
 }
 

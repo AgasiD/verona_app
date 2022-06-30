@@ -19,7 +19,6 @@ class InactividadesPage extends StatelessWidget {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
     final _obraService = Provider.of<ObraService>(context);
-    final _pref = new Preferences();
     return Scaffold(
       floatingActionButton: CustomNavigatorButton(
         accion: () => Navigator.pushNamed(context, InactividadesForm.routeName,
@@ -62,6 +61,7 @@ class InactividadesPage extends StatelessWidget {
           },
         ),
       ),
+      bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
 }

@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/chat.dart';
 import 'package:verona_app/services/chat_service.dart';
 
 import 'package:verona_app/services/socket_service.dart';
@@ -49,15 +51,15 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       child: FutureBuilder(
           future: _chatService.loadChat(chatId: chatId, limit: 25, offset: 0),
           builder: (_, snapshot) {
-            print(snapshot.data);
             if (snapshot.data == null) {
               return Loading(
                 mensaje: 'Recuperando mensajes...',
               );
             } else {
+              print(_chatService.chat.chatName);
               _chatService.chat.chatName == ''
                   ? chatName = arguments['chatName']
-                  : false;
+                  : chatName = _chatService.chat.chatName;
 
               return Scaffold(
                   appBar: _CustomChatBar(chatName: chatName),
@@ -119,14 +121,14 @@ class _CustomChatBarState extends State<_CustomChatBar> {
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
     return AppBar(
-      backgroundColor: Helper.primaryColor?.withOpacity(0.3),
+      backgroundColor: Helper.brandColors[0],
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
             children: [
               Text('${widget.chatName}',
-                  style: TextStyle(color: Colors.white70))
+                  style: TextStyle(color: Helper.brandColors[8]))
             ],
           ),
           _socketService.socket.connected
@@ -192,17 +194,6 @@ class _ListMessageBoxState extends State<ListMessageBox>
     } else {
       final mensajesNuevos = (response.data['message'] as List<dynamic>);
 
-      mensajesNuevos.reversed.forEach((element) {
-        // widget.messages.insert(0, Message.fromMap(element));
-      });
-      // widget.messageList = widget.messages
-      //     .map((e) => MessageBox(
-      //         esMsgPropio: e.from == _pref.id,
-      //         messageText: e.mensaje,
-      //         name: e.name,
-      //         animatorController: null,
-      //         ts: e.ts))
-      //     .toList();
       _refreshController.loadComplete();
       setState(() {});
     }
@@ -255,14 +246,6 @@ class _ListMessageBoxState extends State<ListMessageBox>
     if (this.mounted) {
       print(data);
       final mensaje = data;
-      // if (mensaje.from != _pref.id && !propio) {
-      //   if (mensaje.chatId == widget.chatId) {
-      //     // widget.messages.add(mensaje);
-      //   }
-      // } else if (mensaje.from == _pref.id && propio) {
-      //   // widget.messages.insert(0, mensaje);
-      // }
-
       mensajes.insert(0, mensaje);
       final mBox = MessageBox(
           esMsgPropio: propio,
@@ -271,7 +254,6 @@ class _ListMessageBoxState extends State<ListMessageBox>
           animatorController: AnimationController(
               vsync: this, duration: Duration(milliseconds: 200)),
           ts: mensaje.ts);
-      // widget.messageList.add(mBox);
       mBox.animatorController!.forward();
       mensajesBox.add(mBox);
       // if (this.mounted) {
@@ -298,7 +280,8 @@ class _ListMessageBoxState extends State<ListMessageBox>
 
     return Container(
       width: MediaQuery.of(context).size.width,
-      margin: EdgeInsets.only(top: 30),
+      margin: EdgeInsets.only(top: 0),
+      color: Helper.brandColors[1],
       child: Column(
         children: [
           Flexible(
@@ -378,8 +361,8 @@ class __InputChatState extends State<_InputChat> {
     final focusNode = new FocusNode();
     final _socket = Provider.of<SocketService>(context);
     _chatService = Provider.of<ChatService>(context);
-    return SafeArea(
-        child: Container(
+    return Container(
+      color: Helper.brandColors[3],
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         children: [
@@ -437,7 +420,7 @@ class __InputChatState extends State<_InputChat> {
           ))
         ],
       ),
-    ));
+    );
   }
 
   void enviarMensaje(SocketService _socket) {
@@ -567,7 +550,7 @@ class _ChatMessageState extends State<_ChatMessage> {
                             child: Container(
                               color: widget.esMsgPropio
                                   ? Colors.grey[shade * 2]
-                                  : Colors.red[shade],
+                                  : Helper.brandColors[7],
                             ))),
                     Container(
                       margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
@@ -576,7 +559,7 @@ class _ChatMessageState extends State<_ChatMessage> {
                       decoration: BoxDecoration(
                           color: widget.esMsgPropio
                               ? Colors.grey[shade * 2]
-                              : Colors.red[shade],
+                              : Helper.brandColors[7],
                           borderRadius: BorderRadius.circular(7)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

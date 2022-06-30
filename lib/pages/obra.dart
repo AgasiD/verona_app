@@ -30,7 +30,9 @@ class ObraPage extends StatelessWidget {
             future: _service.obtenerObra(obraId),
             builder: (context, snapshot) {
               if (snapshot.data == null) {
-                return Loading();
+                return Loading(
+                  mensaje: 'Cargando Obra',
+                );
               } else {
                 final obra = snapshot.data as Obra;
                 NetworkImage imagen = obra.imageId == ''
@@ -52,7 +54,7 @@ class ObraPage extends StatelessWidget {
                           expandedHeight: 220.0,
                           flexibleSpace: FlexibleSpaceBar(
                             background: Hero(
-                                tag: obra.nombre,
+                                tag: obra.id,
                                 child: FadeInImage(
                                   image: imagen,
                                   // height: 250,
@@ -129,30 +131,6 @@ class ObraPage extends StatelessWidget {
                           ),
                         ),
                       ],
-
-                      // Positioned(
-                      //   top: 0,
-                      //   width: MediaQuery.of(context).size.width,
-                      //   child: Stack(
-                      //     children: [
-                      //       Hero(
-                      //           tag: obra.nombre,
-                      //           child: FadeInImage(
-                      //             image: imagen,
-                      //             // height: 250,
-                      //             width: MediaQuery.of(context).size.width,
-                      //             placeholder:
-                      //                 AssetImage('assets/loading-image.gif'),
-                      //             imageErrorBuilder: (_, obj, st) {
-                      //               return Container(
-                      //                   child: Image(
-                      //                       image: AssetImage(
-                      //                           'assets/image.png')));
-                      //             },
-                      //           )),
-                      //     ],
-                      //   ),
-                      // ),
                     ));
               }
             }));
@@ -273,24 +251,10 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
     final obraId = arguments['obraId'];
     final _service = Provider.of<ObraService>(context, listen: false);
 
-    return FutureBuilder(
-      future: _service.obtenerObra(obraId),
-      builder: (context, snapshot) {
-        if (snapshot.data == null) {
-          return Center(
-              child: SpinKitDualRing(
-            size: 20,
-            color: Helper.primaryColor!,
-          ));
-          ;
-        } else {
-          final obra = snapshot.data as Obra;
-          final _data = _generarItems(obra);
-          return _CustomExpansion(
-            data: _data,
-          );
-        }
-      },
+    final obra = _service.obra as Obra;
+    final _data = _generarItems(obra);
+    return _CustomExpansion(
+      data: _data,
     );
   }
 

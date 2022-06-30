@@ -4,9 +4,6 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/obra.dart';
-import 'package:verona_app/pages/obras.dart';
-import 'package:verona_app/services/notifications_service.dart';
-import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -17,9 +14,11 @@ class NotificacionesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-            color: Helper.brandColors[1],
-            child: SafeArea(child: _NotificationsList())));
+      body: Container(
+          color: Helper.brandColors[1],
+          child: SafeArea(child: _NotificationsList())),
+      bottomNavigationBar: CustomNavigatorFooter(),
+    );
   }
 }
 
@@ -29,8 +28,7 @@ class _NotificationsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context);
-    final _notificationService =
-        Provider.of<NotificationService>(context, listen: false);
+
     final _pref = new Preferences();
     return FutureBuilder(
         future: _usuarioService.obtenerNotificaciones(_pref.id),

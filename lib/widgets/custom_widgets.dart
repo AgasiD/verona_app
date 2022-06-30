@@ -844,13 +844,14 @@ class Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: Helper.brandColors[1],
       height: MediaQuery.of(context).size.height,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SpinKitDualRing(color: Helper.primaryColor!),
+            SpinKitDualRing(color: Helper.brandColors[8]),
             SizedBox(
               height: 15,
             ),
@@ -858,9 +859,10 @@ class Loading extends StatelessWidget {
                 ? Text(
                     mensaje,
                     style: TextStyle(
-                        color: Helper.primaryColor,
+                        color: Helper.brandColors[3],
                         fontSize: 15,
-                        decoration: TextDecoration.none),
+                        decoration: TextDecoration.none,
+                        fontWeight: FontWeight.bold),
                   )
                 : Container()
           ],

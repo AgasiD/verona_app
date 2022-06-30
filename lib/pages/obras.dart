@@ -259,12 +259,66 @@ Container _obraCard(BuildContext context, Obra obra) {
       : NetworkImage(
           'https://drive.google.com/uc?export=view&id=${obra.imageId}');
   return Container(
-    height: 300,
-    width: 300,
+    margin: EdgeInsets.symmetric(horizontal: 20),
     child: GestureDetector(
-      onTap: (() => Navigator.pushNamed(context, ObraPage.routeName,
-          arguments: {'obraId': obra.id})),
-      child: Stack(
+        onTap: (() => Navigator.pushNamed(context, ObraPage.routeName,
+            arguments: {'obraId': obra.id})),
+        child: Container(
+          child: Card(
+            elevation: 10,
+            color: Helper.brandColors[2],
+            child: Row(
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * .4,
+                  child: Column(children: [
+                    Text(obra.nombre,
+                        style: TextStyle(
+                            color: Helper.brandColors[3],
+                            fontSize: 21,
+                            fontWeight: FontWeight.bold)),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(obra.lote,
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Helper.brandColors[8],
+                            fontWeight: FontWeight.bold)),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text('Tareas preliminares',
+                        style: TextStyle(color: Helper.brandColors[3]))
+                  ]),
+                ),
+                Hero(
+                  tag: obra.id,
+                  child: FadeInImage(
+                      width: MediaQuery.of(context).size.width * .47,
+                      image: imagen,
+                      imageErrorBuilder: (_, obj, st) {
+                        return Container(
+                            child:
+                                Image(image: AssetImage('assets/image.png')));
+                      },
+                      placeholder: AssetImage('assets/loading-image.gif')),
+                ),
+              ],
+            ),
+          ),
+        )),
+  );
+}
+
+NetworkImage _CustomNetworkImage(String imageId) {
+  return NetworkImage('https://drive.google.com/uc?id=$imageId');
+}
+
+
+
+
+/*Stack(
         children: [
           Positioned(
               top: 0,
@@ -315,10 +369,4 @@ Container _obraCard(BuildContext context, Obra obra) {
               )),
         ],
       ),
-    ),
-  );
-}
-
-NetworkImage _CustomNetworkImage(String imageId) {
-  return NetworkImage('https://drive.google.com/uc?id=$imageId');
-}
+    */
