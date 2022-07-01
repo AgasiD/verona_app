@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:verona_app/models/miembro.dart';
+import 'package:verona_app/models/pedido.dart';
 import 'package:verona_app/models/propietario.dart';
 
 class Obra {
@@ -20,6 +21,7 @@ class Obra {
   String lote;
   List<Propietario> propietarios;
   String? ts;
+  List<Pedido> pedidos;
   Obra({
     required this.nombre,
     this.id = '',
@@ -36,6 +38,7 @@ class Obra {
     required this.lote,
     this.propietarios = const [],
     this.descripcion = 'Sin descripción',
+    this.pedidos = const [],
     ts,
   }) {
     this.nombre = nombre;
@@ -52,33 +55,38 @@ class Obra {
     this.imageId = imageId;
     this.lote = lote;
     this.descripcion = descripcion;
+    this.pedidos = pedidos;
     this.ts =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
-        nombre: json["nombre"],
-        id: json["id"],
-        barrio: json["barrio"],
-        chatE: json["chatE"],
-        chatI: json["chatI"],
-        diasEstimados: json["diasEstimados"],
-        diasInactivos: json["diasInactivos"],
-        diasTranscurridos: json["diasTranscurridos"],
-        docs: json["docs"],
-        descripcion: json['descripcion'] ?? 'Sin descripción',
-        equipo: (json["equipo"] as List<dynamic>)
-            .map((e) => Miembro.fromJson(e))
-            .toList(),
-        estadios: json["estadios"],
-        imageId: json['imageId'] ?? '',
-        lote: json["lote"],
-        ts: json["ts"],
-        propietarios: (json["propietarios"] as List<dynamic>)
-            .map((e) => Propietario.fromJson(e))
-            .toList(),
-      );
+      nombre: json["nombre"],
+      id: json["id"],
+      barrio: json["barrio"],
+      chatE: json["chatE"],
+      chatI: json["chatI"],
+      diasEstimados: json["diasEstimados"],
+      diasInactivos: json["diasInactivos"],
+      diasTranscurridos: json["diasTranscurridos"],
+      docs: json["docs"],
+      descripcion: json['descripcion'] ?? 'Sin descripción',
+      equipo: (json["equipo"] as List<dynamic>)
+          .map((e) => Miembro.fromJson(e))
+          .toList(),
+      estadios: json["estadios"],
+      imageId: json['imageId'] ?? '',
+      lote: json["lote"],
+      ts: json["ts"],
+      propietarios: (json["propietarios"] as List<dynamic>)
+          .map((e) => Propietario.fromJson(e))
+          .toList(),
+      pedidos: json["pedidos"] != null
+          ? (json["pedidos"] as List<dynamic>)
+              .map((e) => Pedido.fromJson(e))
+              .toList()
+          : []);
 
   toMap() => {
         'nombre': this.nombre,
@@ -96,7 +104,8 @@ class Obra {
         'lote': this.lote,
         'ts': this.ts,
         'propietarios': this.propietarios,
-        'descripcion': this.descripcion
+        'descripcion': this.descripcion,
+        'pedidos': this.pedidos
       };
 
   estaPropietario(usuarioId) {

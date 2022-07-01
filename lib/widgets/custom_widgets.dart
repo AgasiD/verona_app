@@ -457,6 +457,7 @@ class CustomAreaInput extends StatefulWidget {
   static String? _passedFunction(String? input) {}
   TextInputAction textInputAction;
   final Color iconColor = Colors.black;
+
   CustomAreaInput({
     Key? key,
     required this.hintText,
