@@ -10,6 +10,7 @@ import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/inactividades.dart';
 import 'package:verona_app/pages/listas/equipo.dart';
+import 'package:verona_app/pages/listas/pedidos_obra.dart';
 import 'package:verona_app/pages/listas/propietarios.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -36,7 +37,7 @@ class ObraPage extends StatelessWidget {
                 );
               } else {
                 final obra = snapshot.data as Obra;
-                NetworkImage imagen = obra.imageId == ''
+                NetworkImage imagen = obra.imageId != ''
                     ? NetworkImage(
                         'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
                     : NetworkImage(
@@ -313,7 +314,10 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       titulo: 'Pedidos',
       values: [].toList(),
       accion: () {
-        Navigator.pushNamed(context, PedidoForm.routeName);
+        Navigator.pushNamed(
+          context,
+          PedidoList.routeName,
+        );
       },
     );
     items.add(pedidos);

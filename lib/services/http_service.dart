@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 class HttpService extends ChangeNotifier {
   //bool loading = false;
-  final isProduction = true;
+  final isProduction = false;
   String _baseUrl = 'veronaserver.herokuapp.com';
   final headers = {"Content-Type": "application/json"};
   late Uri url;

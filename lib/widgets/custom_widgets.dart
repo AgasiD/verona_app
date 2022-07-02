@@ -337,6 +337,7 @@ class CustomInput extends StatefulWidget {
   IconButton iconButton;
   final int lines;
   final bool validaError;
+  final bool enable;
   String? Function(String?) validarInput;
   Function(String) onChange;
   static void _passedOnChange(String? input) {}
@@ -355,6 +356,7 @@ class CustomInput extends StatefulWidget {
     this.validaError = false,
     this.initialValue = '',
     this.textInputAction = TextInputAction.next,
+    this.enable = true,
     this.iconButton = const IconButton(
       onPressed: null,
       icon: Icon(null),
@@ -393,6 +395,7 @@ class _CustomInputState extends State<CustomInput> {
           padding: EdgeInsets.only(right: 15),
           margin: EdgeInsets.only(bottom: 10),
           child: TextFormField(
+            enabled: widget.enable,
             controller: widget.textController,
             maxLines: widget.lines,
             autocorrect: false,

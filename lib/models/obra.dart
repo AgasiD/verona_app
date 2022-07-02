@@ -21,7 +21,7 @@ class Obra {
   String lote;
   List<Propietario> propietarios;
   String? ts;
-  List<Pedido> pedidos;
+  List<dynamic> pedidos;
   Obra({
     required this.nombre,
     this.id = '',
@@ -62,31 +62,28 @@ class Obra {
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
-      nombre: json["nombre"],
-      id: json["id"],
-      barrio: json["barrio"],
-      chatE: json["chatE"],
-      chatI: json["chatI"],
-      diasEstimados: json["diasEstimados"],
-      diasInactivos: json["diasInactivos"],
-      diasTranscurridos: json["diasTranscurridos"],
-      docs: json["docs"],
-      descripcion: json['descripcion'] ?? 'Sin descripción',
-      equipo: (json["equipo"] as List<dynamic>)
-          .map((e) => Miembro.fromJson(e))
-          .toList(),
-      estadios: json["estadios"],
-      imageId: json['imageId'] ?? '',
-      lote: json["lote"],
-      ts: json["ts"],
-      propietarios: (json["propietarios"] as List<dynamic>)
-          .map((e) => Propietario.fromJson(e))
-          .toList(),
-      pedidos: json["pedidos"] != null
-          ? (json["pedidos"] as List<dynamic>)
-              .map((e) => Pedido.fromJson(e))
-              .toList()
-          : []);
+        nombre: json["nombre"],
+        id: json["id"],
+        barrio: json["barrio"],
+        chatE: json["chatE"],
+        chatI: json["chatI"],
+        diasEstimados: json["diasEstimados"],
+        diasInactivos: json["diasInactivos"],
+        diasTranscurridos: json["diasTranscurridos"],
+        docs: json["docs"],
+        descripcion: json['descripcion'] ?? 'Sin descripción',
+        equipo: (json["equipo"] as List<dynamic>)
+            .map((e) => Miembro.fromJson(e))
+            .toList(),
+        estadios: json["estadios"],
+        imageId: json['imageId'] ?? '',
+        lote: json["lote"],
+        ts: json["ts"],
+        propietarios: (json["propietarios"] as List<dynamic>)
+            .map((e) => Propietario.fromJson(e))
+            .toList(),
+        pedidos: json["pedidos"] ?? [],
+      );
 
   toMap() => {
         'nombre': this.nombre,

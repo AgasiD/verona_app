@@ -170,6 +170,14 @@ class Helper {
     return fechaMensaje;
   }
 
+  static String getFechaFromTS(int ts) {
+    final tiempoMensaje = DateTime.fromMillisecondsSinceEpoch(ts);
+
+    var fecha = DateFormat('dd/MM/yy').format(tiempoMensaje);
+
+    return fecha;
+  }
+
   static toCustomTile(text1, text2, text3) {
     return {"title": text1, "subtitle": text2, "avatar": text3};
   }

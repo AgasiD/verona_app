@@ -38,7 +38,7 @@ class Pedido {
   factory Pedido.fromJson(Map<String, dynamic> json) => Pedido(
       id: json["id"],
       idUsuario: json["idUsuario"],
-      idObra: json["idObra"],
+      idObra: json["idObra"] ?? '',
       nota: json["nota"],
       prioridad: json["prioridad"],
       asignado: json["asignado"],

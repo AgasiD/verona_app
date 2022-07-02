@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/models/pedido.dart';
 import 'package:verona_app/services/http_service.dart';
 
 class ObraService extends ChangeNotifier {
@@ -82,5 +83,37 @@ class ObraService extends ChangeNotifier {
     final notificaciones = MyResponse.fromJson(response);
     notifyListeners();
     return notificaciones;
+  }
+
+  Future<MyResponse> obtenerPedidos(String obraId) async {
+    final datos = await this._http.get('$_endpoint/obtenerPedidos/$obraId');
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    return resp;
+  }
+
+  Future<MyResponse> obtenerPedido(String pedidoId) async {
+    final datos = await this._http.get('$_endpoint/obtenerPedido/$pedidoId');
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    return resp;
+  }
+
+  Future<MyResponse> nuevoPedido(Pedido pedido) async {
+    final datos =
+        await this._http.post('$_endpoint/agregarPedido', pedido.toJson());
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+    return resp;
+  }
+
+  Future<MyResponse> editPedido(Pedido pedido) async {
+    final datos =
+        await this._http.put('$_endpoint/actualizarPedido/', pedido.toJson());
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+    return resp;
   }
 }
