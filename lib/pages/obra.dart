@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -7,7 +6,6 @@ import 'package:verona_app/models/obra.dart';
 
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
-import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/inactividades.dart';
 import 'package:verona_app/pages/listas/equipo.dart';
 import 'package:verona_app/pages/listas/pedidos_obra.dart';
@@ -26,6 +24,8 @@ class ObraPage extends StatelessWidget {
     final obraId = arguments['obraId'];
     final _service = Provider.of<ObraService>(context);
     final _pref = new Preferences();
+    final esDelivery = _pref.role == 6;
+
     return Scaffold(
         bottomNavigationBar: CustomNavigatorFooter(),
         body: FutureBuilder(
@@ -87,44 +87,52 @@ class ObraPage extends StatelessWidget {
                                       obraId: obraId,
                                     ),
                                     CaracteristicaObra(),
-                                    _DiasView(obra: obra, obraId: obraId),
-                                    Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          vertical: 25.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          _pref.role != 3
-                                              ? CustomNavigatorButton(
-                                                  icono: Icons.groups_outlined,
+                                    !esDelivery
+                                        ? _DiasView(obra: obra, obraId: obraId)
+                                        : Container(),
+                                    !esDelivery
+                                        ? Container(
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical: 25.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                _pref.role != 3
+                                                    ? CustomNavigatorButton(
+                                                        icono: Icons
+                                                            .groups_outlined,
+                                                        accion: () {
+                                                          Navigator.pushNamed(
+                                                              context,
+                                                              ChatPage
+                                                                  .routeName,
+                                                              arguments: {
+                                                                'chatId':
+                                                                    obra.chatI
+                                                              });
+                                                        },
+                                                        showNotif: true,
+                                                      )
+                                                    : Container(width: 60),
+                                                CustomNavigatorButton(
+                                                  icono: Icons.chat,
                                                   accion: () {
-                                                    Navigator.pushNamed(context,
-                                                        ChatPage.routeName,
-                                                        arguments: {
-                                                          'chatId': obra.chatI
-                                                        });
+                                                    openDialogConfirmation(
+                                                        context, (ctx) {
+                                                      Navigator.pushNamed(ctx,
+                                                          ChatPage.routeName,
+                                                          arguments: {
+                                                            'chatId': obra.chatE
+                                                          });
+                                                    }, 'Abrirá chat con propietarios');
                                                   },
                                                   showNotif: true,
                                                 )
-                                              : Container(width: 60),
-                                          CustomNavigatorButton(
-                                            icono: Icons.chat,
-                                            accion: () {
-                                              openDialogConfirmation(context,
-                                                  (ctx) {
-                                                Navigator.pushNamed(
-                                                    ctx, ChatPage.routeName,
-                                                    arguments: {
-                                                      'chatId': obra.chatE
-                                                    });
-                                              }, 'Abrirá chat con propietarios');
-                                            },
-                                            showNotif: true,
+                                              ],
+                                            ),
                                           )
-                                        ],
-                                      ),
-                                    ),
+                                        : Container(),
                                   ]),
                                 ),
                               );
@@ -262,66 +270,80 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
   List<Item> _generarItems(Obra obra) {
     List<Item> items = [];
+    final _pref = new Preferences();
     //Desplegable de propietarios
-    final propietarios = Item(
-        icon: Icons.key,
-        titulo: 'Propietarios',
-        route: PropietariosList.routeName,
+    if (_pref.role != 6) {
+      final propietarios = Item(
+          icon: Icons.key,
+          titulo: 'Propietarios',
+          route: PropietariosList.routeName,
+          accion: () {
+            Navigator.pushNamed(context, PropietariosList.routeName,
+                arguments: {'obraId': obra.id});
+            return 1;
+          },
+          values: [].toList());
+      items.add(propietarios);
+
+      //Desplegable de equipo
+      final team = Item(
+        icon: Icons.groups_rounded,
+        list: 2,
+        titulo: 'Equipo',
+        values: [].toList(),
         accion: () {
-          Navigator.pushNamed(context, PropietariosList.routeName,
+          Navigator.pushNamed(context, EquipoList.routeName,
               arguments: {'obraId': obra.id});
           return 1;
         },
-        values: [].toList());
-    items.add(propietarios);
+      );
+      items.add(team);
 
-    //Desplegable de equipo
-    final team = Item(
-      icon: Icons.groups_rounded,
-      list: 2,
-      titulo: 'Equipo',
-      values: [].toList(),
-      accion: () {
-        Navigator.pushNamed(context, EquipoList.routeName,
-            arguments: {'obraId': obra.id});
-        return 1;
-      },
-    );
-    items.add(team);
+      //Desplegable de docs
+      final doc = Item(
+        icon: Icons.file_copy,
+        list: 2,
+        titulo: 'Documentos',
+        values: [].toList(),
+        accion: () {},
+      );
+      items.add(doc);
 
-    //Desplegable de docs
-    final doc = Item(
-      icon: Icons.file_copy,
-      list: 2,
-      titulo: 'Documentos',
-      values: [].toList(),
-      accion: () {},
-    );
-    items.add(doc);
+      final status = Item(
+        icon: Icons.account_tree,
+        list: 2,
+        titulo: 'Etapas',
+        values: [].toList(),
+        accion: () {},
+      );
+      items.add(status);
 
-    final status = Item(
-      icon: Icons.account_tree,
-      list: 2,
-      titulo: 'Etapas',
-      values: [].toList(),
-      accion: () {},
-    );
-    items.add(status);
-
-    final pedidos = Item(
-      icon: Icons.request_page_outlined,
-      list: 2,
-      titulo: 'Pedidos',
-      values: [].toList(),
-      accion: () {
-        Navigator.pushNamed(
-          context,
-          PedidoList.routeName,
-        );
-      },
-    );
-    items.add(pedidos);
-
+      final pedidos = Item(
+        icon: Icons.request_page_outlined,
+        list: 2,
+        titulo: 'Pedidos',
+        values: [].toList(),
+        accion: () {
+          Navigator.pushNamed(
+            context,
+            PedidoList.routeName,
+          );
+        },
+      );
+      items.add(pedidos);
+    } else {
+      final pedidos = Item(
+        icon: Icons.request_page_outlined,
+        list: 2,
+        titulo: 'Pedidos',
+        values: [].toList(),
+        accion: () {
+          Navigator.pushNamed(context, PedidoList.routeName,
+              arguments: {'deliveryId': _pref.id});
+        },
+      );
+      items.add(pedidos);
+    }
     return items;
   }
 }

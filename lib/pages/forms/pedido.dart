@@ -51,15 +51,30 @@ class PedidoForm extends StatelessWidget implements MyForm {
   }
 }
 
-class _Form extends StatelessWidget {
+class _Form extends StatefulWidget {
   _Form({Key? key, this.pedido = null}) : super(key: key);
   Pedido? pedido;
+
+  @override
+  State<_Form> createState() => _FormState();
+}
+
+class _FormState extends State<_Form> {
   Color colorHint = Helper.brandColors[3];
+
   Preferences _pref = new Preferences();
+
   int prioridad = 1;
+  String repartidoId = '';
   String title = 'nuevo pedido';
+  String usuarioAsignado = '1';
+
   bool enable = true;
+
+  bool pedidoCerrado = false, pedidoAsignado = false;
+
   TextEditingController areaTxtController = new TextEditingController();
+  late List<DropdownMenuItem<String>> repartidores;
   List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[
     DropdownMenuItem(
       value: 1,
@@ -74,18 +89,75 @@ class _Form extends StatelessWidget {
       child: Text('Prioridad alta'.toUpperCase()),
     )
   ];
+
+  late bool vistaComprado, vistaDelivery, vistaAdmin, vistaGeneral;
+
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context);
-    int initialData = 0;
 
-    if (pedido != null) {
-      initialData = pedido!.prioridad;
-      areaTxtController.text = pedido!.nota;
+    // SI ES UN PEDIDO EXISTENTE
+    if (widget.pedido != null) {
+      areaTxtController.text = widget.pedido!.nota;
       title = 'editar pedido';
-      prioridad = pedido!.prioridad;
-      pedido!.asignado ? enable = false : true;
-      pedido!.cerrado ? enable = false : true;
+      prioridad = widget.pedido!.prioridad;
+      widget.pedido!.asignado ? enable = false : true;
+      widget.pedido!.cerrado ? enable = false : true;
+      final rep = _obraService.obra.equipo
+          .where((element) => element.role == 6)
+          .toList();
+
+      repartidores = rep
+          .map((e) => DropdownMenuItem(
+                value: e.id,
+                child: Text('${e.nombre} ${e.apellido}'.toUpperCase()),
+              ))
+          .toList();
+      repartidores.insert(
+          0,
+          DropdownMenuItem(
+            value: '1',
+            child: Text('Seleccione repartidor'.toUpperCase()),
+          ));
+      if (repartidores.length == 1) {
+        repartidores.add(DropdownMenuItem(
+          value: '1',
+          child: Text('Sin repartidores asignados'.toUpperCase()),
+        ));
+      }
+
+      repartidoId = '1';
+
+      if (widget.pedido!.asignado) {
+        pedidoAsignado = true;
+        repartidoId = widget.pedido!.usuarioAsignado;
+        usuarioAsignado = widget.pedido!.usuarioAsignado;
+      }
+    }
+    // vista admin
+    if (widget.pedido != null && _pref.role == 1 && !widget.pedido!.cerrado) {
+      vistaAdmin = true;
+      vistaComprado = false;
+      vistaDelivery = false;
+    } else if (widget.pedido != null &&
+        _pref.role == 5 &&
+        !widget.pedido!.cerrado) {
+      //vista comprado
+      vistaAdmin = false;
+      vistaComprado = true;
+      vistaDelivery = false;
+    } else if (widget.pedido != null &&
+        _pref.role == 6 &&
+        !widget.pedido!.cerrado) {
+      // vista repartidor
+      vistaAdmin = false;
+      vistaComprado = false;
+      vistaDelivery = true;
+    } else {
+      vistaGeneral = true;
+      vistaAdmin = false;
+      vistaComprado = false;
+      vistaDelivery = false;
     }
     return Container(
         color: Helper.brandColors[1],
@@ -152,6 +224,73 @@ class _Form extends StatelessWidget {
                           onSaved: (value) {},
                         )
                       : Container(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  (vistaAdmin || vistaComprado)
+                      ? DropdownButtonFormField2(
+                          value: repartidoId,
+                          items: repartidores,
+                          style: TextStyle(
+                              color: Helper.brandColors[5], fontSize: 16),
+                          iconSize: 30,
+                          buttonHeight: 60,
+                          buttonPadding: EdgeInsets.only(left: 20, right: 10),
+                          decoration: getDecoration(),
+                          hint: Text(
+                            'Seleccione delivery',
+                            style: TextStyle(fontSize: 16, color: colorHint),
+                          ),
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: colorHint,
+                          ),
+                          dropdownDecoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Helper.brandColors[2],
+                          ),
+                          onChanged: (value) {
+                            if (value != '1') {
+                              pedidoAsignado = true;
+                              usuarioAsignado = value.toString();
+                              widget.pedido!.tsAsignado =
+                                  DateTime.now().millisecondsSinceEpoch;
+                            } else {
+                              widget.pedido!.tsAsignado = 0;
+                              widget.pedido!.usuarioAsignado = '';
+                              pedidoAsignado = false;
+                            }
+                          },
+                          onSaved: (value) {},
+                        )
+                      : Container(),
+                  (vistaAdmin || vistaComprado || vistaDelivery) &&
+                          widget.pedido!.asignado
+                      ? Row(
+                          children: [
+                            Text(
+                              'Cerrar pedido',
+                              style: TextStyle(color: Helper.brandColors[5]),
+                            ),
+                            Switch(
+                                value: pedidoCerrado,
+                                activeColor: Helper.brandColors[3],
+                                activeTrackColor: Helper.brandColors[8],
+                                inactiveTrackColor: Helper.brandColors[3],
+                                onChanged: (cerrado) {
+                                  setState(() {
+                                    pedidoCerrado = cerrado;
+                                    if (cerrado) {
+                                      widget.pedido!.tsCerrado =
+                                          DateTime.now().millisecondsSinceEpoch;
+                                    } else {
+                                      widget.pedido!.tsCerrado = 0;
+                                    }
+                                  });
+                                })
+                          ],
+                        )
+                      : Container()
                 ],
               ),
             ),
@@ -159,35 +298,77 @@ class _Form extends StatelessWidget {
               height: 150,
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: widget.pedido != null
+                  ? widget.pedido!.cerrado
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.spaceAround
+                  : MainAxisAlignment.spaceAround,
               children: [
-                MainButton(
-                  width: 120,
-                  fontSize: 18,
-                  color: Helper.brandColors[8].withOpacity(.5).withAlpha(150),
-                  text: 'Grabar',
-                  onPressed: () async {
-                    String mensaje1 = 'Creando pedido...';
-                    String mensaje2 = 'Error al crear pedido';
-                    String mensaje3 = 'Pedido creado con exito';
-                    if (pedido != null) {
-                      mensaje1 = 'Actualizando pedido...';
-                      mensaje2 = 'Error al actualizar el pedido';
-                      mensaje3 = 'Pedido actualizado con exito';
-                    }
-                    openLoadingDialog(context, mensaje: mensaje1);
-                    final response = await grabarPedido(
-                        _obraService.obra.id, areaTxtController, _obraService);
-                    closeLoadingDialog(context);
+                widget.pedido != null
+                    ? !widget.pedido!.cerrado
+                        ? MainButton(
+                            width: 120,
+                            fontSize: 18,
+                            color: Helper.brandColors[8]
+                                .withOpacity(.5)
+                                .withAlpha(150),
+                            text: 'Grabar',
+                            onPressed: () async {
+                              String mensaje1 = 'Creando pedido...';
+                              String mensaje2 = 'Error al crear pedido';
+                              String mensaje3 = 'Pedido creado con exito';
+                              if (widget.pedido != null) {
+                                mensaje1 = 'Actualizando pedido...';
+                                mensaje2 = 'Error al actualizar el pedido';
+                                mensaje3 = 'Pedido actualizado con exito';
+                              }
+                              openLoadingDialog(context, mensaje: mensaje1);
+                              final response = await grabarPedido(
+                                  _obraService.obra.id,
+                                  areaTxtController,
+                                  _obraService);
+                              closeLoadingDialog(context);
 
-                    if (response[0]) {
-                      openAlertDialog(context, mensaje2,
-                          subMensaje: response[1]);
-                    } else {
-                      openAlertDialog(context, mensaje3);
-                    }
-                  },
-                ),
+                              if (response[0]) {
+                                openAlertDialog(context, mensaje2,
+                                    subMensaje: response[1]);
+                              } else {
+                                openAlertDialog(context, mensaje3);
+                              }
+                            },
+                          )
+                        : SizedBox()
+                    : MainButton(
+                        width: 120,
+                        fontSize: 18,
+                        color: Helper.brandColors[8]
+                            .withOpacity(.5)
+                            .withAlpha(150),
+                        text: 'Grabar',
+                        onPressed: () async {
+                          String mensaje1 = 'Creando pedido...';
+                          String mensaje2 = 'Error al crear pedido';
+                          String mensaje3 = 'Pedido creado con exito';
+                          if (widget.pedido != null) {
+                            mensaje1 = 'Actualizando pedido...';
+                            mensaje2 = 'Error al actualizar el pedido';
+                            mensaje3 = 'Pedido actualizado con exito';
+                          }
+                          openLoadingDialog(context, mensaje: mensaje1);
+                          final response = await grabarPedido(
+                              _obraService.obra.id,
+                              areaTxtController,
+                              _obraService);
+                          closeLoadingDialog(context);
+
+                          if (response[0]) {
+                            openAlertDialog(context, mensaje2,
+                                subMensaje: response[1]);
+                          } else {
+                            openAlertDialog(context, mensaje3);
+                          }
+                        },
+                      ),
                 SecondaryButton(
                     width: 120,
                     fontSize: 18,
@@ -204,7 +385,7 @@ class _Form extends StatelessWidget {
 
   grabarPedido(obraId, areaTxtController, ObraService _obraService) async {
     MyResponse response;
-    if (pedido == null) {
+    if (widget.pedido == null) {
       final ped = new Pedido(
           idObra: obraId,
           idUsuario: _pref.id,
@@ -212,14 +393,21 @@ class _Form extends StatelessWidget {
           prioridad: prioridad);
       response = await _obraService.nuevoPedido(ped);
     } else {
-      pedido!.nota = areaTxtController.text;
-      pedido!.prioridad = prioridad;
-      response = await _obraService.editPedido(pedido!);
-    }
-    if (response.fallo) {
-      return [true, response.error];
-    } else {
-      return [false, response.data];
+      if (usuarioAsignado == '1') {
+        return [true, 'No se ha seleccionado repartidor'];
+      } else {
+        widget.pedido!.nota = areaTxtController.text;
+        widget.pedido!.prioridad = prioridad;
+        widget.pedido!.asignado = pedidoAsignado;
+        widget.pedido!.usuarioAsignado = usuarioAsignado;
+        widget.pedido!.cerrado = pedidoCerrado;
+        response = await _obraService.editPedido(widget.pedido!);
+        if (response.fallo) {
+          return [true, response.error];
+        } else {
+          return [false, response.data];
+        }
+      }
     }
   }
 

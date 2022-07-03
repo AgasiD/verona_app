@@ -1,13 +1,8 @@
-import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
-import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/models/pedido.dart';
-import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -18,13 +13,22 @@ class PedidoList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _pref = new Preferences();
+
     final _obraService = Provider.of<ObraService>(context, listen: false);
+    Future future;
+    if (_pref.role == 6) {
+      future = _obraService.obtenerPedidosAsignadosDelivery(
+          _obraService.obra.id, _pref.id);
+    } else {
+      future = _obraService.obtenerPedidos(_obraService.obra.id);
+    }
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-              future: _obraService.obtenerPedidos(_obraService.obra.id),
+              future: future,
               builder: (context, snapshot) {
                 if (snapshot.data == null) {
                   return Loading(mensaje: 'Cargando equipo asignado');
@@ -33,7 +37,6 @@ class PedidoList extends StatelessWidget {
                   if (!response.fallo) {
                     final pedidos = response.data;
                     final _pref = new Preferences();
-                    print(pedidos.length);
                     if (pedidos.length > 0) {
                       return Column(
                         children: [
@@ -70,25 +73,28 @@ class PedidoList extends StatelessWidget {
                           SizedBox(
                             height: 10,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              MainButton(
-                                width: 150,
-                                height: 20,
-                                color: Helper.brandColors[8],
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, PedidoForm.routeName,
-                                      arguments: {
-                                        'obraId': _obraService.obra.id
-                                      });
-                                },
-                                text: 'Crear pedido',
-                                fontSize: 15,
-                              ),
-                            ],
-                          )
+                          _pref.role != 6
+                              ? Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    MainButton(
+                                      width: 150,
+                                      height: 20,
+                                      color: Helper.brandColors[8],
+                                      onPressed: () {
+                                        Navigator.pushNamed(
+                                            context, PedidoForm.routeName,
+                                            arguments: {
+                                              'obraId': _obraService.obra.id
+                                            });
+                                      },
+                                      text: 'Crear pedido',
+                                      fontSize: 15,
+                                    ),
+                                  ],
+                                )
+                              : Container()
                         ],
                       );
                     } else {
@@ -108,26 +114,29 @@ class PedidoList extends StatelessWidget {
                           SizedBox(
                             height: 10,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              MainButton(
-                                width: 150,
-                                height: 20,
-                                color: Helper.brandColors[8],
-                                onPressed: () {
-                                  print('hola');
-                                  Navigator.pushNamed(
-                                      context, PedidoForm.routeName,
-                                      arguments: {
-                                        'obraId': _obraService.obra.id
-                                      });
-                                },
-                                text: 'Crear pedido',
-                                fontSize: 15,
-                              ),
-                            ],
-                          )
+                          _pref.role != 6
+                              ? Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    MainButton(
+                                      width: 150,
+                                      height: 20,
+                                      color: Helper.brandColors[8],
+                                      onPressed: () {
+                                        print('hola');
+                                        Navigator.pushNamed(
+                                            context, PedidoForm.routeName,
+                                            arguments: {
+                                              'obraId': _obraService.obra.id
+                                            });
+                                      },
+                                      text: 'Crear pedido',
+                                      fontSize: 15,
+                                    ),
+                                  ],
+                                )
+                              : Container()
                         ],
                       );
                     }

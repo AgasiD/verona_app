@@ -921,19 +921,36 @@ class CustomNavigatorFooter extends StatelessWidget {
                 }
               }),
           CustomNavigatorButton(
-              showNotif: false,
-              icono: Icons.person_outline,
-              accion: () =>
-                  Navigator.pushReplacementNamed(context, ObrasPage.routeName)),
+            showNotif: false,
+            icono: Icons.person_outline,
+            accion: () {
+              final name = ModalRoute.of(context)!.settings.name;
+              if (name != ObrasPage.routeName) {
+                Navigator.pushReplacementNamed(context, ObrasPage.routeName);
+              }
+            },
+          ),
           CustomNavigatorButton(
-              showNotif: true,
-              icono: Icons.notifications_none_rounded,
-              accion: () =>
-                  Navigator.pushNamed(context, NotificacionesPage.routeName)),
+            showNotif: true,
+            icono: Icons.notifications_none_rounded,
+            accion: () {
+              final name = ModalRoute.of(context)!.settings.name;
+              if (name != NotificacionesPage.routeName) {
+                Navigator.pushReplacementNamed(
+                    context, NotificacionesPage.routeName);
+              }
+            },
+          ),
           CustomNavigatorButton(
-              showNotif: true,
-              icono: Icons.message_outlined,
-              accion: () => Navigator.pushNamed(context, ChatList.routeName)),
+            showNotif: true,
+            icono: Icons.message_outlined,
+            accion: () {
+              final name = ModalRoute.of(context)!.settings.name;
+              if (name != ChatList.routeName) {
+                Navigator.pushReplacementNamed(context, ChatList.routeName);
+              }
+            },
+          ),
         ],
       ),
     );

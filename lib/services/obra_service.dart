@@ -92,6 +92,15 @@ class ObraService extends ChangeNotifier {
     return resp;
   }
 
+  Future<MyResponse> obtenerPedidosAsignadosDelivery(
+      String obraId, String deliveryId) async {
+    final datos = await this._http.post('$_endpoint/obtenerPedidosByDelivery',
+        {'obraId': obraId, 'deliveryId': deliveryId});
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    return resp;
+  }
+
   Future<MyResponse> obtenerPedido(String pedidoId) async {
     final datos = await this._http.get('$_endpoint/obtenerPedido/$pedidoId');
     final response = datos["response"];
