@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:async/async.dart';
@@ -58,7 +60,7 @@ class HttpService extends ChangeNotifier {
     return data;
   }
 
-  upload(XFile imageFile, String endpoint) async {
+  uploadImage(XFile imageFile, String endpoint) async {
     String imgId = '';
     // open a bytestream
     var stream =
@@ -91,5 +93,96 @@ class HttpService extends ChangeNotifier {
 
     await c;
     return imgId;
+  }
+
+  uploadDocument(FilePickerResult file, String endpoint) async {
+    String imgId = '';
+    // open a bytestream
+    var stream = new http.ByteStream(
+        DelegatingStream.typed(file.files.single.readStream!));
+    // get file length
+    var length = await file.files.single.size;
+    // string to uri
+    if (isProduction) {
+      url = Uri.https(_baseUrl, endpoint);
+    } else {
+      url = Uri.http(_baseUrl, endpoint);
+    }
+    // create multipart request
+    var request = new http.MultipartRequest("POST", url);
+
+    // multipart that takes file
+    var multipartFile = http.MultipartFile('pdf', stream, length,
+        filename: basename('fileName'));
+
+    // add file to multipart
+    request.files.add(multipartFile);
+
+    // send
+    final a = await request.send();
+    // listen for response
+    final b = a.stream.transform(utf8.decoder);
+    final c = b.listen((value) {
+      imgId = value;
+    }).asFuture();
+
+    await c;
+    return imgId;
+
+    /*
+//create multipart request for POST or PATCH method
+    if (isProduction) {
+      url = Uri.https(_baseUrl, endpoint);
+    } else {
+      url = Uri.http(_baseUrl, endpoint);
+    }
+    var request = http.MultipartRequest("POST", url);
+    //add text fields
+    request.fields["text_field"] = 'NO SE QUE VA ACA';
+    //create multipart using filepath, string or bytes
+    var pic = await http.MultipartFile.fromPath(
+        "file_field", file.files.single.path!);
+    //add multipart to request
+    request.files.add(pic);
+    var response = await request.send();
+
+    //Get the response from the server
+    var responseData = await response.stream.toBytes();
+    var responseString = String.fromCharCodes(responseData);
+    print(responseString);
+*/
+
+    // String imgId = '';
+    // Uint8List fileBytes = file.files.first.bytes!;
+    // // open a bytestream
+    // var stream = new http.ByteStream(DelegatingStream.typed(file.files.single. .openRead()));
+    // // get file length
+    // var length = await file.files.single.size;
+    // // string to uri
+    // if (isProduction) {
+    //   url = Uri.https(_baseUrl, endpoint);
+    // } else {
+    //   url = Uri.http(_baseUrl, endpoint);
+    // }
+    // // create multipart request
+    // var request = new http.MultipartRequest("POST", url);
+
+    // // multipart that takes file
+    // var multipartFile = http.MultipartFile('image', stream, length,
+    //     filename: basename('fileName'));
+
+    // // add file to multipart
+    // request.files.add(multipartFile);
+
+    // // send
+    // final a = await request.send();
+    // // listen for response
+    // final b = a.stream.transform(utf8.decoder);
+    // final c = b.listen((value) {
+    //   imgId = value;
+    // }).asFuture();
+
+    // await c;
+    // return imgId;
   }
 }

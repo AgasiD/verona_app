@@ -109,6 +109,7 @@ class _ObrasPageState extends State<ObrasPage> {
                 // child: Hero(
                 //   tag: 'obra',
                 child: FadeInImage(
+                    width: MediaQuery.of(context).size.width * .47,
                     image: AssetImage(
                         'assets/image.png'), //NetworkImage(obra.imagen),
                     placeholder: AssetImage('assets/image.png')),
@@ -257,7 +258,11 @@ Container _obraCard(BuildContext context, Obra obra) {
       ? NetworkImage(
           'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
       : NetworkImage(
-          'https://drive.google.com/uc?export=view&id=${obra.imageId}');
+          'https://drive.google.com/uc?export=view&id=${obra.imageId}',
+          headers: {
+              "Authorization":
+                  "Bearer ya29.A0ARrdaM_6GO94psBfX0G8FhqeJLZ2ItNjaOOVYcYBwRmNssneRoaF82hENqCcrQrVfMKrJEjtyEdVPO7nxiJUU3xZiKkYLTWrTm8-PSJV-kiuxErcHwX_2Vd31vi6VfS8XDw9IRwnalhvtTqzE2H2RP7z40NRNg"
+            });
   return Container(
     margin: EdgeInsets.symmetric(horizontal: 20),
     child: GestureDetector(
@@ -299,8 +304,9 @@ Container _obraCard(BuildContext context, Obra obra) {
                       image: imagen,
                       imageErrorBuilder: (_, obj, st) {
                         return Container(
-                            child:
-                                Image(image: AssetImage('assets/image.png')));
+                            child: Image(
+                                width: MediaQuery.of(context).size.width * .47,
+                                image: AssetImage('assets/image.png')));
                       },
                       placeholder: AssetImage('assets/loading-image.gif')),
                 ),

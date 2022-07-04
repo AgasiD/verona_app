@@ -4,6 +4,7 @@ import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/contactos.dart';
+import 'package:verona_app/pages/forms/documento.dart';
 import 'package:verona_app/pages/forms/inactividad.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -22,6 +23,7 @@ import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/pages/pedidos.dart';
 import 'package:verona_app/pages/prueba.dart';
+import 'package:verona_app/pages/visor_imagen.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   AgregarPropietariosPage.routeName: (_) => AgregarPropietariosPage(),
@@ -29,9 +31,11 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   ChatPage.routeName: (_) => ChatPage(),
   ChatList.routeName: (_) => ChatList(),
   ContactsPage.routeName: (_) => ContactsPage(),
+  DocumentoForm.routeName: (_) => DocumentoForm(),
   DocumentosPage.routeName: (_) => DocumentosPage(),
   EquipoList.routeName: (_) => EquipoList(),
   FormPage.routeName: (_) => FormPage(),
+  ImagenViewer.routeName: (_) => ImagenViewer(),
   InactividadesPage.routeName: (_) => InactividadesPage(),
   InactividadesForm.routeName: (_) => InactividadesForm(),
   LoginPage.routeName: (_) => LoginPage(),

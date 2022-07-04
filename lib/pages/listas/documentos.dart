@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:verona_app/helpers/Preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/chat.dart';
-import 'package:verona_app/pages/obra.dart';
+import 'package:verona_app/pages/forms/documento.dart';
+import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/obra_service.dart';
-import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class DocumentosPage extends StatelessWidget {
@@ -21,7 +21,7 @@ class DocumentosPage extends StatelessWidget {
           color: Helper.brandColors[1],
           child: SafeArea(child: _DocumentosList())),
       floatingActionButton: CustomNavigatorButton(
-        accion: () => Navigator.pushNamed(context, ChatPage.routeName),
+        accion: () => Navigator.pushNamed(context, DocumentoForm.routeName),
         icono: Icons.add,
         showNotif: false,
       ),
@@ -101,7 +101,6 @@ class _CustomListViewState extends State<_CustomListView> {
   ];
   @override
   Widget build(BuildContext context) {
-    late dynamic iconAvatar;
     late Function()? actionOnTap;
     return Container(
         height: MediaQuery.of(context).size.height,
@@ -112,26 +111,76 @@ class _CustomListViewState extends State<_CustomListView> {
               if (i % 2 == 0) {
                 esPar = true;
               }
-              iconAvatar = Icons.picture_as_pdf_outlined;
+              final iconAvatar = getIcon(widget.data[i]['mimeType']);
 
               String route = '';
               Map<String, dynamic> arg = {};
-
-              if (route == '') {
-                actionOnTap = null;
+              if (getType(widget.data[i]['mimeType']) == 'jpg') {
+                actionOnTap = () =>
+                    Navigator.pushNamed((context), ImagenViewer.routeName);
               } else {
-                actionOnTap =
-                    () => Navigator.pushNamed((context), route, arguments: arg);
+                actionOnTap = () async {
+                  final Uri _url = Uri.parse(
+                      'https://drive.google.com/file/d/1JN70EnLrwbDDK3Kf8mT0xjTYWh0YXSRn/view?usp=sharing');
+                  if (await canLaunchUrl(_url))
+                    await launchUrl(_url);
+                  else
+                    // can't launch url, there is some error
+                    throw "Could not launch $_url";
+                };
               }
-
               return _CustomListTile(
                 iconAvatar: iconAvatar,
                 esPar: esPar,
                 title: widget.data[i]['name'],
-                subtitle: 'PDF',
+                subtitle: getType(widget.data[i]['mimeType']).toUpperCase(),
                 actionOnTap: actionOnTap,
               );
             }));
+  }
+
+  String getType(type) {
+    String extension = '';
+    switch (type) {
+      case 'application/pdf':
+        extension = 'pdf';
+        break;
+
+      case 'image/jpeg':
+        extension = 'jpg';
+        break;
+
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        extension = 'docx';
+        break;
+
+      case 'application/vnd.ms-excel':
+        extension = 'xls';
+        break;
+    }
+    return extension;
+  }
+
+  IconData getIcon(type) {
+    IconData icon = Icons.picture_as_pdf_outlined;
+    switch (type) {
+      case 'application/pdf':
+        icon = Icons.picture_as_pdf_rounded;
+        break;
+
+      case 'image/jpeg':
+        icon = Icons.image_outlined;
+        break;
+
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        icon = Icons.file_copy;
+        break;
+
+      case 'application/vnd.ms-excel':
+        icon = Icons.calculate_outlined;
+        break;
+    }
+    return icon;
   }
 }
 
@@ -157,10 +206,6 @@ class _CustomListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
-    final texts = title.split('.');
-
-    final titleAux = texts.first;
-    subtitle = texts.last.toUpperCase();
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: this.padding),
@@ -178,10 +223,10 @@ class _CustomListTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100)),
                 child: CircleAvatar(
                   backgroundColor: Helper.brandColors[0],
-                  child: Icon(iconAvatar),
+                  child: Icon(iconAvatar, color: Helper.brandColors[8]),
                 ),
               ),
-              title: Text(titleAux,
+              title: Text(title,
                   style: TextStyle(
                       color: Helper.brandColors[5], fontSize: fontSize)),
               subtitle: this.subtitle != ''
@@ -206,64 +251,6 @@ class _CustomListTile extends StatelessWidget {
     ;
   }
 }
-
-
-
-// ListView.builder(
-//                       itemCount: notificaciones.length,
-//                       itemBuilder: (BuildContext context, int i) {
-//                         final iconName = notificaciones[i]['type'];
-//                         String route = '';
-//                         Map<String, dynamic> arg = {};
-//                         switch (notificaciones[i]['type']) {
-//                           case 'obra':
-//                             route = ObraPage.routeName;
-//                             arg = {'obraId': notificaciones[i]['route']};
-//                             break;
-//                         }
-
-//                         return Column(
-//                           children: [
-//                             ListTile(
-//                               onTap: () {
-//                                 Navigator.pushNamed(context, route,
-//                                     arguments: arg);
-//                               },
-//                               title: Text(notificaciones[i]['title']),
-//                               subtitle: Text(
-//                                 notificaciones[i]['subtitle'],
-//                                 style: TextStyle(fontSize: 14),
-//                               ),
-//                               leading: CircleAvatar(
-//                                 backgroundColor: !notificaciones[i]['leido']
-//                                     ? Color.fromARGB(255, 101, 171, 180)
-//                                     : Colors.white,
-//                                 foregroundColor: notificaciones[i]['leido']
-//                                     ? Colors.blue
-//                                     : Colors.white,
-//                                 child: Icon(iconos
-//                                     .where((element) =>
-//                                         element.containsKey(iconName))
-//                                     .first[iconName]),
-//                               ),
-//                               trailing: Column(
-//                                   mainAxisAlignment:
-//                                       MainAxisAlignment.spaceBetween,
-//                                   children: [
-//                                     Icon(Icons.arrow_forward_ios_rounded),
-//                                     Text(
-//                                       Helper.getFechaHoraFromTS(
-//                                           notificaciones[i]['ts']),
-//                                       style: TextStyle(color: Colors.grey),
-//                                     )
-//                                   ]),
-//                             ),
-//                             Divider(
-//                               height: 25,
-//                             ),
-//                           ],
-//                         );
-//                       }),
 
 /*
 
