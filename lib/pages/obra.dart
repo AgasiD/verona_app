@@ -7,6 +7,7 @@ import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/inactividades.dart';
+import 'package:verona_app/pages/listas/documentos.dart';
 import 'package:verona_app/pages/listas/equipo.dart';
 import 'package:verona_app/pages/listas/pedidos_obra.dart';
 import 'package:verona_app/pages/listas/propietarios.dart';
@@ -305,7 +306,9 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         list: 2,
         titulo: 'Documentos',
         values: [].toList(),
-        accion: () {},
+        accion: () {
+          Navigator.pushNamed(context, DocumentosPage.routeName);
+        },
       );
       items.add(doc);
 

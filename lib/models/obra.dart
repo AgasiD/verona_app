@@ -22,6 +22,7 @@ class Obra {
   List<Propietario> propietarios;
   String? ts;
   List<dynamic> pedidos;
+  String? driveFolderId;
   Obra({
     required this.nombre,
     this.id = '',
@@ -39,6 +40,7 @@ class Obra {
     this.propietarios = const [],
     this.descripcion = 'Sin descripción',
     this.pedidos = const [],
+    this.driveFolderId = '',
     ts,
   }) {
     this.nombre = nombre;
@@ -56,6 +58,7 @@ class Obra {
     this.lote = lote;
     this.descripcion = descripcion;
     this.pedidos = pedidos;
+    this.driveFolderId = driveFolderId;
     this.ts =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
@@ -71,6 +74,7 @@ class Obra {
         diasInactivos: json["diasInactivos"],
         diasTranscurridos: json["diasTranscurridos"],
         docs: json["docs"],
+        driveFolderId: json["driveFolderId"],
         descripcion: json['descripcion'] ?? 'Sin descripción',
         equipo: (json["equipo"] as List<dynamic>)
             .map((e) => Miembro.fromJson(e))
@@ -102,7 +106,8 @@ class Obra {
         'ts': this.ts,
         'propietarios': this.propietarios,
         'descripcion': this.descripcion,
-        'pedidos': this.pedidos
+        'pedidos': this.pedidos,
+        'driveFolderId': this.driveFolderId
       };
 
   estaPropietario(usuarioId) {

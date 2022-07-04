@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/services/http_service.dart';
 
 class GoogleDriveService extends ChangeNotifier {
@@ -18,6 +19,14 @@ class GoogleDriveService extends ChangeNotifier {
 
   guardarImagen(XFile img) {
     this._img = img;
+  }
+
+  obtenerDocumentos(String folderId) async {
+    folderId = folderId == '' ? 'SinID' : folderId;
+    final datos = await this._http.get('$_endpoint/inFolder/$folderId');
+    final response = MyResponse.fromJson(datos['response']);
+
+    return response;
   }
 
   imagenValida() {
