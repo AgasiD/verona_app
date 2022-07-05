@@ -27,7 +27,6 @@ class GoogleDriveService extends ChangeNotifier {
         final to = _endpoint + "/$fileName/$extension/$parent";
 
         final datos = await this._http.uploadDocument(_document, to);
-        print('imagen grabada');
         notifyListeners();
         return datos;
       } else {

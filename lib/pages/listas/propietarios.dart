@@ -54,7 +54,6 @@ class PropietariosList extends StatelessWidget {
                                     height: 20,
                                     color: Helper.brandColors[8],
                                     onPressed: () {
-                                      print('psuh');
                                       Navigator.pushNamed(context,
                                           AgregarPropietariosPage.routeName);
                                     },

@@ -211,7 +211,6 @@ class _FormState extends State<_Form> {
                         if (image != null) {
                           _driveService.guardarImagen(image!);
                           setState(() {
-                            print(image);
                             imageSelected = true;
                           });
                         }

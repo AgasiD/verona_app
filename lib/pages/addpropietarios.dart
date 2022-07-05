@@ -171,7 +171,6 @@ class __customTileAddedState extends State<_customTileAdded> {
             } else {
               openLoadingDialog(context, mensaje: 'Asociando propietario...');
               mensaje = 'Propietario asignado';
-              print(widget.propietario.dni);
               await _ObraService.agregarUsuario(
                   widget.obra.id, widget.propietario.dni);
               widget.asignados.add(widget.propietario.dni);

@@ -36,7 +36,6 @@ class _ObrasPageState extends State<ObrasPage> {
     this.obrasFiltradas = await _obras.obtenerObrasByUser(_pref.id);
     setState(() {});
     // if failed,use refreshFailed()
-    print('obras filtradas ' + this.obrasFiltradas.length.toString());
     _refreshController.refreshCompleted();
     // _obras.notifyListeners();
   }
@@ -44,7 +43,6 @@ class _ObrasPageState extends State<ObrasPage> {
   void _onLoading() async {
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 1000));
-    print(' On loading! ');
     // if failed,use loadFailed(),if no data return,use LoadNodata()
     _refreshController.loadComplete();
   }

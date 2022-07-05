@@ -66,7 +66,6 @@ class SocketService with ChangeNotifier {
   }
 
   void enviarMensaje(Message mensaje) {
-    print('mensaje enviado');
     this._socket.emit('nuevo-mensaje', mensaje.toMap());
   }
 

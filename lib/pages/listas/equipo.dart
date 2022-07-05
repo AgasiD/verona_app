@@ -92,7 +92,6 @@ class EquipoList extends StatelessWidget {
                                     height: 20,
                                     color: Helper.brandColors[8],
                                     onPressed: () {
-                                      print('hola');
                                       Navigator.pushNamed(
                                           context, AsignarEquipoPage.routeName);
                                     },

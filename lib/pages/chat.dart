@@ -216,7 +216,6 @@ class _ListMessageBoxState extends State<ListMessageBox>
 
     _socketService.socket.on('nuevo-mensaje', (data) {
       //Escucha mensajes del servidor
-      print('nuevo mensaje recibido');
       _recibirMensaje(data);
     });
     cargarHistorial();
@@ -229,9 +228,7 @@ class _ListMessageBoxState extends State<ListMessageBox>
 
       if (mensaje.from == _pref.id) {
         //si es mensaje propio
-        print('Es mensaje propio');
       } else {
-        print('agrega mensaje');
         agregarMensaje(mensaje, false);
         //Vibration.vibrate(duration: 75, amplitude: 128);
 
@@ -244,7 +241,6 @@ class _ListMessageBoxState extends State<ListMessageBox>
 
   void agregarMensaje(dynamic data, bool propio) {
     if (this.mounted) {
-      print(data);
       final mensaje = data;
       mensajes.insert(0, mensaje);
       final mBox = MessageBox(

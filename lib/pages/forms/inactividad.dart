@@ -56,7 +56,6 @@ class _FormState extends State<_Form> {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     obraId = arguments['obraId'];
-    print('rebuild');
     if (arguments.containsKey('id')) {
       //NUEVA INACTIVIDAD
       inactividadId = arguments['id'];
@@ -77,7 +76,6 @@ class _FormState extends State<_Form> {
           openLoadingDialog(context, mensaje: 'Actualizando inactividad...');
           MyResponse response;
           response = await _obraService.editInactividad(obraId, inactividad);
-          print(response.data);
           closeLoadingDialog(context);
 
           if (response.fallo) {

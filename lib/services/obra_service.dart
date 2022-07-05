@@ -62,7 +62,6 @@ class ObraService extends ChangeNotifier {
 
   Future<MyResponse> nuevaInactividad(
       String obraId, Inactividad inactividad) async {
-    print(obraId);
     final datos = await this
         ._http
         .post('$_endpoint/inactividad/$obraId', inactividad.toMap());
@@ -75,7 +74,6 @@ class ObraService extends ChangeNotifier {
 
   Future<MyResponse> editInactividad(
       String obraId, Inactividad inactividad) async {
-    print(obraId);
     final datos = await this
         ._http
         .put('$_endpoint/inactividad/$obraId', inactividad.toMap());

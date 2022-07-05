@@ -116,12 +116,13 @@ class _CustomListViewState extends State<_CustomListView> {
               String route = '';
               Map<String, dynamic> arg = {};
               if (getType(widget.data[i]['mimeType']) == 'jpg') {
-                actionOnTap = () =>
-                    Navigator.pushNamed((context), ImagenViewer.routeName);
+                actionOnTap = () => Navigator.pushNamed(
+                    (context), ImagenViewer.routeName,
+                    arguments: {'imagenId': widget.data[i]['id']});
               } else {
                 actionOnTap = () async {
                   final Uri _url = Uri.parse(
-                      'https://drive.google.com/file/d/1JN70EnLrwbDDK3Kf8mT0xjTYWh0YXSRn/view?usp=sharing');
+                      'https://drive.google.com/file/d/${widget.data[i]['id']}/view?usp=sharing');
                   if (await canLaunchUrl(_url))
                     await launchUrl(_url);
                   else
@@ -155,7 +156,7 @@ class _CustomListViewState extends State<_CustomListView> {
         break;
 
       case 'application/vnd.ms-excel':
-        extension = 'xls';
+        extension = 'Excel';
         break;
     }
     return extension;
