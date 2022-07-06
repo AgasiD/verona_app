@@ -107,14 +107,11 @@ class _CustomListViewState extends State<_CustomListView> {
         child: ListView.builder(
             itemCount: widget.data.length,
             itemBuilder: (_, i) {
-              bool esPar = false;
-              if (i % 2 == 0) {
-                esPar = true;
-              }
               final iconAvatar = getIcon(widget.data[i]['mimeType']);
+              bool esPar = false;
 
-              String route = '';
-              Map<String, dynamic> arg = {};
+              i % 2 == 0 ? esPar = true : esPar = false;
+
               if (getType(widget.data[i]['mimeType']) == 'jpg') {
                 actionOnTap = () => Navigator.pushNamed(
                     (context), ImagenViewer.routeName,
@@ -126,8 +123,8 @@ class _CustomListViewState extends State<_CustomListView> {
                   if (await canLaunchUrl(_url))
                     await launchUrl(_url);
                   else
-                    // can't launch url, there is some error
-                    throw "Could not launch $_url";
+                    openAlertDialog(
+                        context, 'No se puede visualizar el documento');
                 };
               }
               return _CustomListTile(

@@ -19,7 +19,6 @@ void main() async {
       .ensureInitialized(); //espera que los widtes se inicialiicen para seguir
 
   // inicializa servicio notificaciones
-
   final pref = new Preferences();
   await pref.initPrefs();
   await NotificationService.initializeApp();
