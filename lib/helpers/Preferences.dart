@@ -29,6 +29,14 @@ class Preferences {
     _prefs.setString('id', id);
   }
 
+  String get token {
+    return _prefs.getString('token') ?? '';
+  }
+
+  set token(String token) {
+    _prefs.setString('token', token);
+  }
+
   int get role {
     return _prefs.getInt('role') ?? 0;
   }

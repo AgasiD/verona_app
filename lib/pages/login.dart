@@ -1,12 +1,10 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
-import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -105,8 +103,11 @@ class __FormState extends State<_Form> {
               if (response.fallo) {
                 openAlertDialog(context, response.error);
               } else {
-                _usuario.usuario = Miembro.fromJson(response.data);
-                guardarUserData(_usuario.usuario);
+                _usuario.usuario = Miembro.fromJson(response.data['usuario']);
+                final token = '';
+                // response.data['token'];
+
+                guardarUserData(_usuario.usuario, token);
                 final tokenResponse = await _usuario.setTokenDevice(
                     _usuario.usuario.id, NotificationService.token!);
                 if (tokenResponse.fallo) {
@@ -124,10 +125,11 @@ class __FormState extends State<_Form> {
         ]));
   }
 
-  void guardarUserData(Miembro usuario) {
+  void guardarUserData(Miembro usuario, String token) {
     pref.id = usuario.dni;
     pref.nombre = '${usuario.nombre} ${usuario.apellido}';
     pref.role = usuario.role;
+    pref.token = token;
   }
 }
 

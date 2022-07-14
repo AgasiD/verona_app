@@ -9,6 +9,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -155,12 +156,26 @@ class __SearchListViewState extends State<_SearchListView> {
               if (snapshot.data == null) {
                 return Loading(mensaje: 'Recuperando obras');
               } else {
-                obras = snapshot.data as List<Obra>;
-                obrasFiltradas = obras;
-                return _CustomObras(
-                  obras: obras,
-                  obrasFiltradas: obras,
-                );
+                final response = snapshot.data as MyResponse;
+
+                if (!response.fallo) {
+                  obras = (response.data as List<dynamic>)
+                      .map((e) => Obra.fromMap(e))
+                      .toList();
+                  obrasFiltradas = obras;
+                  return _CustomObras(
+                    obras: obras,
+                    obrasFiltradas: obras,
+                  );
+                } else {
+                  return Container(
+                    child: Text(
+                      response.error,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  );
+                  openAlertDialog(context, response.error);
+                }
               }
             })));
   }

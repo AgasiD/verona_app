@@ -7,6 +7,7 @@ import 'package:path/path.dart';
 import 'package:async/async.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 
 class HttpService extends ChangeNotifier {
   //bool loading = false;
@@ -21,16 +22,19 @@ class HttpService extends ChangeNotifier {
   }
 
   get(String endpoint) async {
+    final _pref = new Preferences();
     this.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
 
-    final response = await http.get(url);
+    final response = await http.get(url, headers: {'x-token': _pref.token});
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
 
   post(String endpoint, Map<String, dynamic> body) async {
+    final _pref = new Preferences();
+    headers.addAll({'x-token': _pref.token});
     isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
@@ -42,6 +46,7 @@ class HttpService extends ChangeNotifier {
   }
 
   delete(String endpoint) async {
+    final _pref = new Preferences();
     isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
@@ -51,6 +56,7 @@ class HttpService extends ChangeNotifier {
   }
 
   put(String endpoint, Map<String, dynamic> body) async {
+    final _pref = new Preferences();
     isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);

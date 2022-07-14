@@ -7,6 +7,7 @@ import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/routes/routes.dart';
+import 'package:verona_app/services/auth_service.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
@@ -51,6 +52,9 @@ class _AppStateState extends State<AppState> {
         ChangeNotifierProvider(
           create: (_) => ChatService(),
           lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AuthService(),
         ),
         ChangeNotifierProvider(
           create: (_) => SocketService(),
@@ -152,12 +156,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _isInForeground = true;
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     _isInForeground = state == AppLifecycleState.resumed;
 
     if (_isInForeground) {
       final _socketService = Provider.of<SocketService>(context, listen: false);
+      final _authService = Provider.of<AuthService>(context, listen: false);
       final _pref = new Preferences();
       if (_pref.id != null || _pref.id != '') {
         _socketService.connect(_pref.id);
@@ -165,6 +170,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       final _notService =
           Provider.of<NotificationService>(context, listen: false);
       _notService.resetNotificationBadge();
+
+      //renovar token
+
+      // print(_pref.token == null);
+      // print(_pref.token == '');
+      // if (_pref.token != null && _pref.token != '') {
+      //   final response = await _authService.validarToken(_pref.token);
+      //   if (!response.fallo) {
+      //     _pref.token = response.data.toString();
+      //   }
+      // }
     }
     if (AppLifecycleState.inactive.name == 'inactive') {
       final _notService =

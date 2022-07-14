@@ -20,10 +20,9 @@ class ObraService extends ChangeNotifier {
 
   obtenerObrasByUser(String userId) async {
     final datos = await this._http.get('$_endpoint/byuser/$userId');
-    final lista = datos["obras"];
-    final listObras =
-        (lista as List<dynamic>).map((json) => Obra.fromMap(json)).toList();
-    return listObras;
+    final response = MyResponse.fromJson(datos['response']);
+
+    return response;
   }
 
   Future<Obra> obtenerObra(String obraId) async {

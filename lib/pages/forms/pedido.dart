@@ -6,6 +6,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/pedido.dart';
+import 'package:verona_app/pages/pedidos.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -366,6 +367,10 @@ class _FormState extends State<_Form> {
                                 subMensaje: response[1]);
                           } else {
                             openAlertDialog(context, mensaje3);
+                            Navigator.pop(
+                              context,
+                              PedidosPage.routeName,
+                            );
                           }
                         },
                       ),
@@ -392,6 +397,7 @@ class _FormState extends State<_Form> {
           nota: areaTxtController.text,
           prioridad: prioridad);
       response = await _obraService.nuevoPedido(ped);
+      return [false, ''];
     } else {
       if (usuarioAsignado == '1') {
         return [true, 'No se ha seleccionado repartidor'];
