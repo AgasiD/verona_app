@@ -275,15 +275,12 @@ class _CustomObrasState extends State<_CustomObras> {
 }
 
 Container _obraCard(BuildContext context, Obra obra) {
-  final NetworkImage imagen = obra.imageId == ''
-      ? NetworkImage(
+  var imagen = obra.imageId == ''
+      ? Helper.imageNetwork(
           'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-      : NetworkImage(
+      : Helper.imageNetwork(
           'https://drive.google.com/uc?export=view&id=${obra.imageId}',
-          headers: {
-              "Authorization":
-                  "Bearer ya29.A0ARrdaM_6GO94psBfX0G8FhqeJLZ2ItNjaOOVYcYBwRmNssneRoaF82hENqCcrQrVfMKrJEjtyEdVPO7nxiJUU3xZiKkYLTWrTm8-PSJV-kiuxErcHwX_2Vd31vi6VfS8XDw9IRwnalhvtTqzE2H2RP7z40NRNg"
-            });
+        );
   return Container(
     margin: EdgeInsets.symmetric(horizontal: 20),
     child: GestureDetector(
@@ -341,9 +338,6 @@ Container _obraCard(BuildContext context, Obra obra) {
 NetworkImage _CustomNetworkImage(String imageId) {
   return NetworkImage('https://drive.google.com/uc?id=$imageId');
 }
-
-
-
 
 /*Stack(
         children: [

@@ -131,6 +131,15 @@ class Helper {
     return diaSemana;
   }
 
+  static ImageProvider imageNetwork(String url,
+      {double height = 100, double width = 100}) {
+    try {
+      return NetworkImage(url);
+    } catch (e) {
+      return AssetImage('assets/image.png');
+    }
+  }
+
   static String getProfesion(int role) {
     switch (role) {
       case 2:

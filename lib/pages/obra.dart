@@ -42,10 +42,10 @@ class ObraPage extends StatelessWidget {
                 );
               } else {
                 final obra = snapshot.data as Obra;
-                NetworkImage imagen = obra.imageId == ''
-                    ? NetworkImage(
+                var imagen = obra.imageId == ''
+                    ? Helper.imageNetwork(
                         'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-                    : NetworkImage(
+                    : Helper.imageNetwork(
                         'https://drive.google.com/uc?export=view&id=${obra.imageId}');
 
                 return Container(
@@ -138,68 +138,80 @@ class ObraPage extends StatelessWidget {
                                             ),
                                           )
                                         : Container(),
-                                    _pref.role == 99
-                                        ? TextButton(
-                                            style: ButtonStyle(
-                                                backgroundColor:
-                                                    MaterialStateProperty.all(
-                                                        Color.fromARGB(
-                                                            255, 122, 9, 1))),
-                                            child: Container(
-                                              width: 150,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceEvenly,
-                                                children: [
-                                                  Text(
-                                                    'Eliminar obra',
-                                                    style: TextStyle(
+                                    _pref.role == 1
+                                        ? Container(
+                                            margin: EdgeInsets.only(top: 25),
+                                            child: TextButton(
+                                                style: ButtonStyle(
+                                                    backgroundColor:
+                                                        MaterialStateProperty
+                                                            .all(Color.fromARGB(
+                                                                255,
+                                                                122,
+                                                                9,
+                                                                1))),
+                                                child: Container(
+                                                  width: 150,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceEvenly,
+                                                    children: [
+                                                      Text(
+                                                        'Eliminar obra',
+                                                        style: TextStyle(
+                                                            color: Helper
+                                                                .brandColors[5]),
+                                                      ),
+                                                      Icon(
+                                                        Icons.delete,
                                                         color: Helper
-                                                            .brandColors[5]),
+                                                            .brandColors[5],
+                                                      )
+                                                    ],
                                                   ),
-                                                  Icon(
-                                                    Icons.delete,
-                                                    color:
-                                                        Helper.brandColors[5],
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            onPressed: () {
-                                              openDialogConfirmation(context,
-                                                  (context) async {
-                                                // eliminar obra
-                                                openLoadingDialog(context,
-                                                    mensaje:
-                                                        'Eliminando obra...');
-                                                final response = await _service
-                                                    .eliminarObra(obraId);
-                                                closeLoadingDialog(context);
-                                                if (response.fallo) {
-                                                  openAlertDialog(context,
-                                                      'Error al elimiar obra',
-                                                      subMensaje:
-                                                          response.error);
-                                                } else {
-                                                  openAlertDialog(context,
-                                                      'Obra eliminada con éxito');
-                                                  Timer(
-                                                      Duration(
-                                                          milliseconds: 750),
-                                                      () => closeLoadingDialog(
-                                                          context));
-                                                  Timer(
-                                                      Duration(
-                                                          milliseconds: 750),
-                                                      () => Navigator
-                                                              .pushReplacementNamed(
-                                                            context,
-                                                            ObrasPage.routeName,
-                                                          ));
-                                                }
-                                              }, 'Confirmar para eliminar obra');
-                                            })
+                                                ),
+                                                onPressed: () {
+                                                  openDialogConfirmation(
+                                                      context, (context) async {
+                                                    // eliminar obra
+                                                    openLoadingDialog(context,
+                                                        mensaje:
+                                                            'Eliminando obra...');
+                                                    final response =
+                                                        await _service
+                                                            .eliminarObra(
+                                                                obraId);
+                                                    closeLoadingDialog(context);
+                                                    if (response.fallo) {
+                                                      openAlertDialog(context,
+                                                          'Error al elimiar obra',
+                                                          subMensaje:
+                                                              response.error);
+                                                    } else {
+                                                      openAlertDialog(context,
+                                                          'Obra eliminada con éxito');
+                                                      Timer(
+                                                          Duration(
+                                                              milliseconds:
+                                                                  750),
+                                                          () =>
+                                                              closeLoadingDialog(
+                                                                  context));
+                                                      Timer(
+                                                          Duration(
+                                                              milliseconds:
+                                                                  750),
+                                                          () => Navigator
+                                                                  .pushReplacementNamed(
+                                                                context,
+                                                                ObrasPage
+                                                                    .routeName,
+                                                              ));
+                                                    }
+                                                  }, 'Confirmar para eliminar obra');
+                                                }),
+                                          )
                                         : Container()
                                   ]),
                                 ),

@@ -67,24 +67,23 @@ class ImgGalleryPage extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     FadeInImage(
-                                      height: 170,
-                                      // imageErrorBuilder: (_, obj, st) {
-                                      //   return Container(
-                                      //       child: Image(
-                                      //           width: MediaQuery.of(context)
-                                      //                   .size
-                                      //                   .width *
-                                      //               .47,
-                                      //           image: AssetImage(
-                                      //               'assets/image.png')));
-                                      // },
-                                      fadeInDuration:
-                                          Duration(milliseconds: 500),
-                                      placeholder:
-                                          AssetImage('assets/image.png'),
-                                      image: NetworkImage(
-                                          'https://drive.google.com/uc?export=view&id=${e['id']}'),
-                                    ),
+                                        height: 170,
+                                        imageErrorBuilder: (_, obj, st) {
+                                          return Container(
+                                              child: Image(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      .47,
+                                                  image: AssetImage(
+                                                      'assets/image.png')));
+                                        },
+                                        fadeInDuration:
+                                            Duration(milliseconds: 500),
+                                        placeholder:
+                                            AssetImage('assets/image.png'),
+                                        image: Helper.imageNetwork(
+                                            'https://drive.google.com/uc?export=view&id=${e['id']}')),
                                     Text(
                                       e['name'],
                                       style: TextStyle(
