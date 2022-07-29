@@ -16,7 +16,12 @@ class ImgGalleryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final _driveService = Provider.of<GoogleDriveService>(context);
     final _obraService = Provider.of<ObraService>(context);
-    final _driveId = _obraService.obra.imgFolderId;
+    String _driveId = _obraService.obra.imgFolderId;
+
+    if (ModalRoute.of(context)!.settings.arguments != null) {
+      final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+      _driveId = arguments['driveId'];
+    }
 
     return Scaffold(
       bottomNavigationBar: CustomNavigatorFooter(),
@@ -60,30 +65,45 @@ class ImgGalleryPage extends StatelessWidget {
                             .map(
                               (e) => GestureDetector(
                                 onTap: () {
-                                  Navigator.pushNamed(
-                                      context, ImagenViewer.routeName,
-                                      arguments: {"imagenId": e['id']});
+                                  if (e['mimeType'] ==
+                                      'application/vnd.google-apps.folder') {
+                                    Navigator.pushNamed(
+                                        context, ImgGalleryPage.routeName,
+                                        arguments: {"driveId": e['id']});
+                                  } else {
+                                    Navigator.pushNamed(
+                                        context, ImagenViewer.routeName,
+                                        arguments: {"imagenId": e['id']});
+                                  }
                                 },
                                 child: Column(
                                   children: [
-                                    FadeInImage(
-                                        height: 170,
-                                        imageErrorBuilder: (_, obj, st) {
-                                          return Container(
-                                              child: Image(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      .47,
-                                                  image: AssetImage(
-                                                      'assets/image.png')));
-                                        },
-                                        fadeInDuration:
-                                            Duration(milliseconds: 500),
-                                        placeholder:
-                                            AssetImage('assets/image.png'),
-                                        image: Helper.imageNetwork(
-                                            'https://drive.google.com/uc?export=view&id=${e['id']}')),
+                                    e['mimeType'] ==
+                                            'application/vnd.google-apps.folder'
+                                        ? Icon(
+                                            Icons.folder,
+                                            size: 130,
+                                            color: Helper.brandColors[3],
+                                          )
+                                        : FadeInImage(
+                                            height: 170,
+                                            imageErrorBuilder: (_, obj, st) {
+                                              return Container(
+                                                  child: Image(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              .47,
+                                                      image: AssetImage(
+                                                          'assets/image.png')));
+                                            },
+                                            fadeInDuration:
+                                                Duration(milliseconds: 500),
+                                            placeholder:
+                                                AssetImage('assets/image.png'),
+                                            image: Helper.imageNetwork(
+                                                'https://drive.google.com/uc?export=view&id=${e['id']}')),
                                     Text(
                                       e['name'],
                                       style: TextStyle(
