@@ -56,7 +56,6 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 mensaje: 'Recuperando mensajes...',
               );
             } else {
-              print(_chatService.chat.chatName);
               _chatService.chat.chatName == ''
                   ? chatName = arguments['chatName']
                   : chatName = _chatService.chat.chatName;
@@ -372,8 +371,11 @@ class __InputChatState extends State<_InputChat> {
                 isCollapsed: true),
             controller: widget.txtCtrl,
             onSubmitted: (_) {
-              widget.txtCtrl.clear();
+              _socket.socket.connected
+                  ? enviarMensaje(_socket)
+                  : openAlertDialog(context, 'No hay conexión con el servidor');
               focusNode.requestFocus(); //para solicitar el foco
+              widget.txtCtrl.clear();
             },
             onChanged: (text) {
               setState(() {});
@@ -542,7 +544,7 @@ class _ChatMessageState extends State<_ChatMessage> {
                         width: 20,
                         height: 10,
                         child: Transform.rotate(
-                            angle: 10.0,
+                            angle: widget.esMsgPropio ? 15 : 10.0,
                             child: Container(
                               color: widget.esMsgPropio
                                   ? Colors.grey[shade * 2]

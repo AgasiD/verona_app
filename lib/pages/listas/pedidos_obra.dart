@@ -35,68 +35,49 @@ class PedidoList extends StatelessWidget {
                 } else {
                   final response = snapshot.data as MyResponse;
                   if (!response.fallo) {
-                    final pedidos = response.data;
+                    final pedidos = response.data as List<dynamic>;
                     final _pref = new Preferences();
                     if (pedidos.length > 0) {
-                      return Column(
-                        children: [
-                          Container(
-                            height: MediaQuery.of(context).size.height - 210,
-                            color: Helper.brandColors[1],
-                            child: ListView.builder(
-                                itemCount: pedidos.length,
-                                itemBuilder: ((context, index) {
-                                  final esPar = index % 2 == 0;
-                                  final arg = {
-                                    'pedidoId': pedidos[index]['id']
-                                  };
-                                  return _CustomListTile(
-                                    esPar: esPar,
-                                    title: Helper.getFechaFromTS(
-                                        pedidos[index]['ts']),
-                                    subtitle: pedidos[index]['cerrado']
-                                        ? 'Cerrado'.toUpperCase()
-                                        : pedidos[index]['asignado']
-                                            ? 'Asingado'.toUpperCase()
-                                            : 'Sin asignar'.toUpperCase(),
-                                    avatar: pedidos[index]['prioridad']
-                                        .toString()
-                                        .toUpperCase(),
-                                    fontSize: 18,
-                                    onTap: true,
-                                    actionOnTap: () => Navigator.pushNamed(
-                                        context, PedidoForm.routeName,
-                                        arguments: arg),
-                                  );
-                                })),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          _pref.role != 6
-                              ? Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    MainButton(
-                                      width: 150,
-                                      height: 20,
-                                      color: Helper.brandColors[8],
-                                      onPressed: () {
-                                        Navigator.pushNamed(
-                                            context, PedidoForm.routeName,
-                                            arguments: {
-                                              'obraId': _obraService.obra.id
-                                            });
-                                      },
-                                      text: 'Crear pedido',
-                                      fontSize: 15,
-                                    ),
-                                  ],
-                                )
-                              : Container()
-                        ],
-                      );
+                      final agrupado = getPedidosAgrupadosxEstado(pedidos);
+                      return Container(
+                          height: MediaQuery.of(context).size.height,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: agrupado.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return _PedidosByEstado(
+                                          estado: agrupado[index]["estado"],
+                                          pedidos: agrupado[index]['data']);
+                                    }),
+                              ),
+                              _pref.role != 6
+                                  ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        MainButton(
+                                          width: 150,
+                                          height: 20,
+                                          color: Helper.brandColors[8],
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                                context, PedidoForm.routeName,
+                                                arguments: {
+                                                  'obraId': _obraService.obra.id
+                                                });
+                                          },
+                                          text: 'Crear pedido',
+                                          fontSize: 15,
+                                        ),
+                                      ],
+                                    )
+                                  : Container()
+                            ],
+                          ));
                     } else {
                       return Column(
                         children: [
@@ -114,7 +95,7 @@ class PedidoList extends StatelessWidget {
                           SizedBox(
                             height: 10,
                           ),
-                          _pref.role != 6
+                          Helper.habilitaByRole([1, 2, 4, 5])
                               ? Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
@@ -141,11 +122,11 @@ class PedidoList extends StatelessWidget {
                     }
                   } else {
                     return Container(
-                        height: MediaQuery.of(context).size.height - 210,
+                        height: MediaQuery.of(context).size.height,
                         width: MediaQuery.of(context).size.width,
                         child: Center(
                           child: Text(
-                            'Aún no hay integrantes en el equipo',
+                            'Error al recuperar pedidos: ${response.error}',
                             style: TextStyle(
                                 fontSize: 18, color: Helper.brandColors[4]),
                           ),
@@ -156,6 +137,89 @@ class PedidoList extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
+    );
+  }
+
+  getPedidosAgrupadosxEstado(List pedidos) {
+    List<dynamic> agrupados = [];
+    const estados = Helper.ESTADOSPEDIDO;
+    estados.forEach((estado) {
+      List<dynamic> agrupacion = [];
+      agrupacion =
+          pedidos.where((element) => element['estado'] == estado).toList();
+      agrupados
+          .add({"estado": Helper.getEstadoPedido(estado), "data": agrupacion});
+    });
+    return agrupados;
+  }
+}
+
+class _PedidosByEstado extends StatelessWidget {
+  _PedidosByEstado({Key? key, required this.estado, required this.pedidos})
+      : super(key: key);
+
+  List<dynamic> pedidos;
+  String estado;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            border: Border.all(color: Helper.brandColors[9], width: .2),
+            borderRadius: BorderRadius.circular(5),
+            color: Helper.brandColors[0],
+          ),
+          child: ListTile(
+            title: Text(estado.toUpperCase()),
+            textColor: Helper.brandColors[5],
+          ),
+        ),
+        pedidos.length > 0
+            ? ListView.builder(
+                itemCount: pedidos.length,
+                physics: ClampingScrollPhysics(),
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  final esPar = index % 2 == 0;
+                  final arg = {'pedidoId': pedidos[index]['id']};
+                  return Column(
+                    children: [
+                      _CustomListTile(
+                        esPar: false,
+                        title: pedidos[index]['fechaEstimada'] == ''
+                            ? pedidos[index]['fechaDeseada']
+                            : pedidos[index]['fechaEstimada'],
+                        subtitle:
+                            Helper.getEstadoPedido(pedidos[index]['estado'])
+                                .toUpperCase(),
+                        avatar: pedidos[index]['prioridad']
+                            .toString()
+                            .toUpperCase(),
+                        fontSize: 18,
+                        onTap: true,
+                        actionOnTap: () => Navigator.pushNamed(
+                            context, PedidoForm.routeName,
+                            arguments: arg),
+                      ),
+                      index != pedidos.length - 1
+                          ? Divider(
+                              color: Helper.brandColors[8],
+                            )
+                          : Container()
+                    ],
+                  );
+                })
+            : ListTile(
+                title: Text(
+                  'No hay pedidos',
+                  style: TextStyle(color: Helper.brandColors[3], fontSize: 19),
+                ),
+              )
+      ],
     );
   }
 }
@@ -179,7 +243,7 @@ class _CustomListTile extends StatelessWidget {
       required this.avatar,
       this.textAvatar = true,
       this.iconAvatar = Icons.abc,
-      this.padding = 20,
+      this.padding = 0,
       this.onTap = false,
       this.fontSize = 10,
       this.actionOnTap = null})
@@ -202,7 +266,7 @@ class _CustomListTile extends StatelessWidget {
         break;
     }
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: this.padding),
+      padding: EdgeInsets.symmetric(horizontal: 0),
       child: Column(
         children: [
           Container(

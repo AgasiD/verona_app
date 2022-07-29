@@ -376,16 +376,18 @@ class _CustomInputState extends State<CustomInput> {
   Widget build(BuildContext context) {
     final icon = inputValid.value ? Icons.verified : Icons.cancel;
     var inputDecoration = InputDecoration(
-        contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 13),
+        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 13),
         hintText: widget.hintText,
         focusedBorder: InputBorder.none,
         border: InputBorder.none,
         errorBorder: InputBorder.none,
         suffixIcon: widget.iconButton,
-        prefixIcon: Icon(
-          widget.icono,
-          color: Helper.brandColors[9].withOpacity(.6),
-        ),
+        prefixIcon: widget.icono != null
+            ? Icon(
+                widget.icono,
+                color: Helper.brandColors[9].withOpacity(.6),
+              )
+            : null,
         hintStyle: TextStyle(color: Helper.brandColors[3]),
         errorMaxLines: 1);
     return Column(

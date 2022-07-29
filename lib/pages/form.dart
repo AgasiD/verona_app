@@ -52,7 +52,8 @@ class _FormPageState extends State<FormPage> {
       case PedidoForm.routeName:
         formulario = PedidoForm();
         titulo = PedidoForm.nameForm;
-        accion = PedidoForm.accion;
+        accion = () {};
+        //PedidoForm.accion;
         mensajeConfirmacion = PedidoForm.alertMessage;
         //rutaPrevia = PedidoForm.rutaPrevia;
         break;

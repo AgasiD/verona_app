@@ -116,6 +116,7 @@ class _FormState extends State<_Form> {
           ? ''
           : widget.obra!.diasEstimados.toString();
     }
+    print('rebuild');
 
     return SingleChildScrollView(
         child: Form(

@@ -34,7 +34,15 @@ class _ObrasPageState extends State<ObrasPage> {
   final _pref = new Preferences();
 
   void _onRefresh(ObraService _obras) async {
-    this.obrasFiltradas = await _obras.obtenerObrasByUser(_pref.id);
+    final response = await _obras.obtenerObrasByUser(_pref.id);
+    if (response.fallo) {
+      _refreshController.loadFailed();
+      openAlertDialog(context, 'Error al actualizar obras');
+    } else {
+      this.obras =
+          (response.data as List<dynamic>).map((e) => Obra.fromMap(e)).toList();
+      this.obrasFiltradas = obras;
+    }
     setState(() {});
     // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
@@ -267,7 +275,7 @@ class _CustomObrasState extends State<_CustomObras> {
 }
 
 Container _obraCard(BuildContext context, Obra obra) {
-  final NetworkImage imagen = obra.imageId != ''
+  final NetworkImage imagen = obra.imageId == ''
       ? NetworkImage(
           'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
       : NetworkImage(

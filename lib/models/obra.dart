@@ -23,6 +23,7 @@ class Obra {
   String? ts;
   List<dynamic> pedidos;
   String? driveFolderId;
+  String imgFolderId;
   Obra({
     required this.nombre,
     this.id = '',
@@ -41,6 +42,7 @@ class Obra {
     this.descripcion = 'Sin descripción',
     this.pedidos = const [],
     this.driveFolderId = '',
+    this.imgFolderId = '',
     ts,
   }) {
     this.nombre = nombre;
@@ -59,6 +61,7 @@ class Obra {
     this.descripcion = descripcion;
     this.pedidos = pedidos;
     this.driveFolderId = driveFolderId;
+    this.imgFolderId = imgFolderId;
     this.ts =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
@@ -74,7 +77,8 @@ class Obra {
         diasInactivos: json["diasInactivos"],
         diasTranscurridos: json["diasTranscurridos"],
         docs: json["docs"],
-        driveFolderId: json["driveFolderId"],
+        driveFolderId: json["driveFolderId"] ?? '',
+        imgFolderId: json["imgFolderId"] ?? '',
         descripcion: json['descripcion'] ?? 'Sin descripción',
         equipo: (json["equipo"] as List<dynamic>)
             .map((e) => Miembro.fromJson(e))

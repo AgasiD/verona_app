@@ -149,7 +149,7 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
           ),
           txtPersonalCtrl.text == ''
               ? SizedBox(
-                  height: MediaQuery.of(context).size.height * .65,
+                  height: MediaQuery.of(context).size.height - 290,
                   width: MediaQuery.of(context).size.width,
                   child: ListView.builder(
                     itemCount: widget.grupos.length,
@@ -305,21 +305,36 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
         trailing: icono,
         onTap: () async {
           if (!asignado) {
+            // ASOCIAR PERSONAL
             openLoadingDialog(context, mensaje: 'Asignando usuario...');
 
-            await _obraService.agregarUsuario(
+            final response = await _obraService.agregarUsuario(
                 _obraService.obra.id, widget.personal.dni);
-            _obraService.obra.sumarPersonal(widget.personal);
-            snackText =
-                '${widget.personal.nombre} ${widget.personal.apellido} fue asignado al equipo';
+            if (response.fallo) {
+              closeLoadingDialog(context);
+              openAlertDialog(context, 'Error al agregar personal',
+                  subMensaje: response.error);
+            } else {
+              closeLoadingDialog(context);
+              _obraService.obra.sumarPersonal(widget.personal);
+              snackText =
+                  '${widget.personal.nombre} ${widget.personal.apellido} fue asignado al equipo';
+            }
           } else {
+            //DESASOCIAR PERSONAL
             openLoadingDialog(context, mensaje: 'Desasociando...');
 
-            await _obraService.quitarUsuario(
+            final response = await _obraService.quitarUsuario(
                 _obraService.obra.id, widget.personal.dni);
-            _obraService.obra.quitarPersonal(widget.personal);
+            if (response.fallo) {
+              closeLoadingDialog(context);
+              openAlertDialog(context, 'Error al quitar personal',
+                  subMensaje: response.error);
+            } else {
+              _obraService.obra.quitarPersonal(widget.personal);
+              closeLoadingDialog(context);
+            }
           }
-          closeLoadingDialog(context);
           Helper.showSnackBar(
             context,
             snackText,

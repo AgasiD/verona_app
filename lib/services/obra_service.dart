@@ -18,7 +18,7 @@ class ObraService extends ChangeNotifier {
     return listObras;
   }
 
-  obtenerObrasByUser(String userId) async {
+  Future<MyResponse> obtenerObrasByUser(String userId) async {
     final datos = await this._http.get('$_endpoint/byuser/$userId');
     final response = MyResponse.fromJson(datos['response']);
 
@@ -46,16 +46,21 @@ class ObraService extends ChangeNotifier {
     return response;
   }
 
-  Future<dynamic> agregarUsuario(obraId, String dni) async {
-    final response = await this._http.put('$_endpoint/$obraId/$dni', {});
+  Future<MyResponse> agregarUsuario(obraId, String dni) async {
+    final data = await this._http.put('$_endpoint/$obraId/$dni', {});
+    final response = MyResponse.fromJson(data['response']);
+
     notifyListeners();
     return response;
   }
 
-  Future<dynamic> quitarUsuario(obraId, String dni) async {
-    final response =
+  Future<MyResponse> quitarUsuario(obraId, String dni) async {
+    final data =
         await this._http.put('$_endpoint/quitarUsuario/$obraId/$dni', {});
-    // notifyListeners();
+
+    final response = MyResponse.fromJson(data['response']);
+
+    notifyListeners();
     return response;
   }
 
@@ -117,6 +122,14 @@ class ObraService extends ChangeNotifier {
   Future<MyResponse> editPedido(Pedido pedido) async {
     final datos =
         await this._http.put('$_endpoint/actualizarPedido/', pedido.toJson());
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+    return resp;
+  }
+
+  Future<MyResponse> eliminarObra(String obraId) async {
+    final datos = await this._http.delete('$_endpoint/$obraId');
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
     notifyListeners();

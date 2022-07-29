@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -6,11 +8,13 @@ import 'package:verona_app/models/obra.dart';
 
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
+import 'package:verona_app/pages/imagenes_gallery.dart';
 import 'package:verona_app/pages/inactividades.dart';
 import 'package:verona_app/pages/listas/documentos.dart';
 import 'package:verona_app/pages/listas/equipo.dart';
 import 'package:verona_app/pages/listas/pedidos_obra.dart';
 import 'package:verona_app/pages/listas/propietarios.dart';
+import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -23,7 +27,7 @@ class ObraPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-    final _service = Provider.of<ObraService>(context);
+    final _service = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
     final esDelivery = _pref.role == 6;
 
@@ -38,7 +42,7 @@ class ObraPage extends StatelessWidget {
                 );
               } else {
                 final obra = snapshot.data as Obra;
-                NetworkImage imagen = obra.imageId != ''
+                NetworkImage imagen = obra.imageId == ''
                     ? NetworkImage(
                         'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
                     : NetworkImage(
@@ -134,6 +138,69 @@ class ObraPage extends StatelessWidget {
                                             ),
                                           )
                                         : Container(),
+                                    _pref.role == 99
+                                        ? TextButton(
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        Color.fromARGB(
+                                                            255, 122, 9, 1))),
+                                            child: Container(
+                                              width: 150,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  Text(
+                                                    'Eliminar obra',
+                                                    style: TextStyle(
+                                                        color: Helper
+                                                            .brandColors[5]),
+                                                  ),
+                                                  Icon(
+                                                    Icons.delete,
+                                                    color:
+                                                        Helper.brandColors[5],
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              openDialogConfirmation(context,
+                                                  (context) async {
+                                                // eliminar obra
+                                                openLoadingDialog(context,
+                                                    mensaje:
+                                                        'Eliminando obra...');
+                                                final response = await _service
+                                                    .eliminarObra(obraId);
+                                                closeLoadingDialog(context);
+                                                if (response.fallo) {
+                                                  openAlertDialog(context,
+                                                      'Error al elimiar obra',
+                                                      subMensaje:
+                                                          response.error);
+                                                } else {
+                                                  openAlertDialog(context,
+                                                      'Obra eliminada con éxito');
+                                                  Timer(
+                                                      Duration(
+                                                          milliseconds: 750),
+                                                      () => closeLoadingDialog(
+                                                          context));
+                                                  Timer(
+                                                      Duration(
+                                                          milliseconds: 750),
+                                                      () => Navigator
+                                                              .pushReplacementNamed(
+                                                            context,
+                                                            ObrasPage.routeName,
+                                                          ));
+                                                }
+                                              }, 'Confirmar para eliminar obra');
+                                            })
+                                        : Container()
                                   ]),
                                 ),
                               );
@@ -307,10 +374,22 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         titulo: 'Documentos',
         values: [].toList(),
         accion: () {
-          Navigator.pushNamed(context, DocumentosPage.routeName);
+          Navigator.pushNamed(context, DocumentosPage.routeName,
+              arguments: {'driveId': obra.driveFolderId});
         },
       );
       items.add(doc);
+
+      final imgs = Item(
+        icon: Icons.image_outlined,
+        list: 2,
+        titulo: 'Galeria de imagenes',
+        values: [].toList(),
+        accion: () {
+          Navigator.pushNamed(context, ImgGalleryPage.routeName);
+        },
+      );
+      items.add(imgs);
 
       final status = Item(
         icon: Icons.account_tree,
@@ -509,7 +588,7 @@ class _ObraBigrafy extends StatelessWidget {
           thickness: 1,
         ),
         Text(
-          this.descripcion,
+          this.descripcion == '' ? 'Sin descripción de obra' : this.descripcion,
           style: TextStyle(color: Helper.brandColors[3], fontSize: 16),
         ),
         SizedBox(

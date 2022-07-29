@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 
 class Helper {
   static Color? primaryColor = Color(0x1E1E22); //Color(0xff222222);
@@ -22,6 +23,7 @@ class Helper {
     Color(0xffB1770B),
     Color(0xffF8DE31),
   ];
+  static const ESTADOSPEDIDO = [1, 2, 3, 5];
   static String nombre = 'Verona';
   static int limit = 25;
   //static double maxWidth = MediaQuery.of(context).size.wi dth
@@ -193,5 +195,27 @@ class Helper {
           fontWeight: FontWeight.bold,
           foreground: Paint()..shader = linearGradient),
     );
+  }
+
+  static String getEstadoPedido(int estado) {
+    switch (estado) {
+      case 1:
+        return 'Sin confirmar';
+      case 2:
+        return 'Pendiente de compra';
+      case 3:
+        return 'Pendiente de entrega';
+      case 4:
+        return 'Cerrado';
+      case 5:
+        return 'Cerrado';
+      default:
+        return 'Sin asignar';
+    }
+  }
+
+  static bool habilitaByRole(List<int> lista) {
+    final rol = new Preferences().role;
+    return lista.contains(rol);
   }
 }

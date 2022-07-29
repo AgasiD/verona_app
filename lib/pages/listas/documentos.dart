@@ -16,12 +16,15 @@ class DocumentosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    String driveId = arguments['driveId'] ?? '';
     return Scaffold(
       body: Container(
           color: Helper.brandColors[1],
           child: SafeArea(child: _DocumentosList())),
       floatingActionButton: CustomNavigatorButton(
-        accion: () => Navigator.pushNamed(context, DocumentoForm.routeName),
+        accion: () => Navigator.pushNamed(context, DocumentoForm.routeName,
+            arguments: {"driveId": driveId}),
         icono: Icons.add,
         showNotif: false,
       ),
@@ -37,9 +40,11 @@ class _DocumentosList extends StatelessWidget {
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final _driveService = Provider.of<GoogleDriveService>(context);
+    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    String driveId = arguments['driveId'] ?? '';
+
     return FutureBuilder(
-        future:
-            _driveService.obtenerDocumentos(_obraService.obra.driveFolderId!),
+        future: _driveService.obtenerDocumentos(driveId),
         builder: (context, snapshot) {
           if (snapshot.data == null) {
             return Loading(mensaje: 'Recuperando documentos');
@@ -102,6 +107,11 @@ class _CustomListViewState extends State<_CustomListView> {
   @override
   Widget build(BuildContext context) {
     late Function()? actionOnTap;
+    // sort data by name
+
+    widget.data.sort((a, b) {
+      return a['name'].toLowerCase().compareTo(b['name'].toLowerCase());
+    });
     return Container(
         height: MediaQuery.of(context).size.height,
         child: ListView.builder(
@@ -116,6 +126,11 @@ class _CustomListViewState extends State<_CustomListView> {
                 actionOnTap = () => Navigator.pushNamed(
                     (context), ImagenViewer.routeName,
                     arguments: {'imagenId': widget.data[i]['id']});
+              } else if (getType(widget.data[i]['mimeType']).toLowerCase() ==
+                  'Carpeta'.toLowerCase()) {
+                actionOnTap = () => Navigator.pushNamed(
+                    (context), DocumentosPage.routeName,
+                    arguments: {'driveId': widget.data[i]['id']});
               } else {
                 actionOnTap = () async {
                   final Uri _url = Uri.parse(
@@ -155,6 +170,9 @@ class _CustomListViewState extends State<_CustomListView> {
       case 'application/vnd.ms-excel':
         extension = 'Excel';
         break;
+      case 'application/vnd.google-apps.folder':
+        extension = 'Carpeta';
+        break;
     }
     return extension;
   }
@@ -176,6 +194,13 @@ class _CustomListViewState extends State<_CustomListView> {
 
       case 'application/vnd.ms-excel':
         icon = Icons.calculate_outlined;
+        break;
+
+      case 'application/vnd.google-apps.folder':
+        icon = Icons.folder_open;
+        break;
+      default:
+        icon = Icons.file_copy_outlined;
         break;
     }
     return icon;
@@ -224,7 +249,7 @@ class _CustomListTile extends StatelessWidget {
                   child: Icon(iconAvatar, color: Helper.brandColors[8]),
                 ),
               ),
-              title: Text(title,
+              title: Text(title.toUpperCase(),
                   style: TextStyle(
                       color: Helper.brandColors[5], fontSize: fontSize)),
               subtitle: this.subtitle != ''

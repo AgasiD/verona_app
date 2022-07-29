@@ -8,6 +8,7 @@ import 'package:async/async.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:verona_app/helpers/Preferences.dart';
+import 'package:win32/win32.dart';
 
 class HttpService extends ChangeNotifier {
   //bool loading = false;
@@ -34,7 +35,7 @@ class HttpService extends ChangeNotifier {
 
   post(String endpoint, Map<String, dynamic> body) async {
     final _pref = new Preferences();
-    headers.addAll({'x-token': _pref.token});
+    //headers.addAll({'x-token': _pref.token});
     isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
