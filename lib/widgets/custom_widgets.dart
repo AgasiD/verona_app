@@ -1049,6 +1049,61 @@ class _CustomListViewState extends State<CustomListView> {
   }
 }
 
+class CustomSearchListView extends StatefulWidget {
+  CustomSearchListView(
+      {Key? key, required this.data, required this.txtController})
+      : super(key: key);
+
+  List<dynamic> data;
+  TextEditingController txtController;
+
+  @override
+  State<CustomSearchListView> createState() => _CustomSearchListViewState();
+}
+
+class _CustomSearchListViewState extends State<CustomSearchListView> {
+  late List<dynamic> dataFiltrada;
+  Preferences _pref = new Preferences();
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        CustomInput(
+          width: MediaQuery.of(context).size.width * .95,
+          hintText: 'Nombre del personal...',
+          icono: Icons.search,
+          textInputAction: TextInputAction.search,
+          validaError: false,
+          iconButton: IconButton(
+            splashColor: null,
+            icon: Icon(
+              Icons.cancel_outlined,
+              color: Colors.red.withAlpha(200),
+            ),
+            onPressed: () {
+              obrasTxtController.text = '';
+              dataFiltrada = widget.data;
+              setState(() {});
+            },
+          ),
+          textController: obrasTxtController,
+          onChange: (text) {
+            dataFiltrada = widget.data
+                .where((dato) =>
+                    dato.nombre.toLowerCase().contains(text.toLowerCase()))
+                .toList();
+            setState(() {});
+          },
+        ),
+        CustomListView(
+          data: widget.data,
+          padding: 0,
+        )
+      ],
+    );
+  }
+}
+
 class CustomListTile extends StatelessWidget {
   bool esPar;
   String title;

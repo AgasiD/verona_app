@@ -23,6 +23,7 @@ class ChatList extends StatelessWidget {
     _socketService.connect(_pref.id);
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     final _chatService = Provider.of<ChatService>(context);
+    TextEditingController txtController = new TextEditingController();
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
@@ -45,29 +46,10 @@ class ChatList extends StatelessWidget {
                         '${e['nombre']}',
                         'Previsualizacion',
                         '${(e['nombre'][0] + e['nombre'][1]).toString().toUpperCase()}'));
-                    return ListView.builder(
-                        itemCount: usuario.chats.length,
-                        itemBuilder: ((context, index) {
-                          final esPar = index % 2 == 0;
-                          final arg = {
-                            'chatId': usuario.chats[index]['chatId'],
-                            'chatName': usuario.chats[index]['nombre'],
-                          };
-                          return CustomListTile(
-                            esPar: esPar,
-                            title: usuario.chats[index]['nombre'],
-                            subtitle: 'Ultimo mensaje',
-                            avatar: (usuario.chats[index]['nombre'][0] +
-                                    usuario.chats[index]['nombre'][1])
-                                .toString()
-                                .toUpperCase(),
-                            fontSize: 18,
-                            onTap: true,
-                            actionOnTap: () => Navigator.pushNamed(
-                                context, ChatPage.routeName,
-                                arguments: arg),
-                          );
-                        }));
+                    return CustomSearchListView(
+                      data: [],
+                      txtController: txtController,
+                    );
                   } else {
                     return Column(
                       children: [
