@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form%20copy.dart';
+import 'package:verona_app/pages/chat.dart';
 
 import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/login.dart';
@@ -1062,8 +1063,17 @@ class CustomSearchListView extends StatefulWidget {
 }
 
 class _CustomSearchListViewState extends State<CustomSearchListView> {
-  late List<dynamic> dataFiltrada;
+  List<dynamic> dataFiltrada = [];
+
   Preferences _pref = new Preferences();
+  String txtBuscar = '';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    dataFiltrada = widget.data;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -1074,31 +1084,73 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
           icono: Icons.search,
           textInputAction: TextInputAction.search,
           validaError: false,
-          iconButton: IconButton(
-            splashColor: null,
-            icon: Icon(
-              Icons.cancel_outlined,
-              color: Colors.red.withAlpha(200),
-            ),
-            onPressed: () {
-              obrasTxtController.text = '';
-              dataFiltrada = widget.data;
-              setState(() {});
-            },
-          ),
-          textController: obrasTxtController,
+          iconButton: txtBuscar.length > 0
+              ? IconButton(
+                  splashColor: null,
+                  icon: Icon(
+                    Icons.cancel_outlined,
+                    color: Colors.red.withAlpha(200),
+                  ),
+                  onPressed: () {
+                    widget.txtController.text = '';
+                    txtBuscar = '';
+
+                    dataFiltrada = widget.data;
+                    setState(() {});
+                  },
+                )
+              : IconButton(
+                  color: Helper.brandColors[4],
+                  icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
+                  onPressed: null,
+                ),
+          textController: widget.txtController,
           onChange: (text) {
+            txtBuscar = text;
             dataFiltrada = widget.data
                 .where((dato) =>
-                    dato.nombre.toLowerCase().contains(text.toLowerCase()))
+                    dato["nombre"].toLowerCase().contains(text.toLowerCase()))
                 .toList();
             setState(() {});
           },
         ),
-        CustomListView(
-          data: widget.data,
-          padding: 0,
-        )
+        txtBuscar.length > 0 && dataFiltrada.length == 0
+            ? Container(
+                height: MediaQuery.of(context).size.height - 250,
+                child: Center(
+                  child: Text(
+                    'No se encontraron usuarios',
+                    style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+                    maxLines: 3,
+                  ),
+                ),
+              )
+            : Container(
+                height: MediaQuery.of(context).size.height - 207,
+                child: ListView.builder(
+                    itemCount: dataFiltrada.length,
+                    itemBuilder: ((context, index) {
+                      final esPar = index % 2 == 0;
+                      final arg = {
+                        'chatId': dataFiltrada[index]['chatId'],
+                        'chatName': dataFiltrada[index]['nombre'],
+                      };
+                      return CustomListTile(
+                        esPar: esPar,
+                        title: dataFiltrada[index]['nombre'],
+                        subtitle: 'Ultimo mensaje',
+                        avatar: (dataFiltrada[index]['nombre'][0] +
+                                dataFiltrada[index]['nombre'][1])
+                            .toString()
+                            .toUpperCase(),
+                        fontSize: 18,
+                        onTap: true,
+                        actionOnTap: () => Navigator.pushNamed(
+                            context, ChatPage.routeName,
+                            arguments: arg),
+                      );
+                    })),
+              )
       ],
     );
   }

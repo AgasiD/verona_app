@@ -9,10 +9,20 @@ import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
-class ContactsPage extends StatelessWidget {
+class ContactsPage extends StatefulWidget {
   ContactsPage({Key? key}) : super(key: key);
   static const String routeName = 'Contactos';
+
+  @override
+  State<ContactsPage> createState() => _ContactsPageState();
+}
+
+class _ContactsPageState extends State<ContactsPage> {
   final _pref = new Preferences();
+  List<dynamic> dataFiltrada = [];
+  TextEditingController txtController = TextEditingController();
+  String txtBuscar = '';
+
   @override
   Widget build(BuildContext context) {
     final _usuarios = Provider.of<UsuarioService>(context);
@@ -34,15 +44,74 @@ class ContactsPage extends StatelessWidget {
                       .toLowerCase()
                       .compareTo(b.nombre.toLowerCase());
                 });
+                if (txtBuscar.length == 0) {
+                  dataFiltrada = contactos;
+                }
 
-                return ListView.builder(
-                    itemCount: contactos.length,
-                    itemBuilder: (_, index) {
-                      return _ContactTile(
-                        personal: contactos[index],
-                        index: index,
-                      );
-                    });
+                return Column(
+                  children: [
+                    CustomInput(
+                      width: MediaQuery.of(context).size.width * .95,
+                      hintText: 'Nombre del personal...',
+                      icono: Icons.search,
+                      textInputAction: TextInputAction.search,
+                      validaError: false,
+                      iconButton: txtBuscar.length > 0
+                          ? IconButton(
+                              splashColor: null,
+                              icon: Icon(
+                                Icons.cancel_outlined,
+                                color: Colors.red.withAlpha(200),
+                              ),
+                              onPressed: () {
+                                txtBuscar = '';
+                                txtController.text = '';
+                                dataFiltrada = contactos;
+                                setState(() {});
+                              },
+                            )
+                          : IconButton(
+                              color: Helper.brandColors[4],
+                              icon: _pref.role == 1
+                                  ? Icon(Icons.add)
+                                  : Container(),
+                              onPressed: null,
+                            ),
+                      textController: txtController,
+                      onChange: (text) {
+                        txtBuscar = text;
+                        dataFiltrada = contactos
+                            .where((dato) => '${dato.nombre} ${dato.apellido}'
+                                .toLowerCase()
+                                .contains(text.toLowerCase()))
+                            .toList();
+                        setState(() {});
+                      },
+                    ),
+                    txtBuscar.length > 0 && dataFiltrada.length == 0
+                        ? Container(
+                            height: MediaQuery.of(context).size.height - 250,
+                            child: Center(
+                              child: Text(
+                                'No se encontraron usuarios',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.grey[400]),
+                                maxLines: 3,
+                              ),
+                            ),
+                          )
+                        : Container(
+                            height: MediaQuery.of(context).size.height - 207,
+                            child: ListView.builder(
+                                itemCount: dataFiltrada.length,
+                                itemBuilder: (_, index) {
+                                  return _ContactTile(
+                                    personal: dataFiltrada[index],
+                                    index: index,
+                                  );
+                                })),
+                  ],
+                );
               }
             },
           ),

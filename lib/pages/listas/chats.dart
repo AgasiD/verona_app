@@ -47,7 +47,7 @@ class ChatList extends StatelessWidget {
                         'Previsualizacion',
                         '${(e['nombre'][0] + e['nombre'][1]).toString().toUpperCase()}'));
                     return CustomSearchListView(
-                      data: [],
+                      data: usuario.chats,
                       txtController: txtController,
                     );
                   } else {
