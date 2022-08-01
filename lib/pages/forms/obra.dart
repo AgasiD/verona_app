@@ -22,30 +22,31 @@ import 'package:verona_app/services/loading_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
-class ObraForm extends StatefulWidget implements MyForm {
+class MyWidget extends StatelessWidget {
+  const MyWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class ObraForm extends StatelessWidget {
+  ObraForm({Key? key}) : super(key: key);
   static const String routeName = 'obraForm';
   static String nameForm = 'Nueva obra';
   static String alertMessage = 'Confirmar nueva obra';
+  final TextEditingController txtNombreCtrl = TextEditingController();
+  final TextEditingController txtBarrioCtrl = TextEditingController();
+  final TextEditingController txtLoteCtrl = TextEditingController();
+  final TextEditingController txtDuracionCtrl = TextEditingController();
+  final TextEditingController txtDescripCtrl = TextEditingController();
 
-  ObraForm({Key? key}) : super(key: key);
-  @override
-  State<ObraForm> createState() => _ObraFormState();
-}
-
-final TextEditingController txtNombreCtrl = TextEditingController();
-final TextEditingController txtBarrioCtrl = TextEditingController();
-final TextEditingController txtLoteCtrl = TextEditingController();
-final TextEditingController txtDuracionCtrl = TextEditingController();
-final TextEditingController txtDescripCtrl = TextEditingController();
-
-class _ObraFormState extends State<ObraForm> {
   @override
   Widget build(BuildContext context) {
-    String imgButtonText;
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
     final _obraService = Provider.of<ObraService>(context, listen: false);
-
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -54,7 +55,12 @@ class _ObraFormState extends State<ObraForm> {
             child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 40),
                 child: obraId == null
-                    ? _Form()
+                    ? _Form(
+                        txtNombre: txtNombreCtrl,
+                        txtBarrio: txtBarrioCtrl,
+                        txtLote: txtLoteCtrl,
+                        txtDescrip: txtDescripCtrl,
+                        txtDuracion: txtDuracionCtrl)
                     : FutureBuilder(
                         future: _obraService.obtenerObra(obraId),
                         builder: (context, snapshot) {
@@ -63,29 +69,36 @@ class _ObraFormState extends State<ObraForm> {
                               mensaje: 'Cargando obra',
                             );
                           } else {
-                            return _Form(obra: snapshot.data as Obra);
+                            final obra = snapshot.data as Obra;
+
+                            return _Form(
+                                obra: snapshot.data as Obra,
+                                txtNombre: txtNombreCtrl,
+                                txtBarrio: txtBarrioCtrl,
+                                txtLote: txtLoteCtrl,
+                                txtDescrip: txtDescripCtrl,
+                                txtDuracion: txtDuracionCtrl);
                           }
                         }))),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    txtNombreCtrl.text = '';
-    txtBarrioCtrl.text = '';
-    txtLoteCtrl.text = '';
-    txtDuracionCtrl.text = '';
-    txtDescripCtrl.text = '';
-  }
 }
 
 class _Form extends StatefulWidget {
+  @override
+  TextEditingController txtNombre, txtBarrio, txtLote, txtDescrip, txtDuracion;
   Obra? obra;
-  _Form({Key? key, this.obra}) : super(key: key);
+  _Form(
+      {Key? key,
+      this.obra,
+      required this.txtNombre,
+      required this.txtBarrio,
+      required this.txtLote,
+      required this.txtDescrip,
+      required this.txtDuracion})
+      : super(key: key);
 
   @override
   State<_Form> createState() => _FormState();
@@ -93,30 +106,41 @@ class _Form extends StatefulWidget {
 
 class _FormState extends State<_Form> {
   bool imageSelected = false;
+
   bool edit = false;
+
   String imgButtonText = '';
-  Future? future = null;
-  String name = '', barrio = '', lote = '', descrip = '';
-  int duracion = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.obra != null) {
+      // edit = true;
+      widget.txtNombre.text = widget.obra!.nombre;
+      widget.txtBarrio.text = widget.obra!.barrio;
+      widget.txtLote.text = widget.obra!.lote;
+      widget.txtDescrip.text = widget.obra!.descripcion;
+      widget.txtDuracion.text = widget.obra!.diasEstimados == 0
+          ? ''
+          : widget.obra!.diasEstimados.toString();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final _driveService = Provider.of<GoogleDriveService>(context);
     if (imageSelected == false) {
       imgButtonText = 'Seleccionar imagen';
+      if (edit) {
+        imgButtonText = 'Cambiar imagen';
+      }
     } else {
       imgButtonText = 'Imagen seleccionada';
     }
     if (widget.obra != null) {
       edit = true;
-      txtNombreCtrl.text = widget.obra!.nombre;
-      txtBarrioCtrl.text = widget.obra!.barrio;
-      txtLoteCtrl.text = widget.obra!.lote;
-      txtDescripCtrl.text = widget.obra!.descripcion;
-      txtDuracionCtrl.text = widget.obra!.diasEstimados == 0
-          ? ''
-          : widget.obra!.diasEstimados.toString();
     }
-    print('rebuild');
 
     return SingleChildScrollView(
         child: Form(
@@ -141,7 +165,7 @@ class _FormState extends State<_Form> {
           CustomInput(
             hintText: 'Nombre del proyecto',
             icono: Icons.house,
-            textController: txtNombreCtrl,
+            textController: widget.txtNombre,
             validaError: true,
             validarInput: (value) => Helper.campoObligatorio(value),
           ),
@@ -150,22 +174,19 @@ class _FormState extends State<_Form> {
             icono: Icons.holiday_village_outlined,
             validaError: true,
             validarInput: (value) => Helper.campoObligatorio(value),
-            textController: txtBarrioCtrl,
+            textController: widget.txtBarrio,
           ),
           CustomInput(
-            hintText: 'Lote',
-            icono: Icons.format_list_numbered,
-            textController: txtLoteCtrl,
-            validaError: true,
-            validarInput: (value) {
-              return Helper.campoObligatorio(value);
-            },
-          ),
+              hintText: 'Lote',
+              icono: Icons.format_list_numbered,
+              textController: widget.txtLote,
+              validaError: true,
+              validarInput: (value) => Helper.campoObligatorio(value)),
           CustomInput(
             hintText: 'Duración estimada (días)',
             icono: Icons.hourglass_bottom,
-            textController: txtDuracionCtrl,
-            teclado: TextInputType.number,
+            textController: widget.txtDuracion,
+            teclado: TextInputType.numberWithOptions(signed: true),
             validaError: true,
             validarInput: (value) {
               return Helper.validNumeros(value);
@@ -175,78 +196,88 @@ class _FormState extends State<_Form> {
           CustomInput(
             hintText: 'Descripción',
             icono: Icons.description_outlined,
-            textController: txtDescripCtrl,
+            textController: widget.txtDescrip,
             lines: 3,
           ),
-          !edit
-              ? Container(
-                  alignment: Alignment.centerLeft,
-                  child: MaterialButton(
-                      color: Helper.primaryColor,
-                      textColor: Colors.white,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          imageSelected
-                              ? Padding(
-                                  padding: EdgeInsets.only(left: 10),
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Helper.brandColors[8],
-                                  ))
-                              : Padding(
-                                  padding: EdgeInsets.only(right: 14),
-                                  child: Icon(
-                                    Icons.photo_library_outlined,
-                                    color:
-                                        Helper.brandColors[9].withOpacity(.6),
-                                  )),
-                          Text(imgButtonText, style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                      onPressed: () async {
-                        final ImagePicker _picker = ImagePicker();
-                        // Pick an image
-                        final image = await _picker.pickImage(
-                            source: ImageSource.gallery);
-                        if (image != null) {
-                          _driveService.guardarImagen(image!);
-                          setState(() {
-                            imageSelected = true;
-                          });
-                        }
-                      }),
-                )
-              : Container(),
-          SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              MainButton(
-                width: 120,
-                fontSize: 18,
-                color: Helper.brandColors[8].withOpacity(.5).withAlpha(150),
-                text: 'Grabar',
+          Container(
+            alignment: Alignment.centerLeft,
+            child: MaterialButton(
+                color: Helper.primaryColor,
+                textColor: Colors.white,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    imageSelected
+                        ? Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Icon(
+                              Icons.check,
+                              color: Helper.brandColors[8],
+                            ))
+                        : Padding(
+                            padding: EdgeInsets.only(right: 14),
+                            child: Icon(
+                              Icons.photo_library_outlined,
+                              color: Helper.brandColors[9].withOpacity(.6),
+                            )),
+                    Text(imgButtonText, style: TextStyle(fontSize: 16)),
+                  ],
+                ),
                 onPressed: () async {
-                  edit
-                      ? actualizarObra(
-                          context, widget.obra!.id, widget.obra!.imageId)
-                      : grabarObra(context);
-                },
-              ),
-              SecondaryButton(
+                  final ImagePicker _picker = ImagePicker();
+                  // Pick an image
+                  final image =
+                      await _picker.pickImage(source: ImageSource.gallery);
+                  if (image != null) {
+                    _driveService.guardarImagen(image!);
+                    setState(() {
+                      imageSelected = true;
+                    });
+                  }
+                }),
+          ),
+          SizedBox(height: 40),
+          Container(
+            margin: EdgeInsets.only(bottom: 40),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                MainButton(
                   width: 120,
                   fontSize: 18,
-                  color: Helper.brandColors[2],
-                  text: 'Cancelar',
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-            ],
+                  color: Helper.brandColors[8].withOpacity(.5).withAlpha(150),
+                  text: 'Grabar',
+                  onPressed: () async {
+                    edit
+                        ? actualizarObra(
+                            context, widget.obra!.id, widget.obra!.imageId)
+                        : grabarObra(context);
+                  },
+                ),
+                SecondaryButton(
+                    width: 120,
+                    fontSize: 18,
+                    color: Helper.brandColors[2],
+                    text: 'Cancelar',
+                    onPressed: () {
+                      Navigator.pop(context);
+                    }),
+              ],
+            ),
           )
         ],
       ),
     ));
+  }
+
+  void dispose() {
+    super.dispose();
+
+    widget.txtNombre.text = '';
+    widget.txtBarrio.text = '';
+    widget.txtLote.text = '';
+    widget.txtDuracion.text = '';
+    widget.txtDescrip.text = '';
   }
 
   grabarObra(BuildContext context) async {
@@ -255,19 +286,19 @@ class _FormState extends State<_Form> {
     final _driveService =
         Provider.of<GoogleDriveService>(context, listen: false);
 
-    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-    txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
-    txtLoteCtrl.text.trim() == '' ? isValid = false : true;
-    int.tryParse(txtDuracionCtrl.text) == null ? isValid = false : true;
+    widget.txtNombre.text.trim() == '' ? isValid = false : true;
+    widget.txtBarrio.text.trim() == '' ? isValid = false : true;
+    widget.txtLote.text.trim() == '' ? isValid = false : true;
+    int.tryParse(widget.txtDuracion.text) == null ? isValid = false : true;
 
     if (isValid) {
       final obra = Obra(
-          nombre: txtNombreCtrl.text,
-          barrio: txtBarrioCtrl.text,
-          lote: txtLoteCtrl.text,
+          nombre: widget.txtNombre.text,
+          barrio: widget.txtBarrio.text,
+          lote: widget.txtLote.text,
           propietarios: [],
-          descripcion: txtDescripCtrl.text,
-          diasEstimados: int.parse(txtDuracionCtrl.text));
+          descripcion: widget.txtDescrip.text,
+          diasEstimados: int.parse(widget.txtDuracion.text));
       if (_driveService.imagenValida()) {
         openLoadingDialog(context, mensaje: 'Subiendo imagen');
         final imageResponse = await _driveService.grabarImagen(obra.nombre);
@@ -277,11 +308,11 @@ class _FormState extends State<_Form> {
       openLoadingDialog(context, mensaje: 'Grabando obra...');
       Map<String, dynamic> response = await _service.grabarObra(obra);
       final obraResponse = Obra.fromMap(response["obra"]);
-      txtNombreCtrl.text = '';
-      txtBarrioCtrl.text = '';
-      txtLoteCtrl.text = '';
-      txtDuracionCtrl.text = '';
-      txtDescripCtrl.text = '';
+      widget.txtNombre.text = '';
+      widget.txtBarrio.text = '';
+      widget.txtLote.text = '';
+      widget.txtDuracion.text = '';
+      widget.txtDescrip.text = '';
       closeLoadingDialog(context);
       openLoadingDialog(context, mensaje: 'Grabando obra...');
       Timer(Duration(milliseconds: 750), () {
@@ -301,22 +332,32 @@ class _FormState extends State<_Form> {
     final _driveService =
         Provider.of<GoogleDriveService>(context, listen: false);
 
-    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-    txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
-    txtLoteCtrl.text.trim() == '' ? isValid = false : true;
-    int.tryParse(txtDuracionCtrl.text) == null ? isValid = false : true;
+    widget.txtNombre.text.trim() == '' ? isValid = false : true;
+    widget.txtBarrio.text.trim() == '' ? isValid = false : true;
+    widget.txtLote.text.trim() == '' ? isValid = false : true;
+    int.tryParse(widget.txtDuracion.text) == null ? isValid = false : true;
 
     if (isValid) {
-      final obra = widget.obra;
-      obra!.nombre = txtNombreCtrl.text;
-      obra!.barrio = txtBarrioCtrl.text;
-      obra!.lote = txtLoteCtrl.text;
-      obra!.descripcion = txtDescripCtrl.text;
-      obra!.diasEstimados = int.parse(txtDuracionCtrl.text);
-      obra!.id = obraId;
+      widget.obra!.nombre = widget.txtNombre.text;
+      widget.obra!.barrio = widget.txtBarrio.text;
+      widget.obra!.lote = widget.txtLote.text;
+      widget.obra!.descripcion = widget.txtDescrip.text;
+      widget.obra!.diasEstimados = int.parse(widget.txtDuracion.text);
+      widget.obra!.id = obraId;
 
+      if (imageSelected) {
+        if (_driveService.imagenValida()) {
+          // subir imagen
+          openLoadingDialog(context, mensaje: 'Subiendo imagen');
+          final imageResponse =
+              await _driveService.grabarImagen(widget.obra!.nombre);
+          widget.obra!.imageId = imageResponse;
+          closeLoadingDialog(context);
+        }
+      }
       openLoadingDialog(context, mensaje: 'Actualizando obra...');
-      Map<String, dynamic> response = await _service.actualizarObra(obra);
+      Map<String, dynamic> response =
+          await _service.actualizarObra(widget.obra!);
       final obraResponse = Obra.fromMap(response["obra"]);
       closeLoadingDialog(context);
       openLoadingDialog(context, mensaje: 'Obra modificada');

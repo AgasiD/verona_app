@@ -386,7 +386,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         titulo: 'Documentos',
         values: [].toList(),
         accion: () {
-          Navigator.pushNamed(context, DocumentosPage.routeName,
+          Navigator.pushNamed(context, ImgGalleryPage.routeName,
               arguments: {'driveId': obra.driveFolderId});
         },
       );

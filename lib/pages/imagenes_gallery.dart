@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/forms/imagen-doc.dart';
+import 'package:verona_app/pages/listas/documentos.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -64,17 +66,38 @@ class ImgGalleryPage extends StatelessWidget {
                         final imagenes = files
                             .map(
                               (e) => GestureDetector(
-                                onTap: () {
-                                  if (e['mimeType'] ==
-                                      'application/vnd.google-apps.folder') {
+                                onTap: () async {
+                                  // if (e['mimeType'] ==
+                                  //     'application/vnd.google-apps.folder') {
+                                  //   Navigator.pushNamed(
+                                  //       context, ImgGalleryPage.routeName,
+                                  //       arguments: {"driveId": e['id']});
+                                  // } else {
+                                  //   Navigator.pushNamed(
+                                  //       context, ImagenViewer.routeName,
+                                  //       arguments: {"imagenId": e['id']});
+                                  // }
+
+                                  if (getType(e['mimeType']) == 'jpg') {
                                     Navigator.pushNamed(
-                                        context, ImgGalleryPage.routeName,
-                                        arguments: {"driveId": e['id']});
+                                        (context), ImagenViewer.routeName,
+                                        arguments: {'imagenId': e['id']});
+                                  } else if (getType(e['mimeType'])
+                                          .toLowerCase() ==
+                                      'Carpeta'.toLowerCase()) {
+                                    Navigator.pushNamed(
+                                        (context), ImgGalleryPage.routeName,
+                                        arguments: {'driveId': e['id']});
                                   } else {
-                                    Navigator.pushNamed(
-                                        context, ImagenViewer.routeName,
-                                        arguments: {"imagenId": e['id']});
+                                    final Uri _url = Uri.parse(
+                                        'https://drive.google.com/file/d/${e['id']}/view?usp=sharing');
+                                    if (await canLaunchUrl(_url))
+                                      await launchUrl(_url);
+                                    else
+                                      openAlertDialog(context,
+                                          'No se puede visualizar el documento');
                                   }
+                                  ;
                                 },
                                 child: Column(
                                   children: [
@@ -103,7 +126,9 @@ class ImgGalleryPage extends StatelessWidget {
                                             placeholder:
                                                 AssetImage('assets/image.png'),
                                             image: Helper.imageNetwork(
-                                                'https://drive.google.com/uc?export=view&id=${e['id']}')),
+                                                e['thumbnailLink']
+                                                // 'https://drive.google.com/uc?export=view&id=${e['id']}'
+                                                )),
                                     Text(
                                       e['name'],
                                       style: TextStyle(
@@ -126,5 +151,30 @@ class ImgGalleryPage extends StatelessWidget {
                   }),
                 )),
     );
+  }
+
+  String getType(type) {
+    String extension = '';
+    switch (type) {
+      case 'application/pdf':
+        extension = 'pdf';
+        break;
+
+      case 'image/jpeg':
+        extension = 'jpg';
+        break;
+
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        extension = 'docx';
+        break;
+
+      case 'application/vnd.ms-excel':
+        extension = 'Excel';
+        break;
+      case 'application/vnd.google-apps.folder':
+        extension = 'Carpeta';
+        break;
+    }
+    return extension;
   }
 }

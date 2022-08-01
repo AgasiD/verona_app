@@ -22,52 +22,54 @@ class ChatList extends StatelessWidget {
     final _pref = new Preferences();
     _socketService.connect(_pref.id);
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
-    final _chatService = Provider.of<ChatService>(context);
     TextEditingController txtController = new TextEditingController();
     return Scaffold(
-      body: Container(
-        color: Helper.brandColors[1],
-        child: SafeArea(
-          child: FutureBuilder(
-              future: _usuarioService.obtenerUsuario(_pref.id),
-              builder: (context, snapshot) {
-                if (snapshot.data == null) {
-                  return Loading(mensaje: 'Cargando chats');
-                } else {
-                  final response = MyResponse.fromJson(
-                      snapshot.data as Map<String, dynamic>);
-                  final usuario = Miembro.fromJson(response.data);
-                  usuario.chats = usuario.chats
-                      .where((element) => element['individual'] == true)
-                      .toList();
-
-                  if (usuario.chats.length > 0) {
-                    final dataTile = usuario.chats.map((e) => Helper.toCustomTile(
-                        '${e['nombre']}',
-                        'Previsualizacion',
-                        '${(e['nombre'][0] + e['nombre'][1]).toString().toUpperCase()}'));
-                    return CustomSearchListView(
-                      data: usuario.chats,
-                      txtController: txtController,
-                    );
+      body: SingleChildScrollView(
+        child: Container(
+          color: Helper.brandColors[1],
+          child: SafeArea(
+            child: FutureBuilder(
+                future: _usuarioService.obtenerUsuario(_pref.id),
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return Loading(mensaje: 'Cargando chats');
                   } else {
-                    return Column(
-                      children: [
-                        Container(
-                            height: MediaQuery.of(context).size.height - 200,
-                            width: MediaQuery.of(context).size.width,
-                            child: Center(
-                              child: Text(
-                                'Aún no tiene conversaciones',
-                                style: TextStyle(
-                                    fontSize: 18, color: Helper.brandColors[4]),
-                              ),
-                            )),
-                      ],
-                    );
+                    final response = MyResponse.fromJson(
+                        snapshot.data as Map<String, dynamic>);
+                    final usuario = Miembro.fromJson(response.data);
+                    usuario.chats = usuario.chats
+                        .where((element) => element['individual'] == true)
+                        .toList();
+
+                    if (usuario.chats.length > 0) {
+                      final dataTile = usuario.chats.map((e) => Helper.toCustomTile(
+                          '${e['nombre']}',
+                          'Previsualizacion',
+                          '${(e['nombre'][0] + e['nombre'][1]).toString().toUpperCase()}'));
+                      return CustomSearchListView(
+                        data: usuario.chats,
+                        txtController: txtController,
+                      );
+                    } else {
+                      return Column(
+                        children: [
+                          Container(
+                              height: MediaQuery.of(context).size.height - 200,
+                              width: MediaQuery.of(context).size.width,
+                              child: Center(
+                                child: Text(
+                                  'Aún no tiene conversaciones',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Helper.brandColors[4]),
+                                ),
+                              )),
+                        ],
+                      );
+                    }
                   }
-                }
-              }),
+                }),
+          ),
         ),
       ),
       floatingActionButton: CustomNavigatorButton(

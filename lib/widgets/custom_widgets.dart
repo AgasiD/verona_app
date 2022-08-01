@@ -1116,7 +1116,7 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
         ),
         txtBuscar.length > 0 && dataFiltrada.length == 0
             ? Container(
-                height: MediaQuery.of(context).size.height - 250,
+                height: MediaQuery.of(context).size.height - 200,
                 child: Center(
                   child: Text(
                     'No se encontraron usuarios',
@@ -1126,7 +1126,7 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
                 ),
               )
             : Container(
-                height: MediaQuery.of(context).size.height - 207,
+                height: MediaQuery.of(context).size.height - 205,
                 child: ListView.builder(
                     itemCount: dataFiltrada.length,
                     itemBuilder: ((context, index) {
