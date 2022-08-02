@@ -54,7 +54,7 @@ class ChatList extends StatelessWidget {
                       return Column(
                         children: [
                           Container(
-                              height: MediaQuery.of(context).size.height - 200,
+                              height: MediaQuery.of(context).size.height - 140,
                               width: MediaQuery.of(context).size.width,
                               child: Center(
                                 child: Text(

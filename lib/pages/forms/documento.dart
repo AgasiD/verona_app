@@ -11,6 +11,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/inactividad.dart';
+import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/listas/documentos.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -46,7 +47,7 @@ class _FormState extends State<_Form> {
       textAction = 'Nuevo documento',
       imgButtonText = 'Seleccionar documento';
   bool edit = false,
-      esPrivado = false,
+      habilitaPropietario = false,
       documentSelected = false,
       imagenSelected = false;
   List<DropdownMenuItem<String>> formato = <DropdownMenuItem<String>>[
@@ -95,6 +96,18 @@ class _FormState extends State<_Form> {
               try {
                 final res = await _driveService.grabarImagenes(
                     driveId, txtCtrlName.text == '' ? null : txtCtrlName.text);
+                if ((habilitaPropietario && res.length > 0) ||
+                    _pref.role == 3) {
+                  // modificar obra
+                  final response = await _obraService.addEnabledFiles(
+                      res, _obraService.obra.id);
+                  _obraService.obra.enabledFiles
+                      .insertAll(_obraService.obra.enabledFiles.length, res);
+                  if (response.fallo) {
+                    closeLoadingDialog(context);
+                    openAlertDialog(context, response.message);
+                  }
+                }
                 closeLoadingDialog(context);
                 openAlertDialog(context, 'Imagenes subidas');
                 Timer(
@@ -106,7 +119,7 @@ class _FormState extends State<_Form> {
                 openAlertDialog(context, 'Error al subir imagen',
                     subMensaje: err.toString());
               }
-            }, '¿Seguro que desea subirte este documento?');
+            }, '¿Seguro que desea subir este documento?');
           } else {
             openAlertDialog(context, 'Debe ingresar un nombre al documento');
           }
@@ -139,7 +152,7 @@ class _FormState extends State<_Form> {
                 openAlertDialog(context, 'Error al subir imagen',
                     subMensaje: err.toString());
               }
-            }, '¿Seguro que desea subirte este documento?');
+            }, '¿Seguro que desea subir este documento?');
           } else {
             openAlertDialog(context, 'Debe ingresar un nombre al documento');
           }
@@ -321,21 +334,26 @@ class _FormState extends State<_Form> {
                           }
                         }))
                 : Container(),
-            Row(
-              children: [
-                Text(
-                  'Habilitar propietario'.toUpperCase(),
-                  style: TextStyle(color: Helper.brandColors[5]),
-                ),
-                Switch(
-                  onChanged: (a) {},
-                  value: false,
-                  activeColor: Helper.brandColors[3],
-                  activeTrackColor: Helper.brandColors[8],
-                  inactiveTrackColor: Helper.brandColors[3],
-                )
-              ],
-            ),
+            _pref.role != 3
+                ? Row(
+                    children: [
+                      Text(
+                        'Habilitar propietario'.toUpperCase(),
+                        style: TextStyle(color: Helper.brandColors[5]),
+                      ),
+                      Switch(
+                        onChanged: (habilita) {
+                          habilitaPropietario = habilita;
+                          setState(() {});
+                        },
+                        value: habilitaPropietario,
+                        activeColor: Helper.brandColors[3],
+                        activeTrackColor: Helper.brandColors[8],
+                        inactiveTrackColor: Helper.brandColors[3],
+                      )
+                    ],
+                  )
+                : Container(),
             SizedBox(
               height: 50,
             ),

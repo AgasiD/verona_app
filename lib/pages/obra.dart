@@ -123,14 +123,27 @@ class ObraPage extends StatelessWidget {
                                                 CustomNavigatorButton(
                                                   icono: Icons.chat,
                                                   accion: () {
-                                                    openDialogConfirmation(
-                                                        context, (ctx) {
-                                                      Navigator.pushNamed(ctx,
-                                                          ChatPage.routeName,
-                                                          arguments: {
-                                                            'chatId': obra.chatE
-                                                          });
-                                                    }, 'Abrirá chat con propietarios');
+                                                    _pref.role != 3
+                                                        ? openDialogConfirmation(
+                                                            context, (ctx) {
+                                                            Navigator.pushNamed(
+                                                                ctx,
+                                                                ChatPage
+                                                                    .routeName,
+                                                                arguments: {
+                                                                  'chatId':
+                                                                      obra.chatE
+                                                                });
+                                                          },
+                                                            'Abrirá chat con propietarios')
+                                                        : Navigator.pushNamed(
+                                                            context,
+                                                            ChatPage.routeName,
+                                                            arguments: {
+                                                                'chatId':
+                                                                    obra.chatE
+                                                              });
+                                                    ;
                                                   },
                                                   showNotif: true,
                                                 )

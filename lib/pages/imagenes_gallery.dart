@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/forms/documento.dart';
-import 'package:verona_app/pages/forms/imagen-doc.dart';
-import 'package:verona_app/pages/listas/documentos.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ImgGalleryPage extends StatelessWidget {
-  const ImgGalleryPage({Key? key}) : super(key: key);
+  ImgGalleryPage({Key? key}) : super(key: key);
   static final routeName = 'imageGallery';
+  final _pref = new Preferences();
 
   @override
   Widget build(BuildContext context) {
@@ -51,14 +51,23 @@ class ImgGalleryPage extends StatelessWidget {
                       return Loading(mensaje: 'Recuperando imagenes');
                     } else {
                       final response = snapshot.data as MyResponse;
-                      final files = response.data['files'] as List<dynamic>;
+                      var files = response.data['files'] as List<dynamic>;
+
+                      // Filtro por habilitados para cliente
+                      if (_pref.role == 3) {
+                        files = files
+                            .where((file) => _obraService.obra.enabledFiles
+                                .contains(file['id']))
+                            .toList();
+                      }
+
                       if (files.isEmpty) {
                         return Container(
                             height: MediaQuery.of(context).size.height,
                             width: MediaQuery.of(context).size.width,
                             child: Center(
                               child: Text(
-                                'Aún no hay imagenes subidas',
+                                'Aún no hay documentos disponibles',
                                 style: TextStyle(
                                     fontSize: 20, color: Helper.brandColors[4]),
                               ),

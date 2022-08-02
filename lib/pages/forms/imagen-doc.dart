@@ -81,7 +81,7 @@ class _FormState extends State<_Form> {
               openAlertDialog(context, 'Error al subir imagen',
                   subMensaje: err.toString());
             }
-          }, '¿Seguro que desea subirte este documento?');
+          }, '¿Seguro que desea subir este documento?');
         } else {
           openAlertDialog(context, 'Debe ingresar un nombre al documento');
         }

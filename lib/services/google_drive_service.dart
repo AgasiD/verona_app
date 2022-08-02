@@ -72,18 +72,23 @@ class GoogleDriveService extends ChangeNotifier {
 
   Future grabarImagenes(String driveId, String? nombre) async {
     int index = 1;
+    List<String> ids = [];
     for (var img in _imgs) {
-      print('imagen $index');
       this._img = img;
       final ts = DateTime.now().millisecondsSinceEpoch;
       String fileName = nombre ?? 'fromApp-$ts';
-      final response = await grabarImagen('$fileName ($index)',
-          driveId: driveId, imagen: img);
+      if (nombre != null) {
+        fileName = _imgs.length == 1 ? nombre : '$nombre ($index)';
+      }
+      final response =
+          await grabarImagen(fileName, driveId: driveId, imagen: img);
       index = index + 1;
+      ids.add(response);
     }
     ;
     notifyListeners();
     print('3');
+    return ids;
   }
 
   obtenerCantidadImgSeleccionada() {

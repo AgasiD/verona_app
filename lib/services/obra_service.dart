@@ -33,6 +33,14 @@ class ObraService extends ChangeNotifier {
     return data;
   }
 
+  Future addEnabledFiles(List<String> ids, String obraId) async {
+    final body = {"ids": ids};
+    final datos = await this._http.put('$_endpoint/enabledFiles/$obraId', body);
+
+    final response = MyResponse.fromJson(datos["response"]);
+    return response;
+  }
+
   grabarObra(Obra obra) async {
     final response = await this._http.post(_endpoint, obra.toMap());
     notifyListeners();
@@ -132,7 +140,7 @@ class ObraService extends ChangeNotifier {
     final datos = await this._http.delete('$_endpoint/$obraId');
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
-    notifyListeners();
+    // notifyListeners();
     return resp;
   }
 }

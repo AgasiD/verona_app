@@ -19,13 +19,18 @@ class InactividadesPage extends StatelessWidget {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
     final _obraService = Provider.of<ObraService>(context);
+    final _pref = new Preferences();
+
     return Scaffold(
-      floatingActionButton: CustomNavigatorButton(
-        accion: () => Navigator.pushNamed(context, InactividadesForm.routeName,
-            arguments: {'obraId': obraId}),
-        icono: Icons.add,
-        showNotif: false,
-      ),
+      floatingActionButton: _pref.role != 3
+          ? CustomNavigatorButton(
+              accion: () => Navigator.pushNamed(
+                  context, InactividadesForm.routeName,
+                  arguments: {'obraId': obraId}),
+              icono: Icons.add,
+              showNotif: false,
+            )
+          : Container(),
       body: Container(
         color: Helper.brandColors[1],
         child: FutureBuilder(

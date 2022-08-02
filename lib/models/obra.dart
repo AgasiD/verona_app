@@ -24,6 +24,7 @@ class Obra {
   List<dynamic> pedidos;
   String? driveFolderId;
   String imgFolderId;
+  List<dynamic> enabledFiles;
   Obra({
     required this.nombre,
     this.id = '',
@@ -43,6 +44,7 @@ class Obra {
     this.pedidos = const [],
     this.driveFolderId = '',
     this.imgFolderId = '',
+    this.enabledFiles = const [],
     ts,
   }) {
     this.nombre = nombre;
@@ -62,36 +64,37 @@ class Obra {
     this.pedidos = pedidos;
     this.driveFolderId = driveFolderId;
     this.imgFolderId = imgFolderId;
+    this.enabledFiles = enabledFiles;
     this.ts =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
-        nombre: json["nombre"],
-        id: json["id"],
-        barrio: json["barrio"],
-        chatE: json["chatE"],
-        chatI: json["chatI"],
-        diasEstimados: json["diasEstimados"],
-        diasInactivos: json["diasInactivos"],
-        diasTranscurridos: json["diasTranscurridos"],
-        docs: json["docs"],
-        driveFolderId: json["driveFolderId"] ?? '',
-        imgFolderId: json["imgFolderId"] ?? '',
-        descripcion: json['descripcion'] ?? 'Sin descripción',
-        equipo: (json["equipo"] as List<dynamic>)
-            .map((e) => Miembro.fromJson(e))
-            .toList(),
-        estadios: json["estadios"],
-        imageId: json['imageId'] ?? '',
-        lote: json["lote"],
-        ts: json["ts"],
-        propietarios: (json["propietarios"] as List<dynamic>)
-            .map((e) => Propietario.fromJson(e))
-            .toList(),
-        pedidos: json["pedidos"] ?? [],
-      );
+      nombre: json["nombre"],
+      id: json["id"],
+      barrio: json["barrio"],
+      chatE: json["chatE"],
+      chatI: json["chatI"],
+      diasEstimados: json["diasEstimados"],
+      diasInactivos: json["diasInactivos"],
+      diasTranscurridos: json["diasTranscurridos"],
+      docs: json["docs"],
+      driveFolderId: json["driveFolderId"] ?? '',
+      imgFolderId: json["imgFolderId"] ?? '',
+      descripcion: json['descripcion'] ?? 'Sin descripción',
+      equipo: (json["equipo"] as List<dynamic>)
+          .map((e) => Miembro.fromJson(e))
+          .toList(),
+      estadios: json["estadios"],
+      imageId: json['imageId'] ?? '',
+      lote: json["lote"],
+      ts: json["ts"],
+      propietarios: (json["propietarios"] as List<dynamic>)
+          .map((e) => Propietario.fromJson(e))
+          .toList(),
+      pedidos: json["pedidos"] ?? [],
+      enabledFiles: json["enabledFiles"] as List<dynamic>);
 
   toMap() => {
         'nombre': this.nombre,
@@ -111,7 +114,8 @@ class Obra {
         'propietarios': this.propietarios,
         'descripcion': this.descripcion,
         'pedidos': this.pedidos,
-        'driveFolderId': this.driveFolderId
+        'driveFolderId': this.driveFolderId,
+        'enabledFiles': this.enabledFiles
       };
 
   estaPropietario(usuarioId) {
