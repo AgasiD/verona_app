@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/forms/documento.dart';
 import 'package:verona_app/pages/forms/imagen-doc.dart';
 import 'package:verona_app/pages/listas/documentos.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
@@ -28,7 +29,7 @@ class ImgGalleryPage extends StatelessWidget {
     return Scaffold(
       bottomNavigationBar: CustomNavigatorFooter(),
       floatingActionButton: CustomNavigatorButton(
-        accion: () => Navigator.pushNamed(context, ImagenesForm.routeName,
+        accion: () => Navigator.pushNamed(context, DocumentoForm.routeName,
             arguments: {'driveId': _driveId}),
         icono: Icons.add,
         showNotif: false,

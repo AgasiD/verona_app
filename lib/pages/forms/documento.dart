@@ -4,6 +4,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -44,14 +45,21 @@ class _FormState extends State<_Form> {
   String inactividadId = '',
       textAction = 'Nuevo documento',
       imgButtonText = 'Seleccionar documento';
-  bool edit = false, esPrivado = false, documentSelected = false;
+  bool edit = false,
+      esPrivado = false,
+      documentSelected = false,
+      imagenSelected = false;
   List<DropdownMenuItem<String>> formato = <DropdownMenuItem<String>>[
     DropdownMenuItem(
       value: '1',
-      child: Text('Archivo'.toUpperCase()),
+      child: Text('Imagen'.toUpperCase()),
     ),
     DropdownMenuItem(
       value: '2',
+      child: Text('Archivo'.toUpperCase()),
+    ),
+    DropdownMenuItem(
+      value: '3',
       child: Text('Carpeta'.toUpperCase()),
     ),
   ];
@@ -62,6 +70,7 @@ class _FormState extends State<_Form> {
   late Inactividad inactividad;
   late GoogleDriveService _driveService;
   late Function() submitAction;
+
   @override
   void initState() {
     super.initState();
@@ -77,6 +86,36 @@ class _FormState extends State<_Form> {
 
     submitAction = () async {
       if (fileType == '1') {
+        if (imagenSelected) {
+          if (txtCtrlName.text.trim() != '') {
+            openDialogConfirmation(context, (context) async {
+              String msg = 'Subiendo imagenes...';
+              openLoadingDialog(context, mensaje: msg);
+              MyResponse response;
+              try {
+                final res = await _driveService.grabarImagenes(
+                    driveId, txtCtrlName.text == '' ? null : txtCtrlName.text);
+                closeLoadingDialog(context);
+                openAlertDialog(context, 'Imagenes subidas');
+                Timer(
+                    Duration(milliseconds: 750), () => Navigator.pop(context));
+                Timer(
+                    Duration(milliseconds: 750), () => Navigator.pop(context));
+              } catch (err) {
+                closeLoadingDialog(context);
+                openAlertDialog(context, 'Error al subir imagen',
+                    subMensaje: err.toString());
+              }
+            }, '¿Seguro que desea subirte este documento?');
+          } else {
+            openAlertDialog(context, 'Debe ingresar un nombre al documento');
+          }
+        } else {
+          openAlertDialog(context, 'No se ha seleccionado ningun documento');
+        }
+        ;
+      }
+      if (fileType == '2') {
         if (documentSelected) {
           if (txtCtrlName.text.trim() != '') {
             openDialogConfirmation(context, (context) async {
@@ -107,7 +146,7 @@ class _FormState extends State<_Form> {
         } else {
           openAlertDialog(context, 'No se ha seleccionado ningun documento');
         }
-      } else if (fileType == '2') {
+      } else if (fileType == '3') {
         if (txtCtrlName.text.trim() == '') {
           openAlertDialog(context, 'No se ha asignado nombre a la carpeta');
           return;
@@ -139,125 +178,190 @@ class _FormState extends State<_Form> {
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(color: Helper.brandColors[1]),
       child: SafeArea(
-          child: Column(
-        children: [
-          Logo(),
-          SizedBox(
-            height: 40,
-          ),
-          Text(
-            textAction.toUpperCase(),
-            style: TextStyle(
-                foreground: Paint()
-                  ..shader = Helper.getGradient(
-                      [Helper.brandColors[8], Helper.brandColors[9]]),
-                fontSize: 23),
-          ),
-          SizedBox(
-            height: 40,
-          ),
-          DropdownButtonFormField2(
-            value: fileType,
-            items: formato,
-            style: TextStyle(color: Helper.brandColors[5], fontSize: 16),
-            iconSize: 30,
-            buttonHeight: 60,
-            buttonPadding: EdgeInsets.only(left: 20, right: 10),
-            decoration: getDecoration(),
-            hint: Text(
-              '',
-              style: TextStyle(fontSize: 16, color: Helper.brandColors[3]),
+          child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Logo(),
+            SizedBox(
+              height: 40,
             ),
-            icon: Icon(
-              Icons.arrow_drop_down,
-              color: Helper.brandColors[3],
+            Text(
+              textAction.toUpperCase(),
+              style: TextStyle(
+                  foreground: Paint()
+                    ..shader = Helper.getGradient(
+                        [Helper.brandColors[8], Helper.brandColors[9]]),
+                  fontSize: 23),
             ),
-            dropdownDecoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: Helper.brandColors[2],
+            SizedBox(
+              height: 40,
             ),
-            onChanged: (value) {
-              setState(() {
-                fileType = value.toString();
-                print(fileType);
-              });
-            },
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          CustomInput(
-              hintText: 'NOMBRE',
-              icono: Icons.more_horiz,
-              textController: txtCtrlName),
-          fileType == '1'
-              ? Container(
-                  alignment: Alignment.centerLeft,
-                  child: MaterialButton(
-                      color: Helper.primaryColor,
-                      textColor: Colors.white,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          documentSelected
-                              ? Padding(
-                                  padding: EdgeInsets.only(left: 10),
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Helper.brandColors[8],
-                                  ))
-                              : Padding(
-                                  padding: EdgeInsets.only(right: 14),
-                                  child: Icon(
-                                    Icons.photo_library_outlined,
-                                    color:
-                                        Helper.brandColors[9].withOpacity(.6),
-                                  )),
-                          Text(imgButtonText, style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                      onPressed: () async {
-                        FilePickerResult? result =
-                            await FilePicker.platform.pickFiles(
-                          withData: true,
-                          withReadStream: true,
-                          allowMultiple: false,
-                          // type: FileType.custom,
-                          // allowedExtensions: ['jpg', 'pdf', 'doc', 'docx', 'xls'],
-                        );
-                        if (result != null) {
-                          PlatformFile file = result.files.first;
-                          result!.files.single;
-                          _driveService.guardarDocumento(result!);
-                          setState(() {
-                            documentSelected = true;
-                          });
-                        }
-                      }),
-                )
-              : Container(),
-          SizedBox(
-            height: 50,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              MainButton(
-                color: Helper.brandColors[8],
-                onPressed: submitAction,
-                text: 'Guardar',
-                width: 100,
+            DropdownButtonFormField2(
+              value: fileType,
+              items: formato,
+              style: TextStyle(color: Helper.brandColors[5], fontSize: 16),
+              iconSize: 30,
+              buttonHeight: 60,
+              buttonPadding: EdgeInsets.only(left: 20, right: 10),
+              decoration: getDecoration(),
+              hint: Text(
+                '',
+                style: TextStyle(fontSize: 16, color: Helper.brandColors[3]),
               ),
-              SecondaryButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  text: 'Cancelar',
-                  width: 100,
-                  color: Helper.brandColors[2]),
-            ],
-          )
-        ],
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: Helper.brandColors[3],
+              ),
+              dropdownDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: Helper.brandColors[2],
+              ),
+              onChanged: (value) {
+                setState(() {
+                  fileType = value.toString();
+                  print(fileType);
+                });
+              },
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            CustomInput(
+                hintText: 'NOMBRE',
+                icono: Icons.more_horiz,
+                textController: txtCtrlName),
+            fileType == '2'
+                ? Container(
+                    alignment: Alignment.centerLeft,
+                    child: MaterialButton(
+                        color: Helper.primaryColor,
+                        textColor: Colors.white,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            documentSelected
+                                ? Padding(
+                                    padding: EdgeInsets.only(left: 10),
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Helper.brandColors[8],
+                                    ))
+                                : Padding(
+                                    padding: EdgeInsets.only(right: 14),
+                                    child: Icon(
+                                      Icons.photo_library_outlined,
+                                      color:
+                                          Helper.brandColors[9].withOpacity(.6),
+                                    )),
+                            Text(imgButtonText, style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                        onPressed: () async {
+                          FilePickerResult? result =
+                              await FilePicker.platform.pickFiles(
+                            withData: true,
+                            withReadStream: true,
+                            allowMultiple: false,
+                            // type: FileType.custom,
+                            // allowedExtensions: ['jpg', 'pdf', 'doc', 'docx', 'xls'],
+                          );
+                          if (result != null) {
+                            PlatformFile file = result.files.first;
+                            result!.files.single;
+                            _driveService.guardarDocumento(result!);
+                            setState(() {
+                              documentSelected = true;
+                            });
+                          }
+                        }),
+                  )
+                : Container(),
+            fileType == '1'
+                ? Container(
+                    alignment: Alignment.centerLeft,
+                    child: MaterialButton(
+                        color: Helper.primaryColor,
+                        textColor: Colors.white,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            imagenSelected
+                                ? Padding(
+                                    padding: EdgeInsets.only(left: 10),
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Helper.brandColors[8],
+                                    ))
+                                : Padding(
+                                    padding: EdgeInsets.only(right: 14),
+                                    child: Icon(
+                                      Icons.photo_library_outlined,
+                                      color:
+                                          Helper.brandColors[9].withOpacity(.6),
+                                    )),
+                            Text(imgButtonText, style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                        onPressed: () async {
+                          try {
+                            final ImagePicker _picker = ImagePicker();
+                            // Pick an image
+                            final List<XFile>? images =
+                                await _picker.pickMultiImage();
+                            if (images != null) {
+                              _driveService.guardarImagenes(images);
+                              setState(() {
+                                imagenSelected = true;
+                                imgButtonText =
+                                    'Imagenes seleccionadas (${_driveService.obtenerCantidadImgSeleccionada()})';
+                              });
+                            }
+                          } catch (e) {
+                            openAlertDialog(context, e.toString());
+                          }
+                        }))
+                : Container(),
+            Row(
+              children: [
+                Text(
+                  'Habilitar propietario'.toUpperCase(),
+                  style: TextStyle(color: Helper.brandColors[5]),
+                ),
+                Switch(
+                  onChanged: (a) {},
+                  value: false,
+                  activeColor: Helper.brandColors[3],
+                  activeTrackColor: Helper.brandColors[8],
+                  inactiveTrackColor: Helper.brandColors[3],
+                )
+              ],
+            ),
+            SizedBox(
+              height: 50,
+            ),
+            Container(
+              margin: EdgeInsets.only(bottom: 45),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  MainButton(
+                    color: Helper.brandColors[8],
+                    onPressed: submitAction,
+                    text: 'Guardar',
+                    width: 100,
+                  ),
+                  SecondaryButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      text: 'Cancelar',
+                      width: 100,
+                      color: Helper.brandColors[2]),
+                ],
+              ),
+            )
+          ],
+        ),
       )),
     );
   }
