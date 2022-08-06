@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -281,6 +282,7 @@ Container _obraCard(BuildContext context, Obra obra) {
       : Helper.imageNetwork(
           'https://drive.google.com/uc?export=view&id=${obra.imageId}',
         );
+  final porcent = (Random().nextDouble() * 100).round();
   return Container(
     margin: EdgeInsets.symmetric(horizontal: 20),
     child: GestureDetector(
@@ -311,8 +313,35 @@ Container _obraCard(BuildContext context, Obra obra) {
                     SizedBox(
                       height: 5,
                     ),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 10),
+                      child: Column(
+                        children: [
+                          Text('${porcent.toString()}%',
+                              style: TextStyle(
+                                  color: Helper.brandColors[3],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold)),
+                          Container(
+                            margin: EdgeInsets.symmetric(vertical: 3),
+                            padding: EdgeInsets.symmetric(horizontal: 30),
+                            child: LinearProgressIndicator(
+                              value: porcent.toDouble() / 100,
+                              semanticsLabel: 'HoLA',
+                              backgroundColor: Helper.brandColors[3],
+                              color: Helper.brandColors[8],
+                            ),
+                          ),
+                          // Text('${porcent.toString()}%',
+                          //     style: TextStyle(
+                          //         color: Helper.brandColors[3],
+                          //         fontSize: 12,
+                          //         fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
                     Text('Tareas preliminares',
-                        style: TextStyle(color: Helper.brandColors[3]))
+                        style: TextStyle(color: Helper.brandColors[3])),
                   ]),
                 ),
                 Hero(

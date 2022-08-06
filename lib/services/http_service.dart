@@ -19,7 +19,7 @@ class HttpService extends ChangeNotifier {
   HttpService() {
     isProduction
         ? _baseUrl = 'veronaserver.herokuapp.com'
-        : _baseUrl = '192.168.0.155:8008';
+        : _baseUrl = '192.168.0.155:4321';
   }
 
   get(String endpoint) async {

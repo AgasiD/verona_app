@@ -67,7 +67,7 @@ class ImgGalleryPage extends StatelessWidget {
                             width: MediaQuery.of(context).size.width,
                             child: Center(
                               child: Text(
-                                'Aún no hay documentos disponibles',
+                                'Aún no hay documentos disponibles ',
                                 style: TextStyle(
                                     fontSize: 20, color: Helper.brandColors[4]),
                               ),
@@ -119,7 +119,7 @@ class ImgGalleryPage extends StatelessWidget {
                                             color: Helper.brandColors[3],
                                           )
                                         : FadeInImage(
-                                            height: 170,
+                                            height: 150,
                                             imageErrorBuilder: (_, obj, st) {
                                               return Container(
                                                   child: Image(
