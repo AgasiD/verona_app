@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,24 +6,19 @@ import 'package:path/path.dart';
 import 'package:async/async.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
-import 'package:win32/win32.dart';
 
 class HttpService extends ChangeNotifier {
   //bool loading = false;
-  final isProduction = false;
-  String _baseUrl = 'veronaserver.herokuapp.com';
+  String _baseUrl = Environment.API_URL;
   final headers = {"Content-Type": "application/json"};
   late Uri url;
-  HttpService() {
-    isProduction
-        ? _baseUrl = 'veronaserver.herokuapp.com'
-        : _baseUrl = '192.168.0.155:4321';
-  }
+  HttpService() {}
 
   get(String endpoint) async {
     final _pref = new Preferences();
-    this.isProduction
+    Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
 
@@ -36,7 +30,7 @@ class HttpService extends ChangeNotifier {
   post(String endpoint, Map<String, dynamic> body) async {
     final _pref = new Preferences();
     //headers.addAll({'x-token': _pref.token});
-    isProduction
+    Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
 
@@ -48,7 +42,7 @@ class HttpService extends ChangeNotifier {
 
   delete(String endpoint) async {
     final _pref = new Preferences();
-    isProduction
+    Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
     final response = await http.delete(url);
@@ -58,7 +52,7 @@ class HttpService extends ChangeNotifier {
 
   put(String endpoint, Map<String, dynamic> body) async {
     final _pref = new Preferences();
-    isProduction
+    Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
     final response =
@@ -75,7 +69,7 @@ class HttpService extends ChangeNotifier {
     // get file length
     var length = await imageFile.length();
     // string to uri
-    if (isProduction) {
+    if (Environment.isProduction) {
       url = Uri.https(_baseUrl, endpoint);
     } else {
       url = Uri.http(_baseUrl, endpoint);
@@ -110,7 +104,7 @@ class HttpService extends ChangeNotifier {
     // get file length
     var length = await file.files.single.size;
     // string to uri
-    if (isProduction) {
+    if (Environment.isProduction) {
       url = Uri.https(_baseUrl, endpoint);
     } else {
       url = Uri.http(_baseUrl, endpoint);

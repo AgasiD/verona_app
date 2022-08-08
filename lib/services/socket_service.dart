@@ -1,17 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:socket_io_client/socket_io_client.dart';
-import 'package:verona_app/helpers/Preferences.dart';
-import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/message.dart';
-import 'package:verona_app/models/miembro.dart';
-import 'package:verona_app/services/usuario_service.dart';
-
-import 'obra_service.dart';
 
 enum ServerStatus { Online, Offline, Connecting }
 
@@ -23,8 +15,9 @@ class SocketService with ChangeNotifier {
   int unreadNotifications = 0;
   void connect(clientId) {
     if (clientId != null && clientId.toString().trim() != '') {
-      final url =
-          'http://192.168.0.155:8008'; //'https://veronaserver.herokuapp.com'; //
+      final url = Environment.isProduction
+          ? 'https://veronaserver.herokuapp.com'
+          : 'http://192.168.0.155:8008';
       if (this._serverStatus == ServerStatus.Offline) {
         this._serverStatus = ServerStatus.Connecting;
         this._socket = IO.io(url, {

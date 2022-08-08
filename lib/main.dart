@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/login.dart';
@@ -23,6 +26,12 @@ void main() async {
   final pref = new Preferences();
   await pref.initPrefs();
   await NotificationService.initializeApp();
+
+  //dotenv.env['API_URL']
+  //dotenv.get('API_URL', fallback: 'API_URL not found'),
+
+  await dotenv.load(fileName: Environment.fileName);
+
   runApp(AppState());
 }
 
