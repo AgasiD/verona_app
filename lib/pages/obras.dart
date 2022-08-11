@@ -62,6 +62,7 @@ class _ObrasPageState extends State<ObrasPage> {
     super.initState();
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final _pref = new Preferences();
+
     // _socketService.connect(_pref.id);
   }
 
@@ -117,7 +118,7 @@ class _ObrasPageState extends State<ObrasPage> {
                 // child: Hero(
                 //   tag: 'obra',
                 child: FadeInImage(
-                    width: MediaQuery.of(context).size.width * .47,
+                    width: MediaQuery.of(context).size.width * .4,
                     image: AssetImage(
                         'assets/image.png'), //NetworkImage(obra.imagen),
                     placeholder: AssetImage('assets/image.png')),
@@ -149,16 +150,13 @@ TextEditingController obrasTxtController = new TextEditingController();
 class __SearchListViewState extends State<_SearchListView> {
   late List<Obra> obras;
   late List<Obra> obrasFiltradas;
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     final _obras = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     return SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: FutureBuilder(
             future: _obras.obtenerObrasByUser(_pref.id),
             builder: ((context, snapshot) {
@@ -183,7 +181,6 @@ class __SearchListViewState extends State<_SearchListView> {
                       style: TextStyle(color: Colors.red),
                     ),
                   );
-                  openAlertDialog(context, response.error);
                 }
               }
             })));
@@ -202,7 +199,7 @@ class _CustomObras extends StatefulWidget {
 
 class _CustomObrasState extends State<_CustomObras> {
   final _pref = new Preferences();
-
+  @override
   @override
   Widget build(BuildContext context) {
     return Column(children: [
@@ -279,12 +276,12 @@ Container _obraCard(BuildContext context, Obra obra) {
   var imagen = obra.imageId == ''
       ? Helper.imageNetwork(
           'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-      : Helper.imageNetwork(
-          'https://drive.google.com/uc?export=view&id=${obra.imageId}',
-        );
+      : Helper.imageNetwork('https://drive.google.com/uc?id=${obra.imageId}'
+          // 'https://drive.google.com/uc?export=view&id=${obra.imageId}',
+          );
   final porcent = (Random().nextDouble() * 100).round();
   return Container(
-    margin: EdgeInsets.symmetric(horizontal: 20),
+    margin: EdgeInsets.symmetric(horizontal: 15),
     child: GestureDetector(
         onTap: (() => Navigator.pushNamed(context, ObraPage.routeName,
             arguments: {'obraId': obra.id})),
@@ -295,6 +292,7 @@ Container _obraCard(BuildContext context, Obra obra) {
             child: Row(
               children: [
                 Container(
+                  padding: EdgeInsets.symmetric(vertical: 10),
                   width: MediaQuery.of(context).size.width * .4,
                   child: Column(children: [
                     Text(obra.nombre,
@@ -347,7 +345,7 @@ Container _obraCard(BuildContext context, Obra obra) {
                 Hero(
                   tag: obra.id,
                   child: FadeInImage(
-                      width: MediaQuery.of(context).size.width * .47,
+                      width: MediaQuery.of(context).size.width * .48,
                       image: imagen,
                       imageErrorBuilder: (_, obj, st) {
                         return Container(

@@ -42,48 +42,52 @@ class _AsignarPedidoFormState extends State<AsignarPedidoForm> {
         child: Text('ci'),
       ),
     ];
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 25),
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(color: Colors.black45, blurRadius: 5, offset: Offset(0, 3))
-        ],
-        color: Colors.grey.shade100,
-      ),
-      width: double.infinity,
-      child: Form(
-        child: Column(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Repartidor'),
-                DropdownButton(
-                    isDense: false,
-                    icon: Icon(Icons.delivery_dining_outlined),
-                    isExpanded: true,
-                    value: this.repartidor,
-                    items: items,
-                    style: TextStyle(fontSize: 15, color: Colors.black),
-                    hint: Text('Seleccione repartidor'),
-                    onChanged: (dynamic a) => {
-                          setState(() {
-                            this.repartidor = a;
-                          })
-                        }),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            CustomInputArea(
-              hintText: 'Escribir observacion',
-              icono: Icons.ac_unit,
-              textController: areaTxtController,
-              lines: 10,
-            )
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 25),
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black45, blurRadius: 5, offset: Offset(0, 3))
           ],
+          color: Colors.grey.shade100,
+        ),
+        width: double.infinity,
+        child: Form(
+          child: Column(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Repartidor'),
+                  DropdownButton(
+                      isDense: false,
+                      icon: Icon(Icons.delivery_dining_outlined),
+                      isExpanded: true,
+                      value: this.repartidor,
+                      items: items,
+                      style: TextStyle(fontSize: 15, color: Colors.black),
+                      hint: Text('Seleccione repartidor'),
+                      onChanged: (dynamic a) => {
+                            setState(() {
+                              this.repartidor = a;
+                            })
+                          }),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInputArea(
+                hintText: 'Escribir observacion',
+                icono: Icons.ac_unit,
+                textController: areaTxtController,
+                lines: 10,
+              )
+            ],
+          ),
         ),
       ),
     );

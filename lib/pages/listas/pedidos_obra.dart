@@ -190,12 +190,15 @@ class _PedidosByEstado extends StatelessWidget {
                     children: [
                       _CustomListTile(
                         esPar: false,
-                        title: pedidos[index]['fechaEstimada'] == ''
-                            ? pedidos[index]['fechaDeseada']
-                            : pedidos[index]['fechaEstimada'],
+                        title:
+                            "${pedidos[index]['titulo'].toString().toUpperCase()}",
                         subtitle:
-                            Helper.getEstadoPedido(pedidos[index]['estado'])
-                                .toUpperCase(),
+                            // Helper.getEstadoPedido(pedidos[index]['estado'])
+                            //     .toUpperCase(),
+
+                            pedidos[index]['fechaEstimada'] == ''
+                                ? "${("Fecha deseada").toUpperCase()} ${pedidos[index]['fechaDeseada']}"
+                                : "${("Fecha de entrega").toUpperCase()} ${pedidos[index]['fechaEstimada']}",
                         avatar: pedidos[index]['prioridad']
                             .toString()
                             .toUpperCase(),

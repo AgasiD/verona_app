@@ -91,7 +91,7 @@ class _ContactsPageState extends State<ContactsPage> {
                       ),
                       txtBuscar.length > 0 && dataFiltrada.length == 0
                           ? Container(
-                              height: MediaQuery.of(context).size.height - 250,
+                              height: MediaQuery.of(context).size.height - 200,
                               child: Center(
                                 child: Text(
                                   'No se encontraron usuarios',
@@ -167,7 +167,9 @@ class __ContactTileState extends State<_ContactTile> {
                 child: CircleAvatar(
                   backgroundColor: Helper.brandColors[0],
                   child: Text(
-                    (widget.personal.nombre[0] + widget.personal.apellido[0])
+                    (widget.personal.nombre[0] ??
+                            "" + widget.personal.apellido[0] ??
+                            "")
                         .toUpperCase(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -190,6 +192,7 @@ class __ContactTileState extends State<_ContactTile> {
                 color: Helper.brandColors[3],
               ),
               onTap: () async {
+                openLoadingDialog(context, mensaje: 'Creando chat...');
                 // Generar Chat
                 final response =
                     await _chat.crearChat(_pref.id, widget.personal.id);
@@ -197,6 +200,9 @@ class __ContactTileState extends State<_ContactTile> {
                   openAlertDialog(context, 'Error al crear el chat',
                       subMensaje: response.error);
                 } else {
+                  closeLoadingDialog(
+                    context,
+                  );
                   Navigator.pushNamed(context, ChatPage.routeName, arguments: {
                     'chatId': response.data['chatId'],
                     'chatName': response.data['chatName'],

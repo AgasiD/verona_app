@@ -24,7 +24,9 @@ class DocumentoForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _Form(),
+      body: GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: _Form()),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }

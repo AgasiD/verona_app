@@ -54,9 +54,9 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.edrex.veronaapp"
         minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 20
-        versionName "1.1.10"
+        targetSdkVersion 31
+        versionCode 23
+        versionName "1.2.3"
     }
 
     signingConfigs {

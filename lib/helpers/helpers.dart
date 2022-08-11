@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 
 class Helper {
@@ -134,7 +135,13 @@ class Helper {
   static ImageProvider imageNetwork(String url,
       {double height = 100, double width = 100}) {
     try {
-      return NetworkImage(url);
+      url = Environment.isProduction
+          ? url
+          : 'https://icon-library.com/images/none-icon/none-icon-0.jpg';
+      return NetworkImage(url, headers: {
+        "Authorization":
+            "Bearer ya29.A0ARrdaM_6GO94psBfX0G8FhqeJLZ2ItNjaOOVYcYBwRmNssneRoaF82hENqCcrQrVfMKrJEjtyEdVPO7nxiJUU3xZiKkYLTWrTm8-PSJV-kiuxErcHwX_2Vd31vi6VfS8XDw9IRwnalhvtTqzE2H2RP7z40NRNg"
+      });
     } catch (e) {
       return AssetImage('assets/image.png');
     }

@@ -8,18 +8,9 @@ import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
-class AsignarEquipoPage extends StatefulWidget {
-  static final routeName = 'asignarequipo';
-
+class AsignarEquipoPage extends StatelessWidget {
   AsignarEquipoPage({Key? key}) : super(key: key);
-
-  @override
-  State<AsignarEquipoPage> createState() => _AgregarPropietariosPageState();
-}
-
-TextEditingController txtPersonalCtrl = TextEditingController();
-
-class _AgregarPropietariosPageState extends State<AsignarEquipoPage> {
+  static final routeName = 'asignarequipo';
   @override
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
@@ -90,12 +81,38 @@ class _SearchListGroupView extends StatefulWidget {
   State<_SearchListGroupView> createState() => __SearchListGroupViewState();
 }
 
+TextEditingController _txtPersonalCtrl = TextEditingController();
+
 class __SearchListGroupViewState extends State<_SearchListGroupView> {
   List<Miembro> asignados = [];
   List<Miembro> miembrosFiltrados = [];
   @override
   Widget build(BuildContext context) {
-    final _obraService = Provider.of<ObraService>(context);
+    print('build searchlist ');
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+
+    var miembros = miembrosFiltrados!.map((e) {
+      return Container(
+        child: Column(children: [
+          // Text(e.dni),
+          _CustomAddListTile(personal: e),
+          Divider(
+            height: 0,
+          ),
+        ]),
+      );
+    }).toList();
+
+    if (miembros.length == 0) {
+      miembros.add(Container(
+          child: ListTile(
+              title: Text(
+        'No se encontró personal',
+        style: TextStyle(color: Helper.brandColors[3]),
+      ))));
+    }
+    ;
+
     return Container(
       child: SingleChildScrollView(
           child: Container(
@@ -112,11 +129,11 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                   hintText: 'Martín...',
                   textInputAction: TextInputAction.search,
                   icono: Icons.search,
-                  iconButton: txtPersonalCtrl.value == ''
+                  iconButton: _txtPersonalCtrl.value == ''
                       ? IconButton(
                           icon: Icon(Icons.cancel_outlined),
                           onPressed: () {
-                            txtPersonalCtrl.text = '';
+                            _txtPersonalCtrl.text = '';
                           },
                         )
                       : IconButton(
@@ -129,7 +146,7 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                                 context, MiembroForm.routeName);
                           },
                         ),
-                  textController: txtPersonalCtrl,
+                  textController: _txtPersonalCtrl,
                   onChange: (text) {
                     miembrosFiltrados.clear();
                     widget.grupos.forEach((element) {
@@ -147,7 +164,7 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
               ],
             ),
           ),
-          txtPersonalCtrl.text == ''
+          _txtPersonalCtrl.text == ''
               ? SizedBox(
                   height: MediaQuery.of(context).size.height - 290,
                   width: MediaQuery.of(context).size.width,
@@ -220,37 +237,14 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                   ),
                 )
               : SizedBox(
-                  height: MediaQuery.of(context).size.height * .65,
+                  height: MediaQuery.of(context).size.height - 291,
                   width: MediaQuery.of(context).size.width,
-                  child: ListView.builder(
-                    itemCount: miembrosFiltrados.length,
-                    itemBuilder: (context, index) {
-                      var miembros = miembrosFiltrados!.map((e) {
-                        return Container(
-                          child: Column(children: [
-                            _CustomAddListTile(personal: e),
-                            Divider(
-                              height: 0,
-                            ),
-                          ]),
-                        );
-                      }).toList();
-
-                      if (miembros.length == 0) {
-                        miembros.add(Container(
-                            child: ListTile(
-                                title: Text(
-                          'Sin personal',
-                          style: TextStyle(color: Helper.brandColors[3]),
-                        ))));
-                      }
-                      return Column(
-                        children: miembros,
-                      );
-                    },
+                  child: Column(
+                    children: miembros,
                   ),
                 ),
-          Padding(
+          Container(
+              margin: EdgeInsets.only(bottom: 15),
               padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: MainButton(
                   color: Helper.brandColors[0],
@@ -261,6 +255,14 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
         ]),
       )),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+
+    _txtPersonalCtrl.text = '';
   }
 }
 

@@ -398,11 +398,13 @@ class _CustomInputState extends State<CustomInput> {
           padding: EdgeInsets.only(right: 15),
           margin: EdgeInsets.only(bottom: 10),
           child: TextFormField(
+            textCapitalization: TextCapitalization.sentences,
             enabled: widget.enable,
             controller: widget.textController,
             maxLines: widget.lines,
             autocorrect: false,
             keyboardType: widget.teclado,
+            keyboardAppearance: Brightness.dark,
             obscureText: widget.isPassword,
             decoration: inputDecoration,
             textInputAction: widget.textInputAction,
@@ -817,6 +819,9 @@ void openAlertDialog(BuildContext context, String mensaje,
         context: context,
         builder: (context) => AlertDialog(
               title: Text(mensaje),
+              content: subMensaje != null && subMensaje != ''
+                  ? Text(subMensaje!)
+                  : Container(),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -929,7 +934,7 @@ class CustomNavigatorFooter extends StatelessWidget {
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {
-                Navigator.pushReplacementNamed(context, ObrasPage.routeName);
+                Navigator.pushNamed(context, ObrasPage.routeName);
               }
             },
           ),
@@ -939,8 +944,7 @@ class CustomNavigatorFooter extends StatelessWidget {
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != NotificacionesPage.routeName) {
-                Navigator.pushReplacementNamed(
-                    context, NotificacionesPage.routeName);
+                Navigator.pushNamed(context, NotificacionesPage.routeName);
               }
             },
           ),
@@ -950,7 +954,7 @@ class CustomNavigatorFooter extends StatelessWidget {
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ChatList.routeName) {
-                Navigator.pushReplacementNamed(context, ChatList.routeName);
+                Navigator.pushNamed(context, ChatList.routeName);
               }
             },
           ),

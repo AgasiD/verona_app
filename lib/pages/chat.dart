@@ -363,6 +363,7 @@ class __InputChatState extends State<_InputChat> {
         children: [
           Flexible(
               child: TextField(
+            textCapitalization: TextCapitalization.sentences,
             textInputAction: TextInputAction.send,
             focusNode: focusNode,
             decoration: InputDecoration(

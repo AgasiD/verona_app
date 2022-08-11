@@ -13,7 +13,7 @@ import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/pedido.dart';
 import 'package:verona_app/pages/chat.dart';
-import 'package:verona_app/pages/pedidos.dart';
+import 'package:verona_app/pages/listas/pedidos.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
@@ -33,35 +33,39 @@ class PedidoForm extends StatelessWidget implements MyForm {
     final pedidoId = arguments['pedidoId'] ?? '';
     bool edit = pedidoId != '';
 
-    return Scaffold(
-        body: edit
-            ? FutureBuilder(
-                future: _obraService.obtenerPedido(pedidoId),
-                builder: (context, snapshot) {
-                  if (snapshot.data == null) {
-                    return Loading(
-                      mensaje: 'Cargando pedido',
-                    );
-                  } else {
-                    MyResponse response = snapshot.data as MyResponse;
-                    if (response.fallo) {
-                      return Container();
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+          body: edit
+              ? FutureBuilder(
+                  future: _obraService.obtenerPedido(pedidoId),
+                  builder: (context, snapshot) {
+                    if (snapshot.data == null) {
+                      return Loading(
+                        mensaje: 'Cargando pedido',
+                      );
+                    } else {
+                      MyResponse response = snapshot.data as MyResponse;
+                      if (response.fallo) {
+                        return Container();
+                      }
+                      final pedido = Pedido.fromJson(
+                          response.data as Map<String, dynamic>);
+                      return _Form(pedido: pedido);
                     }
-                    final pedido =
-                        Pedido.fromJson(response.data as Map<String, dynamic>);
-                    return _Form(pedido: pedido);
-                  }
-                },
-              )
-            : _Form(
-                pedido: new Pedido(
-                  idUsuario: '',
-                  idObra: '',
-                  nota: '',
-                  prioridad: 1,
-                  estado: 0,
-                ),
-              ));
+                  },
+                )
+              : _Form(
+                  pedido: new Pedido(
+                    idUsuario: '',
+                    idObra: '',
+                    nota: '',
+                    prioridad: 1,
+                    estado: 0,
+                    titulo: '',
+                  ),
+                )),
+    );
   }
 }
 
@@ -78,6 +82,7 @@ class _FormState extends State<_Form> {
 
   Color colorHint = Helper.brandColors[3];
   Preferences _pref = new Preferences();
+  TextEditingController titleTxtController = new TextEditingController();
   TextEditingController areaTxtController = new TextEditingController();
   TextEditingController indicacionesTxtController = new TextEditingController();
   TextEditingController txtCtrlDate = new TextEditingController();
@@ -126,6 +131,7 @@ class _FormState extends State<_Form> {
       widget.pedido!.fechaDeseada = txtCtrlDateDeseada.text;
     } else if (widget.pedido!.estado >= 0) {
       //Editar pedido (Asignar atributos)
+      titleTxtController.text = widget.pedido!.titulo;
       areaTxtController.text = widget.pedido!.nota;
       title = 'editar pedido';
       prioridad = widget.pedido!.prioridad;
@@ -206,6 +212,13 @@ class _FormState extends State<_Form> {
                     Form(
                       child: Column(
                         children: [
+                          CustomInput(
+                            enable: editableByEstado(0),
+                            hintText: 'Titulo del pedido',
+                            icono: Icons.title,
+                            textController: titleTxtController,
+                            lines: 1,
+                          ),
                           CustomInput(
                             enable: editableByEstado(0),
                             hintText: 'Detallar solicitud de materiales',
@@ -671,15 +684,16 @@ class _FormState extends State<_Form> {
     switch (widget.pedido!.estado) {
       case 0: // PEDIDO NUEVO
         final ped = new Pedido(
-          idObra: obraId,
-          idUsuario: _pref.id,
-          nota: areaTxtController.text,
-          prioridad: prioridad,
-          fechaDeseada: widget.pedido!.fechaDeseada,
-          /*
+            idObra: obraId,
+            idUsuario: _pref.id,
+            nota: areaTxtController.text,
+            prioridad: prioridad,
+            fechaDeseada: widget.pedido!.fechaDeseada,
+            titulo: titleTxtController.text
+            /*
           notificar a  
         */
-        );
+            );
 
         response = await _obraService.nuevoPedido(ped);
         if (response.fallo) {

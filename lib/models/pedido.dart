@@ -15,6 +15,7 @@ class Pedido {
       required this.idObra,
       required this.nota,
       required this.prioridad,
+      required this.titulo,
       this.usuarioAsignado = '',
       this.ts = 0,
       this.tsAsignado = 0,
@@ -30,6 +31,7 @@ class Pedido {
   String idUsuario;
   String idObra;
   String nota;
+  String titulo;
   int prioridad;
   int ts;
   int tsAsignado;
@@ -57,7 +59,8 @@ class Pedido {
       fechaDeseada: json['fechaDeseada'] ?? '',
       indicaciones: json['indicaciones'] ?? '',
       estado: json['estado'] ?? 0,
-      nombreUsuario: json['nombreUsuario'] ?? '');
+      nombreUsuario: json['nombreUsuario'] ?? '',
+      titulo: json['titulo'] ?? 'Sin titulo');
 
   Map<String, dynamic> toJson() => {
         "id": id,
@@ -74,5 +77,6 @@ class Pedido {
         "fechaDeseada": fechaDeseada,
         "indicaciones": indicaciones,
         "estado": estado,
+        "titulo": titulo
       };
 }

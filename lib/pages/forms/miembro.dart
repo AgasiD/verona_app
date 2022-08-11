@@ -4,13 +4,9 @@ import 'dart:async';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/miembro.dart';
-import 'package:verona_app/models/propietario.dart';
-import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -35,8 +31,10 @@ class _MiembroFormState extends State<MiembroForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _Form(),
-      bottomSheet: CustomNavigatorFooter(),
+      body: GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: _Form()),
+      bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
 }
@@ -188,6 +186,7 @@ class _Form extends StatelessWidget {
                           color: Helper.brandColors[2],
                         ),
                         onChanged: (value) {
+                          personalSelected = value.toString();
                           //Do something when changing the item if you want.
                         },
                         onSaved: (value) {},

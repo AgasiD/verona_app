@@ -251,6 +251,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       navigatorKey: navigatorKey, // Navegar
       scaffoldMessengerKey: messengerKey, // Snacks
       routes: appRoutes,
+      themeMode: ThemeMode.dark,
     );
   }
 }
