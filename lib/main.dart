@@ -5,7 +5,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/forms/pedido.dart';
+import 'package:verona_app/pages/listas/pedidos.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/obras.dart';
@@ -17,6 +20,7 @@ import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
+import 'package:vibration/vibration.dart';
 
 void main() async {
   WidgetsFlutterBinding
@@ -97,7 +101,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     final _pref = new Preferences();
 
-    NotificationService.messagesStream.listen((notif) {
+    NotificationService.messagesStream.listen((notif) async {
       //SOLO SE DISPARA CUANDO ESTA LA APP ABIERTA
       print('-----------NUEVA NOTIFICACION-----------');
       final type = notif.data["type"];
@@ -119,6 +123,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             }
             navigatorKey.currentState!.pushNamed(ObraPage.routeName,
                 arguments: {"obraId": notif.data["obraId"]});
+            break;
+
+          case 'pedido':
+            final _obraService =
+                Provider.of<ObraService>(context, listen: false);
+            if (_obraService.obra.id == '') {
+              final obra = await _obraService.obtenerObra(notif.data['obraId']);
+              _obraService.obra = obra;
+            }
+            navigatorKey.currentState!
+                .pushNamed(PedidoForm.routeName, arguments: {
+              'pedidoId': notif.data['pedidoId'],
+              'obraId': notif.data['obraId'],
+            });
             break;
         }
       } else {
@@ -211,6 +229,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final _pref = new Preferences();
     late String initalRoute;
     initalRoute = !_pref.logged ? LoginPage.routeName : ObrasPage.routeName;
+    final _chatService = Provider.of<ChatService>(context, listen: false);
 
     final _socket = Provider.of<SocketService>(context, listen: false);
 
@@ -227,6 +246,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               final notificationText = data.toString().split(';');
               _notificationService.sumNotificationBadge();
             }
+          }
+          return true;
+        });
+      });
+
+      _socket.socket.on('nuevo-mensaje', (data) {
+        //Escucha mensajes del servidor
+        // setUltimoMensaje(mensaje);
+        _chatService.notifyListeners();
+        Vibration.vibrate(duration: 5, amplitude: 10);
+        print(data);
+        final snackBar = _initSnackMessage(data, navigatorKey);
+
+        Navigator.of(navigatorKey.currentContext!).popUntil((route) {
+          if (!route.settings.name!.contains('chat')) {
+            messengerKey.currentState?.showSnackBar(snackBar);
           }
           return true;
         });
@@ -254,4 +289,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       themeMode: ThemeMode.dark,
     );
   }
+}
+
+SnackBar _initSnackMessage(data, navigatorKey) {
+  return SnackBar(
+    duration: Duration(seconds: 3),
+    action: SnackBarAction(
+        label: 'Ver',
+        onPressed: () => navigatorKey.currentState!.pushNamed(
+            ChatPage.routeName,
+            arguments: {'chatId': data['chatId'], 'chatName': data['name']})),
+    content: Text(
+      'Nuevo mensaje de ${data['name']}',
+      // textAlign: TextAlign.center,
+      // style: style,
+    ),
+  );
 }

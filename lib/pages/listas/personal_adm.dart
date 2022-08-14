@@ -8,9 +8,9 @@ import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
-class EquipoList extends StatelessWidget {
-  const EquipoList({Key? key}) : super(key: key);
-  static final routeName = 'equipo_list';
+class PersonalADM extends StatelessWidget {
+  const PersonalADM({Key? key}) : super(key: key);
+  static final routeName = 'personal_adm';
 
   @override
   Widget build(BuildContext context) {

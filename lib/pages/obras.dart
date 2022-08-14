@@ -81,7 +81,7 @@ class _ObrasPageState extends State<ObrasPage> {
     final textStyle = TextStyle(fontSize: 16, color: Colors.grey[600]);
     final menu = [
       {'name': 'Nuevo propietario', 'route': PropietarioForm.routeName},
-      {'name': 'Nuevo personal', 'route': MiembroForm.routeName},
+      {'name': 'Personal', 'route': MiembroForm.routeName},
     ];
 
     return Scaffold(
@@ -251,11 +251,26 @@ class _CustomObrasState extends State<_CustomObras> {
           ],
         ),
       ),
+      Row(
+        children: [
+          Container(
+            margin: EdgeInsets.only(left: 17, top: 10, bottom: 10),
+            child: Text(
+              '¡Hola, ${(_pref.nombre.split(' ')[0])}!',
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Helper.brandColors[8],
+                  fontWeight: FontWeight.bold),
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ],
+      ),
       widget.obras.length > 0
           ? ListView.builder(
               physics:
                   NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
-              padding: EdgeInsets.only(top: 25),
+              padding: EdgeInsets.only(top: 5),
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
               itemCount: widget.obrasFiltradas.length,

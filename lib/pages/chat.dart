@@ -268,7 +268,7 @@ class _ListMessageBoxState extends State<ListMessageBox>
   @override
   void dispose() {
     // TODO: implement dispose
-    _socketService.socket.off('nuevo-mensaje');
+    // _socketService.socket.off('nuevo-mensaje');
     super.dispose();
   }
 
@@ -375,10 +375,10 @@ class __InputChatState extends State<_InputChat> {
                 hintText: 'Escriba mensaje',
                 isCollapsed: true),
             controller: widget.txtCtrl,
-            onSubmitted: (_) {
+            onSubmitted: (_) async {
               if (widget.txtCtrl.text.trim().length > 0) {
                 _socket.socket.connected
-                    ? enviarMensaje(_socket)
+                    ? await enviarMensaje(_socket)
                     : openAlertDialog(
                         context, 'No hay conexión con el servidor');
                 focusNode.requestFocus(); //para solicitar el foco
@@ -429,7 +429,7 @@ class __InputChatState extends State<_InputChat> {
     );
   }
 
-  void enviarMensaje(SocketService _socket) {
+  Future<void> enviarMensaje(SocketService _socket) async {
     final mensaje = Message(
         chatId: _chatService.chatId,
         from: _pref.id,
@@ -441,6 +441,8 @@ class __InputChatState extends State<_InputChat> {
     widget.agregarMensaje(mensaje, true);
     _socket.enviarMensaje(mensaje);
     widget.txtCtrl.text = '';
+    await Future.delayed(Duration(milliseconds: 1500));
+    _chatService.notifyListeners();
   }
 }
 

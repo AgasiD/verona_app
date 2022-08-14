@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -18,9 +19,11 @@ import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obras.dart';
+import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
+import 'package:vibration/vibration.dart';
 
 class CustomPainterAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -182,13 +185,13 @@ class CustomDrawer extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [Text('Cerrar sesion   '), Icon(Icons.logout)]),
                 onPressed: () async {
-                  // final response = await _usuarioService.deleteDevice(
-                  //     _pref.id, _notificationService.token!);
-                  // if (response.fallo) {
-                  //   openAlertDialog(
-                  //       context, 'No se ha desasociado el dispositivo',
-                  //       subMensaje: response.error);
-                  // }
+                  final response = await _usuarioService.deleteDevice(
+                      _pref.id, NotificationService.token!);
+                  if (response.fallo) {
+                    openAlertDialog(
+                        context, 'No se ha desasociado el dispositivo',
+                        subMensaje: response.error);
+                  }
                   _pref.logged = false;
                   _socketService.disconnect();
                   Navigator.pushReplacementNamed(context, LoginPage.routeName);
@@ -813,6 +816,66 @@ void openDialogConfirmation(
   }
 }
 
+void openBottomSheet(
+    BuildContext context, String titulo, String subtitulo, List actions) {
+  if (Platform.isIOS) {
+    var botones = actions.map((accion) {
+      return CupertinoActionSheetAction(
+        isDefaultAction: accion['default'],
+        onPressed: accion['accion'],
+        child: Text(accion['text']),
+      );
+    }).toList();
+
+    botones.add(CupertinoActionSheetAction(
+      isDestructiveAction: true,
+      onPressed: () {
+        Navigator.pop(context);
+      },
+      child: const Text('Cancelar'),
+    ));
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(titulo),
+        message: Text(subtitulo),
+        actions: botones,
+      ),
+    );
+  } else {
+    var botones = actions.map((accion) {
+      return SecondaryButton(
+        onPressed: accion['accion'],
+        text: accion['text'],
+        color: Helper.brandColors[2],
+        width: MediaQuery.of(context).size.width,
+      );
+    }).toList();
+
+    botones.add(SecondaryButton(
+      onPressed: () => Navigator.pop(context),
+      text: 'Cancelar',
+      color: Helper.brandColors[1],
+      width: MediaQuery.of(context).size.width,
+    ));
+
+    showBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(color: Helper.brandColors[2]),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: botones,
+          ),
+        );
+      },
+    );
+  }
+}
+
 void openAlertDialog(BuildContext context, String mensaje,
     {String? subMensaje}) {
   if (Platform.isAndroid) {
@@ -1073,25 +1136,10 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
   Preferences _pref = new Preferences();
   String txtBuscar = '';
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    dataFiltrada = widget.data;
-    _socketService = Provider.of<SocketService>(context, listen: false);
-
-    _socketService.socket.on('nuevo-mensaje', (data) {
-      //Escucha mensajes del servidor
-      final mensaje = Message.fromMap(data);
-      final chatId = mensaje.chatId;
-
-      print(mensaje.mensaje);
-      print(mensaje.chatId);
-      setUltimoMensaje(mensaje);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    dataFiltrada = widget.data;
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1143,7 +1191,7 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
                   ),
                 )
               : Container(
-                  height: MediaQuery.of(context).size.height - 206,
+                  height: MediaQuery.of(context).size.height - 205,
                   child: ListView.builder(
                       itemCount: dataFiltrada.length,
                       itemBuilder: ((context, index) {
@@ -1152,12 +1200,18 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
                           'chatId': dataFiltrada[index]['id'],
                           'chatName': dataFiltrada[index]['nombre'],
                         };
+                        String nombreMensaje = dataFiltrada[index]
+                                    ['usuarioUltimoMensaje']['idUsuario'] ==
+                                _pref.id
+                            ? 'Yo'
+                            : dataFiltrada[index]['usuarioUltimoMensaje']
+                                ['nombreUsuario'];
                         return CustomListTile(
                           esPar: esPar,
                           title: dataFiltrada[index]['nombre'],
                           subtitle: dataFiltrada[index]['ultimoMensaje'] == ''
                               ? ''
-                              : '${dataFiltrada[index]['usuarioUltimoMensaje']['nombreUsuario']}: ${dataFiltrada[index]['ultimoMensaje']} ',
+                              : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} ',
                           avatar: (dataFiltrada[index]['nombre'][0] +
                                   dataFiltrada[index]['nombre'][1])
                               .toString()

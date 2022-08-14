@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/message.dart';
+import 'package:win32/win32.dart';
 
 enum ServerStatus { Online, Offline, Connecting }
 
@@ -58,7 +61,7 @@ class SocketService with ChangeNotifier {
     this.socket.disconnect();
   }
 
-  void enviarMensaje(Message mensaje) {
+  void enviarMensaje(Message mensaje) async {
     this._socket.emit('nuevo-mensaje', mensaje.toMap());
   }
 

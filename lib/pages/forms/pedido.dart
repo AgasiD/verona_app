@@ -24,12 +24,12 @@ class PedidoForm extends StatelessWidget implements MyForm {
   static String nameForm = 'Nuevo pedido';
   static String alertMessage = 'Confirmar nuevo pedido';
   static const String routeName = 'pedido';
-
+  late String obraId;
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    final obraId = arguments['obraId'];
+    obraId = arguments['obraId'];
     final pedidoId = arguments['pedidoId'] ?? '';
     bool edit = pedidoId != '';
 
@@ -78,6 +78,20 @@ class _Form extends StatefulWidget {
 }
 
 class _FormState extends State<_Form> {
+  @override
+  void initState() {
+    super.initState();
+    cargarObra();
+  }
+
+  Future cargarObra() async {
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+    if (_obraService.obra.id == '') {
+      final obra = await _obraService.obtenerObra(widget.pedido!.idObra);
+      _obraService.obra = obra;
+    }
+  }
+
   late List<DropdownMenuItem<String>> repartidores;
 
   Color colorHint = Helper.brandColors[3];

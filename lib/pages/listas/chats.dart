@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/message.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/listas/contactos.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:vibration/vibration.dart';
 
 import '../../services/socket_service.dart';
 
@@ -21,11 +23,27 @@ class ChatList extends StatefulWidget {
 
 class _ChatListState extends State<ChatList> {
   @override
+  void initState() {
+    super.initState();
+    // final _socketService = Provider.of<SocketService>(context, listen: false);
+
+    // final _chatService = Provider.of<ChatService>(context, listen: false);
+
+    // _socketService.socket.on('nuevo-mensaje', (data) {
+    //   //Escucha mensajes del servidor
+    //   print('nuevo nehsae');
+    //   // setUltimoMensaje(mensaje);
+    //   _chatService.notifyListeners();
+    //   Vibration.vibrate(duration: 5, amplitude: 10);
+    // });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context, listen: false);
-    final _chatService = Provider.of<ChatService>(context, listen: false);
     final _pref = new Preferences();
     _socketService.connect(_pref.id);
+
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     TextEditingController txtController = new TextEditingController();
     return Scaffold(
@@ -49,7 +67,6 @@ class _ChatListState extends State<ChatList> {
                         .map((e) => e["chatId"] as String)
                         .toList() as List<String>;
                     return _UsuariosChats(
-                        chatService: _chatService,
                         chatsUsuario: chatsUsuario,
                         usuario: usuario,
                         txtController: txtController);
@@ -89,20 +106,19 @@ class _ChatListState extends State<ChatList> {
 class _UsuariosChats extends StatelessWidget {
   const _UsuariosChats({
     Key? key,
-    required ChatService chatService,
     required this.chatsUsuario,
     required this.usuario,
     required this.txtController,
-  })  : _chatService = chatService,
-        super(key: key);
+  }) : super(key: key);
 
-  final ChatService _chatService;
   final List<String> chatsUsuario;
   final Miembro usuario;
   final TextEditingController txtController;
 
   @override
   Widget build(BuildContext context) {
+    final _chatService = Provider.of<ChatService>(context);
+    print('rebuild');
     return FutureBuilder(
         future: _chatService.obtenerChats(chatsUsuario),
         builder: (context, snapshot) {
@@ -124,11 +140,14 @@ class _UsuariosChats extends StatelessWidget {
             });
 
             var chats = response.data as List;
+            chats = chats
+                .where((chat) => chat['ultimoMensaje'] != '')
+                .toList(); // Filtro por chats que tengan contengan mensaje
             chats.sort((a, b) {
               if (a['tsUltimoMensaje'] > b['tsUltimoMensaje'])
-                return 1;
-              else if (a['tsUltimoMensaje'] < b['tsUltimoMensaje']) {
                 return -1;
+              else if (a['tsUltimoMensaje'] < b['tsUltimoMensaje']) {
+                return 1;
               } else {
                 return 0;
               }

@@ -319,18 +319,53 @@ class _FormState extends State<_Form> {
                         ),
                         onPressed: () async {
                           try {
-                            final ImagePicker _picker = ImagePicker();
-                            // Pick an image
-                            final List<XFile>? images =
-                                await _picker.pickMultiImage();
-                            if (images != null) {
-                              _driveService.guardarImagenes(images);
-                              setState(() {
-                                imagenSelected = true;
-                                imgButtonText =
-                                    'Imagenes seleccionadas (${_driveService.obtenerCantidadImgSeleccionada()})';
-                              });
-                            }
+                            var acciones = [
+                              {
+                                "text": 'Seleccionar de galería',
+                                "default": true,
+                                "accion": () async {
+                                  final ImagePicker _picker = ImagePicker();
+                                  final List<XFile>? images =
+                                      await _picker.pickMultiImage();
+                                  if (images != null) {
+                                    _driveService.guardarImagenes(images);
+                                    Navigator.pop(context);
+                                    setState(() {
+                                      imagenSelected = true;
+                                      imgButtonText =
+                                          'Imagenes seleccionadas (${_driveService.obtenerCantidadImgSeleccionada()})';
+                                    });
+                                  }
+                                },
+                              },
+                              {
+                                "text": 'Abrir camara',
+                                "default": false,
+                                "accion": () async {
+                                  final ImagePicker _picker = ImagePicker();
+                                  late List<XFile>? images;
+                                  final XFile? image = await _picker.pickImage(
+                                      source: ImageSource.camera);
+                                  if (image != null) {
+                                    images = [image];
+                                  } else {
+                                    images = null;
+                                  }
+
+                                  if (images != null) {
+                                    _driveService.guardarImagenes(images);
+                                    Navigator.pop(context);
+                                    setState(() {
+                                      imagenSelected = true;
+                                      imgButtonText =
+                                          'Imagenes seleccionadas (${_driveService.obtenerCantidadImgSeleccionada()})';
+                                    });
+                                  }
+                                },
+                              },
+                            ];
+                            openBottomSheet(context, 'Subir documento',
+                                'Seleccionar método', acciones);
                           } catch (e) {
                             openAlertDialog(context, e.toString());
                           }
