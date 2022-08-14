@@ -30,4 +30,11 @@ class ChatService extends ChangeNotifier {
     notifyListeners();
     return response;
   }
+
+  Future<MyResponse> obtenerChats(List<String> chatsUsuario) async {
+    final body = {"chatsUsuarios": chatsUsuario};
+    final data = await this._http.post('$_endpoint/chatsUsuario', body);
+    final response = MyResponse.fromJson(data['response']);
+    return response;
+  }
 }

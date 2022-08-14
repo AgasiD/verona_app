@@ -20,7 +20,6 @@ class ContactsPage extends StatefulWidget {
 class _ContactsPageState extends State<ContactsPage> {
   final _pref = new Preferences();
   List<dynamic> dataFiltrada = [];
-  TextEditingController txtController = TextEditingController();
   String txtBuscar = '';
 
   @override
@@ -28,6 +27,7 @@ class _ContactsPageState extends State<ContactsPage> {
     final _usuarios = Provider.of<UsuarioService>(context);
     return Scaffold(
       body: Container(
+        height: MediaQuery.of(context).size.height,
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
@@ -48,78 +48,99 @@ class _ContactsPageState extends State<ContactsPage> {
                   dataFiltrada = contactos;
                 }
 
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      CustomInput(
-                        width: MediaQuery.of(context).size.width * .95,
-                        hintText: 'Nombre del personal...',
-                        icono: Icons.search,
-                        textInputAction: TextInputAction.search,
-                        validaError: false,
-                        iconButton: txtBuscar.length > 0
-                            ? IconButton(
-                                splashColor: null,
-                                icon: Icon(
-                                  Icons.cancel_outlined,
-                                  color: Colors.red.withAlpha(200),
-                                ),
-                                onPressed: () {
-                                  txtBuscar = '';
-                                  txtController.text = '';
-                                  dataFiltrada = contactos;
-                                  setState(() {});
-                                },
-                              )
-                            : IconButton(
-                                color: Helper.brandColors[4],
-                                icon: _pref.role == 1
-                                    ? Icon(Icons.add)
-                                    : Container(),
-                                onPressed: null,
-                              ),
-                        textController: txtController,
-                        onChange: (text) {
-                          txtBuscar = text;
-                          dataFiltrada = contactos
-                              .where((dato) => '${dato.nombre} ${dato.apellido}'
-                                  .toLowerCase()
-                                  .contains(text.toLowerCase()))
-                              .toList();
-                          setState(() {});
-                        },
-                      ),
-                      txtBuscar.length > 0 && dataFiltrada.length == 0
-                          ? Container(
-                              height: MediaQuery.of(context).size.height - 200,
-                              child: Center(
-                                child: Text(
-                                  'No se encontraron usuarios',
-                                  style: TextStyle(
-                                      fontSize: 20, color: Colors.grey[400]),
-                                  maxLines: 3,
-                                ),
-                              ),
-                            )
-                          : Container(
-                              height: MediaQuery.of(context).size.height - 205,
-                              child: ListView.builder(
-                                  itemCount: dataFiltrada.length,
-                                  itemBuilder: (_, index) {
-                                    return _ContactTile(
-                                      personal: dataFiltrada[index],
-                                      index: index,
-                                    );
-                                  })),
-                    ],
-                  ),
-                );
+                return _ListViewSearch(data: dataFiltrada);
               }
             },
           ),
         ),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
+    );
+  }
+}
+
+class _ListViewSearch extends StatefulWidget {
+  _ListViewSearch({Key? key, required this.data}) : super(key: key);
+
+  List<dynamic> data;
+
+  @override
+  State<_ListViewSearch> createState() => _ListViewSearchState();
+}
+
+class _ListViewSearchState extends State<_ListViewSearch> {
+  TextEditingController _txtBuscar = TextEditingController();
+  List<dynamic> dataFiltrada = [];
+  final _pref = new Preferences();
+
+  @override
+  void initState() {
+    super.initState();
+    this.dataFiltrada = widget.data;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          CustomInput(
+            width: MediaQuery.of(context).size.width * .95,
+            hintText: 'Nombre del personal',
+            icono: Icons.search,
+            textInputAction: TextInputAction.search,
+            validaError: false,
+            iconButton: _txtBuscar.text.length > 0
+                ? IconButton(
+                    splashColor: null,
+                    icon: Icon(
+                      Icons.cancel_outlined,
+                      color: Colors.red.withAlpha(200),
+                    ),
+                    onPressed: () {
+                      _txtBuscar.text = '';
+                      dataFiltrada = widget.data;
+                      setState(() {});
+                    },
+                  )
+                : IconButton(
+                    color: Helper.brandColors[4],
+                    icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
+                    onPressed: null,
+                  ),
+            textController: _txtBuscar,
+            onChange: (text) {
+              dataFiltrada = widget.data
+                  .where((dato) => '${dato.nombre} ${dato.apellido}'
+                      .toLowerCase()
+                      .contains(text.toLowerCase()))
+                  .toList();
+              setState(() {});
+            },
+          ),
+          _txtBuscar.text.length > 0 && dataFiltrada.length == 0
+              ? Container(
+                  height: MediaQuery.of(context).size.height - 200,
+                  child: Center(
+                    child: Text(
+                      'No se encontraron usuarios',
+                      style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+                      maxLines: 3,
+                    ),
+                  ),
+                )
+              : Container(
+                  height: MediaQuery.of(context).size.height - 207,
+                  child: ListView.builder(
+                      itemCount: dataFiltrada.length,
+                      itemBuilder: (_, index) {
+                        return _ContactTile(
+                          personal: dataFiltrada[index],
+                          index: index,
+                        );
+                      })),
+        ],
+      ),
     );
   }
 }
@@ -185,7 +206,7 @@ class __ContactTileState extends State<_ContactTile> {
                       )),
               subtitle: Text(
                 Helper.getProfesion(widget.personal.role),
-                style: TextStyle(color: Helper.brandColors[9].withOpacity(.8)),
+                style: TextStyle(color: Helper.brandColors[8].withOpacity(.8)),
               ),
               trailing: Icon(
                 Icons.arrow_forward_ios_rounded,

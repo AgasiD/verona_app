@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form%20copy.dart';
+import 'package:verona_app/models/message.dart';
 import 'package:verona_app/pages/chat.dart';
 
 import 'package:verona_app/pages/listas/chats.dart';
@@ -1068,7 +1069,7 @@ class CustomSearchListView extends StatefulWidget {
 
 class _CustomSearchListViewState extends State<CustomSearchListView> {
   List<dynamic> dataFiltrada = [];
-
+  late SocketService _socketService;
   Preferences _pref = new Preferences();
   String txtBuscar = '';
   @override
@@ -1076,87 +1077,109 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
     // TODO: implement initState
     super.initState();
     dataFiltrada = widget.data;
+    _socketService = Provider.of<SocketService>(context, listen: false);
+
+    _socketService.socket.on('nuevo-mensaje', (data) {
+      //Escucha mensajes del servidor
+      final mensaje = Message.fromMap(data);
+      final chatId = mensaje.chatId;
+
+      print(mensaje.mensaje);
+      print(mensaje.chatId);
+      setUltimoMensaje(mensaje);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CustomInput(
-          width: MediaQuery.of(context).size.width * .95,
-          hintText: 'Nombre del personal...',
-          icono: Icons.search,
-          textInputAction: TextInputAction.search,
-          validaError: false,
-          iconButton: txtBuscar.length > 0
-              ? IconButton(
-                  splashColor: null,
-                  icon: Icon(
-                    Icons.cancel_outlined,
-                    color: Colors.red.withAlpha(200),
-                  ),
-                  onPressed: () {
-                    widget.txtController.text = '';
-                    txtBuscar = '';
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          CustomInput(
+            width: MediaQuery.of(context).size.width * .95,
+            hintText: 'Nombre del personal...',
+            icono: Icons.search,
+            textInputAction: TextInputAction.search,
+            validaError: false,
+            iconButton: txtBuscar.length > 0
+                ? IconButton(
+                    splashColor: null,
+                    icon: Icon(
+                      Icons.cancel_outlined,
+                      color: Colors.red.withAlpha(200),
+                    ),
+                    onPressed: () {
+                      widget.txtController.text = '';
+                      txtBuscar = '';
 
-                    dataFiltrada = widget.data;
-                    setState(() {});
-                  },
-                )
-              : IconButton(
-                  color: Helper.brandColors[4],
-                  icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
-                  onPressed: null,
-                ),
-          textController: widget.txtController,
-          onChange: (text) {
-            txtBuscar = text;
-            dataFiltrada = widget.data
-                .where((dato) =>
-                    dato["nombre"].toLowerCase().contains(text.toLowerCase()))
-                .toList();
-            setState(() {});
-          },
-        ),
-        txtBuscar.length > 0 && dataFiltrada.length == 0
-            ? Container(
-                height: MediaQuery.of(context).size.height - 200,
-                child: Center(
-                  child: Text(
-                    'No se encontraron usuarios',
-                    style: TextStyle(fontSize: 20, color: Colors.grey[400]),
-                    maxLines: 3,
+                      dataFiltrada = widget.data;
+                      setState(() {});
+                    },
+                  )
+                : IconButton(
+                    color: Helper.brandColors[4],
+                    icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
+                    onPressed: null,
                   ),
-                ),
-              )
-            : Container(
-                height: MediaQuery.of(context).size.height - 205,
-                child: ListView.builder(
-                    itemCount: dataFiltrada.length,
-                    itemBuilder: ((context, index) {
-                      final esPar = index % 2 == 0;
-                      final arg = {
-                        'chatId': dataFiltrada[index]['chatId'],
-                        'chatName': dataFiltrada[index]['nombre'],
-                      };
-                      return CustomListTile(
-                        esPar: esPar,
-                        title: dataFiltrada[index]['nombre'],
-                        subtitle: 'Ultimo mensaje',
-                        avatar: (dataFiltrada[index]['nombre'][0] +
-                                dataFiltrada[index]['nombre'][1])
-                            .toString()
-                            .toUpperCase(),
-                        fontSize: 18,
-                        onTap: true,
-                        actionOnTap: () => Navigator.pushNamed(
-                            context, ChatPage.routeName,
-                            arguments: arg),
-                      );
-                    })),
-              )
-      ],
+            textController: widget.txtController,
+            onChange: (text) {
+              txtBuscar = text;
+              dataFiltrada = widget.data
+                  .where((dato) =>
+                      dato["nombre"].toLowerCase().contains(text.toLowerCase()))
+                  .toList();
+              setState(() {});
+            },
+          ),
+          txtBuscar.length > 0 && dataFiltrada.length == 0
+              ? Container(
+                  height: MediaQuery.of(context).size.height - 20,
+                  child: Center(
+                    child: Text(
+                      'No se encontraron usuarios',
+                      style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+                      maxLines: 3,
+                    ),
+                  ),
+                )
+              : Container(
+                  height: MediaQuery.of(context).size.height - 206,
+                  child: ListView.builder(
+                      itemCount: dataFiltrada.length,
+                      itemBuilder: ((context, index) {
+                        final esPar = index % 2 == 0;
+                        final arg = {
+                          'chatId': dataFiltrada[index]['id'],
+                          'chatName': dataFiltrada[index]['nombre'],
+                        };
+                        return CustomListTile(
+                          esPar: esPar,
+                          title: dataFiltrada[index]['nombre'],
+                          subtitle: dataFiltrada[index]['ultimoMensaje'] == ''
+                              ? ''
+                              : '${dataFiltrada[index]['usuarioUltimoMensaje']['nombreUsuario']}: ${dataFiltrada[index]['ultimoMensaje']} ',
+                          avatar: (dataFiltrada[index]['nombre'][0] +
+                                  dataFiltrada[index]['nombre'][1])
+                              .toString()
+                              .toUpperCase(),
+                          fontSize: 18,
+                          onTap: true,
+                          actionOnTap: () => Navigator.pushNamed(
+                              context, ChatPage.routeName,
+                              arguments: arg),
+                        );
+                      })),
+                )
+        ],
+      ),
     );
+  }
+
+  setUltimoMensaje(Message msg) {
+    final chatIndex = this
+        .dataFiltrada
+        .indexWhere((element) => element['chatId'] == msg.chatId);
+    dataFiltrada[chatIndex]['ultimoMensaje'] = msg.mensaje;
   }
 }
 

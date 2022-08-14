@@ -7,12 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
-import 'package:verona_app/models/chat.dart';
 import 'package:verona_app/services/chat_service.dart';
-
 import 'package:verona_app/services/socket_service.dart';
-
 import '../models/message.dart';
 import '../widgets/custom_widgets.dart';
 
@@ -192,9 +188,17 @@ class _ListMessageBoxState extends State<ListMessageBox>
       _refreshController.loadFailed();
     } else {
       final mensajesNuevos = (response.data['message'] as List<dynamic>);
+      if (mensajesNuevos.length > 0) {
+        // print(mensajes);
+        mensajesNuevos.reversed.forEach((element) {
+          mensajes.insert(0, Message.fromMap(element));
+        });
+        // mensajes.addAll([mensajesNuevos]);
+        this.mensajesBox = mensajes.map((e) => e.toWidget(_pref.id)).toList();
 
-      _refreshController.loadComplete();
-      setState(() {});
+        _refreshController.loadComplete();
+        setState(() {});
+      }
     }
   }
 
@@ -372,11 +376,14 @@ class __InputChatState extends State<_InputChat> {
                 isCollapsed: true),
             controller: widget.txtCtrl,
             onSubmitted: (_) {
-              _socket.socket.connected
-                  ? enviarMensaje(_socket)
-                  : openAlertDialog(context, 'No hay conexión con el servidor');
-              focusNode.requestFocus(); //para solicitar el foco
-              widget.txtCtrl.clear();
+              if (widget.txtCtrl.text.trim().length > 0) {
+                _socket.socket.connected
+                    ? enviarMensaje(_socket)
+                    : openAlertDialog(
+                        context, 'No hay conexión con el servidor');
+                focusNode.requestFocus(); //para solicitar el foco
+                widget.txtCtrl.clear();
+              }
             },
             onChanged: (text) {
               setState(() {});
