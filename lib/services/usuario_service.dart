@@ -55,6 +55,14 @@ class UsuarioService extends ChangeNotifier {
     return response;
   }
 
+  modificarUsuario(dynamic usuario) async {
+    final response =
+        await this._http.put('$_endpoint/${usuario.id}', usuario.toJson());
+    final data = MyResponse.fromJson(response['response']);
+    notifyListeners();
+    return data;
+  }
+
   changePassword(Map<String, String> usuario) async {
     final response = await this._http.put('$_endpoint/password', usuario);
     return response;

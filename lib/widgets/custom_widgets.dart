@@ -155,11 +155,11 @@ class CustomDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
     final _usuarioService = Provider.of<UsuarioService>(context);
-    final _notificationService = Provider.of<NotificationService>(context);
     final _pref = new Preferences();
     return Drawer(
-        child: SafeArea(
-      child: Container(
+        child: Container(
+      color: Helper.brandColors[2],
+      child: SafeArea(
         child: Stack(
           children: [
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -183,7 +183,13 @@ class CustomDrawer extends StatelessWidget {
               child: TextButton(
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [Text('Cerrar sesion   '), Icon(Icons.logout)]),
+                    children: [
+                      Text(
+                        'Cerrar sesion ',
+                        style: TextStyle(color: Helper.brandColors[4]),
+                      ),
+                      Icon(Icons.logout, color: Helper.brandColors[8])
+                    ]),
                 onPressed: () async {
                   final response = await _usuarioService.deleteDevice(
                       _pref.id, NotificationService.token!);
@@ -204,10 +210,15 @@ class CustomDrawer extends StatelessWidget {
                   children: menu
                       .map((e) => TextButton(
                             child: Row(children: [
-                              Icon(Icons.person_add_alt_sharp),
-                              Text(
-                                '${e["name"]}',
-                                style: textStyle,
+                              Icon(Icons.person_add_alt_sharp,
+                                  color: Helper.brandColors[8]),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 15.0),
+                                child: Text(
+                                  '${e["name"]}',
+                                  style: textStyle,
+                                ),
                               ),
                             ]),
                             onPressed: () {

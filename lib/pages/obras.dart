@@ -16,6 +16,7 @@ import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
+import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -78,10 +79,10 @@ class _ObrasPageState extends State<ObrasPage> {
     Platform.isIOS
         ? header = WaterDropHeader()
         : header = MaterialClassicHeader();
-    final textStyle = TextStyle(fontSize: 16, color: Colors.grey[600]);
+    final textStyle = TextStyle(fontSize: 16, color: Helper.brandColors[4]);
     final menu = [
       {'name': 'Nuevo propietario', 'route': PropietarioForm.routeName},
-      {'name': 'Personal', 'route': MiembroForm.routeName},
+      {'name': 'Personal', 'route': PersonalADM.routeName},
     ];
 
     return Scaffold(
@@ -212,7 +213,7 @@ class _CustomObrasState extends State<_CustomObras> {
           children: [
             CustomInput(
               width: MediaQuery.of(context).size.width * .95,
-              hintText: 'Madrid...',
+              hintText: 'Nombre de proyecto',
               icono: Icons.search,
               textInputAction: TextInputAction.search,
               validaError: false,

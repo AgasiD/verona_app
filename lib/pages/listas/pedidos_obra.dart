@@ -163,6 +163,8 @@ class _PedidosByEstado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -185,7 +187,10 @@ class _PedidosByEstado extends StatelessWidget {
                 shrinkWrap: true,
                 itemBuilder: (BuildContext context, int index) {
                   final esPar = index % 2 == 0;
-                  final arg = {'pedidoId': pedidos[index]['id']};
+                  final arg = {
+                    'pedidoId': pedidos[index]['id'],
+                    'obraId': _obraService.obra.id
+                  };
                   return Column(
                     children: [
                       _CustomListTile(
