@@ -234,7 +234,6 @@ class _FormState extends State<_Form> {
               onChanged: (value) {
                 setState(() {
                   fileType = value.toString();
-                  print(fileType);
                 });
               },
             ),

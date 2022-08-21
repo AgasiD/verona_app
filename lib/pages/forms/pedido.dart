@@ -601,8 +601,6 @@ class _FormState extends State<_Form> {
                                         setState(() {
                                           imageSelected = true;
                                           tieneImagen = true;
-                                          print('imagen cargada!');
-                                          print(tieneImagen);
                                         });
                                       }
                                     } else {
@@ -753,7 +751,6 @@ class _FormState extends State<_Form> {
       case 4:
         widget.pedido!.nota = areaTxtController.text;
         widget.pedido!.prioridad = prioridad;
-        print('tiene Imagen:' + tieneImagen.toString());
         if (!tieneImagen) {
           // openAlertDialog(context, 'No se ha cargado imagen/evidencia');
           return [true, 'No se ha cargado imagen/evidencia'];

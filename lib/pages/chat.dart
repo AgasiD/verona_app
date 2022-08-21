@@ -9,6 +9,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/socket_service.dart';
+import 'package:verona_app/services/usuario_service.dart';
 import '../models/message.dart';
 import '../widgets/custom_widgets.dart';
 
@@ -20,19 +21,26 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
+class _ChatPageState extends State<ChatPage>
+    with RouteAware, TickerProviderStateMixin {
   final focusNode = new FocusNode();
   List<MessageBox> messageList = [];
   List<Message> messages = [];
   Preferences _pref = Preferences();
   String chatName = 'Sin nombre';
-  late ChatService _chatService = Provider.of<ChatService>(context);
+  late ChatService _chatService =
+      Provider.of<ChatService>(context, listen: false);
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _chatService = Provider.of<ChatService>(context, listen: false);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -63,34 +71,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       txtController: txtController,
                       chatId: chatId));
             }
-          }
-
-          //       } else {
-          //         final response = snapshot.data as MyResponse;
-          //         if (response.fallo) {
-          //           openAlertDialog(context, response.error);
-          //           return Container();
-          //         } else {
-          //           final members = response.data["members"] as List<dynamic>;
-          //           chatName = response.data['chatName'];
-          //           chatName == '' ? chatName = arguments['chatName'] : false;
-          //           final messagesRes = response.data['message'] as List<dynamic>;
-          //           final messages = messagesRes;
-          //           final mensajes =
-          //               messages.map((e) => Message.fromMap(e)).toList();
-
-          //           final appbar = _CustomChatBar(chatName: chatName);
-          //           return Scaffold(
-          //               appBar: appbar,
-          //               body: ListMessageBox(
-          //                   members: members,
-          //                   messages: mensajes,
-          //                   txtController: txtController,
-          //                   chatId: chatId));
-          //         }
-          //       }
-          //     }),
-          ),
+          }),
     );
   }
 }
@@ -112,6 +93,19 @@ class _CustomChatBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _CustomChatBarState extends State<_CustomChatBar> {
+  late ChatService _chatService;
+  @override
+  void initState() {
+    super.initState();
+    _chatService = Provider.of<ChatService>(context, listen: false);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
@@ -190,10 +184,11 @@ class _ListMessageBoxState extends State<ListMessageBox>
       final mensajesNuevos = (response.data['message'] as List<dynamic>);
       if (mensajesNuevos.length > 0) {
         // print(mensajes);
-        mensajesNuevos.reversed.forEach((element) {
-          mensajes.insert(0, Message.fromMap(element));
+        mensajesNuevos.forEach((element) {
+          //inserto al principio del chat (mensaje viejo)
+          mensajes.add(Message.fromMap(element));
         });
-        // mensajes.addAll([mensajesNuevos]);
+
         this.mensajesBox = mensajes.map((e) => e.toWidget(_pref.id)).toList();
 
         _refreshController.loadComplete();
@@ -203,11 +198,13 @@ class _ListMessageBoxState extends State<ListMessageBox>
   }
 
   late SocketService _socketService;
+  late UsuarioService _usuarioService;
+
   @override
   void initState() {
     super.initState();
     _chatService = Provider.of<ChatService>(context, listen: false);
-
+    _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     Platform.isIOS
         ? header = WaterDropHeader()
         : header = MaterialClassicHeader();
@@ -221,7 +218,16 @@ class _ListMessageBoxState extends State<ListMessageBox>
       //Escucha mensajes del servidor
       _recibirMensaje(data);
     });
+
     cargarHistorial();
+    if (mensajes.length > 0) {
+      _usuarioService
+          .ultimoMensajeLeido(_pref.id, widget.chatId, mensajes.first.ts ?? 0)
+          .then((value) {
+        _chatService.notifyListeners();
+        print('ntify');
+      });
+    }
   }
 
   void _recibirMensaje(dynamic data) {
@@ -245,7 +251,8 @@ class _ListMessageBoxState extends State<ListMessageBox>
   void agregarMensaje(dynamic data, bool propio) {
     if (this.mounted) {
       final mensaje = data;
-      mensajes.insert(0, mensaje);
+      //agrego mensaje
+      mensajes.add(mensaje);
       final mBox = MessageBox(
           esMsgPropio: propio,
           messageText: mensaje.mensaje,
@@ -254,7 +261,8 @@ class _ListMessageBoxState extends State<ListMessageBox>
               vsync: this, duration: Duration(milliseconds: 200)),
           ts: mensaje.ts);
       mBox.animatorController!.forward();
-      mensajesBox.add(mBox);
+      //lo inserto al final de la pantalla (como mensaje reciente)
+      mensajesBox.insert(0, mBox);
       // if (this.mounted) {
       setState(() {});
     }
@@ -265,12 +273,13 @@ class _ListMessageBoxState extends State<ListMessageBox>
     this.mensajesBox = mensajes.map((e) => e.toWidget(_pref.id)).toList();
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    // _socketService.socket.off('nuevo-mensaje');
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   // TODO: implement dispose
+  //   // _socketService.socket.off('nuevo-mensaje');
+  //   super.dispose();
+
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -313,7 +322,7 @@ class _ListMessageBoxState extends State<ListMessageBox>
             child: ListView.builder(
               reverse: true,
               itemCount: mensajesBox.length,
-              itemBuilder: (_, i) => mensajesBox.reversed.toList()[i],
+              itemBuilder: (_, i) => mensajesBox.toList()[i],
               physics: BouncingScrollPhysics(),
             ),
           )),
@@ -359,7 +368,7 @@ class __InputChatState extends State<_InputChat> {
   Widget build(BuildContext context) {
     final focusNode = new FocusNode();
     final _socket = Provider.of<SocketService>(context);
-    _chatService = Provider.of<ChatService>(context);
+    _chatService = Provider.of<ChatService>(context, listen: false);
     return Container(
       color: Helper.brandColors[3],
       padding: EdgeInsets.symmetric(horizontal: 8),
@@ -382,11 +391,11 @@ class __InputChatState extends State<_InputChat> {
                     : openAlertDialog(
                         context, 'No hay conexión con el servidor');
                 focusNode.requestFocus(); //para solicitar el foco
-                widget.txtCtrl.clear();
+                // widget.txtCtrl.clear();
               }
             },
             onChanged: (text) {
-              setState(() {});
+              // setState(() {});
             },
           )),
           Container(
@@ -441,8 +450,6 @@ class __InputChatState extends State<_InputChat> {
     widget.agregarMensaje(mensaje, true);
     _socket.enviarMensaje(mensaje);
     widget.txtCtrl.text = '';
-    await Future.delayed(Duration(milliseconds: 1500));
-    _chatService.notifyListeners();
   }
 }
 

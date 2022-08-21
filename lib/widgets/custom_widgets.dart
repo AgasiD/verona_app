@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -23,7 +22,6 @@ import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
-import 'package:vibration/vibration.dart';
 
 class CustomPainterAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -982,11 +980,18 @@ class Item {
   IconData icon;
 }
 
-class CustomNavigatorFooter extends StatelessWidget {
+class CustomNavigatorFooter extends StatefulWidget {
   CustomNavigatorFooter({Key? key}) : super(key: key);
 
   @override
+  State<CustomNavigatorFooter> createState() => _CustomNavigatorFooterState();
+}
+
+class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
+  @override
   Widget build(BuildContext context) {
+    final _chatService = Provider.of<ChatService>(context);
+
     return Container(
       decoration: BoxDecoration(color: Helper.brandColors[1]),
       padding: EdgeInsets.only(top: 20),
@@ -1014,7 +1019,7 @@ class CustomNavigatorFooter extends StatelessWidget {
             },
           ),
           CustomNavigatorButton(
-            showNotif: true,
+            showNotif: false,
             icono: Icons.notifications_none_rounded,
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
@@ -1024,12 +1029,14 @@ class CustomNavigatorFooter extends StatelessWidget {
             },
           ),
           CustomNavigatorButton(
-            showNotif: true,
+            showNotif: _chatService.tieneMensaje,
             icono: Icons.message_outlined,
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ChatList.routeName) {
+                _chatService.tieneMensaje = false;
                 Navigator.pushNamed(context, ChatList.routeName);
+                setState(() {});
               }
             },
           ),
@@ -1065,7 +1072,7 @@ class CustomNavigatorButton extends StatelessWidget {
             ],
             borderRadius: BorderRadius.all(Radius.circular(size / 2))),
         child: Badge(
-          showBadge: false, // showNotif,
+          showBadge: showNotif,
           badgeColor: Helper.brandColors[8],
           child: IconButton(
             onPressed: accion,
@@ -1219,16 +1226,21 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
                                 ['nombreUsuario'];
                         return CustomListTile(
                           esPar: esPar,
-                          title: dataFiltrada[index]['nombre'],
-                          subtitle: dataFiltrada[index]['ultimoMensaje'] == ''
+                          title:
+                              '${dataFiltrada[index]['nombre'].toString().trim()} ${dataFiltrada[index]['cantMsgSinLeer']}',
+                          subtitle: (dataFiltrada[index]['ultimoMensaje'] == ''
                               ? ''
-                              : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} ',
+                              : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} '),
                           avatar: (dataFiltrada[index]['nombre'][0] +
                                   dataFiltrada[index]['nombre'][1])
                               .toString()
                               .toUpperCase(),
                           fontSize: 18,
                           onTap: true,
+                          bold:
+                              (dataFiltrada[index]['cantMsgSinLeer'] as int) > 0
+                                  ? true
+                                  : false,
                           actionOnTap: () => Navigator.pushNamed(
                               context, ChatPage.routeName,
                               arguments: arg),
@@ -1248,6 +1260,241 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
   }
 }
 
+class ChatsList extends StatefulWidget {
+  ChatsList({Key? key, required this.data, required this.txtController})
+      : super(key: key);
+
+  List<dynamic> data;
+  TextEditingController txtController;
+
+  @override
+  State<ChatsList> createState() => _ChatsListState();
+}
+
+class _ChatsListState extends State<ChatsList> {
+  List<dynamic> dataFiltrada = [];
+  late SocketService _socketService;
+  Preferences _pref = new Preferences();
+  String txtBuscar = '';
+  @override
+  @override
+  Widget build(BuildContext context) {
+    dataFiltrada = widget.data;
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          CustomInput(
+            width: MediaQuery.of(context).size.width * .95,
+            hintText: 'Nombre del personal...',
+            icono: Icons.search,
+            textInputAction: TextInputAction.search,
+            validaError: false,
+            iconButton: txtBuscar.length > 0
+                ? IconButton(
+                    splashColor: null,
+                    icon: Icon(
+                      Icons.cancel_outlined,
+                      color: Colors.red.withAlpha(200),
+                    ),
+                    onPressed: () {
+                      widget.txtController.text = '';
+                      txtBuscar = '';
+
+                      dataFiltrada = widget.data;
+                      setState(() {});
+                    },
+                  )
+                : IconButton(
+                    color: Helper.brandColors[4],
+                    icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
+                    onPressed: null,
+                  ),
+            textController: widget.txtController,
+            onChange: (text) {
+              txtBuscar = text;
+              dataFiltrada = widget.data
+                  .where((dato) =>
+                      dato["nombre"].toLowerCase().contains(text.toLowerCase()))
+                  .toList();
+              setState(() {});
+            },
+          ),
+          txtBuscar.length > 0 && dataFiltrada.length == 0
+              ? Container(
+                  height: MediaQuery.of(context).size.height - 20,
+                  child: Center(
+                    child: Text(
+                      'No se encontraron usuarios',
+                      style: TextStyle(fontSize: 20, color: Colors.grey[400]),
+                      maxLines: 3,
+                    ),
+                  ),
+                )
+              : Container(
+                  height: MediaQuery.of(context).size.height - 205,
+                  child: ListView.builder(
+                      itemCount: dataFiltrada.length,
+                      itemBuilder: ((context, index) {
+                        final esPar = index % 2 == 0;
+                        final arg = {
+                          'chatId': dataFiltrada[index]['id'],
+                          'chatName': dataFiltrada[index]['nombre'],
+                        };
+                        String nombreMensaje = dataFiltrada[index]
+                                    ['usuarioUltimoMensaje']['idUsuario'] ==
+                                _pref.id
+                            ? 'Yo'
+                            : dataFiltrada[index]['usuarioUltimoMensaje']
+                                ['nombreUsuario'];
+                        return CustomListTileMessage(
+                          badgeData: dataFiltrada[index]['cantMsgSinLeer'],
+                          esPar: esPar,
+                          title:
+                              '${dataFiltrada[index]['nombre'].toString().trim()}',
+                          subtitle: (dataFiltrada[index]['ultimoMensaje'] == ''
+                              ? ''
+                              : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} '),
+                          avatar: (dataFiltrada[index]['nombre'][0] +
+                                  dataFiltrada[index]['nombre'][1])
+                              .toString()
+                              .toUpperCase(),
+                          fontSize: 18,
+                          onTap: true,
+                          bold:
+                              (dataFiltrada[index]['cantMsgSinLeer'] as int) > 0
+                                  ? true
+                                  : false,
+                          actionOnTap: () => Navigator.pushNamed(
+                              context, ChatPage.routeName,
+                              arguments: arg),
+                        );
+                      })),
+                )
+        ],
+      ),
+    );
+  }
+
+  setUltimoMensaje(Message msg) {
+    final chatIndex = this
+        .dataFiltrada
+        .indexWhere((element) => element['chatId'] == msg.chatId);
+    dataFiltrada[chatIndex]['ultimoMensaje'] = msg.mensaje;
+  }
+}
+
+class CustomListTileMessage extends StatelessWidget {
+  int badgeData;
+  String title;
+  String subtitle;
+  String avatar;
+  bool esPar;
+  bool onTap;
+  bool textAvatar;
+  bool bold;
+  double padding;
+  double fontSize;
+  IconData iconAvatar;
+  Function()? actionOnTap;
+  CustomListTileMessage(
+      {Key? key,
+      required this.esPar,
+      required this.title,
+      required this.subtitle,
+      required this.avatar,
+      this.textAvatar = true,
+      this.iconAvatar = Icons.abc,
+      this.padding = 20,
+      this.onTap = false,
+      this.fontSize = 10,
+      this.bold = false,
+      required this.badgeData,
+      this.actionOnTap = null})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: this.padding),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+                color: _color, borderRadius: BorderRadius.circular(10)),
+            child: ListTile(
+              leading: Container(
+                padding: EdgeInsets.all(1),
+                decoration: BoxDecoration(
+                    color:
+                        !esPar ? Helper.brandColors[8].withOpacity(.8) : null,
+                    borderRadius: BorderRadius.circular(100)),
+                child: CircleAvatar(
+                  backgroundColor: Helper.brandColors[0],
+                  child: textAvatar
+                      ? Text(
+                          avatar,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Helper.brandColors[5],
+                          ),
+                        )
+                      : Icon(iconAvatar),
+                ),
+              ),
+              title: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3.0),
+                child: Text(title,
+                    style: TextStyle(
+                        color: Helper.brandColors[5],
+                        fontSize: fontSize,
+                        fontWeight: bold ? FontWeight.bold : null)),
+              ),
+              subtitle: this.subtitle != ''
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        subtitle,
+                        style: TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            color: Helper.brandColors[8].withOpacity(.8),
+                            fontWeight: bold ? FontWeight.bold : null),
+                      ),
+                    )
+                  : null,
+              trailing: Container(
+                width: 70,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    badgeData > 0
+                        ? Badge(
+                            badgeColor: Helper.brandColors[8],
+                            badgeContent: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Text(badgeData.toString()),
+                            ),
+                          )
+                        : Container(),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Helper.brandColors[3],
+                    ),
+                  ],
+                ),
+              ),
+              onTap: actionOnTap,
+            ),
+          ),
+        ],
+      ),
+    );
+    ;
+  }
+}
+
 class CustomListTile extends StatelessWidget {
   bool esPar;
   String title;
@@ -1255,6 +1502,7 @@ class CustomListTile extends StatelessWidget {
   String avatar;
   bool onTap;
   bool textAvatar;
+  bool bold;
   double padding;
   double fontSize;
   IconData iconAvatar;
@@ -1270,6 +1518,7 @@ class CustomListTile extends StatelessWidget {
       this.padding = 20,
       this.onTap = false,
       this.fontSize = 10,
+      this.bold = false,
       this.actionOnTap = null})
       : super(key: key);
 
@@ -1306,12 +1555,15 @@ class CustomListTile extends StatelessWidget {
               ),
               title: Text(title,
                   style: TextStyle(
-                      color: Helper.brandColors[5], fontSize: fontSize)),
+                      color: Helper.brandColors[5],
+                      fontSize: fontSize,
+                      fontWeight: bold ? FontWeight.bold : null)),
               subtitle: this.subtitle != ''
                   ? Text(
                       subtitle,
                       style: TextStyle(
-                          color: Helper.brandColors[8].withOpacity(.8)),
+                          color: Helper.brandColors[8].withOpacity(.8),
+                          fontWeight: bold ? FontWeight.bold : null),
                     )
                   : null,
               trailing: onTap

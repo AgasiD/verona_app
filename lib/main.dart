@@ -1,14 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
-import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
-import 'package:verona_app/pages/listas/pedidos.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/obras.dart';
@@ -103,7 +100,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     NotificationService.messagesStream.listen((notif) async {
       //SOLO SE DISPARA CUANDO ESTA LA APP ABIERTA
-      print('-----------NUEVA NOTIFICACION-----------');
+      print(StackTrace.current.toString() +
+          '-----------NUEVA NOTIFICACION-----------');
       final type = notif.data["type"];
       if (notif.data["navega"] ?? false) {
         switch (type) {
@@ -254,17 +252,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _socket.socket.on('nuevo-mensaje', (data) {
         //Escucha mensajes del servidor
         // setUltimoMensaje(mensaje);
-        _chatService.notifyListeners();
         Vibration.vibrate(duration: 5, amplitude: 10);
-        print(data);
+        print('Nuevo mensaje');
         final snackBar = _initSnackMessage(data, navigatorKey);
 
         Navigator.of(navigatorKey.currentContext!).popUntil((route) {
           if (!route.settings.name!.contains('chat')) {
             messengerKey.currentState?.showSnackBar(snackBar);
+            _chatService.tieneMensaje = true;
+            _chatService.notifyListeners();
           }
           return true;
         });
+        _chatService.notifyListeners();
       });
 
       _socket.socket.on('message', (data) {

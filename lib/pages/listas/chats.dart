@@ -21,54 +21,45 @@ class ChatList extends StatefulWidget {
   State<ChatList> createState() => _ChatListState();
 }
 
-class _ChatListState extends State<ChatList> {
+class _ChatListState extends State<ChatList> with RouteAware {
   @override
   void initState() {
     super.initState();
-    // final _socketService = Provider.of<SocketService>(context, listen: false);
-
-    // final _chatService = Provider.of<ChatService>(context, listen: false);
-
-    // _socketService.socket.on('nuevo-mensaje', (data) {
-    //   //Escucha mensajes del servidor
-    //   print('nuevo nehsae');
-    //   // setUltimoMensaje(mensaje);
-    //   _chatService.notifyListeners();
-    //   Vibration.vibrate(duration: 5, amplitude: 10);
-    // });
   }
+
+  TextEditingController txtController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final _chatService = Provider.of<ChatService>(context);
+    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final _pref = new Preferences();
     _socketService.connect(_pref.id);
 
-    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
-    TextEditingController txtController = new TextEditingController();
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-              future: _usuarioService.obtenerUsuario(_pref.id),
+              future: _chatService.obtenerChats(_pref.id),
               builder: (context, snapshot) {
                 if (snapshot.data == null) {
                   return Loading(mensaje: 'Cargando chats');
                 } else {
-                  final response = MyResponse.fromJson(
-                      snapshot.data as Map<String, dynamic>);
-                  final usuario = Miembro.fromJson(response.data);
-                  usuario.chats = usuario.chats
-                      .where((element) => element['individual'] == true)
-                      .toList();
-                  if (usuario.chats.length > 0) {
-                    final chatsUsuario = usuario.chats
-                        .map((e) => e["chatId"] as String)
-                        .toList() as List<String>;
+                  final response = snapshot.data as MyResponse;
+                  final chats = response.data as List;
+
+                  if (chats.length > 0) {
+                    final chatsUsuario = chats
+                        .map((e) => {
+                              "chatId": e["chatId"],
+                              "mensajeLeido": e['mensajeLeido'] ?? 0
+                            })
+                        .toList();
                     return _UsuariosChats(
-                        chatsUsuario: chatsUsuario,
-                        usuario: usuario,
+                        chats: chats,
+                        // usuario: chats,
                         txtController: txtController);
                   } else {
                     return SingleChildScrollView(
@@ -106,57 +97,72 @@ class _ChatListState extends State<ChatList> {
 class _UsuariosChats extends StatelessWidget {
   const _UsuariosChats({
     Key? key,
-    required this.chatsUsuario,
-    required this.usuario,
+    required this.chats,
+    // required this.usuario,
     required this.txtController,
   }) : super(key: key);
 
-  final List<String> chatsUsuario;
-  final Miembro usuario;
+  final List<dynamic> chats;
+  // final Miembro usuario;
   final TextEditingController txtController;
 
   @override
   Widget build(BuildContext context) {
-    final _chatService = Provider.of<ChatService>(context);
-    print('rebuild');
-    return FutureBuilder(
-        future: _chatService.obtenerChats(chatsUsuario),
-        builder: (context, snapshot) {
-          if (snapshot.data == null) {
-            return Loading(
-              mensaje: 'Recuperando mensajes',
-            );
-          } else {
-            final response = snapshot.data as MyResponse;
-            (response.data as List<dynamic>).forEach((chat) {
-              final data = this
-                  .usuario
-                  .chats
-                  .where((element) => element['chatId'] == chat['id'])
-                  .toList()
-                  .first;
-              chat.addAll({'nombre': data['nombre']});
-              // print(data);
-            });
+    final _chatService = Provider.of<ChatService>(context, listen: false);
 
-            var chats = response.data as List;
-            chats = chats
-                .where((chat) => chat['ultimoMensaje'] != '')
-                .toList(); // Filtro por chats que tengan contengan mensaje
-            chats.sort((a, b) {
-              if (a['tsUltimoMensaje'] > b['tsUltimoMensaje'])
-                return -1;
-              else if (a['tsUltimoMensaje'] < b['tsUltimoMensaje']) {
-                return 1;
-              } else {
-                return 0;
-              }
-            });
-            return CustomSearchListView(
-              data: chats,
-              txtController: txtController,
-            );
-          }
-        });
+    return ChatsList(
+      data: chats,
+      txtController: txtController,
+    );
   }
 }
+            // final response = snapshot.data as MyResponse;
+
+            // (response.data as List<dynamic>).forEach((chat) {
+            //   // Matcheo los chats con los nombres de usuario
+            //   final data = this
+            //       .usuario
+            //       .chats
+            //       .where((element) => element['chatId'] == chat['id'])
+            //       .toList()
+            //       .first;
+
+            //   // print(Helper.getFechaHoraFromTS(data['mensajeLeido'] ?? 0));
+
+            //   final ultMsgLeido = (chat['messages'] as List).indexWhere(
+            //       (msg) => msg['ts'] == (data['mensajeLeido'] ?? 0));
+            //   if (ultMsgLeido == (chat['messages'] as List).length) {
+            //     print('SIN MENSAJES NO LEIDOS');
+            //   }
+
+            //   final msgSinLeer =
+            //       (chat['messages'] as List).length - ultMsgLeido;
+
+            //   chat.addAll({'nombre': data['nombre'], 'cantMsgSinLeer': 0});
+            //   // print(data);
+            // });
+
+            // msgs = chat.messages.findIndex(chat.ts == chatUltimoMesanjeLeido);
+    // msgNoLeidos = message.lenght - msgs
+
+    // var chats = response.data as List;
+
+    // chats = chats
+    //     .where((chat) =>
+    //         (chat['ultimoMensaje'] != '')) //as List).length > 0)
+    //     .toList(); // Filtro por chats que tengan contengan mensaje
+    // chats.sort((a, b) {
+    //   if (a['tsUltimoMensaje'] > b['tsUltimoMensaje'])
+    //     return -1;
+    //   else if (a['tsUltimoMensaje'] < b['tsUltimoMensaje']) {
+    //     return 1;
+    //   } else {
+    //     return 0;
+    //   }
+    // });
+    //   return CustomSearchListView(
+    //     data: chats,
+    //     txtController: txtController,
+    //   );
+    // }
+    // });

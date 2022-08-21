@@ -8,6 +8,7 @@ class ChatService extends ChangeNotifier {
   final _endpoint = 'api/chat';
   late Chat chat;
   String chatId = '';
+  bool tieneMensaje = false;
 
   Future<MyResponse> loadChat(
       {String chatId = '', int offset = 0, int limit = 20}) async {
@@ -32,8 +33,8 @@ class ChatService extends ChangeNotifier {
     return response;
   }
 
-  Future<MyResponse> obtenerChats(List<String> chatsUsuario) async {
-    final body = {"chatsUsuarios": chatsUsuario};
+  Future<MyResponse> obtenerChats(String usuarioId) async {
+    final body = {"usuarioId": usuarioId};
     final data = await this._http.post('$_endpoint/chatsUsuario', body);
     final response = MyResponse.fromJson(data['response']);
     return response;

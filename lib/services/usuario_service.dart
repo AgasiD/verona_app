@@ -85,4 +85,12 @@ class UsuarioService extends ChangeNotifier {
     final response = await this._http.put('$_endpoint/deleteDevice', body);
     return MyResponse.fromJson(response['response']);
   }
+
+  Future<MyResponse> ultimoMensajeLeido(
+      String id, String chatId, int ts) async {
+    final body = {"chatId": chatId, "mensajeTs": ts};
+    final response =
+        await this._http.put('$_endpoint/ultimoMensajeLeido/$id', body);
+    return MyResponse.fromJson(response['response']);
+  }
 }
