@@ -6,7 +6,6 @@ import 'package:socket_io_client/socket_io_client.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/message.dart';
-import 'package:win32/win32.dart';
 
 enum ServerStatus { Online, Offline, Connecting }
 
@@ -16,8 +15,10 @@ class SocketService with ChangeNotifier {
   ServerStatus get serverStatus => this._serverStatus;
   IO.Socket get socket => this._socket;
   int unreadNotifications = 0;
+  bool conectando = false;
   void connect(clientId) {
-    if (clientId != null && clientId.toString().trim() != '') {
+    if (clientId != null && clientId.toString().trim() != '' && !conectando) {
+      conectando = true;
       final url = Environment.isProduction
           ? 'https://veronaserver.herokuapp.com'
           : 'http://192.168.0.155:8008';
@@ -36,6 +37,7 @@ class SocketService with ChangeNotifier {
       this._socket.onConnect((_) {
         this._serverStatus = ServerStatus.Online;
         print('----------CONECTADO CON EL SERVIDOR----------');
+        conectando = false;
         notifyListeners();
       });
 

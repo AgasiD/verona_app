@@ -90,7 +90,6 @@ class _CustomSearchListView extends StatefulWidget {
 }
 
 class __CustomSearchListViewState extends State<_CustomSearchListView> {
-  List<dynamic> dataFiltrada = [];
   late SocketService _socketService;
   Preferences _pref = new Preferences();
   String txtBuscar = '';
@@ -98,7 +97,6 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
   @override
   void initState() {
     super.initState();
-    dataFiltrada = widget.data;
   }
 
   @override
@@ -122,7 +120,7 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                     onPressed: () {
                       widget.txtController.text = '';
                       txtBuscar = '';
-                      dataFiltrada = widget.data;
+
                       setState(() {});
                     },
                   )
@@ -134,14 +132,14 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
             textController: widget.txtController,
             onChange: (text) {
               txtBuscar = text;
-              dataFiltrada = widget.data
+              widget.data = widget.data
                   .where((dato) =>
                       dato["title"].toLowerCase().contains(text.toLowerCase()))
                   .toList();
               setState(() {});
             },
           ),
-          txtBuscar.length > 0 && dataFiltrada.length == 0
+          txtBuscar.length > 0 && widget.data.length == 0
               ? Container(
                   height: MediaQuery.of(context).size.height - 20,
                   child: Center(
@@ -155,18 +153,18 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
               : Container(
                   height: MediaQuery.of(context).size.height - 205,
                   child: ListView.builder(
-                      itemCount: dataFiltrada.length,
+                      itemCount: widget.data.length,
                       itemBuilder: ((context, index) {
                         final esPar = index % 2 == 0;
                         final arg = {
-                          'usuarioId': dataFiltrada[index]['id'],
+                          'usuarioId': widget.data[index]['id'],
                         };
 
                         return CustomListTile(
                           esPar: esPar,
-                          title: dataFiltrada[index]['title'],
-                          subtitle: dataFiltrada[index]['subtitle'],
-                          avatar: dataFiltrada[index]['avatar']
+                          title: widget.data[index]['title'],
+                          subtitle: widget.data[index]['subtitle'],
+                          avatar: widget.data[index]['avatar']
                               .toString()
                               .toUpperCase(),
                           fontSize: 18,
