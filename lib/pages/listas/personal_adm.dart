@@ -159,7 +159,6 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                         final arg = {
                           'usuarioId': widget.data[index]['id'],
                         };
-
                         return CustomListTile(
                           esPar: esPar,
                           title: widget.data[index]['title'],

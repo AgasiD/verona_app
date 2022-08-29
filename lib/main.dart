@@ -12,10 +12,12 @@ import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/routes/routes.dart';
 import 'package:verona_app/services/auth_service.dart';
 import 'package:verona_app/services/chat_service.dart';
+import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
+import 'package:verona_app/services/tarea_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:vibration/vibration.dart';
 
@@ -27,9 +29,6 @@ void main() async {
   final pref = new Preferences();
   await pref.initPrefs();
   await NotificationService.initializeApp();
-
-  //dotenv.env['API_URL']
-  //dotenv.get('API_URL', fallback: 'API_URL not found'),
 
   await dotenv.load(fileName: Environment.fileName);
 
@@ -51,6 +50,17 @@ class _AppStateState extends State<AppState> {
           create: (_) => ObraService(),
           lazy: false,
         ),
+
+        ChangeNotifierProvider(
+          create: (_) => TareaService(),
+          lazy: false,
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => EtapaService(),
+          lazy: false,
+        ),
+
         ChangeNotifierProvider(
           create: (_) => GoogleDriveService(),
           lazy: false,
@@ -222,7 +232,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    ObraService _obrasService = Provider.of<ObraService>(context);
+    ObraService _obrasService =
+        Provider.of<ObraService>(context, listen: false);
 
     final _pref = new Preferences();
     late String initalRoute;

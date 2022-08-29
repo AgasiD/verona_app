@@ -143,4 +143,62 @@ class ObraService extends ChangeNotifier {
     // notifyListeners();
     return resp;
   }
+
+  Future<MyResponse> actualizarTarea(String obraId, String etapaId,
+      String tareaId, bool realizada, String usuarioId, int ts) async {
+    final body = {
+      "etapaId": etapaId,
+      "tareaId": tareaId,
+      "valor": realizada,
+      "usuarioId": usuarioId,
+      "ts": ts
+    };
+    final cadena = '$_endpoint/actualizaTarea/$obraId';
+    final datos = await this._http.put(cadena, body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    return resp;
+  }
+
+  Future<MyResponse> asignarTarea(
+      String etapaId, String tareaId, String obraId) async {
+    final body = {"tareaId": tareaId, "etapaId": etapaId, "obraId": obraId};
+    final datos = await this._http.put('$_endpoint/asignarTarea', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  Future<MyResponse> quitarTarea(
+      String etapaId, String tareaId, String obraId) async {
+    final body = {"tareaId": tareaId, "etapaId": etapaId, "obraId": obraId};
+    final datos = await this._http.put('$_endpoint/quitarTarea', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  Future<MyResponse> asignarEtapa(String etapaId, String obraId) async {
+    final body = {"etapaId": etapaId, "obraId": obraId};
+    final datos = await this._http.put('$_endpoint/asignarEtapa', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  Future<MyResponse> quitarEtapa(String etapaId, String obraId) async {
+    final body = {"etapaId": etapaId, "obraId": obraId};
+    final datos = await this._http.put('$_endpoint/quitarEtapa', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
 }

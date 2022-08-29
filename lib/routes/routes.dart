@@ -3,6 +3,8 @@ import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/listas/asigna_etapas_extras.dart';
+import 'package:verona_app/pages/listas/asigna_tareas_extras.dart';
 import 'package:verona_app/pages/listas/contactos.dart';
 import 'package:verona_app/pages/forms/documento.dart';
 import 'package:verona_app/pages/forms/imagen-doc.dart';
@@ -16,9 +18,11 @@ import 'package:verona_app/pages/inactividades.dart';
 import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/listas/documentos.dart';
 import 'package:verona_app/pages/listas/equipo.dart';
+import 'package:verona_app/pages/listas/etapas.dart';
 import 'package:verona_app/pages/listas/pedidos_obra.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/listas/propietarios.dart';
+import 'package:verona_app/pages/listas/tareas.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obra.dart';
@@ -37,6 +41,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   DocumentoForm.routeName: (_) => DocumentoForm(),
   DocumentosPage.routeName: (_) => DocumentosPage(),
   EquipoList.routeName: (_) => EquipoList(),
+  EtapasObra.routeName: (_) => EtapasObra(),
   FormPage.routeName: (_) => FormPage(),
   ImagenViewer.routeName: (_) => ImagenViewer(),
   ImgGalleryPage.routeName: (_) => ImgGalleryPage(),
@@ -57,4 +62,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   PropietarioForm.routeName: (_) => PropietarioForm(),
   PropietariosList.routeName: (_) => PropietariosList(),
   Prueba.routeName: (_) => Prueba(),
+  TareasCheckList.routeName: (_) => TareasCheckList(),
+  TareasExtrasPage.routeName: (_) => TareasExtrasPage(),
+  EtapasExtrasPage.routeName: (_) => EtapasExtrasPage(),
 };

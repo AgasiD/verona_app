@@ -295,7 +295,6 @@ Container _obraCard(BuildContext context, Obra obra) {
       : Helper.imageNetwork('https://drive.google.com/uc?id=${obra.imageId}'
           // 'https://drive.google.com/uc?export=view&id=${obra.imageId}',
           );
-  final porcent = (Random().nextDouble() * 100).round();
   return Container(
     margin: EdgeInsets.symmetric(horizontal: 15),
     child: GestureDetector(
@@ -317,7 +316,7 @@ Container _obraCard(BuildContext context, Obra obra) {
                             fontSize: 21,
                             fontWeight: FontWeight.bold)),
                     SizedBox(
-                      height: 5,
+                      height: 10,
                     ),
                     Text(obra.lote,
                         style: TextStyle(
@@ -325,37 +324,31 @@ Container _obraCard(BuildContext context, Obra obra) {
                             color: Helper.brandColors[8],
                             fontWeight: FontWeight.bold)),
                     SizedBox(
-                      height: 5,
+                      height: 10,
                     ),
                     Container(
                       margin: EdgeInsets.only(bottom: 10),
                       child: Column(
                         children: [
-                          Text('${porcent.toString()}%',
+                          Text('${(obra.porcentajeRealizado).toString()}%',
                               style: TextStyle(
                                   color: Helper.brandColors[3],
-                                  fontSize: 12,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold)),
                           Container(
                             margin: EdgeInsets.symmetric(vertical: 3),
                             padding: EdgeInsets.symmetric(horizontal: 30),
                             child: LinearProgressIndicator(
-                              value: porcent.toDouble() / 100,
+                              value: obra.porcentajeRealizado / 100,
                               semanticsLabel: 'HoLA',
                               backgroundColor: Helper.brandColors[3],
                               color: Helper.brandColors[8],
                             ),
                           ),
-                          // Text('${porcent.toString()}%',
-                          //     style: TextStyle(
-                          //         color: Helper.brandColors[3],
-                          //         fontSize: 12,
-                          //         fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
-                    Text('Tareas preliminares',
-                        style: TextStyle(color: Helper.brandColors[3])),
+                    // Text('', style: TextStyle(color: Helper.brandColors[3])),
                   ]),
                 ),
                 Hero(
@@ -381,56 +374,3 @@ Container _obraCard(BuildContext context, Obra obra) {
 NetworkImage _CustomNetworkImage(String imageId) {
   return NetworkImage('https://drive.google.com/uc?id=$imageId');
 }
-
-/*Stack(
-        children: [
-          Positioned(
-              top: 0,
-              right: 10,
-              left: 10,
-              height: 235,
-              child: Container(
-                child: ClipRRect(
-                  //borderRadius: BorderRadius.all(Radius.circular(40)),
-                  child: Hero(
-                    tag: obra.nombre,
-                    child: FadeInImage(
-                        height: 190,
-                        image: imagen,
-                        imageErrorBuilder: (_, obj, st) {
-                          return Container(
-                              child:
-                                  Image(image: AssetImage('assets/image.png')));
-                        },
-                        placeholder: AssetImage('assets/loading-image.gif')),
-                  ),
-                ),
-              )),
-          Positioned(
-              top: 195,
-              left: 75,
-              right: 75,
-              height: 75,
-              child: Container(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(obra.nombre,
-                          style: TextStyle(
-                              fontSize: 21, fontWeight: FontWeight.bold)),
-                      Text('Tareas preliminares')
-                    ]),
-                width: 100,
-                decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black45,
-                          blurRadius: 5,
-                          offset: Offset(0, 3))
-                    ],
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-              )),
-        ],
-      ),
-    */

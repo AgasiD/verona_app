@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/models/miembro.dart';
-import 'package:verona_app/models/pedido.dart';
 import 'package:verona_app/models/propietario.dart';
+import 'package:verona_app/models/tarea.dart';
+import 'package:verona_app/pages/listas/etapas.dart';
 
 class Obra {
   String nombre;
@@ -16,7 +17,7 @@ class Obra {
   int diasTranscurridos;
   List<dynamic> docs;
   List<Miembro> equipo;
-  List<dynamic> estadios;
+  List<Etapa> etapas;
   String imageId;
   String lote;
   List<Propietario> propietarios;
@@ -36,7 +37,7 @@ class Obra {
     this.diasTranscurridos = 0,
     this.docs = const [],
     this.equipo = const [],
-    this.estadios = const [],
+    this.etapas = const [],
     this.imageId = '',
     required this.lote,
     this.propietarios = const [],
@@ -57,7 +58,7 @@ class Obra {
     this.diasTranscurridos = diasTranscurridos;
     this.docs = docs;
     this.equipo = equipo;
-    this.estadios = estadios;
+    this.etapas = etapas;
     this.imageId = imageId;
     this.lote = lote;
     this.descripcion = descripcion;
@@ -78,15 +79,15 @@ class Obra {
       chatI: json["chatI"],
       diasEstimados: json["diasEstimados"],
       diasInactivos: json["diasInactivos"],
-      diasTranscurridos: json["diasTranscurridos"],
-      docs: json["docs"],
+      diasTranscurridos: 0,
+      docs: [],
       driveFolderId: json["driveFolderId"] ?? '',
       imgFolderId: json["imgFolderId"] ?? '',
       descripcion: json['descripcion'] ?? 'Sin descripción',
       equipo: (json["equipo"] as List<dynamic>)
           .map((e) => Miembro.fromJson(e))
           .toList(),
-      estadios: json["estadios"],
+      etapas: (json["etapas"] as List).map((e) => Etapa.fromJson(e)).toList(),
       imageId: json['imageId'] ?? '',
       lote: json["lote"],
       ts: json["ts"],
@@ -107,7 +108,7 @@ class Obra {
         'diasTranscurridos': this.diasTranscurridos,
         'docs': this.docs,
         'equipo': this.equipo,
-        'estadios': this.estadios,
+        'etapas': this.etapas,
         'imageId': this.imageId,
         'lote': this.lote,
         'ts': this.ts,
@@ -117,6 +118,17 @@ class Obra {
         'driveFolderId': this.driveFolderId,
         'enabledFiles': this.enabledFiles
       };
+
+  double get porcentajeRealizado {
+    int cantTotalTareas = 0;
+    int cantTotalTaresHechas = 0;
+    etapas.forEach((etapa) {
+      cantTotalTareas = cantTotalTareas + etapa.cantTareas;
+      cantTotalTaresHechas = cantTotalTaresHechas + etapa.cantTareasTerminadas;
+    });
+    return double.parse(
+        (cantTotalTaresHechas / cantTotalTareas * 100).toStringAsFixed(2));
+  }
 
   estaPropietario(usuarioId) {
     return propietarios.indexWhere((element) => element.dni == usuarioId) > -1;
@@ -144,5 +156,34 @@ class Obra {
     if (estaPersonal(miembro.dni)) {
       equipo.removeWhere((element) => element.dni == miembro.dni);
     }
+  }
+
+  sumarTarea(String etapaId, Tarea tarea) {
+    final indexEtapa = etapas.indexWhere((etapa) => etapa.id == etapaId);
+    etapas[indexEtapa].tareas.add(tarea);
+  }
+
+  quitarTarea(String etapa, Tarea tarea) {
+    final indexEtapa = etapas.indexWhere((etapaAux) => etapaAux.id == etapa);
+    final indexTarea = etapas[indexEtapa]
+        .tareas
+        .indexWhere((tareaAux) => tareaAux.id == tarea.id);
+    etapas[indexEtapa].tareas.removeAt(indexTarea);
+  }
+
+  void actualizaTarea(String idtapa, String id, bool value) {
+    final etapaIndex = etapas.indexWhere((etapa) => etapa.id == idtapa);
+    final tareaIndex =
+        etapas[etapaIndex].tareas.indexWhere((tarea) => tarea.id == id);
+    etapas[etapaIndex].tareas[tareaIndex].realizado = value;
+  }
+
+  sumarEtapa(Etapa etapa) {
+    etapas.add(etapa);
+  }
+
+  quitarEtapa(String etapa) {
+    final indexEtapa = etapas.indexWhere((etapaAux) => etapaAux.id == etapa);
+    etapas.removeAt(indexEtapa);
   }
 }

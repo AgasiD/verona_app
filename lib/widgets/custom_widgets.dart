@@ -204,27 +204,29 @@ class CustomDrawer extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 35),
-              child: Column(
-                  children: menu
-                      .map((e) => TextButton(
-                            child: Row(children: [
-                              Icon(Icons.person_add_alt_sharp,
-                                  color: Helper.brandColors[8]),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15.0),
-                                child: Text(
-                                  '${e["name"]}',
-                                  style: textStyle,
-                                ),
-                              ),
-                            ]),
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                  context, e["route"].toString());
-                            },
-                          ))
-                      .toList()),
+              child: _pref.role == 1
+                  ? Column(
+                      children: menu
+                          .map((e) => TextButton(
+                                child: Row(children: [
+                                  Icon(Icons.person_add_alt_sharp,
+                                      color: Helper.brandColors[8]),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15.0),
+                                    child: Text(
+                                      '${e["name"]}',
+                                      style: textStyle,
+                                    ),
+                                  ),
+                                ]),
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                      context, e["route"].toString());
+                                },
+                              ))
+                          .toList())
+                  : Container(),
             )
           ],
         ),
