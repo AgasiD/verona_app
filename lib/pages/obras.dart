@@ -18,6 +18,7 @@ import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/obra.dart';
+import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -81,8 +82,21 @@ class _ObrasPageState extends State<ObrasPage> {
         : header = MaterialClassicHeader();
     final textStyle = TextStyle(fontSize: 16, color: Helper.brandColors[4]);
     final menu = [
-      {'name': 'Nuevo propietario', 'route': PropietarioForm.routeName},
-      {'name': 'Personal', 'route': PersonalADM.routeName},
+      {
+        'icon': Icons.person_pin_rounded,
+        'name': 'Mi perfil',
+        'route': PerfilPage.routeName
+      },
+      {
+        'icon': Icons.person_add_alt_sharp,
+        'name': 'Nuevo propietario',
+        'route': PropietarioForm.routeName
+      },
+      {
+        'icon': Icons.group_sharp,
+        'name': 'Personal',
+        'route': PersonalADM.routeName
+      },
     ];
 
     return Scaffold(
@@ -99,41 +113,6 @@ class _ObrasPageState extends State<ObrasPage> {
                 child: _SearchListView(obras: obras))),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
-    );
-  }
-
-  Padding _obraCard(BuildContext context, Obra obra) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, ObraPage.routeName,
-            arguments: {'nameForm': PedidoForm.routeName, 'obraId': obra.id}),
-        child: Card(
-          elevation: 5,
-          child: Column(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
-                // child: Hero(
-                //   tag: 'obra',
-                child: FadeInImage(
-                    width: MediaQuery.of(context).size.width * .4,
-                    image: AssetImage(
-                        'assets/image.png'), //NetworkImage(obra.imagen),
-                    placeholder: AssetImage('assets/image.png')),
-                // ),
-              ),
-              ListTile(
-                title: Text(obra.nombre),
-                subtitle: Text(
-                    'Tareas preliminares'), //obra.estadios.last.descripcion
-              )
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -305,56 +284,61 @@ Container _obraCard(BuildContext context, Obra obra) {
             elevation: 10,
             color: Helper.brandColors[2],
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 10),
-                  width: MediaQuery.of(context).size.width * .4,
-                  child: Column(children: [
-                    Text(obra.nombre,
-                        style: TextStyle(
-                            color: Helper.brandColors[3],
-                            fontSize: 21,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(obra.lote,
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Helper.brandColors[8],
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      child: Column(
-                        children: [
-                          Text('${(obra.porcentajeRealizado).toString()}%',
-                              style: TextStyle(
-                                  color: Helper.brandColors[3],
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold)),
-                          Container(
-                            margin: EdgeInsets.symmetric(vertical: 3),
-                            padding: EdgeInsets.symmetric(horizontal: 30),
-                            child: LinearProgressIndicator(
-                              value: obra.porcentajeRealizado / 100,
-                              semanticsLabel: 'HoLA',
-                              backgroundColor: Helper.brandColors[3],
-                              color: Helper.brandColors[8],
-                            ),
+                  width: MediaQuery.of(context).size.width * .47,
+                  child: Column(
+                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(obra.nombre,
+                            style: TextStyle(
+                                color: Helper.brandColors[3],
+                                fontSize: 21,
+                                fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(obra.lote,
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: Helper.brandColors[8],
+                                fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          // alignment: Alignment.topRight,
+                          margin: EdgeInsets.only(bottom: 10),
+                          child: Column(
+                            children: [
+                              Text('${(obra.porcentajeRealizado).toString()}%',
+                                  style: TextStyle(
+                                      color: Helper.brandColors[3],
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold)),
+                              Container(
+                                margin: EdgeInsets.symmetric(vertical: 3),
+                                padding: EdgeInsets.symmetric(horizontal: 30),
+                                child: LinearProgressIndicator(
+                                  value: obra.porcentajeRealizado / 100,
+                                  semanticsLabel: 'HoLA',
+                                  backgroundColor: Helper.brandColors[3],
+                                  color: Helper.brandColors[8],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    // Text('', style: TextStyle(color: Helper.brandColors[3])),
-                  ]),
+                        ),
+                        // Text('', style: TextStyle(color: Helper.brandColors[3])),
+                      ]),
                 ),
                 Hero(
                   tag: obra.id,
                   child: FadeInImage(
-                      width: MediaQuery.of(context).size.width * .48,
+                      width: MediaQuery.of(context).size.width * .43,
                       image: imagen,
                       imageErrorBuilder: (_, obj, st) {
                         return Container(

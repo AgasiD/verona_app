@@ -147,13 +147,50 @@ class CustomDrawer extends StatelessWidget {
   }) : super(key: key);
 
   final TextStyle textStyle;
-  final List<Map<String, String>> menu;
+  final List<Map<String, dynamic>> menu;
 
   @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _pref = new Preferences();
+
+    final menuVista = _pref.role == 1
+        ? menu
+            .map((e) => TextButton(
+                  child: Row(children: [
+                    Icon(e['icon'], color: Helper.brandColors[8]),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Text(
+                        '${e["name"]}',
+                        style: textStyle,
+                      ),
+                    ),
+                  ]),
+                  onPressed: () {
+                    Navigator.pushNamed(context, e["route"].toString());
+                  },
+                ))
+            .toList()
+        : menu
+            .sublist(0, 1)
+            .map((e) => TextButton(
+                  child: Row(children: [
+                    Icon(e['icon'], color: Helper.brandColors[8]),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Text(
+                        '${e["name"]}',
+                        style: textStyle,
+                      ),
+                    ),
+                  ]),
+                  onPressed: () {
+                    Navigator.pushNamed(context, e["route"].toString());
+                  },
+                ))
+            .toList();
     return Drawer(
         child: Container(
       color: Helper.brandColors[2],
@@ -203,31 +240,9 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 35),
-              child: _pref.role == 1
-                  ? Column(
-                      children: menu
-                          .map((e) => TextButton(
-                                child: Row(children: [
-                                  Icon(Icons.person_add_alt_sharp,
-                                      color: Helper.brandColors[8]),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 15.0),
-                                    child: Text(
-                                      '${e["name"]}',
-                                      style: textStyle,
-                                    ),
-                                  ),
-                                ]),
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, e["route"].toString());
-                                },
-                              ))
-                          .toList())
-                  : Container(),
-            )
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 35),
+                child: Column(children: menuVista))
           ],
         ),
       ),
@@ -351,7 +366,7 @@ class CustomInput extends StatefulWidget {
   final TextEditingController textController;
   final double width;
   IconButton iconButton;
-  final int lines;
+  final int? lines;
   final bool validaError;
   final bool enable;
   String? Function(String?) validarInput;
@@ -368,7 +383,7 @@ class CustomInput extends StatefulWidget {
     this.isPassword = false,
     this.teclado = TextInputType.text,
     this.width = double.infinity,
-    this.lines = 1,
+    this.lines = null,
     this.validaError = false,
     this.initialValue = '',
     this.textInputAction = TextInputAction.next,
@@ -416,7 +431,7 @@ class _CustomInputState extends State<CustomInput> {
             textCapitalization: TextCapitalization.sentences,
             enabled: widget.enable,
             controller: widget.textController,
-            maxLines: widget.lines,
+            maxLines: widget.lines ?? 1,
             autocorrect: false,
             keyboardType: widget.teclado,
             keyboardAppearance: Brightness.dark,
@@ -1012,7 +1027,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               }),
           CustomNavigatorButton(
             showNotif: false,
-            icono: Icons.person_outline,
+            icono: Icons.holiday_village_outlined,
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {

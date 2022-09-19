@@ -39,7 +39,7 @@ class LoginPage extends StatelessWidget {
                 size: 200,
               ),
               _Form(),
-              _Labels(),
+              // _Labels(),
               Text(
                 'Powered by e-Drex©',
                 style: TextStyle(color: Helper.brandColors[4]),

@@ -143,7 +143,8 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                           ),
                           onPressed: () {
                             Navigator.pushReplacementNamed(
-                                context, MiembroForm.routeName);
+                                context, MiembroForm.routeName,
+                                arguments: {"usuarioId": null});
                           },
                         ),
                   textController: _txtPersonalCtrl,

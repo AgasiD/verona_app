@@ -28,7 +28,7 @@ final TextEditingController txtDNICtrl = TextEditingController();
 final TextEditingController txtTelefonoCtrl = TextEditingController();
 final TextEditingController txtMailCtrl = TextEditingController();
 String personalSelected = '2';
-late String usuarioId;
+late String? usuarioId;
 
 class _MiembroFormState extends State<MiembroForm> {
   @override
@@ -307,7 +307,7 @@ class _Form extends StatelessWidget {
 
     if (isValid) {
       final miembro = Miembro(
-          id: edit ? usuarioId : '',
+          id: edit ? usuarioId! : '',
           nombre: txtNombreCtrl.text,
           apellido: txtApellidoCtrl.text,
           dni: txtDNICtrl.text,

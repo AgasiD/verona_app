@@ -46,7 +46,6 @@ class GoogleDriveService extends ChangeNotifier {
     try {
       if (_document != null) {
         final to = _endpoint + "/$fileName/$extension/$parent";
-
         final datos = await this._http.uploadDocument(_document, to);
         notifyListeners();
         return datos;

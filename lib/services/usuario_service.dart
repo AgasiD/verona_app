@@ -50,7 +50,8 @@ class UsuarioService extends ChangeNotifier {
   }
 
   grabarUsuario(dynamic usuario) async {
-    final response = await this._http.post(_endpoint, usuario.toJson());
+    final data = await this._http.post(_endpoint, usuario.toJson());
+    final response = MyResponse.fromJson(data['response']);
     // notifyListeners();
     return response;
   }
@@ -63,7 +64,7 @@ class UsuarioService extends ChangeNotifier {
     return data;
   }
 
-  changePassword(Map<String, String> usuario) async {
+  changePassword(Map<String, String?> usuario) async {
     final response = await this._http.put('$_endpoint/password', usuario);
     return response;
   }

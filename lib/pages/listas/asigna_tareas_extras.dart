@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
-import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/tarea.dart';
-import 'package:verona_app/pages/forms/miembro.dart';
-import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/tarea_service.dart';
-import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class TareasExtrasPage extends StatelessWidget {

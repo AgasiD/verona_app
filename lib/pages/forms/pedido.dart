@@ -116,7 +116,8 @@ class _FormState extends State<_Form> {
       pedidoConfirmado = false,
       editConfirmado = true,
       imageSelected = false,
-      tieneImagen = false;
+      tieneImagen = false,
+      entregaExterna = false;
 
   List<DropdownMenuItem<int>> prioridades = <DropdownMenuItem<int>>[
     DropdownMenuItem(
@@ -176,12 +177,13 @@ class _FormState extends State<_Form> {
         repartidoId = widget.pedido!.usuarioAsignado == ''
             ? repartidores.first.value.toString()
             : widget.pedido!.usuarioAsignado;
+
+        entregaExterna = widget.pedido!.entregaExterna;
       }
 
       if (widget.pedido!.estado == 5) {
         // ESTADO: Pedido cerrado
         tieneImagen = widget.pedido!.imagenId == '' ? false : true;
-
         imgButtonText = tieneImagen ? 'Ver evidencia' : 'Foto/Evidencia';
         pedidoConfirmado = true;
         pedidoEnStock = true;
@@ -191,6 +193,7 @@ class _FormState extends State<_Form> {
         indicacionesTxtController.text = widget.pedido!.indicaciones;
         txtCtrlDate.text = widget.pedido!.fechaEstimada;
         prioridad = widget.pedido!.prioridad;
+        entregaExterna = widget.pedido!.entregaExterna;
       }
     }
 
@@ -237,6 +240,8 @@ class _FormState extends State<_Form> {
                             enable: editableByEstado(0),
                             hintText: 'Detallar solicitud de materiales',
                             icono: Icons.description_outlined,
+                            teclado: TextInputType.multiline,
+                            textInputAction: TextInputAction.newline,
                             textController: areaTxtController,
                             lines: 8,
                           ),
@@ -487,11 +492,26 @@ class _FormState extends State<_Form> {
                                                     widget.pedido!
                                                             .usuarioAsignado =
                                                         value.toString();
+
+                                                    if (value == '9999') {
+                                                      widget.pedido!
+                                                              .entregaExterna =
+                                                          true;
+                                                      entregaExterna = true;
+                                                    } else {
+                                                      widget.pedido!
+                                                              .entregaExterna =
+                                                          false;
+                                                      entregaExterna = false;
+                                                    }
                                                   } else {
                                                     widget.pedido!.tsAsignado =
                                                         0;
                                                     widget.pedido!
                                                         .usuarioAsignado = '';
+                                                    widget.pedido!
+                                                        .entregaExterna = false;
+                                                    entregaExterna = false;
                                                   }
                                                 },
                                                 onSaved: (value) {},
@@ -562,56 +582,165 @@ class _FormState extends State<_Form> {
                                   (permiteVerByRole(
                                           [6]) && // devery agrega y ve foto
                                       permiteVerByEstado([4, 5]))
-                              ? MaterialButton(
-                                  // evidencia
-                                  color: Helper.primaryColor,
-                                  textColor: Colors.white,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      imageSelected
-                                          ? Padding(
-                                              padding:
-                                                  EdgeInsets.only(left: 10),
-                                              child: Icon(
-                                                Icons.check,
-                                                color: Helper.brandColors[8],
-                                              ))
-                                          : Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 14),
-                                              child: Icon(
-                                                Icons.photo_library_outlined,
-                                                color: Helper.brandColors[9]
-                                                    .withOpacity(.6),
-                                              )),
-                                      Text(imgButtonText,
-                                          style: TextStyle(fontSize: 16)),
-                                    ],
-                                  ),
-                                  onPressed: () async {
-                                    if (!tieneImagen) {
-                                      final ImagePicker _picker = ImagePicker();
-                                      final image = await _picker.pickImage(
-                                          source: ImageSource.camera);
-                                      if (image != null) {
-                                        _driveService
-                                            .guardarImagenPedido(image!);
+                              ? !entregaExterna
+                                  ? MaterialButton(
+                                      // evidencia
+                                      color: Helper.primaryColor,
+                                      textColor: Colors.white,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          imageSelected
+                                              ? Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 10),
+                                                  child: Icon(
+                                                    Icons.check,
+                                                    color:
+                                                        Helper.brandColors[8],
+                                                  ))
+                                              : Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 14),
+                                                  child: Icon(
+                                                    Icons
+                                                        .photo_library_outlined,
+                                                    color: Helper.brandColors[9]
+                                                        .withOpacity(.6),
+                                                  )),
+                                          Text(imgButtonText,
+                                              style: TextStyle(fontSize: 16)),
+                                        ],
+                                      ),
+                                      onPressed: () async {
+                                        if (!tieneImagen) {
+                                          final ImagePicker _picker =
+                                              ImagePicker();
+                                          final image = await _picker.pickImage(
+                                              source: ImageSource.camera);
+                                          if (image != null) {
+                                            _driveService
+                                                .guardarImagenPedido(image!);
 
-                                        setState(() {
-                                          imageSelected = true;
-                                          tieneImagen = true;
-                                        });
-                                      }
-                                    } else {
-                                      Navigator.pushNamed(
-                                          context, ImagenViewer.routeName,
-                                          arguments: {
-                                            'imagenId': widget.pedido!.imagenId
-                                          });
-                                    }
-                                  })
-                              : Container()
+                                            setState(() {
+                                              imageSelected = true;
+                                              tieneImagen = true;
+                                            });
+                                          }
+                                        } else {
+                                          Navigator.pushNamed(
+                                              context, ImagenViewer.routeName,
+                                              arguments: {
+                                                'imagenId':
+                                                    widget.pedido!.imagenId
+                                              });
+                                        }
+                                      })
+                                  : MaterialButton(
+                                      color: Helper.primaryColor,
+                                      textColor: Colors.white,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          tieneImagen
+                                              ? Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 10),
+                                                  child: Icon(
+                                                    Icons.check,
+                                                    color:
+                                                        Helper.brandColors[8],
+                                                  ))
+                                              : Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 14),
+                                                  child: Icon(
+                                                    Icons
+                                                        .photo_library_outlined,
+                                                    color: Helper.brandColors[9]
+                                                        .withOpacity(.6),
+                                                  )),
+                                          Text(imgButtonText,
+                                              style: TextStyle(fontSize: 16)),
+                                        ],
+                                      ),
+                                      onPressed: () async {
+                                        try {
+                                          if (!tieneImagen) {
+                                            var acciones = [
+                                              {
+                                                "text":
+                                                    'Seleccionar de galería',
+                                                "default": true,
+                                                "accion": () async {
+                                                  final ImagePicker _picker =
+                                                      ImagePicker();
+                                                  final XFile? image =
+                                                      await _picker.pickImage(
+                                                          source: ImageSource
+                                                              .gallery);
+                                                  if (image != null) {
+                                                    tieneImagen = true;
+                                                    _driveService
+                                                        .guardarImagenPedido(
+                                                            image);
+                                                    Navigator.pop(context);
+                                                    setState(() {
+                                                      // imagenSelected = true;
+                                                      imgButtonText =
+                                                          'Imagenes seleccionada';
+                                                    });
+                                                  }
+                                                },
+                                              },
+                                              {
+                                                "text": 'Abrir camara',
+                                                "default": false,
+                                                "accion": () async {
+                                                  final ImagePicker _picker =
+                                                      ImagePicker();
+
+                                                  final XFile? image =
+                                                      await _picker.pickImage(
+                                                          source: ImageSource
+                                                              .camera);
+
+                                                  if (image != null) {
+                                                    tieneImagen = true;
+                                                    _driveService
+                                                        .guardarImagenPedido(
+                                                            image);
+                                                    Navigator.pop(context);
+                                                    setState(() {
+                                                      // imagenSelected = true;
+                                                      imgButtonText =
+                                                          'Imagenes seleccionadas (${_driveService.obtenerCantidadImgSeleccionada()})';
+                                                    });
+                                                  }
+                                                },
+                                              },
+                                            ];
+                                            openBottomSheet(
+                                                context,
+                                                'Subir documento',
+                                                'Seleccionar método',
+                                                acciones);
+                                          } else {
+                                            Navigator.pushNamed(
+                                                context, ImagenViewer.routeName,
+                                                arguments: {
+                                                  'imagenId':
+                                                      widget.pedido!.imagenId
+                                                });
+                                          }
+                                        } catch (e) {
+                                          openAlertDialog(
+                                              context, e.toString());
+                                        }
+                                      })
+                              : Container(),
                         ],
                       ),
                     ),
@@ -730,7 +859,6 @@ class _FormState extends State<_Form> {
         } else {
           return [false, response.data];
         }
-        break;
       case 3:
         if (widget.pedido!.usuarioAsignado == '') {
           return [true, 'No se ha seleccionado repartidor'];
@@ -739,6 +867,9 @@ class _FormState extends State<_Form> {
         widget.pedido!.nota = areaTxtController.text;
         widget.pedido!.prioridad = prioridad;
         widget.pedido!.fechaEstimada = txtCtrlDate.text;
+        if (widget.pedido!.usuarioAsignado == '9999') {
+          widget.pedido!.entregaExterna = true;
+        }
 
         response = await _obraService.editPedido(widget.pedido!);
         if (response.fallo) {
@@ -746,7 +877,6 @@ class _FormState extends State<_Form> {
         } else {
           return [false, response.data];
         }
-        break;
 
       case 4:
         widget.pedido!.nota = areaTxtController.text;
@@ -766,7 +896,6 @@ class _FormState extends State<_Form> {
         } else {
           return [false, response.data];
         }
-        break;
 
       default:
         break;
@@ -856,7 +985,11 @@ class _FormState extends State<_Form> {
           value: '0',
           child: Text('Seleccione repartidor'.toUpperCase()),
         ));
-    if (repartidores.length == 1) {
+    repartidores.add(DropdownMenuItem(
+      value: '9999',
+      child: Text('Entrega externa'.toUpperCase()),
+    ));
+    if (repartidores.length == 2) {
       repartidores.add(DropdownMenuItem(
         value: '1',
         child: Text('Sin repartidores asignados'.toUpperCase()),

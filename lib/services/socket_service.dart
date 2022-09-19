@@ -20,8 +20,8 @@ class SocketService with ChangeNotifier {
     if (clientId != null && clientId.toString().trim() != '' && !conectando) {
       conectando = true;
       final url = Environment.isProduction
-          ? 'https://veronaserver.herokuapp.com'
-          : 'http://192.168.0.155:8008';
+          ? 'https://${Environment.API_URL}'
+          : 'http://${Environment.API_URL}';
       if (this._serverStatus == ServerStatus.Offline) {
         this._serverStatus = ServerStatus.Connecting;
         this._socket = IO.io(url, {
@@ -56,6 +56,7 @@ class SocketService with ChangeNotifier {
             notif.where((element) => !element['leido']).length;
         notifyListeners();
       });
+      conectando = false;
     }
   }
 

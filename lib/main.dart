@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -100,7 +100,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       new GlobalKey<ScaffoldMessengerState>();
   final GlobalKey<NavigatorState> navigatorKey =
       new GlobalKey<NavigatorState>();
-  static late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  // static late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   @override
   void initState() {
     super.initState();
@@ -113,6 +113,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       print(StackTrace.current.toString() +
           '-----------NUEVA NOTIFICACION-----------');
       final type = notif.data["type"];
+      notif.data["navega"] == "true" ? notif.data["navega"] = true : false;
       if (notif.data["navega"] ?? false) {
         switch (type) {
           case 'message':
