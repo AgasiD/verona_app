@@ -535,7 +535,7 @@ class _FormState extends State<_Form> {
                             ],
                           ),
                           permiteVerByEstado([3, 4, 5]) &&
-                                  permiteVerByRole([1, 6])
+                                  permiteVerByRole([1, 6, 5])
                               ? Row(
                                   children: [
                                     Text(

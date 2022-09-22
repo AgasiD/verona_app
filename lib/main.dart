@@ -109,9 +109,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final _pref = new Preferences();
 
     NotificationService.messagesStream.listen((notif) async {
-      //SOLO SE DISPARA CUANDO ESTA LA APP ABIERTA
-      print(StackTrace.current.toString() +
-          '-----------NUEVA NOTIFICACION-----------');
+      print('-----------NUEVA NOTIFICACION-----------');
       final type = notif.data["type"];
       notif.data["navega"] == "true" ? notif.data["navega"] = true : false;
       if (notif.data["navega"] ?? false) {
@@ -149,18 +147,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             break;
         }
       } else {
-        // si no navega y
         Navigator.of(navigatorKey.currentContext!).popUntil((route) {
-          final snackBar = SnackBar(
+          var snackBar = SnackBar(
             content: Text(notif.notification!.title ?? 'Sin titulo'),
           );
-          if (!route.settings.name!.contains('chat')) {
+          if (!(route.settings.name ?? '')!.contains('chat')) {
+            if (notif.data['type'] == 'pedido') {
+              snackBar = SnackBar(
+                content: Text(notif.notification!.title ?? 'Sin titulo'),
+                action: SnackBarAction(
+                    label: 'Ver',
+                    onPressed: () => navigatorKey.currentState!
+                            .pushNamed(PedidoForm.routeName, arguments: {
+                          'pedidoId': notif.data['pedidoId'],
+                          'obraId': notif.data['obraId']
+                        })),
+              );
+            }
             messengerKey.currentState?.showSnackBar(snackBar);
           } else {
+            // si estoy dentro de chat
             Map<String, dynamic> args =
                 route.settings.arguments as Map<String, dynamic>;
             final chatId = args["chatId"];
             final data = notif.data;
+
             if (data['chatId'] != chatId) {
               messengerKey.currentState?.showSnackBar(snackBar);
             }
@@ -240,7 +251,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     late String initalRoute;
     initalRoute = !_pref.logged ? LoginPage.routeName : ObrasPage.routeName;
     final _chatService = Provider.of<ChatService>(context, listen: false);
-
     final _socket = Provider.of<SocketService>(context, listen: false);
 
     if (_pref.logged) {

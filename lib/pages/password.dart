@@ -96,12 +96,12 @@ class __FormState extends State<_Form> {
           //   icono: Icons.person_outline,
           //   textController: emailCtrl,
           // ),
-          CustomInput(
-            hintText: 'Contraseña actual',
-            icono: Icons.password_outlined,
-            textController: passCtrl,
-            isPassword: true,
-          ),
+          // CustomInput(
+          //   hintText: 'Contraseña actual',
+          //   icono: Icons.password_outlined,
+          //   textController: passCtrl,
+          //   isPassword: true,
+          // ),
           CustomInput(
             hintText: 'Nueva contraseña',
             icono: Icons.password_outlined,

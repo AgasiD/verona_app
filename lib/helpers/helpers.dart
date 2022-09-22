@@ -165,7 +165,7 @@ class Helper {
     return 'Admin';
   }
 
-  static String getFechaHoraFromTS(int ts) {
+  static String getFechaHoraFromTS(int ts, {bool fechaSinHora = false}) {
     final tiempoMensaje = DateTime.fromMillisecondsSinceEpoch(ts);
 
     var fecha = DateFormat('dd/MM/yy').format(tiempoMensaje);
@@ -176,7 +176,11 @@ class Helper {
     final fechaMensaje;
     if (ts < DateTime.now().millisecondsSinceEpoch - 24 * 3600000 * 7) {
       //mostrar fecha
-      fechaMensaje = '$fecha  ${hora}:${minutos}';
+      if (fechaSinHora) {
+        fechaMensaje = fecha;
+      } else {
+        fechaMensaje = '$fecha  ${hora}:${minutos}';
+      }
     } else if (ts < DateTime.now().millisecondsSinceEpoch - 24 * 3600000) {
       //mostrar dia
       fechaMensaje =

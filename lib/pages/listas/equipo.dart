@@ -37,7 +37,7 @@ class EquipoList extends StatelessWidget {
                     return Column(
                       children: [
                         Container(
-                          height: MediaQuery.of(context).size.height - 210,
+                          height: MediaQuery.of(context).size.height - 220,
                           color: Helper.brandColors[1],
                           child: CustomListView(
                               padding: 15, data: dataTile.toList()),

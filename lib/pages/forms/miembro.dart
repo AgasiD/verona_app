@@ -130,6 +130,10 @@ class _Form extends StatelessWidget {
       value: '6',
       child: Text('Repartidor'),
     ),
+    DropdownMenuItem<String>(
+      value: '1',
+      child: Text('Admin'),
+    ),
   ];
   @override
   Widget build(BuildContext context) {

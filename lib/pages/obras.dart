@@ -12,9 +12,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/obra.dart';
-import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/obra.dart';
@@ -85,7 +83,8 @@ class _ObrasPageState extends State<ObrasPage> {
       {
         'icon': Icons.person_pin_rounded,
         'name': 'Mi perfil',
-        'route': PerfilPage.routeName
+        'route': PerfilPage.routeName,
+        'args': {'usuarioId': _pref.id}
       },
       {
         'icon': Icons.person_add_alt_sharp,

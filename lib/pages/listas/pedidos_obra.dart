@@ -82,7 +82,7 @@ class PedidoList extends StatelessWidget {
                       return Column(
                         children: [
                           Container(
-                              height: MediaQuery.of(context).size.height - 210,
+                              height: MediaQuery.of(context).size.height - 220,
                               width: MediaQuery.of(context).size.width,
                               child: Center(
                                 child: Text(
@@ -191,19 +191,31 @@ class _PedidosByEstado extends StatelessWidget {
                     'pedidoId': pedidos[index]['id'],
                     'obraId': _obraService.obra.id
                   };
+                  final textSubtitle = pedidos[index]['fechaEstimada'] == ''
+                      ? "${("Fecha deseada").toUpperCase()} ${pedidos[index]['fechaDeseada']}"
+                      : "${("Fecha de entrega").toUpperCase()} ${pedidos[index]['fechaEstimada']}";
                   return Column(
                     children: [
                       _CustomListTile(
                         esPar: false,
                         title:
                             "${pedidos[index]['titulo'].toString().toUpperCase()}",
-                        subtitle:
-                            // Helper.getEstadoPedido(pedidos[index]['estado'])
-                            //     .toUpperCase(),
-
-                            pedidos[index]['fechaEstimada'] == ''
-                                ? "${("Fecha deseada").toUpperCase()} ${pedidos[index]['fechaDeseada']}"
-                                : "${("Fecha de entrega").toUpperCase()} ${pedidos[index]['fechaEstimada']}",
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              textSubtitle.toUpperCase(),
+                              style: TextStyle(
+                                  color: Helper.brandColors[8].withOpacity(.8)),
+                            ),
+                            Text(
+                              ('Por: ${pedidos[index]['usuario']['nombre']} ${pedidos[index]['usuario']['apellido']}')
+                                  .toUpperCase(),
+                              style: TextStyle(
+                                  color: Helper.brandColors[8].withOpacity(.8)),
+                            ),
+                          ],
+                        ),
                         avatar: pedidos[index]['prioridad']
                             .toString()
                             .toUpperCase(),
@@ -235,7 +247,7 @@ class _PedidosByEstado extends StatelessWidget {
 class _CustomListTile extends StatelessWidget {
   bool esPar;
   String title;
-  String subtitle;
+  Widget subtitle;
   String avatar;
   bool onTap;
   bool textAvatar;
@@ -284,13 +296,7 @@ class _CustomListTile extends StatelessWidget {
               title: Text(title,
                   style: TextStyle(
                       color: Helper.brandColors[5], fontSize: fontSize)),
-              subtitle: this.subtitle != ''
-                  ? Text(
-                      subtitle,
-                      style: TextStyle(
-                          color: Helper.brandColors[8].withOpacity(.8)),
-                    )
-                  : null,
+              subtitle: subtitle,
               trailing: onTap
                   ? Icon(
                       Icons.arrow_forward_ios_rounded,

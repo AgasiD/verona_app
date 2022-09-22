@@ -5,6 +5,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
+import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -41,11 +42,13 @@ class PersonalADM extends StatelessWidget {
                     return Column(
                       children: [
                         Container(
-                          height: MediaQuery.of(context).size.height - 150,
+                          height: MediaQuery.of(context).size.height - 160,
                           color: Helper.brandColors[1],
                           child: _CustomSearchListView(
-                              txtController: txtBuscador,
-                              data: dataTile.toList()),
+                            txtController: txtBuscador,
+                            data: dataTile.toList(),
+                            dataFiltrada: dataTile.toList(),
+                          ),
                         )
                       ],
                     );
@@ -79,10 +82,15 @@ class PersonalADM extends StatelessWidget {
 
 class _CustomSearchListView extends StatefulWidget {
   _CustomSearchListView(
-      {Key? key, required this.data, required this.txtController})
+      {Key? key,
+      required this.data,
+      required this.dataFiltrada,
+      required this.txtController})
       : super(key: key);
 
   List<dynamic> data;
+  List<dynamic> dataFiltrada = [];
+
   TextEditingController txtController;
 
   @override
@@ -96,6 +104,8 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
 
   @override
   void initState() {
+    widget.dataFiltrada = widget.data;
+
     super.initState();
   }
 
@@ -120,6 +130,7 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                     onPressed: () {
                       widget.txtController.text = '';
                       txtBuscar = '';
+                      widget.dataFiltrada = widget.data;
 
                       setState(() {});
                     },
@@ -131,15 +142,16 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                   ),
             textController: widget.txtController,
             onChange: (text) {
+              widget.dataFiltrada = widget.data;
               txtBuscar = text;
-              widget.data = widget.data
+              widget.dataFiltrada = widget.dataFiltrada
                   .where((dato) =>
                       dato["title"].toLowerCase().contains(text.toLowerCase()))
                   .toList();
               setState(() {});
             },
           ),
-          txtBuscar.length > 0 && widget.data.length == 0
+          txtBuscar.length > 0 && widget.dataFiltrada.length == 0
               ? Container(
                   height: MediaQuery.of(context).size.height - 20,
                   child: Center(
@@ -153,23 +165,23 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
               : Container(
                   height: MediaQuery.of(context).size.height - 205,
                   child: ListView.builder(
-                      itemCount: widget.data.length,
+                      itemCount: widget.dataFiltrada.length,
                       itemBuilder: ((context, index) {
                         final esPar = index % 2 == 0;
                         final arg = {
-                          'usuarioId': widget.data[index]['id'],
+                          'usuarioId': widget.dataFiltrada[index]['id'],
                         };
                         return CustomListTile(
                           esPar: esPar,
-                          title: widget.data[index]['title'],
-                          subtitle: widget.data[index]['subtitle'],
-                          avatar: widget.data[index]['avatar']
+                          title: widget.dataFiltrada[index]['title'],
+                          subtitle: widget.dataFiltrada[index]['subtitle'],
+                          avatar: widget.dataFiltrada[index]['avatar']
                               .toString()
                               .toUpperCase(),
                           fontSize: 18,
                           onTap: true,
                           actionOnTap: () => Navigator.pushNamed(
-                              context, MiembroForm.routeName,
+                              context, PerfilPage.routeName,
                               arguments: arg),
                         );
                       })),

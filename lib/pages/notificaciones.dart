@@ -83,7 +83,7 @@ class _CustomListViewState extends State<_CustomListView> {
     {'check': Icons.check_box_outlined},
     {'media': Icons.photo_size_select_actual_rounded},
     {'doc': Icons.document_scanner_outlined},
-    {'pedido': Icons.list_alt_rounded},
+    {'pedido': Icons.request_page_outlined},
     {'inactivity': Icons.work_off_outlined},
     {'obra': Icons.house}
   ];
@@ -132,6 +132,7 @@ class _CustomListViewState extends State<_CustomListView> {
                 esPar: esPar,
                 title: widget.data[i]['title'],
                 subtitle: widget.data[i]['subtitle'],
+                ts: widget.data[i]['ts'],
                 actionOnTap: actionOnTap,
               );
             }));
@@ -144,6 +145,7 @@ class _CustomListTile extends StatelessWidget {
   String subtitle;
   double padding;
   double fontSize;
+  int ts;
   dynamic iconAvatar;
   Function()? actionOnTap;
   _CustomListTile(
@@ -154,6 +156,7 @@ class _CustomListTile extends StatelessWidget {
       this.iconAvatar = Icons.abc,
       this.padding = 5,
       this.fontSize = 17,
+      this.ts = 0,
       this.actionOnTap = null})
       : super(key: key);
 
@@ -169,35 +172,51 @@ class _CustomListTile extends StatelessWidget {
             decoration: BoxDecoration(
                 color: _color, borderRadius: BorderRadius.circular(10)),
             child: ListTile(
-              leading: Container(
-                padding: EdgeInsets.all(1),
-                decoration: BoxDecoration(
-                    color:
-                        !esPar ? Helper.brandColors[8].withOpacity(.8) : null,
-                    borderRadius: BorderRadius.circular(100)),
-                child: CircleAvatar(
-                  backgroundColor: Helper.brandColors[0],
-                  child: Icon(iconAvatar),
+                leading: Container(
+                  padding: EdgeInsets.all(1),
+                  decoration: BoxDecoration(
+                      color:
+                          !esPar ? Helper.brandColors[8].withOpacity(.8) : null,
+                      borderRadius: BorderRadius.circular(100)),
+                  child: CircleAvatar(
+                    backgroundColor: Helper.brandColors[0],
+                    child: Icon(iconAvatar),
+                  ),
                 ),
-              ),
-              title: Text(title,
-                  style: TextStyle(
-                      color: Helper.brandColors[5], fontSize: fontSize)),
-              subtitle: this.subtitle != ''
-                  ? Text(
-                      subtitle,
-                      style: TextStyle(
-                          color: Helper.brandColors[8].withOpacity(.8)),
-                    )
-                  : null,
-              trailing: actionOnTap == null
-                  ? null
-                  : Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Helper.brandColors[3],
+                title: Text(title,
+                    style: TextStyle(
+                        color: Helper.brandColors[5], fontSize: fontSize)),
+                subtitle: this.subtitle != ''
+                    ? Text(
+                        subtitle,
+                        style: TextStyle(
+                            color: Helper.brandColors[8].withOpacity(.8)),
+                      )
+                    : null,
+                onTap: actionOnTap,
+                trailing: Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.bottomRight,
+                        // color: Colors.red,
+                        width: 70,
+                        child: Text(
+                          Helper.getFechaHoraFromTS(this.ts,
+                              fechaSinHora: true),
+                          style: TextStyle(color: Helper.brandColors[3]),
+                        ),
+                      ),
                     ),
-              onTap: actionOnTap,
-            ),
+                  ],
+                )
+                // trailing: actionOnTap == null
+                //     ? null
+                //     : Icon(
+                //         Icons.arrow_forward_ios_rounded,
+                //         color: Helper.brandColors[3],
+                //       ),
+                ),
           ),
         ],
       ),
