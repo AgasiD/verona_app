@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -18,6 +20,7 @@ import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/pdf_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class PedidoForm extends StatelessWidget implements MyForm {
@@ -245,6 +248,42 @@ class _FormState extends State<_Form> {
                             textController: areaTxtController,
                             lines: 8,
                           ),
+                          TextButton(
+                              onPressed: () async {
+                                openLoadingDialog(context,
+                                    mensaje: 'Descargando archivo...');
+                                try {
+                                  final genero =
+                                      await PDFService.generarPDFPedido(
+                                          widget.pedido!);
+                                  if (!genero[0]) {
+                                    throw Exception(genero[1]);
+                                  }
+                                  closeLoadingDialog(context);
+                                  var downloadsDirectory =
+                                      await DownloadsPathProvider
+                                          .downloadsDirectory;
+                                  String tempPath = downloadsDirectory!.path;
+
+                                  Helper.showSnackBar(
+                                      context,
+                                      'Archivo descargado',
+                                      null,
+                                      Duration(seconds: 4),
+                                      SnackBarAction(
+                                        label: 'Ver PDF',
+                                        onPressed: () {
+                                          OpenFile.open(genero[1]);
+                                        },
+                                      ));
+                                } catch (err) {
+                                  closeLoadingDialog(context);
+                                  openAlertDialog(
+                                      context, 'No se pudo descargar archivo',
+                                      subMensaje: err.toString());
+                                }
+                              },
+                              child: Text('Exportar PDF detalle')),
                           DropdownButtonFormField2(
                             value: prioridad,
                             items: prioridades,

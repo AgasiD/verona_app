@@ -162,11 +162,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
               closeLoadingDialog(context);
               snackText = 'Tarea asignada';
               Helper.showSnackBar(
-                context,
-                snackText,
-                null,
-                Duration(milliseconds: 700),
-              );
+                  context, snackText, null, Duration(milliseconds: 700), null);
             }
           } else {
             //Quitar tarea
@@ -184,11 +180,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
               widget.asignado = false;
               closeLoadingDialog(context);
               Helper.showSnackBar(
-                context,
-                snackText,
-                null,
-                Duration(milliseconds: 700),
-              );
+                  context, snackText, null, Duration(milliseconds: 700), null);
             }
           }
 

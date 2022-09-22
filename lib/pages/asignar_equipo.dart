@@ -337,11 +337,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
               _obraService.obra.quitarPersonal(widget.personal);
               closeLoadingDialog(context);
               Helper.showSnackBar(
-                context,
-                snackText,
-                null,
-                Duration(milliseconds: 700),
-              );
+                  context, snackText, null, Duration(milliseconds: 700), null);
             }
           }
 

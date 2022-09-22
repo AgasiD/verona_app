@@ -50,14 +50,15 @@ class Helper {
   //   return hmacSha256.convert(bytes).toString();
   // }
 
-  static void showSnackBar(
-      BuildContext context, String txt, TextStyle? style, Duration? duracion) {
+  static void showSnackBar(BuildContext context, String txt, TextStyle? style,
+      Duration? duracion, SnackBarAction? actions) {
     if (duracion == null) {
       duracion = Duration(seconds: 2);
     }
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       duration: duracion,
+      action: actions,
       content: Text(
         txt,
         textAlign: TextAlign.center,
