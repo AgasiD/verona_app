@@ -5,27 +5,28 @@ import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/pages/listas/etapas.dart';
 
 class Obra {
-  String nombre;
-  String placeHolderImage = 'https://via.placeholder.com/300x150';
-  String id;
+  int diasEstimados;
+  int diasTranscurridos;
+  List<dynamic> diasInactivos;
+  List<dynamic> docs;
+  List<dynamic> enabledFiles;
+  List<dynamic> pedidos;
+  List<Etapa> etapas;
+  List<Miembro> equipo;
+  List<Propietario> propietarios;
   String barrio;
   String chatE;
   String chatI;
   String descripcion;
-  int diasEstimados;
-  List<dynamic> diasInactivos;
-  int diasTranscurridos;
-  List<dynamic> docs;
-  List<Miembro> equipo;
-  List<Etapa> etapas;
+  String id;
   String imageId;
-  String lote;
-  List<Propietario> propietarios;
-  String? ts;
-  List<dynamic> pedidos;
-  String? driveFolderId;
+  String imageURL;
   String imgFolderId;
-  List<dynamic> enabledFiles;
+  String lote;
+  String nombre;
+  String placeHolderImage = 'https://via.placeholder.com/300x150';
+  String? driveFolderId;
+  String? ts;
   Obra({
     required this.nombre,
     this.id = '',
@@ -47,6 +48,7 @@ class Obra {
     this.imgFolderId = '',
     this.enabledFiles = const [],
     ts,
+    this.imageURL = '',
   }) {
     this.nombre = nombre;
     this.id = id;
@@ -69,6 +71,7 @@ class Obra {
     this.ts =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
+    this.imageURL = imageURL;
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
@@ -95,7 +98,8 @@ class Obra {
           .map((e) => Propietario.fromJson(e))
           .toList(),
       pedidos: json["pedidos"] ?? [],
-      enabledFiles: json["enabledFiles"] as List<dynamic>);
+      enabledFiles: json["enabledFiles"] as List<dynamic>,
+      imageURL: json['imageURL'] ?? '');
 
   toMap() => {
         'nombre': this.nombre,
@@ -116,7 +120,8 @@ class Obra {
         'descripcion': this.descripcion,
         'pedidos': this.pedidos,
         'driveFolderId': this.driveFolderId,
-        'enabledFiles': this.enabledFiles
+        'enabledFiles': this.enabledFiles,
+        'imageURL': this.imageURL
       };
 
   double get porcentajeRealizado {
