@@ -186,4 +186,33 @@ class HttpService extends ChangeNotifier {
     // await c;
     // return imgId;
   }
+
+  cargarImagen(XFile imageFile, String baseUrl, String endpoint,
+      Map<String, dynamic> parameters) async {
+    String imgId = '';
+    // open a bytestream
+    var stream =
+        new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
+    var length = await imageFile.length();
+    url = Uri.https(baseUrl, endpoint, parameters);
+
+    var request = new http.MultipartRequest("POST", url);
+
+    var multipartFile = http.MultipartFile('image', stream, length,
+        filename: basename('fileName'));
+
+    // add file to multipart
+    request.files.add(multipartFile);
+
+    // send
+    final a = await request.send();
+    // listen for response
+    final b = a.stream.transform(utf8.decoder);
+    final c = b.listen((value) {
+      imgId = value;
+    }).asFuture();
+
+    await c;
+    return imgId;
+  }
 }

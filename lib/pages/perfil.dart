@@ -3,6 +3,8 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_fade/image_fade.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -13,6 +15,8 @@ import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
+import '../services/image_service.dart';
+
 class PerfilPage extends StatelessWidget {
   PerfilPage({Key? key}) : super(key: key);
   static final routeName = 'perfil';
@@ -21,8 +25,12 @@ class PerfilPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context);
+    final _imageService = Provider.of<ImageService>(context);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     _usuarioId = arguments['usuarioId'];
+    String textoImg = 'Cambiar imagen';
+    bool sinImg = false;
+
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
@@ -42,6 +50,12 @@ class PerfilPage extends StatelessWidget {
                   return Container();
                 } else {
                   Miembro usuario = Miembro.fromJson(response.data);
+
+                  if (usuario.profileURL == '') {
+                    textoImg = 'Subir imagen de perfil';
+                    sinImg = true;
+                  }
+
                   return Container(
                     height: MediaQuery.of(context).size.height - 100,
                     width: MediaQuery.of(context).size.width,
@@ -63,15 +77,60 @@ class PerfilPage extends StatelessWidget {
                               child: CircleAvatar(
                                   radius: 50,
                                   backgroundColor: Helper.brandColors[0],
-                                  child: Text(
-                                    '${usuario.nombre[0].toUpperCase()} ${usuario.apellido[0].toUpperCase()}',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Helper.brandColors[5],
-                                    ),
-                                  )),
+                                  backgroundImage: sinImg
+                                      ? null
+                                      : NetworkImage(usuario.profileURL),
+                                  child: sinImg
+                                      ? Text(
+                                          '${usuario.nombre[0].toUpperCase()} ${usuario.apellido[0].toUpperCase()}',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: Helper.brandColors[5],
+                                          ),
+                                        )
+                                      : Container()),
                             ),
                           ),
+                          TextButton(
+                              onPressed: () async {
+                                final ImagePicker _picker = ImagePicker();
+                                final image = await _picker.pickImage(
+                                    source: ImageSource.gallery);
+                                if (image != null) {
+                                  openLoadingDialog(context,
+                                      mensaje: 'Subiendo imagen...');
+                                  try {
+                                    _imageService.guardarImagen(image);
+                                    final dataImage =
+                                        await _imageService.grabarImagen(
+                                            '${usuario.nombre} ${usuario.apellido}');
+
+                                    if (!dataImage['success']) {
+                                      closeLoadingDialog(context);
+                                      openAlertDialog(
+                                          context, 'No se pudo cargar imagen');
+                                      return;
+                                    }
+
+                                    final imageUrl = dataImage['data']['url'];
+
+                                    usuario.profileURL = imageUrl;
+                                    await _usuarioService
+                                        .modificarUsuario(usuario);
+                                    closeLoadingDialog(context);
+                                    openAlertDialog(
+                                        context, 'Imagen subida con éxito');
+                                  } catch (err) {
+                                    closeLoadingDialog(context);
+                                    openAlertDialog(
+                                        context, 'Error al subir imagen',
+                                        subMensaje: err.toString());
+                                  }
+                                }
+                              },
+                              child: Text(textoImg,
+                                  style:
+                                      TextStyle(color: Helper.brandColors[8]))),
                           Container(
                             alignment: Alignment.center,
                             child: Text(

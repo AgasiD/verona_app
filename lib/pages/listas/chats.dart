@@ -32,7 +32,6 @@ class _ChatListState extends State<ChatList> with RouteAware {
   @override
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context);
-    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final _pref = new Preferences();
     _socketService.connect(_pref.id);

@@ -18,6 +18,7 @@ import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/form.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/services/google_drive_service.dart';
+import 'package:verona_app/services/image_service.dart';
 import 'package:verona_app/services/loading_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -124,7 +125,7 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
-    final _driveService = Provider.of<GoogleDriveService>(context);
+    final _imageService = Provider.of<ImageService>(context);
     if (imageSelected == false) {
       imgButtonText = 'Seleccionar imagen';
       if (edit) {
@@ -225,7 +226,7 @@ class _FormState extends State<_Form> {
                       final image =
                           await _picker.pickImage(source: ImageSource.gallery);
                       if (image != null) {
-                        _driveService.guardarImagen(image!);
+                        _imageService.guardarImagen(image!);
                         setState(() {
                           imageSelected = true;
                         });
@@ -278,56 +279,67 @@ class _FormState extends State<_Form> {
   }
 
   grabarObra(BuildContext context) async {
-    bool isValid = true;
-    final _service = Provider.of<ObraService>(context, listen: false);
-    final _driveService =
-        Provider.of<GoogleDriveService>(context, listen: false);
+    try {
+      bool isValid = true;
+      final _service = Provider.of<ObraService>(context, listen: false);
+      final _imageService = Provider.of<ImageService>(context, listen: false);
 
-    widget.txtNombre.text.trim() == '' ? isValid = false : true;
-    widget.txtBarrio.text.trim() == '' ? isValid = false : true;
-    widget.txtLote.text.trim() == '' ? isValid = false : true;
-    int.tryParse(widget.txtDuracion.text) == null ? isValid = false : true;
+      widget.txtNombre.text.trim() == '' ? isValid = false : true;
+      widget.txtBarrio.text.trim() == '' ? isValid = false : true;
+      widget.txtLote.text.trim() == '' ? isValid = false : true;
+      int.tryParse(widget.txtDuracion.text) == null ? isValid = false : true;
 
-    if (isValid) {
-      final obra = Obra(
-          nombre: widget.txtNombre.text,
-          barrio: widget.txtBarrio.text,
-          lote: widget.txtLote.text,
-          propietarios: [],
-          descripcion: widget.txtDescrip.text,
-          diasEstimados: int.parse(widget.txtDuracion.text));
-      if (_driveService.imagenValida()) {
-        openLoadingDialog(context, mensaje: 'Subiendo imagen');
-        final imageResponse = await _driveService.grabarImagen(obra.nombre);
-        obra.imageId = imageResponse;
+      if (isValid) {
+        final obra = Obra(
+            nombre: widget.txtNombre.text,
+            barrio: widget.txtBarrio.text,
+            lote: widget.txtLote.text,
+            propietarios: [],
+            descripcion: widget.txtDescrip.text,
+            diasEstimados: int.parse(widget.txtDuracion.text));
+        if (_imageService.imagenValida()) {
+          openLoadingDialog(context, mensaje: 'Subiendo imagen');
+          final dataImage = await _imageService.grabarImagen(obra.nombre);
+          if (!dataImage['success']) {
+            closeLoadingDialog(context);
+            openAlertDialog(context, 'No se pudo cargar imagen');
+            return;
+          }
+          final imageUrl = dataImage['data']['url'];
+
+          obra.imageURL = imageUrl;
+          closeLoadingDialog(context);
+        }
+        openLoadingDialog(context, mensaje: 'Grabando obra...');
+        Map<String, dynamic> response = await _service.grabarObra(obra);
+        final obraResponse = Obra.fromMap(response["obra"]);
+        widget.txtNombre.text = '';
+        widget.txtBarrio.text = '';
+        widget.txtLote.text = '';
+        widget.txtDuracion.text = '';
+        widget.txtDescrip.text = '';
         closeLoadingDialog(context);
+        Timer(Duration(milliseconds: 750), () {
+          openLoadingDialog(context, mensaje: 'Obra guardada');
+        });
+        Timer(Duration(milliseconds: 750), () {
+          Navigator.of(context).popAndPushNamed('obras');
+        });
+      } else {
+        openAlertDialog(context, 'Formulario invalido');
       }
-      openLoadingDialog(context, mensaje: 'Grabando obra...');
-      Map<String, dynamic> response = await _service.grabarObra(obra);
-      final obraResponse = Obra.fromMap(response["obra"]);
-      widget.txtNombre.text = '';
-      widget.txtBarrio.text = '';
-      widget.txtLote.text = '';
-      widget.txtDuracion.text = '';
-      widget.txtDescrip.text = '';
+    } catch (err) {
       closeLoadingDialog(context);
-      openLoadingDialog(context, mensaje: 'Grabando obra...');
-      Timer(Duration(milliseconds: 750), () {
-        openLoadingDialog(context, mensaje: 'Obra guardada');
-      });
-      Timer(Duration(milliseconds: 750), () {
-        Navigator.of(context).popAndPushNamed('obras');
-      });
-    } else {
-      openAlertDialog(context, 'Formulario invalido');
+
+      openAlertDialog(context, 'Error al grabar formulario',
+          subMensaje: err.toString());
     }
   }
 
   actualizarObra(BuildContext context, String obraId, String imageId) async {
     bool isValid = true;
     final _service = Provider.of<ObraService>(context, listen: false);
-    final _driveService =
-        Provider.of<GoogleDriveService>(context, listen: false);
+    final _imageService = Provider.of<ImageService>(context, listen: false);
 
     widget.txtNombre.text.trim() == '' ? isValid = false : true;
     widget.txtBarrio.text.trim() == '' ? isValid = false : true;
@@ -342,15 +354,18 @@ class _FormState extends State<_Form> {
       widget.obra!.diasEstimados = int.parse(widget.txtDuracion.text);
       widget.obra!.id = obraId;
 
-      if (imageSelected) {
-        if (_driveService.imagenValida()) {
-          // subir imagen
-          openLoadingDialog(context, mensaje: 'Subiendo imagen');
-          final imageResponse =
-              await _driveService.grabarImagen(widget.obra!.nombre);
-          widget.obra!.imageId = imageResponse;
+      if (_imageService.imagenValida()) {
+        openLoadingDialog(context, mensaje: 'Subiendo imagen');
+        final dataImage = await _imageService.grabarImagen(widget.obra!.nombre);
+        if (!dataImage['success']) {
           closeLoadingDialog(context);
+          openAlertDialog(context, 'No se pudo cargar imagen');
+          return;
         }
+        final imageUrl = dataImage['data']['url'];
+
+        widget.obra!.imageURL = imageUrl;
+        closeLoadingDialog(context);
       }
       openLoadingDialog(context, mensaje: 'Actualizando obra...');
       Map<String, dynamic> response =

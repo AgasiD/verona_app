@@ -135,9 +135,12 @@ class _Form extends StatelessWidget {
       child: Text('Admin'),
     ),
   ];
+  final profileURL = '';
+
   @override
   Widget build(BuildContext context) {
     final colorHint = Helper.brandColors[3];
+
     return Container(
       color: Helper.brandColors[2],
       padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),

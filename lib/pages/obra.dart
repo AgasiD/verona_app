@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:image_fade/image_fade.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -43,11 +44,10 @@ class ObraPage extends StatelessWidget {
                 );
               } else {
                 final obra = snapshot.data as Obra;
-                var imagen = obra.imageId == ''
+                var imagen = obra.imageURL == ''
                     ? Helper.imageNetwork(
                         'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-                    : Helper.imageNetwork(
-                        'https://drive.google.com/uc?export=view&id=${obra.imageId}');
+                    : Helper.imageNetwork(obra.imageURL);
 
                 return Container(
                     color: Helper.brandColors[1],
@@ -62,20 +62,41 @@ class ObraPage extends StatelessWidget {
                           expandedHeight: 220.0,
                           flexibleSpace: FlexibleSpaceBar(
                             background: Hero(
-                                tag: obra.id,
-                                child: FadeInImage(
-                                  image: imagen,
-                                  // height: 250,
-                                  width: MediaQuery.of(context).size.width,
-                                  placeholder:
-                                      AssetImage('assets/loading-image.gif'),
-                                  imageErrorBuilder: (_, obj, st) {
-                                    return Container(
-                                        child: Image(
-                                            image: AssetImage(
-                                                'assets/image.png')));
-                                  },
+                              tag: obra.id,
+                              child: ImageFade(
+                                width: MediaQuery.of(context).size.width * .43,
+                                image: NetworkImage(obra.imageURL),
+                                loadingBuilder:
+                                    (context, progress, chunkEvent) => Center(
+                                        child: CircularProgressIndicator(
+                                  value: progress,
+                                  color: Helper.brandColors[8],
                                 )),
+
+                                // displayed when an error occurs:
+                                errorBuilder: (context, error) => Container(
+                                  color: Helper.brandColors[8],
+                                  alignment: Alignment.center,
+                                  child: Image(
+                                      image: AssetImage('assets/image.png')),
+                                ),
+                              ),
+
+                              // Image(
+                              //   image: imagen,
+                              //   // height: 250,
+                              //   width: MediaQuery.of(context).size.width,
+
+                              //   // placeholder:
+                              //   //     AssetImage('assets/loading-image.gif'),
+                              //   errorBuilder: (_, obj, st) {
+                              //     return Container(
+                              //         child: Image(
+                              //             image: AssetImage(
+                              //                 'assets/image.png')));
+                              //   },
+                              // )
+                            ),
                           ),
                         ),
                         SliverList(

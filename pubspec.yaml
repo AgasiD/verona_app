@@ -64,6 +64,7 @@ dependencies:
   pdf: ^3.8.3
   downloads_path_provider_28: ^0.1.2
   open_file: ^3.2.1
+  image_fade: ^0.6.1
   
 
   

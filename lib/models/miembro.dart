@@ -1,16 +1,16 @@
 class Miembro {
-  Miembro({
-    required this.id,
-    required this.nombre,
-    required this.apellido,
-    required this.dni,
-    required this.email,
-    required this.telefono,
-    required this.role,
-    this.username = '',
-    this.externo = false,
-    this.chats = const [],
-  });
+  Miembro(
+      {required this.id,
+      required this.nombre,
+      required this.apellido,
+      required this.dni,
+      required this.email,
+      required this.telefono,
+      required this.role,
+      this.username = '',
+      this.externo = false,
+      this.chats = const [],
+      this.profileURL = ''});
   String id;
   String nombre;
   String apellido;
@@ -18,6 +18,7 @@ class Miembro {
   String telefono;
   String email;
   String username;
+  String profileURL;
   int role;
   bool externo;
   List<dynamic> chats;
@@ -31,7 +32,8 @@ class Miembro {
       dni: json["dni"],
       role: json["role"],
       chats: json.containsKey('chats') ? json["chats"] : [],
-      username: json['username']);
+      username: json['username'],
+      profileURL: json['profileURL'] ?? '');
 
   Map<String, dynamic> toJson() => {
         "nombre": this.nombre,
@@ -40,6 +42,7 @@ class Miembro {
         "telefono": this.telefono,
         "dni": this.dni,
         "role": this.role,
-        "username": this.username
+        "username": this.username,
+        "profileURL": this.profileURL
       };
 }

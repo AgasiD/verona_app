@@ -1032,7 +1032,9 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {
-                Navigator.pushNamed(context, ObrasPage.routeName);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    ObrasPage.routeName, (Route<dynamic> route) => false);
+                // Navigator.pushNamed(context, ObrasPage.routeName);
               }
             },
           ),
@@ -1042,7 +1044,10 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != NotificacionesPage.routeName) {
-                Navigator.pushNamed(context, NotificacionesPage.routeName);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    NotificacionesPage.routeName,
+                    (Route<dynamic> route) => false);
+                // Navigator.pushNamed(context, NotificacionesPage.routeName);
               }
             },
           ),
@@ -1053,7 +1058,9 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ChatList.routeName) {
                 _chatService.tieneMensaje = false;
-                Navigator.pushNamed(context, ChatList.routeName);
+                // Navigator.pushNamed(context, ChatList.routeName);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    ChatList.routeName, (Route<dynamic> route) => false);
                 setState(() {});
               }
             },
@@ -1350,7 +1357,7 @@ class _ChatsListState extends State<ChatsList> {
                   ),
                 )
               : Container(
-                  height: MediaQuery.of(context).size.height - 205,
+                  height: MediaQuery.of(context).size.height - 180,
                   child: ListView.builder(
                       itemCount: dataFiltrada.length,
                       itemBuilder: ((context, index) {

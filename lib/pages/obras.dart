@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:image_fade/image_fade.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -267,10 +268,10 @@ class _CustomObrasState extends State<_CustomObras> {
 }
 
 Container _obraCard(BuildContext context, Obra obra) {
-  var imagen = obra.imageId == ''
+  var imagen = obra.imageURL == ''
       ? Helper.imageNetwork(
           'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-      : Helper.imageNetwork('https://drive.google.com/uc?id=${obra.imageId}'
+      : Helper.imageNetwork(obra.imageURL
           // 'https://drive.google.com/uc?export=view&id=${obra.imageId}',
           );
   return Container(
@@ -334,18 +335,26 @@ Container _obraCard(BuildContext context, Obra obra) {
                         // Text('', style: TextStyle(color: Helper.brandColors[3])),
                       ]),
                 ),
-                Hero(
-                  tag: obra.id,
-                  child: FadeInImage(
-                      width: MediaQuery.of(context).size.width * .43,
-                      image: imagen,
-                      imageErrorBuilder: (_, obj, st) {
-                        return Container(
-                            child: Image(
-                                width: MediaQuery.of(context).size.width * .47,
-                                image: AssetImage('assets/image.png')));
-                      },
-                      placeholder: AssetImage('assets/loading-image.gif')),
+                // Hero(
+                //   tag: obra.id,
+                //   child:
+                // Image(image: image, loadingBuilder: ),
+                ImageFade(
+                  width: MediaQuery.of(context).size.width * .43,
+                  height: 120,
+                  image: NetworkImage(obra.imageURL),
+                  loadingBuilder: (context, progress, chunkEvent) => Center(
+                      child: CircularProgressIndicator(
+                    value: progress,
+                    color: Helper.brandColors[8],
+                  )),
+
+                  // displayed when an error occurs:
+                  errorBuilder: (context, error) => Container(
+                    color: Helper.brandColors[8],
+                    alignment: Alignment.center,
+                    child: Image(image: AssetImage('assets/image.png')),
+                  ),
                 ),
               ],
             ),
@@ -354,6 +363,6 @@ Container _obraCard(BuildContext context, Obra obra) {
   );
 }
 
-NetworkImage _CustomNetworkImage(String imageId) {
-  return NetworkImage('https://drive.google.com/uc?id=$imageId');
+NetworkImage _CustomNetworkImage(String url) {
+  return NetworkImage(url);
 }
