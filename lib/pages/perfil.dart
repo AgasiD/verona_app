@@ -3,7 +3,6 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:image_fade/image_fade.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -75,7 +74,7 @@ class PerfilPage extends StatelessWidget {
                                   color: Helper.brandColors[8].withOpacity(.8),
                                   borderRadius: BorderRadius.circular(100)),
                               child: CircleAvatar(
-                                  radius: 50,
+                                  radius: 70,
                                   backgroundColor: Helper.brandColors[0],
                                   backgroundImage: sinImg
                                       ? null

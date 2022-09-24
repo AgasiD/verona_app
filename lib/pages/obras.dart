@@ -13,11 +13,14 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
+import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/perfil.dart';
+import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -65,11 +68,52 @@ class _ObrasPageState extends State<ObrasPage> {
     final _pref = new Preferences();
 
     // _socketService.connect(_pref.id);
+
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      if (NotificationService.initMessage != null) {
+        final notif = NotificationService.initMessage;
+        NotificationService.initMessage = null;
+
+        final type = notif!.data['type'];
+        switch (type) {
+          case 'message':
+            Navigator.pushNamed(context, ChatPage.routeName, arguments: {
+              "chatId": notif.data["chatId"],
+              "chatName": notif.data["chatName"]
+            });
+            break;
+          case 'new-obra':
+            //Si es una nueva obra
+            if (notif.data["type"] == 'new-obra') {
+              final _obraService =
+                  Provider.of<ObraService>(context, listen: false);
+              _obraService.notifyListeners();
+            }
+            Navigator.pushNamed(context, ObraPage.routeName,
+                arguments: {"obraId": notif.data["obraId"]});
+            break;
+
+          case 'pedido':
+            final _obraService =
+                Provider.of<ObraService>(context, listen: false);
+            if (_obraService.obra.id == '') {
+              // final obra = await _obraService.obtenerObra(notif.data['obraId']);
+              // _obraService.obra = obra;
+            }
+            Navigator.pushNamed(context, PedidoForm.routeName, arguments: {
+              'pedidoId': notif.data['pedidoId'],
+              'obraId': notif.data['obraId'],
+            });
+            break;
+        }
+      }
+    });
   }
 
   List<Obra> obras = [];
   List<Obra> obrasFiltradas = [];
   int cant = 0;
+
   @override
   Widget build(BuildContext context) {
     ObraService _obras = Provider.of<ObraService>(context);

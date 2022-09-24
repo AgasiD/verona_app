@@ -21,6 +21,14 @@ class Preferences {
     this._prefs.setBool('logged', log);
   }
 
+  String get type {
+    return _prefs.getString('type') ?? '';
+  }
+
+  set type(String type) {
+    this._prefs.setString('type', type);
+  }
+
   String get id {
     return _prefs.getString('id') ?? '';
   }

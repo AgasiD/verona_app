@@ -1033,7 +1033,8 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
-                    ObrasPage.routeName, (Route<dynamic> route) => false);
+                    ObrasPage.routeName,
+                    (Route<dynamic> route) => route.isFirst);
                 // Navigator.pushNamed(context, ObrasPage.routeName);
               }
             },
@@ -1046,7 +1047,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               if (name != NotificacionesPage.routeName) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
                     NotificacionesPage.routeName,
-                    (Route<dynamic> route) => false);
+                    (Route<dynamic> route) => route.isFirst);
                 // Navigator.pushNamed(context, NotificacionesPage.routeName);
               }
             },
@@ -1060,7 +1061,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
                 _chatService.tieneMensaje = false;
                 // Navigator.pushNamed(context, ChatList.routeName);
                 Navigator.of(context).pushNamedAndRemoveUntil(
-                    ChatList.routeName, (Route<dynamic> route) => false);
+                    ChatList.routeName, (Route<dynamic> route) => true);
                 setState(() {});
               }
             },

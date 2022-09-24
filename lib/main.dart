@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -30,6 +31,9 @@ void main() async {
   final pref = new Preferences();
   await pref.initPrefs();
   await NotificationService.initializeApp();
+  final RemoteMessage? _message =
+      await NotificationService.messaging.getInitialMessage();
+  NotificationService.initMessage = _message;
 
   await dotenv.load(fileName: Environment.fileName);
 
@@ -114,94 +118,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final _pref = new Preferences();
 
     NotificationService.messagesStream.listen((notif) async {
-      print('-----------NUEVA NOTIFICACION-----------');
-      final type = notif.data["type"];
-      notif.data["navega"] == "true" ? notif.data["navega"] = true : false;
-      if (notif.data["navega"] ?? false) {
-        switch (type) {
-          case 'message':
-            navigatorKey.currentState!.pushNamed(ChatPage.routeName,
-                arguments: {
-                  "chatId": notif.data["chatId"],
-                  "chatName": notif.data["chatName"]
-                });
-            break;
-          case 'new-obra':
-            //Si es una nueva obra
-            if (notif.data["type"] == 'new-obra') {
-              final _obraService =
-                  Provider.of<ObraService>(context, listen: false);
-              _obraService.notifyListeners();
-            }
-            navigatorKey.currentState!.pushNamed(ObraPage.routeName,
-                arguments: {"obraId": notif.data["obraId"]});
-            break;
-
-          case 'pedido':
-            final _obraService =
-                Provider.of<ObraService>(context, listen: false);
-            if (_obraService.obra.id == '') {
-              final obra = await _obraService.obtenerObra(notif.data['obraId']);
-              _obraService.obra = obra;
-            }
-            navigatorKey.currentState!
-                .pushNamed(PedidoForm.routeName, arguments: {
-              'pedidoId': notif.data['pedidoId'],
-              'obraId': notif.data['obraId'],
-            });
-            break;
-        }
-      } else {
-        Navigator.of(navigatorKey.currentContext!).popUntil((route) {
-          var snackBar = SnackBar(
-            content: Text(notif.notification!.title ?? 'Sin titulo'),
-          );
-          if (!(route.settings.name ?? '')!.contains('chat')) {
-            if (notif.data['type'] == 'pedido') {
-              snackBar = SnackBar(
-                content: Text(notif.notification!.title ?? 'Sin titulo'),
-                action: SnackBarAction(
-                    label: 'Ver',
-                    onPressed: () => navigatorKey.currentState!
-                            .pushNamed(PedidoForm.routeName, arguments: {
-                          'pedidoId': notif.data['pedidoId'],
-                          'obraId': notif.data['obraId']
-                        })),
-              );
-            }
-            messengerKey.currentState?.showSnackBar(snackBar);
-          } else {
-            // si estoy dentro de chat
-            Map<String, dynamic> args =
-                route.settings.arguments as Map<String, dynamic>;
-            final chatId = args["chatId"];
-            final data = notif.data;
-
-            if (data['chatId'] != chatId) {
-              messengerKey.currentState?.showSnackBar(snackBar);
-            }
-          }
-          return true;
-        });
-
-        //Si es un nuevo mensaje o cambios en obra
-        final _usuarioService =
-            Provider.of<UsuarioService>(context, listen: false);
-        if (notif.data["type"] == 'message') {
-          _usuarioService.notifyListeners();
-        }
-        //Si es una nueva obra
-        if (notif.data["type"] == 'new-obra') {
-          final _obraService = Provider.of<ObraService>(context, listen: false);
-          _obraService.notifyListeners();
-          _usuarioService.notifyListeners();
-        }
-        if (notif.data["type"] == 'inactivity') {
-          final _obraService = Provider.of<ObraService>(context, listen: false);
-          _obraService.notifyListeners();
-          _usuarioService.notifyListeners();
-        }
-      }
+      /* SE EJECUTA CUANDO SE RECIBE UNA NOTIFICACION PUSH */
+      await NotificationService.manageNotification(
+          notif, navigatorKey, messengerKey, context);
     });
   }
 
@@ -210,6 +129,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
+
     _isInForeground = state == AppLifecycleState.resumed;
 
     if (_isInForeground) {
@@ -278,14 +198,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
       _socket.socket.on('nuevo-mensaje', (data) {
         //Escucha mensajes del servidor
-        // setUltimoMensaje(mensaje);
         Vibration.vibrate(duration: 5, amplitude: 10);
-        print('Nuevo mensaje');
-        final snackBar = _initSnackMessage(data, navigatorKey);
+        // final snackBar = _initSnackMessage(data, navigatorKey);
 
         Navigator.of(navigatorKey.currentContext!).popUntil((route) {
           if (!route.settings.name!.contains('chat')) {
-            messengerKey.currentState?.showSnackBar(snackBar);
+            // messengerKey.currentState?.showSnackBar(snackBar);
             _chatService.tieneMensaje = true;
             _chatService.notifyListeners();
           }
@@ -310,6 +228,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       debugShowCheckedModeBanner: false,
       title: 'Verona App',
       initialRoute: initalRoute,
+
       navigatorKey: navigatorKey, // Navegar
       scaffoldMessengerKey: messengerKey, // Snacks
       routes: appRoutes,

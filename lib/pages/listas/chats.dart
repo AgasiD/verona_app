@@ -15,7 +15,7 @@ import '../../services/socket_service.dart';
 
 class ChatList extends StatefulWidget {
   const ChatList({Key? key}) : super(key: key);
-  static final routeName = 'chat_list';
+  static const routeName = 'chat_list';
 
   @override
   State<ChatList> createState() => _ChatListState();
