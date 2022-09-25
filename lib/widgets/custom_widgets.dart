@@ -912,7 +912,9 @@ void openAlertDialog(BuildContext context, String mensaje,
               title: Text(mensaje),
               content: subMensaje != null && subMensaje != ''
                   ? Text(subMensaje!)
-                  : Container(),
+                  : Container(
+                      height: 0,
+                    ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),

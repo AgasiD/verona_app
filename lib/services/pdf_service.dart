@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
 import 'package:verona_app/models/pedido.dart';
@@ -53,7 +53,7 @@ class PDFService {
 
   static Future<dynamic> generarPDF(Document pdf, String nombre) async {
     try {
-      var dir = await DownloadsPathProvider.downloadsDirectory;
+      var dir = await getTemporaryDirectory();
       String tempPath = dir!.path;
       final pathFile = '${tempPath}/$nombre.pdf';
       final file = await File(pathFile).create(recursive: true);

@@ -30,8 +30,6 @@ PODS:
   - DKPhotoGallery/Resource (0.0.17):
     - SDWebImage
     - SwiftyGif
-  - downloads_path_provider_28 (0.0.1):
-    - Flutter
   - file_picker (0.0.1):
     - DKImagePickerController/PhotoGallery
     - Flutter
@@ -105,6 +103,8 @@ PODS:
   - nanopb/encode (2.30908.0)
   - open_file (0.0.1):
     - Flutter
+  - path_provider_ios (0.0.1):
+    - Flutter
   - PromisesObjC (2.1.1)
   - SDWebImage (5.13.3):
     - SDWebImage/Core (= 5.13.3)
@@ -118,7 +118,6 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - downloads_path_provider_28 (from `.symlinks/plugins/downloads_path_provider_28/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
@@ -127,6 +126,7 @@ DEPENDENCIES:
   - image_gallery_saver (from `.symlinks/plugins/image_gallery_saver/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - open_file (from `.symlinks/plugins/open_file/ios`)
+  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
   - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - vibration (from `.symlinks/plugins/vibration/ios`)
@@ -148,8 +148,6 @@ SPEC REPOS:
     - SwiftyGif
 
 EXTERNAL SOURCES:
-  downloads_path_provider_28:
-    :path: ".symlinks/plugins/downloads_path_provider_28/ios"
   file_picker:
     :path: ".symlinks/plugins/file_picker/ios"
   firebase_core:
@@ -166,6 +164,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   open_file:
     :path: ".symlinks/plugins/open_file/ios"
+  path_provider_ios:
+    :path: ".symlinks/plugins/path_provider_ios/ios"
   shared_preferences_ios:
     :path: ".symlinks/plugins/shared_preferences_ios/ios"
   url_launcher_ios:
@@ -176,7 +176,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  downloads_path_provider_28: 7425048683ec0b86238361bd93795e91c2bc61a2
   file_picker: 817ab1d8cd2da9d2da412a417162deee3500fc95
   Firebase: 5f8193dff4b5b7c5d5ef72ae54bb76c08e2b841d
   firebase_core: 6ef152b7d6a361e24105e2cc56ab458f1f8367fe
@@ -193,6 +192,7 @@ SPEC CHECKSUMS:
   image_picker_ios: b786a5dcf033a8336a657191401bfdf12017dabb
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
+  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
   PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
   SDWebImage: af5bbffef2cde09f148d826f9733dcde1a9414cd
   shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad

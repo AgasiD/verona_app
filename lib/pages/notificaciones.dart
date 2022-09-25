@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -111,6 +112,15 @@ class _CustomListViewState extends State<_CustomListView> {
               Map<String, dynamic> arg = {};
               switch (widget.data[i]['type']) {
                 case 'obra':
+                  if (widget.data[i]['route'] != '') {
+                    route = ObraPage.routeName;
+                    arg = {'obraId': widget.data[i]['route']};
+                  } else {
+                    route = '';
+                    arg = {};
+                  }
+                  break;
+                case 'pedido':
                   if (widget.data[i]['route'] != '') {
                     route = ObraPage.routeName;
                     arg = {'obraId': widget.data[i]['route']};
