@@ -11,6 +11,7 @@ import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/obra.dart';
+import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 
@@ -138,6 +139,7 @@ class NotificationService extends ChangeNotifier {
             "chatId": notif.data["chatId"],
             "chatName": notif.data["chatName"]
           });
+
           break;
         case 'new-obra':
           //Si es una nueva obra
@@ -250,8 +252,10 @@ class NotificationService extends ChangeNotifier {
       //Si es un nuevo mensaje o cambios en obra
       final _usuarioService =
           Provider.of<UsuarioService>(context, listen: false);
+      final _chatService = Provider.of<ChatService>(context, listen: false);
       if (type == 'message') {
         _usuarioService.notifyListeners();
+        _chatService.notifyListeners();
       }
       //Si es una nueva obra
       if (type == 'new-obra') {

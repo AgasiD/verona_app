@@ -44,13 +44,14 @@ class _NotificationsList extends StatelessWidget {
             } else {
               final notificaciones = response.data;
               if (notificaciones.length > 0) {
-                _usuarioService.leerNotificaciones(_pref.id);
-
-                return Container(
-                    margin: EdgeInsets.only(top: 15),
-                    child: _CustomListView(
-                      data: notificaciones,
-                    ));
+                return FutureBuilder(
+                  future: _usuarioService.leerNotificaciones(_pref.id),
+                  builder: (context, snapshot) => Container(
+                      margin: EdgeInsets.only(top: 15),
+                      child: _CustomListView(
+                        data: notificaciones,
+                      )),
+                );
               } else {
                 return Container(
                   child: Center(
@@ -122,8 +123,8 @@ class _CustomListViewState extends State<_CustomListView> {
                   break;
                 case 'pedido':
                   if (widget.data[i]['route'] != '') {
-                    route = ObraPage.routeName;
-                    arg = {'obraId': widget.data[i]['route']};
+                    route = PedidoForm.routeName;
+                    arg = {'pedidoId': widget.data[i]['route']};
                   } else {
                     route = '';
                     arg = {};

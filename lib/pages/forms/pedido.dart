@@ -27,12 +27,10 @@ class PedidoForm extends StatelessWidget implements MyForm {
   static String nameForm = 'Nuevo pedido';
   static String alertMessage = 'Confirmar nuevo pedido';
   static const String routeName = 'pedido';
-  late String obraId;
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    obraId = arguments['obraId'];
     final pedidoId = arguments['pedidoId'] ?? '';
     bool edit = pedidoId != '';
 

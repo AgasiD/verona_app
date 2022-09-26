@@ -188,7 +188,8 @@ class CustomDrawer extends StatelessWidget {
                     ),
                   ]),
                   onPressed: () {
-                    Navigator.pushNamed(context, e["route"].toString());
+                    Navigator.pushNamed(context, e["route"].toString(),
+                        arguments: e['args'] ?? null);
                   },
                 ))
             .toList();
@@ -827,7 +828,7 @@ void openDialogConfirmation(
         actions: [
           CupertinoDialogAction(
             child: Text('Confirmar'),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
               onPressed(context);
             },
