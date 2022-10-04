@@ -192,6 +192,7 @@ class _Form extends StatelessWidget {
                       textController: txtDNICtrl,
                       teclado: TextInputType.number,
                       validaError: true,
+                      enable: !edit,
                       validarInput: (value) => Helper.validNumeros(value),
                     ),
                     CustomInput(

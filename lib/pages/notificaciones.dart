@@ -44,6 +44,7 @@ class _NotificationsList extends StatelessWidget {
             } else {
               final notificaciones = response.data;
               if (notificaciones.length > 0) {
+                // dividir por por fechas entre hoy y el resto
                 return FutureBuilder(
                   future: _usuarioService.leerNotificaciones(_pref.id),
                   builder: (context, snapshot) => Container(
@@ -93,60 +94,132 @@ class _CustomListViewState extends State<_CustomListView> {
   Widget build(BuildContext context) {
     late dynamic iconAvatar;
     late Function()? actionOnTap;
+    final notificaciones = ordenarNotificaciones(widget.data);
+
     return Container(
         height: MediaQuery.of(context).size.height,
         child: ListView.builder(
-            itemCount: widget.data.length,
+            itemCount: notificaciones.length,
             itemBuilder: (_, i) {
-              bool esPar = false;
-              if (i % 2 == 0) {
-                esPar = true;
-              }
-
-              iconAvatar = iconos
-                  .where(
-                      (element) => element.containsKey(widget.data[i]['type']))
-                  .first[widget.data[i]['type']];
-
-              widget.data[i]['type'];
-              String route = '';
-              Map<String, dynamic> arg = {};
-              switch (widget.data[i]['type']) {
-                case 'obra':
-                  if (widget.data[i]['route'] != '') {
-                    route = ObraPage.routeName;
-                    arg = {'obraId': widget.data[i]['route']};
-                  } else {
-                    route = '';
-                    arg = {};
-                  }
-                  break;
-                case 'pedido':
-                  if (widget.data[i]['route'] != '') {
-                    route = PedidoForm.routeName;
-                    arg = {'pedidoId': widget.data[i]['route']};
-                  } else {
-                    route = '';
-                    arg = {};
-                  }
-                  break;
-              }
-              if (route == '') {
-                actionOnTap = null;
+              if (notificaciones[i] is Container) {
+                return notificaciones[i];
               } else {
-                actionOnTap =
-                    () => Navigator.pushNamed((context), route, arguments: arg);
-              }
+                bool esPar = false;
+                if (i % 2 == 0) {
+                  esPar = true;
+                }
+                final notificacion = notificaciones[i];
+                iconAvatar = iconos
+                    .where(
+                        (element) => element.containsKey(notificacion['type']))
+                    .first[notificacion['type']];
 
-              return _CustomListTile(
-                iconAvatar: iconAvatar,
-                esPar: esPar,
-                title: widget.data[i]['title'],
-                subtitle: widget.data[i]['subtitle'],
-                ts: widget.data[i]['ts'],
-                actionOnTap: actionOnTap,
-              );
+                notificacion['type'];
+                String route = '';
+                Map<String, dynamic> arg = {};
+                switch (notificacion['type']) {
+                  case 'obra':
+                    if (notificacion['route'] != '') {
+                      route = ObraPage.routeName;
+                      arg = {'obraId': notificacion['route']};
+                    } else {
+                      route = '';
+                      arg = {};
+                    }
+                    break;
+                  case 'pedido':
+                    if (notificacion['route'] != '') {
+                      route = PedidoForm.routeName;
+                      arg = {'pedidoId': notificacion['route']};
+                    } else {
+                      route = '';
+                      arg = {};
+                    }
+                    break;
+                }
+                if (route == '') {
+                  actionOnTap = null;
+                } else {
+                  actionOnTap = () =>
+                      Navigator.pushNamed((context), route, arguments: arg);
+                }
+
+                return _CustomListTile(
+                  iconAvatar: iconAvatar,
+                  esPar: esPar,
+                  title: notificacion['title'],
+                  subtitle: notificacion['subtitle'],
+                  ts: notificacion['ts'],
+                  actionOnTap: actionOnTap,
+                );
+              }
             }));
+  }
+
+  ordenarNotificaciones(List data) {
+    final today =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final tsToday = today.millisecondsSinceEpoch;
+    final tsAyer = today.subtract(Duration(days: 1)).millisecondsSinceEpoch;
+    List notificaciones = [];
+
+    // Notificaciones HOY
+    final notificacionesHoy =
+        widget.data.where((notif) => tsToday < notif['ts']);
+
+    if (notificacionesHoy.length > 0) {
+      notificaciones.add(Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: Text(
+            'Hoy',
+            style: TextStyle(
+                fontSize: 15,
+                color: Helper.brandColors[8],
+                fontWeight: FontWeight.bold),
+          )));
+      notificaciones.addAll(notificacionesHoy);
+    }
+
+    final notificacionesAyer = widget.data
+        .where((notif) => tsAyer < notif['ts'] && tsToday > notif['ts']);
+
+    if (notificacionesAyer.length > 0) {
+      notificaciones.add(
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: Text(
+            'Ayer',
+            style: TextStyle(
+                fontSize: 15,
+                color: Helper.brandColors[8],
+                fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+      notificaciones.addAll(notificacionesAyer);
+    }
+    notificaciones.add(
+      Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: Text(
+            'Previas',
+            style: TextStyle(
+                fontSize: 15,
+                color: Helper.brandColors[8],
+                fontWeight: FontWeight.bold),
+          )),
+    );
+    notificaciones.addAll(widget.data.where((notif) => tsAyer >= notif['ts']));
+
+    final notificacionesAnteriores =
+        widget.data.where((notif) => tsAyer >= notif['ts']);
+    return notificaciones;
   }
 }
 

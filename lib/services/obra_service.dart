@@ -30,6 +30,7 @@ class ObraService extends ChangeNotifier {
     final json = datos["obra"];
     final data = Obra.fromMap(json);
     this.obra = data;
+    notifyListeners();
     return data;
   }
 

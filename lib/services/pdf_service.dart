@@ -23,7 +23,7 @@ class PDFService {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
                   children: [
                     Text('Prioridad:' +
-                        ['ALTA', 'MEDIA', 'BAJA'][pedido.prioridad - 1]),
+                        ['BAJA', 'MEDIA', 'ALTA'][pedido.prioridad - 1]),
                     Text('Fecha deseada:' + pedido.fechaDeseada),
                     Text('Fecha estimada:' + pedido.fechaEstimada)
                   ]),
@@ -32,11 +32,9 @@ class PDFService {
                   style: pw.TextStyle(
                       fontSize: 22, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 25),
-              pw.Row(mainAxisAlignment: pw.MainAxisAlignment.center, children: [
-                pw.Text(pedido.nota,
-                    style: pw.TextStyle(fontSize: 18),
-                    overflow: pw.TextOverflow.clip)
-              ])
+              pw.Text(pedido.nota,
+                  style: pw.TextStyle(fontSize: 18),
+                  overflow: pw.TextOverflow.clip)
             ]),
           ),
         ),

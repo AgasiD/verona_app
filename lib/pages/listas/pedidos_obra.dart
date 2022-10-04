@@ -14,9 +14,9 @@ class PedidoList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _pref = new Preferences();
-
     final _obraService = Provider.of<ObraService>(context);
     Future future;
+
     if (_pref.role == 6) {
       future = _obraService.obtenerPedidosAsignadosDelivery(
           _obraService.obra.id, _pref.id);

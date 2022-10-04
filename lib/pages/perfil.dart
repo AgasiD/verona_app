@@ -21,17 +21,23 @@ class PerfilPage extends StatelessWidget {
   PerfilPage({Key? key}) : super(key: key);
   static final routeName = 'perfil';
   late String _usuarioId;
-
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late bool perfilPropio = true;
   @override
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _imageService = Provider.of<ImageService>(context);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    final _pref = new Preferences();
     _usuarioId = arguments['usuarioId'];
     String textoImg = 'Cambiar imagen';
     bool sinImg = false;
+    if (_usuarioId != _pref.id) {
+      perfilPropio = false;
+    }
 
     return Scaffold(
+      key: _scaffoldKey,
       body: Container(
         color: Helper.brandColors[1],
         child: SafeArea(
@@ -245,70 +251,81 @@ class PerfilPage extends StatelessWidget {
                                   style: TextStyle(
                                       fontSize: 17,
                                       color: Helper.brandColors[8]))),
-                          Expanded(
-                              child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              MainButton(
-                                  onPressed: () async {
-                                    try {
-                                      openLoadingDialog(context,
-                                          mensaje: 'Sincronizando...');
-                                      final response =
-                                          await _usuarioService.setTokenDevice(
-                                              _usuarioId,
-                                              NotificationService.token!);
-                                      closeLoadingDialog(context);
-                                      if (response.fallo) {
-                                        openAlertDialog(context,
-                                            'Error al sincronizar dispositivo',
-                                            subMensaje: response.error);
-                                        return;
-                                      }
-                                      openAlertDialog(context,
-                                          'Dispositivo sincronizado con éxito');
-                                    } catch (err) {
-                                      closeLoadingDialog(context);
-                                      openAlertDialog(context,
-                                          'Error al sincronizar dispositivo',
-                                          subMensaje: err.toString());
-                                    }
-                                  },
-                                  width: 250,
-                                  height: 35,
-                                  fontSize: 15,
-                                  color: Helper.brandColors[8],
-                                  text: 'Sincronizar notificaciones'),
-                              MainButton(
-                                  onPressed: () {
-                                    final deleteDevices = (context) async {
-                                      openLoadingDialog(context,
-                                          mensaje:
-                                              'Desasociando dispositivos...');
-                                      final response = await _usuarioService
-                                          .deleteAllDevice(_usuarioId);
-                                      closeLoadingDialog(context);
-                                      if (response.fallo) {
-                                        openAlertDialog(context,
-                                            'Error al sincronizar dispositivo',
-                                            subMensaje: response.error);
-                                        return;
-                                      }
-                                      openAlertDialog(context,
-                                          'Dispositivo sincronizado con éxito');
-                                    };
-                                    openDialogConfirmation(
-                                        context,
-                                        deleteDevices,
-                                        'Confirmar desasociacion');
-                                  },
-                                  width: 250,
-                                  height: 35,
-                                  fontSize: 15,
-                                  color: Helper.brandColors[8],
-                                  text: 'Eliminar dispositivos asociados')
-                            ],
-                          ))
+                          perfilPropio
+                              ? Expanded(
+                                  child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    MainButton(
+                                        onPressed: () async {
+                                          try {
+                                            openLoadingDialog(context,
+                                                mensaje: 'Sincronizando...');
+                                            final response =
+                                                await _usuarioService
+                                                    .setTokenDevice(
+                                                        _usuarioId,
+                                                        NotificationService
+                                                            .token!);
+                                            closeLoadingDialog(context);
+                                            if (response.fallo) {
+                                              openAlertDialog(context,
+                                                  'Error al sincronizar dispositivo',
+                                                  subMensaje: response.error);
+                                              return;
+                                            }
+                                            openAlertDialog(context,
+                                                'Dispositivo sincronizado con éxito');
+                                          } catch (err) {
+                                            closeLoadingDialog(context);
+                                            openAlertDialog(context,
+                                                'Error al sincronizar dispositivo',
+                                                subMensaje: err.toString());
+                                          }
+                                        },
+                                        width: 250,
+                                        height: 35,
+                                        fontSize: 15,
+                                        color: Helper.brandColors[8],
+                                        text: 'Sincronizar notificaciones'),
+                                    MainButton(
+                                        onPressed: () {
+                                          final deleteDevices =
+                                              (context) async {
+                                            openLoadingDialog(context,
+                                                mensaje:
+                                                    'Desasociando dispositivos...');
+                                            final response =
+                                                await _usuarioService
+                                                    .deleteAllDevice(
+                                                        _usuarioId);
+                                            // closeLoadingDialog(context);
+                                            Navigator.pop(
+                                                _scaffoldKey.currentContext!);
+                                            if (response.fallo) {
+                                              openAlertDialog(
+                                                  _scaffoldKey.currentContext!,
+                                                  'Error al sincronizar dispositivo',
+                                                  subMensaje: response.error);
+                                              return;
+                                            }
+                                            openAlertDialog(
+                                                _scaffoldKey.currentContext!,
+                                                'Dispositivo sincronizado con éxito');
+                                          };
+                                          openDialogConfirmation(
+                                              _scaffoldKey.currentContext!,
+                                              deleteDevices,
+                                              'Confirmar desasociacion');
+                                        },
+                                        width: 250,
+                                        height: 35,
+                                        fontSize: 15,
+                                        color: Helper.brandColors[8],
+                                        text: 'Eliminar dispositivos asociados')
+                                  ],
+                                ))
+                              : Container()
                         ],
                       ),
                     ),
