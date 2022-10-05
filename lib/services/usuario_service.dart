@@ -101,4 +101,11 @@ class UsuarioService extends ChangeNotifier {
         await this._http.put('$_endpoint/ultimoMensajeLeido/$id', body);
     return MyResponse.fromJson(response['response']);
   }
+
+  Future<MyResponse> deleteUsuario(String id) async {
+    final response =
+        await this._http.delete('$_endpoint/desactivarUsuario/$id');
+    notifyListeners();
+    return MyResponse.fromJson(response['response']);
+  }
 }

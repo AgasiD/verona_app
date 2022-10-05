@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -10,6 +12,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
+import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -325,6 +328,45 @@ class PerfilPage extends StatelessWidget {
                                         text: 'Eliminar dispositivos asociados')
                                   ],
                                 ))
+                              : Container(),
+                          !perfilPropio && _pref.role == 1
+                              ? TextButton(
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(
+                                              Color.fromARGB(255, 122, 9, 1))),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    width: 270,
+                                    child: Text(
+                                      'Eliminar usuario',
+                                      style: TextStyle(
+                                          color: Helper.brandColors[5]),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    openDialogConfirmation(context,
+                                        (context) async {
+                                      // eliminar obra
+                                      openLoadingDialog(context,
+                                          mensaje: 'Eliminando personal...');
+                                      final response = await _usuarioService
+                                          .deleteUsuario(_usuarioId);
+                                      closeLoadingDialog(context);
+                                      if (response.fallo) {
+                                        openAlertDialog(context,
+                                            'Error al desactivar usuario',
+                                            subMensaje: response.error);
+                                      } else {
+                                        openAlertDialog(context,
+                                            'Usuario desactivado con éxito');
+                                        Timer(Duration(milliseconds: 750),
+                                            () => closeLoadingDialog(context));
+                                        Timer(Duration(milliseconds: 750),
+                                            () => Navigator.pop(context));
+                                      }
+                                    }, 'Confirmar para eliminar personal');
+                                  })
                               : Container()
                         ],
                       ),
