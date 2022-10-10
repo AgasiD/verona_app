@@ -25,14 +25,14 @@ class Miembro {
 
   factory Miembro.fromJson(Map<String, dynamic> json) => Miembro(
       id: json['id'] ?? '',
-      nombre: json["nombre"],
-      apellido: json["apellido"],
-      email: json["email"],
-      telefono: json["telefono"],
-      dni: json["dni"],
-      role: json["role"],
+      nombre: json["nombre"] ?? '',
+      apellido: json["apellido"] ?? '',
+      email: json["email"] ?? '',
+      telefono: json["telefono"] ?? '',
+      dni: json["dni"] ?? '',
+      role: json["role"] ?? 0,
       chats: json.containsKey('chats') ? json["chats"] : [],
-      username: json['username'],
+      username: json['username'] ?? '',
       profileURL: json['profileURL'] ?? '');
 
   Map<String, dynamic> toJson() => {

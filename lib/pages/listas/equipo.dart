@@ -22,12 +22,12 @@ class EquipoList extends StatelessWidget {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-              future: _obraService.obtenerObra(obraId),
+              future: _obraService.obtenerEquipo(obraId),
               builder: (context, snapshot) {
                 if (snapshot.data == null) {
                   return Loading(mensaje: 'Cargando equipo asignado');
                 } else {
-                  final obra = snapshot.data as Obra;
+                  final obra = _obraService.obra;
                   final _pref = new Preferences();
                   if (obra.equipo.length > 0) {
                     final dataTile = obra.equipo.map((e) => Helper.toCustomTile(

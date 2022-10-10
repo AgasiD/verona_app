@@ -126,7 +126,7 @@ class __FormState extends State<_Form> {
   }
 
   void guardarUserData(Miembro usuario, String token) {
-    pref.id = usuario.dni;
+    pref.id = usuario.id;
     pref.nombre = '${usuario.nombre} ${usuario.apellido}';
     pref.role = usuario.role;
     pref.token = token;
