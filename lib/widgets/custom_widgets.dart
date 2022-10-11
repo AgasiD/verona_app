@@ -1554,7 +1554,9 @@ class CustomListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
-
+    final profileImage = (avatar.isEmpty
+        ? AssetImage('assets/user.png')
+        : NetworkImage(avatar)) as ImageProvider;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: this.padding),
       child: Column(
@@ -1571,14 +1573,16 @@ class CustomListTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100)),
                 child: CircleAvatar(
                   backgroundColor: Helper.brandColors[0],
+                  backgroundImage: profileImage,
                   child: textAvatar
-                      ? Text(
-                          avatar,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Helper.brandColors[5],
-                          ),
-                        )
+                      ? Container()
+                      // Text(
+                      //     avatar,
+                      //     textAlign: TextAlign.center,
+                      //     style: TextStyle(
+                      //       color: Helper.brandColors[5],
+                      //     ),
+                      //   )
                       : Icon(iconAvatar),
                 ),
               ),

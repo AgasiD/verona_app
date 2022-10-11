@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
@@ -225,6 +226,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
 
     return MaterialApp(
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: const [
+        Locale('es', ''),
+      ],
       debugShowCheckedModeBanner: false,
       title: 'Verona App',
       initialRoute: initalRoute,

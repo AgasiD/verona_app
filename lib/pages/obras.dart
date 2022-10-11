@@ -142,6 +142,8 @@ class _ObrasPageState extends State<ObrasPage> {
         'route': PersonalADM.routeName
       },
     ];
+    final GlobalKey<ScaffoldState> _scaffoldKey =
+        new GlobalKey<ScaffoldState>();
 
     return Scaffold(
       drawer: CustomDrawer(textStyle: textStyle, menu: menu),

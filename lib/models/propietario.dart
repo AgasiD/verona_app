@@ -16,7 +16,7 @@ class Propietario {
         nombre: json["nombre"],
         apellido: json["apellido"],
         email: json["email"],
-        telefono: json["telefono"],
+        telefono: json["telefono"] ?? '',
         dni: json["dni"],
       );
 

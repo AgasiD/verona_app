@@ -35,7 +35,7 @@ class PersonalADM extends StatelessWidget {
                     final dataTile = personal.map((e) => {
                           'title': '${e.nombre + ' ' + e.apellido}',
                           'subtitle': Helper.getProfesion(e.role),
-                          'avatar': '${e.nombre[0] + e.apellido[0]}',
+                          'avatar': '${e.profileURL}',
                           'id': e.id
                         });
 

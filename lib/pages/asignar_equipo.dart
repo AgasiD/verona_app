@@ -167,7 +167,7 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
           ),
           _txtPersonalCtrl.text == ''
               ? SizedBox(
-                  height: MediaQuery.of(context).size.height - 290,
+                  height: MediaQuery.of(context).size.height - 280,
                   width: MediaQuery.of(context).size.width,
                   child: ListView.builder(
                     itemCount: widget.grupos.length,
@@ -238,10 +238,12 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                   ),
                 )
               : SizedBox(
-                  height: MediaQuery.of(context).size.height - 291,
+                  height: MediaQuery.of(context).size.height - 280,
                   width: MediaQuery.of(context).size.width,
-                  child: Column(
-                    children: miembros,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: miembros,
+                    ),
                   ),
                 ),
           Container(

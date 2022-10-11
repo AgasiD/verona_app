@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -988,30 +989,69 @@ class _FormState extends State<_Form> {
         filled: true);
   }
 
-  void selectDate(context, txtCtrlDate, selectedDate) {
-    DatePicker.showDatePicker(context,
-        showTitleActions: true, minTime: DateTime(2022, 1, 1),
-        // maxTime: DateTime(2025, 12, 31),
-        onConfirm: (date) {
-      String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+  void selectDate(context, txtCtrlDate, selectedDate) async {
+    double width = MediaQuery.of(context).size.width * .8;
+    double height = MediaQuery.of(context).size.height * .5;
+
+    var results = await showCalendarDatePicker2Dialog(
+      context: context,
+      config: CalendarDatePicker2WithActionButtonsConfig(
+        selectedDayHighlightColor: Helper.brandColors[8],
+        calendarType: CalendarDatePicker2Type.single,
+        shouldCloseDialogAfterCancelTapped: true,
+      ),
+      dialogSize: Size(width, height),
+      initialValue: [selectedDate],
+      borderRadius: BorderRadius.circular(5),
+    );
+
+    if (results != null) {
+      final date = results![0];
+      print(date);
+      String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
 
       txtCtrlDate.text = formattedDate.toString();
       widget.pedido!.fechaEstimada = formattedDate.toString();
       selectedDate = date;
-    }, onChanged: (date) {}, currentTime: selectedDate, locale: LocaleType.es);
+    }
+
+    // DatePicker.showDatePicker(context,
+    //     showTitleActions: true, minTime: DateTime(2022, 1, 1),
+    //     // maxTime: DateTime(2025, 12, 31),
+    //     onConfirm: (date) {
+    //   String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+
+    //   txtCtrlDate.text = formattedDate.toString();
+    //   widget.pedido!.fechaEstimada = formattedDate.toString();
+    //   selectedDate = date;
+    // }, onChanged: (date) {}, currentTime: selectedDate, locale: LocaleType.es);
   }
 
-  void selectDateDeseada(context, txtCtrlDate, selectedDate) {
-    DatePicker.showDatePicker(context,
-        showTitleActions: true, minTime: DateTime(2022, 1, 1),
-        // maxTime: DateTime(2025, 12, 31),
-        onConfirm: (date) {
-      String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+  void selectDateDeseada(context, txtCtrlDate, selectedDate) async {
+    double width = MediaQuery.of(context).size.width * .8;
+
+    double height = MediaQuery.of(context).size.height * .5;
+    var results = await showCalendarDatePicker2Dialog(
+      context: context,
+      config: CalendarDatePicker2WithActionButtonsConfig(
+        selectedDayHighlightColor: Helper.brandColors[8],
+        calendarType: CalendarDatePicker2Type.single,
+        shouldCloseDialogAfterCancelTapped: true,
+      ),
+      dialogSize: Size(width, height),
+      initialValue: [selectedDate],
+      borderRadius: BorderRadius.circular(5),
+    );
+
+    if (results != null) {
+      final date = results![0];
+      print(date);
+      String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
 
       txtCtrlDate.text = formattedDate.toString();
       widget.pedido!.fechaDeseada = formattedDate.toString();
       selectedDate = date;
-    }, onChanged: (date) {}, currentTime: selectedDate, locale: LocaleType.es);
+    }
   }
 
   bool permiteVerByRole(List<int> lista) {

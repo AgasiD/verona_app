@@ -103,7 +103,7 @@ class __FormState extends State<_Form> {
               if (response.fallo) {
                 openAlertDialog(context, response.error);
               } else {
-                _usuario.usuario = Miembro.fromJson(response.data['usuario']);
+                _usuario.usuario = Miembro.fromJson(response.data);
                 final token = '';
                 // response.data['token'];
 

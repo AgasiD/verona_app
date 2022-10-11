@@ -33,7 +33,7 @@ class EquipoList extends StatelessWidget {
                     final dataTile = obra.equipo.map((e) => Helper.toCustomTile(
                         '${e.nombre + ' ' + e.apellido}',
                         Helper.getProfesion(e.role),
-                        '${e.nombre[0] + e.apellido[0]}'));
+                        '${e.profileURL}'));
                     return Column(
                       children: [
                         Container(
