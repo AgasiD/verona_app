@@ -779,70 +779,6 @@ class SecondaryButton extends StatelessWidget {
   }
 }
 
-openLoadingDialog(BuildContext context, {String mensaje = ''}) {
-  if (Platform.isAndroid) {
-    showDialog(
-        context: context, builder: (context) => Loading(mensaje: mensaje));
-  } else {
-    showCupertinoDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(title: Text(mensaje)),
-    );
-  }
-  return context;
-}
-
-void closeLoadingDialog(BuildContext context) {
-  if (Platform.isAndroid) {
-    Navigator.of(context, rootNavigator: true).pop();
-  } else {
-    Navigator.of(context, rootNavigator: true).pop();
-  }
-}
-
-void openDialogConfirmation(
-    BuildContext context, Function onPressed, String mensaje) {
-  if (Platform.isAndroid) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text(mensaje),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
-                ),
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onPressed(context);
-                    },
-                    child: Text('Confirmar')),
-              ],
-            ));
-  } else {
-    showCupertinoDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(
-        title: Text(mensaje),
-        actions: [
-          CupertinoDialogAction(
-            child: Text('Confirmar'),
-            onPressed: () async {
-              Navigator.pop(context);
-              onPressed(context);
-            },
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: Text('Cancelar'),
-            onPressed: () => Navigator.pop(context),
-          )
-        ],
-      ),
-    );
-  }
-}
 
 void openBottomSheet(
     BuildContext context, String titulo, String subtitulo, List actions) {
@@ -903,6 +839,74 @@ void openBottomSheet(
     );
   }
 }
+
+
+void openDialogConfirmation(
+    BuildContext context, Function onPressed, String mensaje) {
+  if (Platform.isAndroid) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(mensaje),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
+                ),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onPressed(context);
+                    },
+                    child: Text('Confirmar')),
+              ],
+            ));
+  } else {
+    showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(mensaje),
+        actions: [
+          CupertinoDialogAction(
+            child: Text('Confirmar'),
+            onPressed: () async {
+              Navigator.pop(context);
+              onPressed(context);
+            },
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+
+openLoadingDialog(BuildContext context, {String mensaje = ''}) {
+  if (Platform.isAndroid) {
+    showDialog(
+        context: context, builder: (context) => Loading(mensaje: mensaje));
+  } else {
+    showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(title: Text(mensaje)),
+    );
+  }
+  return context;
+}
+
+void closeLoadingDialog(BuildContext context) {
+  if (Platform.isAndroid) {
+    Navigator.of(context, rootNavigator: true).pop();
+  } else {
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+}
+
 
 void openAlertDialog(BuildContext context, String mensaje,
     {String? subMensaje}) {

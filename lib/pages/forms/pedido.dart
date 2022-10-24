@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
@@ -241,6 +240,7 @@ class _FormState extends State<_Form> {
                           ),
                           CustomInput(
                             enable: editableByEstado(0) ||
+                                permiteVerByEstado([1]) && esCreador() ||
                                 permiteVerByEstado([1, 2, 3, 4]) &&
                                     permiteVerByRole([1, 5]),
                             hintText: 'Detallar solicitud de materiales',
@@ -1057,6 +1057,11 @@ class _FormState extends State<_Form> {
   bool permiteVerByRole(List<int> lista) {
     final rol = new Preferences().role;
     return lista.contains(rol);
+  }
+
+  bool esCreador() {
+    final idUsuario = new Preferences().id;
+    return widget.pedido!.idUsuario == idUsuario;
   }
 
   bool permiteVerByEstado(List<int> lista) {

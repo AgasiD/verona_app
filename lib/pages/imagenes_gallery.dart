@@ -88,19 +88,19 @@ class ImgGalleryPage extends StatelessWidget {
                                   //       arguments: {"imagenId": e['id']});
                                   // }
 
-                                  if (getType(e['mimeType']) == 'jpg') {
-                                    Navigator.pushNamed(
-                                        (context), ImagenViewer.routeName,
-                                        arguments: {'imagenId': e['id']});
-                                  } else if (getType(e['mimeType'])
-                                          .toLowerCase() ==
+                                  // if (getType(e['mimeType']) == 'jpg') {
+                                  //   Navigator.pushNamed(
+                                  //       (context), ImagenViewer.routeName,
+                                  //       arguments: {'imagenId': e['id']});
+                                  // } else
+                                  if (getType(e['mimeType']).toLowerCase() ==
                                       'Carpeta'.toLowerCase()) {
                                     Navigator.pushNamed(
                                         (context), ImgGalleryPage.routeName,
                                         arguments: {'driveId': e['id']});
                                   } else {
                                     final Uri _url = Uri.parse(
-                                        'https://drive.google.com/file/d/${e['id']}/view?usp=sharing');
+                                        'https://drive.google.com/file/d/${e['id']}');
                                     if (await canLaunchUrl(_url))
                                       await launchUrl(_url);
                                     else
@@ -136,7 +136,8 @@ class ImgGalleryPage extends StatelessWidget {
                                             placeholder:
                                                 AssetImage('assets/image.png'),
                                             image: Helper.imageNetwork(
-                                                e['thumbnailLink']
+                                                e['thumbnailLink'] ??
+                                                    'https://www.iconpacks.net/icons/2/free-file-icon-1453-thumb.png'
                                                 // 'https://drive.google.com/uc?export=view&id=${e['id']}'
                                                 )),
                                     Text(
