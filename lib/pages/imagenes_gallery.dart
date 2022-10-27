@@ -1,3 +1,4 @@
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -101,8 +102,26 @@ class ImgGalleryPage extends StatelessWidget {
                                   } else {
                                     final Uri _url = Uri.parse(
                                         'https://drive.google.com/file/d/${e['id']}');
+
+                                    // var isAppInstalledResult =
+                                    //     await LaunchApp.isAppInstalled(
+                                    //   androidPackageName:
+                                    //       'net.pulsesecure.pulsesecure',
+                                    //   iosUrlScheme: 'pulsesecure://',
+                                    //   // openStore: false
+                                    // );
+                                    // var openAppResult = await LaunchApp.openApp(
+                                    //     androidPackageName:
+                                    //         'net.pulsesecure.pulsesecure',
+                                    //     iosUrlScheme: 'pulsesecure://',
+                                    //     appStoreLink:
+                                    //         'itms-apps://apps.apple.com/ar/app/google-drive-almacenamiento/id507874739'
+                                    //     // openStore: false
+                                    //     );
+
                                     if (await canLaunchUrl(_url))
-                                      await launchUrl(_url);
+                                      await launchUrl(_url,
+                                          mode: LaunchMode.externalApplication);
                                     else
                                       openAlertDialog(context,
                                           'No se puede visualizar el documento');

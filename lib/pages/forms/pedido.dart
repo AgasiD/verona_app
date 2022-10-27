@@ -583,7 +583,7 @@ class _FormState extends State<_Form> {
                                   : Container()
                             ],
                           ),
-                          permiteVerByEstado([3, 4, 5]) &&
+                          permiteVerByEstado([2, 3, 4, 5]) &&
                                   permiteVerByRole([1, 6, 5])
                               ? Row(
                                   children: [
@@ -953,7 +953,7 @@ class _FormState extends State<_Form> {
         // } else {
         if (tieneImagen) {
           final idImagen = await _driveService.grabarImagenPedido(
-              'Pedido-${new DateFormat('dd/MM/yy').parse(widget.pedido!.fechaEstimada)}-${_obraService.obra.nombre}',
+              'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}',
               _obraService.obra.driveFolderId!);
           widget.pedido!.imagenId = idImagen;
         }

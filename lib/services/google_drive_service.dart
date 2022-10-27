@@ -47,6 +47,8 @@ class GoogleDriveService extends ChangeNotifier {
       final datos = await this
           ._http
           .uploadImage(_imgPedido, _endpoint + "/$fileName/jpg/$idFolder");
+      final autorizar = await setPermisosToFile(datos);
+
       return datos;
     } else {
       print('No se asigno imagen');
@@ -66,6 +68,11 @@ class GoogleDriveService extends ChangeNotifier {
     } catch (err) {
       print('error');
     }
+  }
+
+  setPermisosToFile(String fileId) async {
+    final datos = await this._http.post('$_endpoint/setPermisos/$fileId', {});
+    // final response = MyResponse.fromJson(datos['response']);
   }
 
   getExtension() {
