@@ -431,7 +431,7 @@ class _CustomInputState extends State<CustomInput> {
           margin: EdgeInsets.only(bottom: 10),
           child: TextFormField(
             textCapitalization: TextCapitalization.sentences,
-            enabled: widget.enable,
+            readOnly: !widget.enable,
             controller: widget.textController,
             maxLines: widget.lines ?? 1,
             autocorrect: false,
@@ -779,7 +779,6 @@ class SecondaryButton extends StatelessWidget {
   }
 }
 
-
 void openBottomSheet(
     BuildContext context, String titulo, String subtitulo, List actions) {
   if (Platform.isIOS) {
@@ -840,7 +839,6 @@ void openBottomSheet(
   }
 }
 
-
 void openDialogConfirmation(
     BuildContext context, Function onPressed, String mensaje) {
   if (Platform.isAndroid) {
@@ -885,7 +883,6 @@ void openDialogConfirmation(
   }
 }
 
-
 openLoadingDialog(BuildContext context, {String mensaje = ''}) {
   if (Platform.isAndroid) {
     showDialog(
@@ -906,7 +903,6 @@ void closeLoadingDialog(BuildContext context) {
     Navigator.of(context, rootNavigator: true).pop();
   }
 }
-
 
 void openAlertDialog(BuildContext context, String mensaje,
     {String? subMensaje}) {

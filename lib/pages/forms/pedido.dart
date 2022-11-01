@@ -83,6 +83,65 @@ class _FormState extends State<_Form> {
   void initState() {
     super.initState();
     cargarObra();
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+    txtCtrlDate.text = formattedDate.toString();
+    txtCtrlDateDeseada.text = formattedDate.toString();
+    if (widget.pedido!.estado == 0) {
+      widget.pedido!.fechaDeseada = txtCtrlDateDeseada.text;
+      titleTxtController.text = _obraService.obra.lote + ' - ';
+    } else if (widget.pedido!.estado >= 0) {
+      //Editar pedido (Asignar atributos)
+      titleTxtController.text = widget.pedido!.titulo;
+      areaTxtController.text = widget.pedido!.nota;
+      title = 'editar pedido';
+      prioridad = widget.pedido!.prioridad;
+      txtCtrlDate.text = widget.pedido!.fechaEstimada == ''
+          ? txtCtrlDate.text
+          : widget.pedido!.fechaEstimada;
+      txtCtrlDateDeseada.text = widget.pedido!.fechaDeseada == ''
+          ? txtCtrlDateDeseada.text
+          : widget.pedido!.fechaDeseada;
+
+      repartidores = obtenerRepartidoresAsignados(_obraService.obra.equipo);
+      repartidoId = repartidores[0].value.toString();
+
+      pedidoConfirmado = false;
+      if (widget.pedido!.estado == 1) {
+        // ESTADO: Pedido sin confirmar
+      }
+      if (widget.pedido!.estado == 2) {
+        // ESTADO: Pedido Pendiente de compra
+        pedidoConfirmado = true;
+      }
+      if (widget.pedido!.estado == 3) {
+        // ESTADO: Pedido Asignado
+        pedidoEnStock = true;
+        pedidoConfirmado = true;
+        tieneImagen = widget.pedido!.imagenId == '' ? false : true;
+        tieneImagen ? imgButtonText = 'Ver evidencia' : false;
+        indicacionesTxtController.text = widget.pedido!.indicaciones;
+        repartidoId = widget.pedido!.usuarioAsignado == ''
+            ? repartidores.first.value.toString()
+            : widget.pedido!.usuarioAsignado;
+
+        entregaExterna = widget.pedido!.entregaExterna;
+      }
+
+      if (widget.pedido!.estado == 5) {
+        // ESTADO: Pedido cerrado
+        tieneImagen = widget.pedido!.imagenId == '' ? false : true;
+        imgButtonText = tieneImagen ? 'Ver evidencia' : 'Foto/Evidencia';
+        pedidoConfirmado = true;
+        pedidoEnStock = true;
+        repartidoId = widget.pedido!.usuarioAsignado == ''
+            ? repartidores.first.value.toString()
+            : widget.pedido!.usuarioAsignado;
+        indicacionesTxtController.text = widget.pedido!.indicaciones;
+        txtCtrlDate.text = widget.pedido!.fechaEstimada;
+        prioridad = widget.pedido!.prioridad;
+        entregaExterna = widget.pedido!.entregaExterna;
+      }
+    }
   }
 
   Future cargarObra() async {
@@ -140,64 +199,8 @@ class _FormState extends State<_Form> {
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final _driveService =
         Provider.of<GoogleDriveService>(context, listen: false);
-    txtCtrlDate.text = formattedDate.toString();
-    txtCtrlDateDeseada.text = formattedDate.toString();
 
-    if (widget.pedido!.estado == 0) {
-      widget.pedido!.fechaDeseada = txtCtrlDateDeseada.text;
-      titleTxtController.text = _obraService.obra.lote + ' - ';
-    } else if (widget.pedido!.estado >= 0) {
-      //Editar pedido (Asignar atributos)
-      titleTxtController.text = widget.pedido!.titulo;
-      areaTxtController.text = widget.pedido!.nota;
-      title = 'editar pedido';
-      prioridad = widget.pedido!.prioridad;
-      txtCtrlDate.text = widget.pedido!.fechaEstimada == ''
-          ? txtCtrlDate.text
-          : widget.pedido!.fechaEstimada;
-      txtCtrlDateDeseada.text = widget.pedido!.fechaDeseada == ''
-          ? txtCtrlDateDeseada.text
-          : widget.pedido!.fechaDeseada;
-
-      repartidores = obtenerRepartidoresAsignados(_obraService.obra.equipo);
-
-      pedidoConfirmado = false;
-      if (widget.pedido!.estado == 1) {
-        // ESTADO: Pedido sin confirmar
-      }
-      if (widget.pedido!.estado == 2) {
-        // ESTADO: Pedido Pendiente de compra
-        pedidoConfirmado = true;
-      }
-      if (widget.pedido!.estado == 3) {
-        // ESTADO: Pedido Asignado
-        pedidoEnStock = true;
-        pedidoConfirmado = true;
-        tieneImagen = widget.pedido!.imagenId == '' ? false : true;
-        tieneImagen ? imgButtonText = 'Ver evidencia' : false;
-        indicacionesTxtController.text = widget.pedido!.indicaciones;
-        repartidoId = widget.pedido!.usuarioAsignado == ''
-            ? repartidores.first.value.toString()
-            : widget.pedido!.usuarioAsignado;
-
-        entregaExterna = widget.pedido!.entregaExterna;
-      }
-
-      if (widget.pedido!.estado == 5) {
-        // ESTADO: Pedido cerrado
-        tieneImagen = widget.pedido!.imagenId == '' ? false : true;
-        imgButtonText = tieneImagen ? 'Ver evidencia' : 'Foto/Evidencia';
-        pedidoConfirmado = true;
-        pedidoEnStock = true;
-        repartidoId = widget.pedido!.usuarioAsignado == ''
-            ? repartidores.first.value.toString()
-            : widget.pedido!.usuarioAsignado;
-        indicacionesTxtController.text = widget.pedido!.indicaciones;
-        txtCtrlDate.text = widget.pedido!.fechaEstimada;
-        prioridad = widget.pedido!.prioridad;
-        entregaExterna = widget.pedido!.entregaExterna;
-      }
-    }
+    print('reincio');
 
     return Container(
         color: Helper.brandColors[1],
@@ -237,6 +240,7 @@ class _FormState extends State<_Form> {
                             icono: Icons.title,
                             textController: titleTxtController,
                             lines: 1,
+                            onChange: ((p0) => print('hola')),
                           ),
                           CustomInput(
                             enable: editableByEstado(0) ||
