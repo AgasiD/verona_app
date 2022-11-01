@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
@@ -21,6 +22,7 @@ import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/pdf_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class PedidoForm extends StatelessWidget implements MyForm {
@@ -30,10 +32,11 @@ class PedidoForm extends StatelessWidget implements MyForm {
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context, listen: false);
+    final _socketService = Provider.of<SocketService>(context, listen: false);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final pedidoId = arguments['pedidoId'] ?? '';
     bool edit = pedidoId != '';
-
+    quitarNovedad(pedidoId, _socketService, _obraService);
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -67,6 +70,18 @@ class PedidoForm extends StatelessWidget implements MyForm {
                   ),
                 )),
     );
+  }
+
+  void quitarNovedad(
+      String pedidoId, SocketService _socketService, ObraService _obraService) {
+    final dato = (_socketService.novedades ?? []).where((novedad) =>
+        novedad['tipo'] == 1 &&
+        novedad['obraId'] == _obraService.obra.id &&
+        novedad['pedidoId'] == pedidoId);
+
+    if (dato.length == 0) return;
+    final _pref = Preferences();
+    _socketService.quitarNovedad(_pref.id, dato.first['id']);
   }
 }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:image_fade/image_fade.dart';
 import 'package:provider/provider.dart';
@@ -11,13 +12,14 @@ import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/imagenes_gallery.dart';
 import 'package:verona_app/pages/inactividades.dart';
-import 'package:verona_app/pages/listas/documentos.dart';
 import 'package:verona_app/pages/listas/equipo.dart';
 import 'package:verona_app/pages/listas/etapas.dart';
 import 'package:verona_app/pages/listas/pedidos_obra.dart';
 import 'package:verona_app/pages/listas/propietarios.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/socket_service.dart';
+import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ObraPage extends StatelessWidget {
@@ -417,7 +419,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       //Desplegable de docs
       final doc = Item(
         icon: Icons.file_copy,
-        list: 2,
+        list: 3,
         titulo: 'Documentos',
         values: [].toList(),
         accion: () {
@@ -429,7 +431,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
       final imgs = Item(
         icon: Icons.image_outlined,
-        list: 2,
+        list: 4,
         titulo: 'Galeria de imagenes',
         values: [].toList(),
         accion: () {
@@ -440,7 +442,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
       final status = Item(
         icon: Icons.account_tree,
-        list: 2,
+        list: 5,
         titulo: 'Etapas',
         values: [].toList(),
         accion: () => Navigator.pushNamed(context, EtapasObra.routeName),
@@ -449,7 +451,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
       final pedidos = Item(
         icon: Icons.request_page_outlined,
-        list: 2,
+        list: 6,
         titulo: 'Pedidos',
         values: [].toList(),
         accion: () {
@@ -463,7 +465,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
     } else {
       final pedidos = Item(
         icon: Icons.request_page_outlined,
-        list: 2,
+        list: 6,
         titulo: 'Pedidos',
         values: [].toList(),
         accion: () {
@@ -490,12 +492,9 @@ class _CustomExpansionState extends State<_CustomExpansion> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> children =
-        List.from(widget.data.map((e) => CaracteristicaButton(
-              action: e.accion,
-              text: e.titulo,
-              icon: e.icon,
-            )));
+    List<Widget> children = List.from(widget.data.map((e) =>
+        CaracteristicaButton(
+            action: e.accion, text: e.titulo, icon: e.icon, listItem: e.list)));
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(children: children),
@@ -505,15 +504,23 @@ class _CustomExpansionState extends State<_CustomExpansion> {
 
 class CaracteristicaButton extends StatelessWidget {
   CaracteristicaButton(
-      {Key? key, required this.action, required this.text, required this.icon})
+      {Key? key,
+      required this.action,
+      required this.text,
+      required this.icon,
+      required this.listItem})
       : super(key: key);
 
   String text;
   IconData icon;
+  int listItem;
   Function() action;
 
   @override
   Widget build(BuildContext context) {
+    final _socketService = Provider.of<SocketService>(context);
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+
     return Container(
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
       padding: EdgeInsets.symmetric(vertical: 2, horizontal: 10),
@@ -541,9 +548,27 @@ class CaracteristicaButton extends StatelessWidget {
             color: Helper.brandColors[8],
             size: 28,
           ),
-          trailing: Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: Helper.brandColors[3],
+          trailing: Container(
+            alignment: Alignment.centerRight,
+            width: 55,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                tieneNovedad(_obraService.obra.id, listItem, _socketService)
+                    ? Badge(
+                        badgeColor: Helper.brandColors[8],
+                        badgeContent: Padding(
+                          padding: const EdgeInsets.all(0),
+                          // child: Text(badgeData.toString()),
+                        ),
+                      )
+                    : Container(),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Helper.brandColors[3],
+                ),
+              ],
+            ),
           ),
           title:
               Text(text, style: TextStyle(color: Colors.white, fontSize: 17)),
@@ -551,6 +576,14 @@ class CaracteristicaButton extends StatelessWidget {
       ),
     );
     ;
+  }
+
+  tieneNovedad(String obraId, int listItem, SocketService _socketService) {
+    final dato = _socketService.novedades.indexWhere((novedad) =>
+        novedad['tipo'] == 1 &&
+        novedad['obraId'] == obraId &&
+        novedad['menu'] == listItem);
+    return dato >= 0;
   }
 }
 

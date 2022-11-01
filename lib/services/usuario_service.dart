@@ -10,6 +10,7 @@ class UsuarioService extends ChangeNotifier {
   HttpService _http = new HttpService();
   final _endpoint = 'api/usuario';
   late Miembro usuario;
+  // late List<Map<String, dynamic>> novedades;
   obtenerPropietarios() async {
     final datos = await this._http.get('$_endpoint/propietario');
     final lista = datos["usuarios"];
@@ -107,5 +108,63 @@ class UsuarioService extends ChangeNotifier {
         await this._http.delete('$_endpoint/desactivarUsuario/$id');
     notifyListeners();
     return MyResponse.fromJson(response['response']);
+  }
+
+  Future<void> obtenerNovedades(String usuarioId) async {
+/*
+tipos
+  - 1: obras
+    * 1: Propietario
+      > idUsuario
+    * 2: Equipo
+      > idUsuario
+    * 3: Documento
+      > idDrive o nombre
+    * 4: Imagen
+      > idDrive o nombre
+    * 5: Etapa
+      > idEtapa - idTarea
+    * 6: Pedido
+      > idPedido
+
+
+  - 2: mensajes
+  - 3: notificaciones;
+
+ */
+
+    // final response =
+    //     await this._http.get('$_endpoint/obtenerNovedades/$usuarioId');
+    // final data = MyResponse.fromJson(response);
+    // novedades = data.data;
+    // notifyListeners();
+    // return MyResponse.fromJson(response['response']);
+
+    // novedades = [
+    //   {
+    //     "tipo": 1,
+    //     "obraId": '-N91Kgcok2qAMS5A8uTD',
+    //     "menu": 6,
+    //     "pedidoId": '-N91STHD79eeV28zlj0D',
+    //   },
+    //   {
+    //     "tipo": 1,
+    //     "obraId": '-N91Kgcok2qAMS5A8uTD',
+    //     "menu": 6,
+    //     "pedidoId": '-N98U7MTCFdI8v31alTZ',
+    //   },
+    //   {
+    //     "tipo": 1,
+    //     "obraId": '-N91PBV-99_lE1XbSXKW',
+    //     "menu": 2,
+    //     "pedidoId": '-N1JKOJUQ1eVOnTQpKMn',
+    //   },
+    //   {
+    //     "tipo": 1,
+    //     "obraId": '-N91PBV-99_lE1XbSXKW',
+    //     "menu": 2,
+    //     "pedidoId": '-N1JMEh_SsLdl11I2cTg',
+    //   },
+    // ];
   }
 }

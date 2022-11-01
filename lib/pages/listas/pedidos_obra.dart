@@ -1,10 +1,14 @@
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
+import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/socket_service.dart';
+import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class PedidoList extends StatelessWidget {
@@ -164,6 +168,7 @@ class _PedidosByEstado extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context, listen: false);
+    final _socketService = Provider.of<SocketService>(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,6 +202,8 @@ class _PedidosByEstado extends StatelessWidget {
                   return Column(
                     children: [
                       _CustomListTile(
+                        esNovedad: _tieneNovedad(_obraService.obra.id,
+                            pedidos[index]['id'], _socketService),
                         esPar: false,
                         title:
                             "${pedidos[index]['titulo'].toString().toUpperCase()}",
@@ -242,6 +249,14 @@ class _PedidosByEstado extends StatelessWidget {
       ],
     );
   }
+
+  _tieneNovedad(String obraId, String pedidoId, SocketService _socketService) {
+    final dato = (_socketService.novedades ?? []).indexWhere((novedad) =>
+        novedad['tipo'] == 1 &&
+        novedad['obraId'] == obraId &&
+        novedad['pedidoId'] == pedidoId);
+    return dato >= 0;
+  }
 }
 
 class _CustomListTile extends StatelessWidget {
@@ -251,9 +266,11 @@ class _CustomListTile extends StatelessWidget {
   String avatar;
   bool onTap;
   bool textAvatar;
+  bool esNovedad;
   double padding;
   double fontSize;
   IconData iconAvatar;
+
   Function()? actionOnTap;
   _CustomListTile(
       {Key? key,
@@ -261,6 +278,7 @@ class _CustomListTile extends StatelessWidget {
       required this.title,
       required this.subtitle,
       required this.avatar,
+      this.esNovedad = false,
       this.textAvatar = true,
       this.iconAvatar = Icons.abc,
       this.padding = 0,
@@ -298,10 +316,27 @@ class _CustomListTile extends StatelessWidget {
                       color: Helper.brandColors[5], fontSize: fontSize)),
               subtitle: subtitle,
               trailing: onTap
-                  ? Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Helper.brandColors[3],
-                    )
+                  ? Container(
+                      alignment: Alignment.centerRight,
+                      width: 55,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          esNovedad
+                              ? Badge(
+                                  badgeColor: Helper.brandColors[8],
+                                  badgeContent: Padding(
+                                    padding: const EdgeInsets.all(0),
+                                    // child: Text(badgeData.toString()),
+                                  ),
+                                )
+                              : Container(),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: Helper.brandColors[3],
+                          ),
+                        ],
+                      ))
                   : null,
               onTap: actionOnTap,
               leading: Chip(
