@@ -327,7 +327,6 @@ class _Form extends StatelessWidget {
           ? response = await _service.modificarUsuario(miembro)
           : response = await _service.grabarUsuario(miembro);
       closeLoadingDialog(context);
-
       if (response.fallo) {
         edit
             ? openAlertDialog(context, 'No se pudo actualizar el personal',
@@ -345,7 +344,6 @@ class _Form extends StatelessWidget {
       }
     } else {
       closeLoadingDialog(context);
-
       openAlertDialog(context, 'Formulario invalido');
     }
   }

@@ -105,7 +105,6 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
   @override
   void initState() {
     widget.dataFiltrada = widget.data;
-
     super.initState();
   }
 

@@ -1013,6 +1013,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
   @override
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context);
+    final _socketService = Provider.of<SocketService>(context);
 
     return Container(
       decoration: BoxDecoration(color: Helper.brandColors[1]),
@@ -1044,7 +1045,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
             },
           ),
           CustomNavigatorButton(
-            showNotif: false,
+            showNotif: _socketService.novedades.length > 0,
             icono: Icons.notifications_none_rounded,
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
