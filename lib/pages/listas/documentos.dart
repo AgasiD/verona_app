@@ -251,7 +251,9 @@ class _CustomListTile extends StatelessWidget {
               ),
               title: Text(title.toUpperCase(),
                   style: TextStyle(
-                      color: Helper.brandColors[5], fontSize: fontSize)),
+                      overflow: TextOverflow.ellipsis,
+                      color: Helper.brandColors[5],
+                      fontSize: fontSize)),
               subtitle: this.subtitle != ''
                   ? Text(
                       subtitle,

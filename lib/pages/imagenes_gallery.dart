@@ -162,6 +162,7 @@ class ImgGalleryPage extends StatelessWidget {
                                     Text(
                                       e['name'],
                                       style: TextStyle(
+                                          overflow: TextOverflow.ellipsis,
                                           fontSize: 15,
                                           color: Helper.brandColors[3]),
                                     )

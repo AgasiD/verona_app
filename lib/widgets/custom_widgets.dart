@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -367,10 +368,11 @@ class CustomInput extends StatefulWidget {
   final TextInputType teclado;
   final TextEditingController textController;
   final double width;
-  IconButton iconButton;
+  IconButton? iconButton;
   final int? lines;
   final bool validaError;
   final bool enable;
+  final bool readOnly;
   String? Function(String?) validarInput;
   Function(String) onChange;
   static void _passedOnChange(String? input) {}
@@ -390,10 +392,8 @@ class CustomInput extends StatefulWidget {
     this.initialValue = '',
     this.textInputAction = TextInputAction.next,
     this.enable = true,
-    this.iconButton = const IconButton(
-      onPressed: null,
-      icon: Icon(null),
-    ),
+    this.readOnly = false,
+    this.iconButton = null,
     required this.textController,
     this.validarInput = _passedFunction,
     this.onChange = _passedOnChange,
@@ -432,6 +432,7 @@ class _CustomInputState extends State<CustomInput> {
           child: TextFormField(
             textCapitalization: TextCapitalization.sentences,
             enabled: widget.enable,
+            readOnly: widget.readOnly,
             controller: widget.textController,
             maxLines: widget.lines ?? 1,
             autocorrect: false,
@@ -779,7 +780,6 @@ class SecondaryButton extends StatelessWidget {
   }
 }
 
-
 void openBottomSheet(
     BuildContext context, String titulo, String subtitulo, List actions) {
   if (Platform.isIOS) {
@@ -840,7 +840,6 @@ void openBottomSheet(
   }
 }
 
-
 void openDialogConfirmation(
     BuildContext context, Function onPressed, String mensaje) {
   if (Platform.isAndroid) {
@@ -885,7 +884,6 @@ void openDialogConfirmation(
   }
 }
 
-
 openLoadingDialog(BuildContext context, {String mensaje = ''}) {
   if (Platform.isAndroid) {
     showDialog(
@@ -906,7 +904,6 @@ void closeLoadingDialog(BuildContext context) {
     Navigator.of(context, rootNavigator: true).pop();
   }
 }
-
 
 void openAlertDialog(BuildContext context, String mensaje,
     {String? subMensaje}) {

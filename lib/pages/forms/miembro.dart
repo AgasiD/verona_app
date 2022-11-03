@@ -340,12 +340,8 @@ class _Form extends StatelessWidget {
             : openAlertDialog(context, 'Personal creado');
         resetForm();
         Timer(Duration(milliseconds: 750), () => Navigator.pop(context));
-        Timer(
-            Duration(milliseconds: 750),
-            () => edit
-                ? Navigator.pop(context)
-                : Navigator.of(context)
-                    .popAndPushNamed(AsignarEquipoPage.routeName));
+        Timer(Duration(milliseconds: 750),
+            () => edit ? Navigator.pop(context) : Navigator.pop(context));
       }
     } else {
       closeLoadingDialog(context);
