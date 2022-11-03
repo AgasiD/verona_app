@@ -235,18 +235,14 @@ class _FormState extends State<_Form> {
                       child: Column(
                         children: [
                           CustomInput(
-                            enable: editableByEstado(0),
-                            hintText: 'Titulo del pedido',
+                            readOnly: !habilitaEdicion(),
+                            hintText: 'Título del pedido',
                             icono: Icons.title,
                             textController: titleTxtController,
                             lines: 1,
-                            onChange: ((p0) => print('hola')),
                           ),
                           CustomInput(
-                            enable: editableByEstado(0) ||
-                                permiteVerByEstado([1]) && esCreador() ||
-                                permiteVerByEstado([1, 2, 3, 4]) &&
-                                    permiteVerByRole([1, 5]),
+                            readOnly: !habilitaEdicion(),
                             hintText: 'Detallar solicitud de materiales',
                             icono: Icons.description_outlined,
                             teclado: TextInputType.multiline,
@@ -292,36 +288,43 @@ class _FormState extends State<_Form> {
                                   },
                                   child: Text('Exportar PDF detalle'))
                               : Container(),
-                          DropdownButtonFormField2(
-                            value: prioridad,
-                            items: prioridades,
-                            style: TextStyle(
-                                color: Helper.brandColors[5], fontSize: 16),
-                            iconSize: 30,
-                            buttonHeight: 60,
-                            buttonPadding: EdgeInsets.only(left: 20, right: 10),
-                            decoration: getDecoration(),
-                            hint: Text(
-                              'Seleccione prioridad',
-                              style: TextStyle(fontSize: 16, color: colorHint),
-                            ),
-                            icon: Icon(
-                              Icons.arrow_drop_down,
-                              color: colorHint,
-                            ),
-                            dropdownDecoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Helper.brandColors[2],
-                            ),
-                            onChanged: (value) {
-                              prioridad = value as int;
-                            },
-                          ),
+                          Theme(
+                              data: Theme.of(context).copyWith(
+                                  disabledColor: Helper.brandColors[3]),
+                              child: DropdownButtonFormField2(
+                                value: prioridad,
+                                items: prioridades,
+                                style: TextStyle(
+                                    color: Helper.brandColors[5], fontSize: 16),
+                                iconSize: 30,
+                                buttonHeight: 60,
+                                buttonPadding:
+                                    EdgeInsets.only(left: 20, right: 10),
+                                decoration: getDecoration(),
+                                hint: Text(
+                                  'Seleccione prioridad',
+                                  style:
+                                      TextStyle(fontSize: 16, color: colorHint),
+                                ),
+                                icon: Icon(
+                                  Icons.arrow_drop_down,
+                                  color: colorHint,
+                                ),
+                                dropdownDecoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Helper.brandColors[2],
+                                ),
+                                onChanged: (habilitaEdicion())
+                                    ? (value) {
+                                        prioridad = value as int;
+                                      }
+                                    : null,
+                              )),
                           SizedBox(
                             height: 20,
                           ),
                           permiteVerByEstado([0, 1, 2, 3]) &&
-                                  permiteVerByRole([1, 2, 4, 5, 6])
+                                  !permiteVerByRole([3])
                               ? Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -332,7 +335,8 @@ class _FormState extends State<_Form> {
                                           color: Helper.brandColors[5]),
                                     ),
                                     CustomInput(
-                                      enable: editableByEstado(0),
+                                      readOnly: true,
+                                      enable: habilitaEdicion(),
                                       width: 200,
                                       hintText: ('Fecha').toUpperCase(),
                                       icono: null,
@@ -441,22 +445,28 @@ class _FormState extends State<_Form> {
                                                       Helper.brandColors[8],
                                                   inactiveTrackColor:
                                                       Helper.brandColors[3],
-                                                  onChanged:
-                                                      !permiteVerByEstado([5])
-                                                          ? (enStock) {
-                                                              setState(() {
-                                                                if (!enStock) {
-                                                                  widget.pedido!
-                                                                      .estado = 2;
-                                                                } else {
-                                                                  widget.pedido!
-                                                                      .estado = 3;
-                                                                }
-                                                                pedidoEnStock =
-                                                                    enStock;
-                                                              });
+                                                  onChanged: !permiteVerByEstado(
+                                                              [5]) &&
+                                                          (
+                                                              // Habilitado para admin (1)
+                                                              permiteVerByEstado(
+                                                                      [2, 3]) &&
+                                                                  permiteVerByRole(
+                                                                      [5, 1]))
+                                                      ? (enStock) {
+                                                          setState(() {
+                                                            if (!enStock) {
+                                                              widget.pedido!
+                                                                  .estado = 2;
+                                                            } else {
+                                                              widget.pedido!
+                                                                  .estado = 3;
                                                             }
-                                                          : null,
+                                                            pedidoEnStock =
+                                                                enStock;
+                                                          });
+                                                        }
+                                                      : null,
                                                 )
                                               ],
                                             )
@@ -480,6 +490,7 @@ class _FormState extends State<_Form> {
                                                         Helper.brandColors[5]),
                                               ),
                                               CustomInput(
+                                                readOnly: true,
                                                 enable:
                                                     permiteVerByRole([1, 5]) &&
                                                         permiteVerByEstado(
@@ -914,7 +925,10 @@ class _FormState extends State<_Form> {
         break;
       case 1: // PEDIDO SIN CONFIRMAR
         widget.pedido!.nota = areaTxtController.text;
+        widget.pedido!.prioridad = prioridad;
+        widget.pedido!.titulo = titleTxtController.text;
         response = await _obraService.editPedido(widget.pedido!);
+
         if (response.fallo) {
           return [true, response.error];
         } else {
@@ -923,7 +937,8 @@ class _FormState extends State<_Form> {
         break;
       case 2: // PEDIDO CONFIRMADO. PENDIENTE DE COMPRA
         widget.pedido!.nota = areaTxtController.text;
-
+        widget.pedido!.prioridad = prioridad;
+        widget.pedido!.titulo = titleTxtController.text;
         response = await _obraService.editPedido(widget.pedido!);
         if (response.fallo) {
           return [true, response.error];
@@ -1127,5 +1142,15 @@ class _FormState extends State<_Form> {
         'chatName': response.data['chatName'],
       });
     }
+  }
+
+  habilitaEdicion() {
+    return editableByEstado(0) || // Habiltado para todos al crear
+        permiteVerByRole([1]) || // Habilitado para admin (1)
+        permiteVerByEstado([1]) &&
+            esCreador() || // Habilitado para creador antes de confirmar por compras (5)
+        permiteVerByEstado([1, 2]) &&
+            permiteVerByRole(
+                [5]); // habilitado para compras(5) antes de asignar
   }
 }

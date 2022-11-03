@@ -138,7 +138,9 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                 : IconButton(
                     color: Helper.brandColors[4],
                     icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
-                    onPressed: null,
+                    onPressed: () => Navigator.pushNamed(
+                        context, MiembroForm.routeName,
+                        arguments: {}),
                   ),
             textController: widget.txtController,
             onChange: (text) {
@@ -175,9 +177,8 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                           esPar: esPar,
                           title: widget.dataFiltrada[index]['title'],
                           subtitle: widget.dataFiltrada[index]['subtitle'],
-                          avatar: widget.dataFiltrada[index]['avatar']
-                              .toString()
-                              .toUpperCase(),
+                          avatar:
+                              widget.dataFiltrada[index]['avatar'].toString(),
                           fontSize: 18,
                           onTap: true,
                           actionOnTap: () => Navigator.pushNamed(
