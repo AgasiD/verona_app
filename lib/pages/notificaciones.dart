@@ -163,9 +163,28 @@ class _CustomListViewState extends State<_CustomListView> {
     final tsAyer = today.subtract(Duration(days: 1)).millisecondsSinceEpoch;
     List notificaciones = [];
 
+// Notificaciones HOY
+    final notificacionesNoLeidas =
+        widget.data.where((notif) => !notif['leido']);
+
+    if (notificacionesNoLeidas.length > 0) {
+      notificaciones.add(Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: Text(
+            'No leidas',
+            style: TextStyle(
+                fontSize: 15,
+                color: Helper.brandColors[8],
+                fontWeight: FontWeight.bold),
+          )));
+      notificaciones.addAll(notificacionesNoLeidas);
+    }
+
     // Notificaciones HOY
     final notificacionesHoy =
-        widget.data.where((notif) => tsToday < notif['ts']);
+        widget.data.where((notif) => tsToday < notif['ts'] && notif['leido']);
 
     if (notificacionesHoy.length > 0) {
       notificaciones.add(Container(
@@ -182,8 +201,8 @@ class _CustomListViewState extends State<_CustomListView> {
       notificaciones.addAll(notificacionesHoy);
     }
 
-    final notificacionesAyer = widget.data
-        .where((notif) => tsAyer < notif['ts'] && tsToday > notif['ts']);
+    final notificacionesAyer = widget.data.where((notif) =>
+        tsAyer < notif['ts'] && tsToday > notif['ts'] && notif['leido']);
 
     if (notificacionesAyer.length > 0) {
       notificaciones.add(
@@ -215,7 +234,8 @@ class _CustomListViewState extends State<_CustomListView> {
                 fontWeight: FontWeight.bold),
           )),
     );
-    notificaciones.addAll(widget.data.where((notif) => tsAyer >= notif['ts']));
+    notificaciones.addAll(
+        widget.data.where((notif) => tsAyer >= notif['ts'] && notif['leido']));
 
     final notificacionesAnteriores =
         widget.data.where((notif) => tsAyer >= notif['ts']);

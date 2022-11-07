@@ -56,8 +56,8 @@ class SocketService with ChangeNotifier {
     });
   }
 
-  void quitarNovedad(usuarioId, novedadId) {
-    this._socket.emit('quitar-novedad', {usuarioId, novedadId});
+  void quitarNovedad(usuarioId, novedadesId) {
+    this._socket.emit('quitar-novedad', {usuarioId, novedadesId});
   }
 
   toConnect(clientId) {

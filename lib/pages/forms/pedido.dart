@@ -81,7 +81,7 @@ class PedidoForm extends StatelessWidget implements MyForm {
 
     if (dato.length == 0) return;
     final _pref = Preferences();
-    _socketService.quitarNovedad(_pref.id, dato.first['id']);
+    _socketService.quitarNovedad(_pref.id, dato.map((e) => e['id']).toList());
   }
 }
 
