@@ -82,7 +82,6 @@ class NotificationService extends ChangeNotifier {
   static Future _onTerminated(RemoteMessage message) async {
     Preferences pref = new Preferences();
 
-    print('_onTerminated');
     pref.type = 'onTerminated';
     message.data["navega"] = true;
     message.data.addAll({"navega": true});
@@ -195,6 +194,11 @@ class NotificationService extends ChangeNotifier {
           default:
             switch (type) {
               case 'message':
+                final detalleGrupo = notif.data['individual'] == 'false'
+                    ? notif.data['externo'] == 'true'
+                        ? ' (externo)'
+                        : ' (interno)'
+                    : '';
                 snackBar = SnackBar(
                   duration: Duration(seconds: 3),
                   action: SnackBarAction(
@@ -205,7 +209,7 @@ class NotificationService extends ChangeNotifier {
                             'chatName': notif.data['chatName']
                           })),
                   content: Text(
-                    'Nuevo mensaje de ${notif.data['chatName']}',
+                    'Nuevo mensaje de ${notif.data['chatName']} $detalleGrupo',
                     // textAlign: TextAlign.center,
                     // style: style,
                   ),

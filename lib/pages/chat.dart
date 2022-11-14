@@ -49,7 +49,8 @@ class _ChatPageState extends State<ChatPage>
     final chatId = arguments['chatId'];
 
     final txtController = TextEditingController();
-
+    final _socketService = Provider.of<SocketService>(context, listen: false);
+    quitarNovedad(chatId, _socketService);
     return Container(
       color: Colors.white,
       child: FutureBuilder(
@@ -73,6 +74,15 @@ class _ChatPageState extends State<ChatPage>
             }
           }),
     );
+  }
+
+  void quitarNovedad(String chatId, SocketService _socketService) {
+    final dato = (_socketService.novedades ?? []).where(
+        (novedad) => novedad['tipo'] == 1 && novedad['chatId'] == chatId);
+
+    if (dato.length == 0) return;
+    final _pref = Preferences();
+    _socketService.quitarNovedad(_pref.id, dato.map((e) => e['id']).toList());
   }
 }
 

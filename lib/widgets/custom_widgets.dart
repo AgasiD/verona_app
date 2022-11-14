@@ -1045,7 +1045,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
             },
           ),
           CustomNavigatorButton(
-            showNotif: _socketService.novedades.length > 0,
+            showNotif: _socketService.tieneNovedadesNotif(),
             icono: Icons.notifications_none_rounded,
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
@@ -1307,7 +1307,12 @@ class _ChatsListState extends State<ChatsList> {
   late SocketService _socketService;
   Preferences _pref = new Preferences();
   String txtBuscar = '';
+
   @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     dataFiltrada = widget.data;

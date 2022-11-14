@@ -197,14 +197,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
       _socket.socket.on('nuevo-mensaje', (data) {
         //Escucha mensajes del servidor
-        Vibration.vibrate(duration: 5, amplitude: 10);
+        if (data['from'] != _pref.id)
+          Vibration.vibrate(duration: 5, amplitude: 10);
         // final snackBar = _initSnackMessage(data, navigatorKey);
 
         Navigator.of(navigatorKey.currentContext!).popUntil((route) {
           if (!route.settings.name!.contains('chat')) {
             // messengerKey.currentState?.showSnackBar(snackBar);
-            _chatService.tieneMensaje = true;
-            _chatService.notifyListeners();
+            if (data['individual'] ?? true) {
+              _chatService.tieneMensaje = true;
+              _chatService.notifyListeners();
+            }
           }
           return true;
         });

@@ -35,7 +35,7 @@ class _ChatListState extends State<ChatList> with RouteAware {
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final _pref = new Preferences();
     _socketService.connect(_pref.id);
-
+    print('reinicio chatlist');
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
@@ -50,12 +50,12 @@ class _ChatListState extends State<ChatList> with RouteAware {
                   final chats = response.data as List;
 
                   if (chats.length > 0) {
-                    final chatsUsuario = chats
-                        .map((e) => {
-                              "chatId": e["chatId"],
-                              "mensajeLeido": e['mensajeLeido'] ?? 0
-                            })
-                        .toList();
+                    // final chatsUsuario = chats
+                    //     .map((e) => {
+                    //           "chatId": e["chatId"],
+                    //           "mensajeLeido": e['mensajeLeido'] ?? 0
+                    //         })
+                    //     .toList();
                     return _UsuariosChats(
                         chats: chats,
                         // usuario: chats,
@@ -107,8 +107,6 @@ class _UsuariosChats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _chatService = Provider.of<ChatService>(context, listen: false);
-
     return ChatsList(
       data: chats,
       txtController: txtController,

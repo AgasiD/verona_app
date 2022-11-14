@@ -5,6 +5,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/obra.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -14,6 +15,9 @@ class NotificacionesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _socketService = Provider.of<SocketService>(context);
+    final _pref = new Preferences();
+    _socketService.connect(_pref.id);
     return Scaffold(
       body: Container(
           color: Helper.brandColors[1],
@@ -173,7 +177,7 @@ class _CustomListViewState extends State<_CustomListView> {
           width: double.infinity,
           alignment: Alignment.center,
           child: Text(
-            'No leidas',
+            'No leídas',
             style: TextStyle(
                 fontSize: 15,
                 color: Helper.brandColors[8],

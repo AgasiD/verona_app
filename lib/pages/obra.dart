@@ -25,8 +25,8 @@ import 'package:verona_app/widgets/custom_widgets.dart';
 class ObraPage extends StatelessWidget {
   static const String routeName = 'obra';
 
-  const ObraPage({Key? key}) : super(key: key);
-
+  ObraPage({Key? key}) : super(key: key);
+  late SocketService _socketService;
   @override
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
@@ -34,6 +34,7 @@ class ObraPage extends StatelessWidget {
     final _service = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
     final esDelivery = _pref.role == 6;
+    _socketService = Provider.of<SocketService>(context);
 
     return Scaffold(
         bottomNavigationBar: CustomNavigatorFooter(),
@@ -141,7 +142,10 @@ class ObraPage extends StatelessWidget {
                                                                     obra.chatI
                                                               });
                                                         },
-                                                        showNotif: false,
+                                                        showNotif:
+                                                            tieneMensajeSinLeer(
+                                                                obra.nombre,
+                                                                obra.chatI),
                                                       )
                                                     : Container(width: 60),
                                                 CustomNavigatorButton(
@@ -169,7 +173,10 @@ class ObraPage extends StatelessWidget {
                                                               });
                                                     ;
                                                   },
-                                                  showNotif: false,
+                                                  showNotif:
+                                                      tieneMensajeSinLeer(
+                                                          obra.nombre,
+                                                          obra.chatE),
                                                 )
                                               ],
                                             ),
@@ -261,6 +268,16 @@ class ObraPage extends StatelessWidget {
                     ));
               }
             }));
+  }
+
+  tieneMensajeSinLeer(String obraId, String chatId) {
+    {
+      final dato = _socketService.novedades.indexWhere((novedad) =>
+          novedad['tipo'] == 1 &&
+          novedad['chatId'] == chatId &&
+          novedad['menu'] == 7);
+      return dato >= 0;
+    }
   }
 }
 

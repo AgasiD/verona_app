@@ -18,7 +18,6 @@ class SocketService with ChangeNotifier {
   bool conectando = false;
   List<dynamic> novedades = [];
   void connect(clientId) {
-    print(conectando);
     if (clientId != null && clientId.toString().trim() != '' && !conectando) {
       conectando = true;
       final url = Environment.isProduction
@@ -51,7 +50,6 @@ class SocketService with ChangeNotifier {
   obtenerNovedad() {
     socket.on('novedad', (data) {
       novedades = data ?? [];
-      print('actualiza novedades');
       notifyListeners();
     });
   }
@@ -119,6 +117,10 @@ class SocketService with ChangeNotifier {
 
   void agregarInactividad(Inactividad inactividad, String obraId) async {
     this._socket.emit('nueva-inactividad', [inactividad.toMap(), obraId]);
+  }
+
+  tieneNovedadesNotif() {
+    return novedades.where((novedad) => novedad['menu'] < 7).length > 0;
   }
 }
 
