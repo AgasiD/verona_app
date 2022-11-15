@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -14,8 +15,7 @@ import 'package:win32/win32.dart';
 class PasswordPage extends StatelessWidget {
   static const String routeName = 'password';
 
-  const PasswordPage({Key? key}) : super(key: key);
-
+  PasswordPage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     double width = double.infinity;
@@ -26,22 +26,26 @@ class PasswordPage extends StatelessWidget {
     }
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
-      body: SafeArea(
-          child: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        child: Container(
-          width: width,
-          height: MediaQuery.of(context).size.height * .9,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _Logo(),
-              _Form(),
-              _Labels(),
-            ],
+      body: Container(
+        color: Helper.brandColors[1],
+        child: SafeArea(
+            child: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          child: Container(
+            width: width,
+            height: MediaQuery.of(context).size.height * .9,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _Logo(),
+                _Form(),
+                // _Labels(),
+              ],
+            ),
           ),
-        ),
-      )),
+        )),
+      ),
+      bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
 }
@@ -56,7 +60,7 @@ class _Logo extends StatelessWidget {
       child: Column(
         children: [
           Image(
-            image: AssetImage('assets/logo.png'),
+            image: AssetImage('assets/isotipo2.png'),
             height: 290,
           ),
         ],
@@ -77,24 +81,27 @@ class __FormState extends State<_Form> {
   final passCtrl = TextEditingController();
   final newPassCtrl = TextEditingController();
   final reNewPassCtrl = TextEditingController();
+  late String usuarioId;
   @override
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context);
 
+    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    usuarioId = arguments['usuarioId'];
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 50),
         child: Column(children: [
-          CustomInput(
-            hintText: 'Usuario',
-            icono: Icons.person_outline,
-            textController: emailCtrl,
-          ),
-          CustomInput(
-            hintText: 'Contraseña',
-            icono: Icons.password_outlined,
-            textController: passCtrl,
-            isPassword: true,
-          ),
+          // CustomInput(
+          //   hintText: 'Usuario',
+          //   icono: Icons.person_outline,
+          //   textController: emailCtrl,
+          // ),
+          // CustomInput(
+          //   hintText: 'Contraseña actual',
+          //   icono: Icons.password_outlined,
+          //   textController: passCtrl,
+          //   isPassword: true,
+          // ),
           CustomInput(
             hintText: 'Nueva contraseña',
             icono: Icons.password_outlined,
@@ -119,7 +126,7 @@ class __FormState extends State<_Form> {
                 final formValid = validarFormulario();
                 if (formValid) {
                   final body = {
-                    "username": emailCtrl.text,
+                    "usuarioId": usuarioId,
                     "password": passCtrl.text,
                     "newpass": newPassCtrl.text
                   };

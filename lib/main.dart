@@ -1,19 +1,20 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/pages/chat.dart';
-import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/login.dart';
-import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/routes/routes.dart';
 import 'package:verona_app/services/auth_service.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
+import 'package:verona_app/services/image_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -29,6 +30,9 @@ void main() async {
   final pref = new Preferences();
   await pref.initPrefs();
   await NotificationService.initializeApp();
+  final RemoteMessage? _message =
+      await NotificationService.messaging.getInitialMessage();
+  NotificationService.initMessage = _message;
 
   await dotenv.load(fileName: Environment.fileName);
 
@@ -66,6 +70,10 @@ class _AppStateState extends State<AppState> {
           lazy: false,
         ),
         ChangeNotifierProvider(
+          create: (_) => ImageService(),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
           create: (_) => NotificationService(),
           lazy: false,
         ),
@@ -100,7 +108,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       new GlobalKey<ScaffoldMessengerState>();
   final GlobalKey<NavigatorState> navigatorKey =
       new GlobalKey<NavigatorState>();
-  static late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  // static late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   @override
   void initState() {
     super.initState();
@@ -109,82 +117,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final _pref = new Preferences();
 
     NotificationService.messagesStream.listen((notif) async {
-      //SOLO SE DISPARA CUANDO ESTA LA APP ABIERTA
-      print(StackTrace.current.toString() +
-          '-----------NUEVA NOTIFICACION-----------');
-      final type = notif.data["type"];
-      if (notif.data["navega"] ?? false) {
-        switch (type) {
-          case 'message':
-            navigatorKey.currentState!.pushNamed(ChatPage.routeName,
-                arguments: {
-                  "chatId": notif.data["chatId"],
-                  "chatName": notif.data["chatName"]
-                });
-            break;
-          case 'new-obra':
-            //Si es una nueva obra
-            if (notif.data["type"] == 'new-obra') {
-              final _obraService =
-                  Provider.of<ObraService>(context, listen: false);
-              _obraService.notifyListeners();
-            }
-            navigatorKey.currentState!.pushNamed(ObraPage.routeName,
-                arguments: {"obraId": notif.data["obraId"]});
-            break;
-
-          case 'pedido':
-            final _obraService =
-                Provider.of<ObraService>(context, listen: false);
-            if (_obraService.obra.id == '') {
-              final obra = await _obraService.obtenerObra(notif.data['obraId']);
-              _obraService.obra = obra;
-            }
-            navigatorKey.currentState!
-                .pushNamed(PedidoForm.routeName, arguments: {
-              'pedidoId': notif.data['pedidoId'],
-              'obraId': notif.data['obraId'],
-            });
-            break;
-        }
-      } else {
-        // si no navega y
-        Navigator.of(navigatorKey.currentContext!).popUntil((route) {
-          final snackBar = SnackBar(
-            content: Text(notif.notification!.title ?? 'Sin titulo'),
-          );
-          if (!route.settings.name!.contains('chat')) {
-            messengerKey.currentState?.showSnackBar(snackBar);
-          } else {
-            Map<String, dynamic> args =
-                route.settings.arguments as Map<String, dynamic>;
-            final chatId = args["chatId"];
-            final data = notif.data;
-            if (data['chatId'] != chatId) {
-              messengerKey.currentState?.showSnackBar(snackBar);
-            }
-          }
-          return true;
-        });
-
-        //Si es un nuevo mensaje o cambios en obra
-        final _usuarioService =
-            Provider.of<UsuarioService>(context, listen: false);
-        if (notif.data["type"] == 'message') {
-          _usuarioService.notifyListeners();
-        }
-        //Si es una nueva obra
-        if (notif.data["type"] == 'new-obra') {
-          final _obraService = Provider.of<ObraService>(context, listen: false);
-          _obraService.notifyListeners();
-          _usuarioService.notifyListeners();
-        }
-        if (notif.data["type"] == 'inactivity') {
-          final _obraService = Provider.of<ObraService>(context, listen: false);
-          _obraService.notifyListeners();
-          _usuarioService.notifyListeners();
-        }
-      }
+      /* SE EJECUTA CUANDO SE RECIBE UNA NOTIFICACION PUSH */
+      await NotificationService.manageNotification(
+          notif, navigatorKey, messengerKey, context);
     });
   }
 
@@ -193,6 +128,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
+
     _isInForeground = state == AppLifecycleState.resumed;
 
     if (_isInForeground) {
@@ -239,7 +175,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     late String initalRoute;
     initalRoute = !_pref.logged ? LoginPage.routeName : ObrasPage.routeName;
     final _chatService = Provider.of<ChatService>(context, listen: false);
-
     final _socket = Provider.of<SocketService>(context, listen: false);
 
     if (_pref.logged) {
@@ -262,21 +197,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
       _socket.socket.on('nuevo-mensaje', (data) {
         //Escucha mensajes del servidor
-        // setUltimoMensaje(mensaje);
-        Vibration.vibrate(duration: 5, amplitude: 10);
-        print('Nuevo mensaje');
-        final snackBar = _initSnackMessage(data, navigatorKey);
+        if (data['from'] != _pref.id)
+          Vibration.vibrate(duration: 5, amplitude: 10);
+        // final snackBar = _initSnackMessage(data, navigatorKey);
 
         Navigator.of(navigatorKey.currentContext!).popUntil((route) {
           if (!route.settings.name!.contains('chat')) {
-            messengerKey.currentState?.showSnackBar(snackBar);
-            _chatService.tieneMensaje = true;
-            _chatService.notifyListeners();
+            // messengerKey.currentState?.showSnackBar(snackBar);
+            if (data['individual'] ?? true) {
+              _chatService.tieneMensaje = true;
+            }
           }
           return true;
         });
         _chatService.notifyListeners();
       });
+
+      _socket.socket.on('actualizarChatList', ((data) {
+        _chatService.notifyListeners();
+      }));
 
       _socket.socket.on('message', (data) {
         final _usuarioService =
@@ -291,9 +230,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
 
     return MaterialApp(
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: const [
+        Locale('es', ''),
+      ],
       debugShowCheckedModeBanner: false,
       title: 'Verona App',
       initialRoute: initalRoute,
+
       navigatorKey: navigatorKey, // Navegar
       scaffoldMessengerKey: messengerKey, // Snacks
       routes: appRoutes,

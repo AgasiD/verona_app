@@ -4,7 +4,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:image_fade/image_fade.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -12,14 +14,17 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/pages/forms/miembro.dart';
+import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/obra.dart';
+import 'package:verona_app/pages/perfil.dart';
+import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
+import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ObrasPage extends StatefulWidget {
@@ -65,11 +70,52 @@ class _ObrasPageState extends State<ObrasPage> {
     final _pref = new Preferences();
 
     // _socketService.connect(_pref.id);
+
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      if (NotificationService.initMessage != null) {
+        final notif = NotificationService.initMessage;
+        NotificationService.initMessage = null;
+
+        final type = notif!.data['type'];
+        switch (type) {
+          case 'message':
+            Navigator.pushNamed(context, ChatPage.routeName, arguments: {
+              "chatId": notif.data["chatId"],
+              "chatName": notif.data["chatName"]
+            });
+            break;
+          case 'new-obra':
+            //Si es una nueva obra
+            if (notif.data["type"] == 'new-obra') {
+              final _obraService =
+                  Provider.of<ObraService>(context, listen: false);
+              _obraService.notifyListeners();
+            }
+            Navigator.pushNamed(context, ObraPage.routeName,
+                arguments: {"obraId": notif.data["obraId"]});
+            break;
+
+          case 'pedido':
+            final _obraService =
+                Provider.of<ObraService>(context, listen: false);
+            if (_obraService.obra.id == '') {
+              // final obra = await _obraService.obtenerObra(notif.data['obraId']);
+              // _obraService.obra = obra;
+            }
+            Navigator.pushNamed(context, PedidoForm.routeName, arguments: {
+              'pedidoId': notif.data['pedidoId'],
+              'obraId': notif.data['obraId'],
+            });
+            break;
+        }
+      }
+    });
   }
 
   List<Obra> obras = [];
   List<Obra> obrasFiltradas = [];
   int cant = 0;
+
   @override
   Widget build(BuildContext context) {
     ObraService _obras = Provider.of<ObraService>(context);
@@ -81,9 +127,25 @@ class _ObrasPageState extends State<ObrasPage> {
         : header = MaterialClassicHeader();
     final textStyle = TextStyle(fontSize: 16, color: Helper.brandColors[4]);
     final menu = [
-      {'name': 'Nuevo propietario', 'route': PropietarioForm.routeName},
-      {'name': 'Personal', 'route': PersonalADM.routeName},
+      {
+        'icon': Icons.person_pin_rounded,
+        'name': 'Mi perfil',
+        'route': PerfilPage.routeName,
+        'args': {'usuarioId': _pref.id}
+      },
+      {
+        'icon': Icons.person_add_alt_sharp,
+        'name': 'Nuevo propietario',
+        'route': PropietarioForm.routeName
+      },
+      {
+        'icon': Icons.group_sharp,
+        'name': 'Personal',
+        'route': PersonalADM.routeName
+      },
     ];
+    final GlobalKey<ScaffoldState> _scaffoldKey =
+        new GlobalKey<ScaffoldState>();
 
     return Scaffold(
       drawer: CustomDrawer(textStyle: textStyle, menu: menu),
@@ -99,41 +161,6 @@ class _ObrasPageState extends State<ObrasPage> {
                 child: _SearchListView(obras: obras))),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
-    );
-  }
-
-  Padding _obraCard(BuildContext context, Obra obra) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, ObraPage.routeName,
-            arguments: {'nameForm': PedidoForm.routeName, 'obraId': obra.id}),
-        child: Card(
-          elevation: 5,
-          child: Column(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
-                // child: Hero(
-                //   tag: 'obra',
-                child: FadeInImage(
-                    width: MediaQuery.of(context).size.width * .4,
-                    image: AssetImage(
-                        'assets/image.png'), //NetworkImage(obra.imagen),
-                    placeholder: AssetImage('assets/image.png')),
-                // ),
-              ),
-              ListTile(
-                title: Text(obra.nombre),
-                subtitle: Text(
-                    'Tareas preliminares'), //obra.estadios.last.descripcion
-              )
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -289,12 +316,14 @@ class _CustomObrasState extends State<_CustomObras> {
 }
 
 Container _obraCard(BuildContext context, Obra obra) {
-  var imagen = obra.imageId == ''
+  var imagen = obra.imageURL == ''
       ? Helper.imageNetwork(
           'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-      : Helper.imageNetwork('https://drive.google.com/uc?id=${obra.imageId}'
+      : Helper.imageNetwork(obra.imageURL
           // 'https://drive.google.com/uc?export=view&id=${obra.imageId}',
           );
+  final _socketService = Provider.of<SocketService>(context);
+
   return Container(
     margin: EdgeInsets.symmetric(horizontal: 15),
     child: GestureDetector(
@@ -305,64 +334,97 @@ Container _obraCard(BuildContext context, Obra obra) {
             elevation: 10,
             color: Helper.brandColors[2],
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 10),
-                  width: MediaQuery.of(context).size.width * .4,
-                  child: Column(children: [
-                    Text(obra.nombre,
-                        style: TextStyle(
-                            color: Helper.brandColors[3],
-                            fontSize: 21,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(obra.lote,
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Helper.brandColors[8],
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      child: Column(
+                  width: MediaQuery.of(context).size.width * .47,
+                  child: Stack(children: [
+                    tieneNovedad(obra.id, _socketService)
+                        ? Positioned(
+                            top: 10,
+                            left: 10,
+                            child: Badge(
+                              badgeColor: Helper.brandColors[8],
+                              badgeContent: Padding(
+                                padding: const EdgeInsets.all(0),
+                                // child: Text(badgeData.toString()),
+                              ),
+                            ))
+                        : Container(),
+                    Column(
+                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text('${(obra.porcentajeRealizado).toString()}%',
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(obra.nombre,
+                                  style: TextStyle(
+                                      color: Helper.brandColors[3],
+                                      fontSize: 21,
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(obra.lote,
                               style: TextStyle(
-                                  color: Helper.brandColors[3],
-                                  fontSize: 15,
+                                  fontSize: 18,
+                                  color: Helper.brandColors[8],
                                   fontWeight: FontWeight.bold)),
+                          SizedBox(
+                            height: 10,
+                          ),
                           Container(
-                            margin: EdgeInsets.symmetric(vertical: 3),
-                            padding: EdgeInsets.symmetric(horizontal: 30),
-                            child: LinearProgressIndicator(
-                              value: obra.porcentajeRealizado / 100,
-                              semanticsLabel: 'HoLA',
-                              backgroundColor: Helper.brandColors[3],
-                              color: Helper.brandColors[8],
+                            // alignment: Alignment.topRight,
+                            margin: EdgeInsets.only(bottom: 10),
+                            child: Column(
+                              children: [
+                                Text(
+                                    '${(obra.porcentajeRealizado).toString()}%',
+                                    style: TextStyle(
+                                        color: Helper.brandColors[3],
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold)),
+                                Container(
+                                  margin: EdgeInsets.symmetric(vertical: 3),
+                                  padding: EdgeInsets.symmetric(horizontal: 30),
+                                  child: LinearProgressIndicator(
+                                    value: obra.porcentajeRealizado / 100,
+                                    semanticsLabel: 'HoLA',
+                                    backgroundColor: Helper.brandColors[3],
+                                    color: Helper.brandColors[8],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    // Text('', style: TextStyle(color: Helper.brandColors[3])),
+                          // Text('', style: TextStyle(color: Helper.brandColors[3])),
+                        ]),
                   ]),
                 ),
-                Hero(
-                  tag: obra.id,
-                  child: FadeInImage(
-                      width: MediaQuery.of(context).size.width * .48,
-                      image: imagen,
-                      imageErrorBuilder: (_, obj, st) {
-                        return Container(
-                            child: Image(
-                                width: MediaQuery.of(context).size.width * .47,
-                                image: AssetImage('assets/image.png')));
-                      },
-                      placeholder: AssetImage('assets/loading-image.gif')),
+                // Hero(
+                //   tag: obra.id,
+                //   child:
+                // Image(image: image, loadingBuilder: ),
+                ImageFade(
+                  width: MediaQuery.of(context).size.width * .43,
+                  height: 120,
+                  image: NetworkImage(obra.imageURL),
+                  loadingBuilder: (context, progress, chunkEvent) => Center(
+                      child: CircularProgressIndicator(
+                    value: progress,
+                    color: Helper.brandColors[8],
+                  )),
+
+                  // displayed when an error occurs:
+                  errorBuilder: (context, error) => Container(
+                    color: Helper.brandColors[8],
+                    alignment: Alignment.center,
+                    child: Image(image: AssetImage('assets/image.png')),
+                  ),
                 ),
               ],
             ),
@@ -371,6 +433,12 @@ Container _obraCard(BuildContext context, Obra obra) {
   );
 }
 
-NetworkImage _CustomNetworkImage(String imageId) {
-  return NetworkImage('https://drive.google.com/uc?id=$imageId');
+tieneNovedad(String obraId, SocketService _socketService) {
+  final dato = _socketService.novedades.indexWhere(
+      (novedad) => novedad['tipo'] == 1 && novedad['obraId'] == obraId);
+  return dato >= 0;
+}
+
+NetworkImage _CustomNetworkImage(String url) {
+  return NetworkImage(url);
 }

@@ -28,7 +28,7 @@ final TextEditingController txtDNICtrl = TextEditingController();
 final TextEditingController txtTelefonoCtrl = TextEditingController();
 final TextEditingController txtMailCtrl = TextEditingController();
 String personalSelected = '2';
-late String usuarioId;
+late String? usuarioId;
 
 class _MiembroFormState extends State<MiembroForm> {
   @override
@@ -130,10 +130,17 @@ class _Form extends StatelessWidget {
       value: '6',
       child: Text('Repartidor'),
     ),
+    DropdownMenuItem<String>(
+      value: '1',
+      child: Text('Admin'),
+    ),
   ];
+  final profileURL = '';
+
   @override
   Widget build(BuildContext context) {
     final colorHint = Helper.brandColors[3];
+
     return Container(
       color: Helper.brandColors[2],
       padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
@@ -185,6 +192,7 @@ class _Form extends StatelessWidget {
                       textController: txtDNICtrl,
                       teclado: TextInputType.number,
                       validaError: true,
+                      // enable: !edit,
                       validarInput: (value) => Helper.validNumeros(value),
                     ),
                     CustomInput(
@@ -307,7 +315,7 @@ class _Form extends StatelessWidget {
 
     if (isValid) {
       final miembro = Miembro(
-          id: edit ? usuarioId : '',
+          id: edit ? usuarioId! : '',
           nombre: txtNombreCtrl.text,
           apellido: txtApellidoCtrl.text,
           dni: txtDNICtrl.text,
@@ -319,7 +327,6 @@ class _Form extends StatelessWidget {
           ? response = await _service.modificarUsuario(miembro)
           : response = await _service.grabarUsuario(miembro);
       closeLoadingDialog(context);
-
       if (response.fallo) {
         edit
             ? openAlertDialog(context, 'No se pudo actualizar el personal',
@@ -332,16 +339,11 @@ class _Form extends StatelessWidget {
             : openAlertDialog(context, 'Personal creado');
         resetForm();
         Timer(Duration(milliseconds: 750), () => Navigator.pop(context));
-        Timer(
-            Duration(milliseconds: 750),
-            () => edit
-                ? Navigator.pop(context)
-                : Navigator.of(context)
-                    .popAndPushNamed(AsignarEquipoPage.routeName));
+        Timer(Duration(milliseconds: 750),
+            () => edit ? Navigator.pop(context) : Navigator.pop(context));
       }
     } else {
       closeLoadingDialog(context);
-
       openAlertDialog(context, 'Formulario invalido');
     }
   }

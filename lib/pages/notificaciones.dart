@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/obra.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -13,6 +15,9 @@ class NotificacionesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _socketService = Provider.of<SocketService>(context);
+    final _pref = new Preferences();
+    _socketService.connect(_pref.id);
     return Scaffold(
       body: Container(
           color: Helper.brandColors[1],
@@ -43,13 +48,15 @@ class _NotificationsList extends StatelessWidget {
             } else {
               final notificaciones = response.data;
               if (notificaciones.length > 0) {
-                _usuarioService.leerNotificaciones(_pref.id);
-
-                return Container(
-                    margin: EdgeInsets.only(top: 15),
-                    child: _CustomListView(
-                      data: notificaciones,
-                    ));
+                // dividir por por fechas entre hoy y el resto
+                return FutureBuilder(
+                  future: _usuarioService.leerNotificaciones(_pref.id),
+                  builder: (context, snapshot) => Container(
+                      margin: EdgeInsets.only(top: 15),
+                      child: _CustomListView(
+                        data: notificaciones,
+                      )),
+                );
               } else {
                 return Container(
                   child: Center(
@@ -83,7 +90,7 @@ class _CustomListViewState extends State<_CustomListView> {
     {'check': Icons.check_box_outlined},
     {'media': Icons.photo_size_select_actual_rounded},
     {'doc': Icons.document_scanner_outlined},
-    {'pedido': Icons.list_alt_rounded},
+    {'pedido': Icons.request_page_outlined},
     {'inactivity': Icons.work_off_outlined},
     {'obra': Icons.house}
   ];
@@ -91,50 +98,152 @@ class _CustomListViewState extends State<_CustomListView> {
   Widget build(BuildContext context) {
     late dynamic iconAvatar;
     late Function()? actionOnTap;
+    final notificaciones = ordenarNotificaciones(widget.data);
+
     return Container(
         height: MediaQuery.of(context).size.height,
         child: ListView.builder(
-            itemCount: widget.data.length,
+            itemCount: notificaciones.length,
             itemBuilder: (_, i) {
-              bool esPar = false;
-              if (i % 2 == 0) {
-                esPar = true;
-              }
-
-              iconAvatar = iconos
-                  .where(
-                      (element) => element.containsKey(widget.data[i]['type']))
-                  .first[widget.data[i]['type']];
-
-              widget.data[i]['type'];
-              String route = '';
-              Map<String, dynamic> arg = {};
-              switch (widget.data[i]['type']) {
-                case 'obra':
-                  if (widget.data[i]['route'] != '') {
-                    route = ObraPage.routeName;
-                    arg = {'obraId': widget.data[i]['route']};
-                  } else {
-                    route = '';
-                    arg = {};
-                  }
-                  break;
-              }
-              if (route == '') {
-                actionOnTap = null;
+              if (notificaciones[i] is Container) {
+                return notificaciones[i];
               } else {
-                actionOnTap =
-                    () => Navigator.pushNamed((context), route, arguments: arg);
-              }
+                bool esPar = false;
+                if (i % 2 == 0) {
+                  esPar = true;
+                }
+                final notificacion = notificaciones[i];
+                iconAvatar = iconos
+                    .where(
+                        (element) => element.containsKey(notificacion['type']))
+                    .first[notificacion['type']];
 
-              return _CustomListTile(
-                iconAvatar: iconAvatar,
-                esPar: esPar,
-                title: widget.data[i]['title'],
-                subtitle: widget.data[i]['subtitle'],
-                actionOnTap: actionOnTap,
-              );
+                notificacion['type'];
+                String route = '';
+                Map<String, dynamic> arg = {};
+                switch (notificacion['type']) {
+                  case 'obra':
+                    if (notificacion['route'] != '') {
+                      route = ObraPage.routeName;
+                      arg = {'obraId': notificacion['route']};
+                    } else {
+                      route = '';
+                      arg = {};
+                    }
+                    break;
+                  case 'pedido':
+                    if (notificacion['route'] != '') {
+                      route = PedidoForm.routeName;
+                      arg = {'pedidoId': notificacion['route']};
+                    } else {
+                      route = '';
+                      arg = {};
+                    }
+                    break;
+                }
+                if (route == '') {
+                  actionOnTap = null;
+                } else {
+                  actionOnTap = () =>
+                      Navigator.pushNamed((context), route, arguments: arg);
+                }
+
+                return _CustomListTile(
+                  iconAvatar: iconAvatar,
+                  esPar: esPar,
+                  title: notificacion['title'],
+                  subtitle: notificacion['subtitle'],
+                  ts: notificacion['ts'],
+                  actionOnTap: actionOnTap,
+                );
+              }
             }));
+  }
+
+  ordenarNotificaciones(List data) {
+    final today =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final tsToday = today.millisecondsSinceEpoch;
+    final tsAyer = today.subtract(Duration(days: 1)).millisecondsSinceEpoch;
+    List notificaciones = [];
+
+// Notificaciones HOY
+    final notificacionesNoLeidas =
+        widget.data.where((notif) => !notif['leido']);
+
+    if (notificacionesNoLeidas.length > 0) {
+      notificaciones.add(Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: Text(
+            'No leídas',
+            style: TextStyle(
+                fontSize: 15,
+                color: Helper.brandColors[8],
+                fontWeight: FontWeight.bold),
+          )));
+      notificaciones.addAll(notificacionesNoLeidas);
+    }
+
+    // Notificaciones HOY
+    final notificacionesHoy =
+        widget.data.where((notif) => tsToday < notif['ts'] && notif['leido']);
+
+    if (notificacionesHoy.length > 0) {
+      notificaciones.add(Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: Text(
+            'Hoy',
+            style: TextStyle(
+                fontSize: 15,
+                color: Helper.brandColors[8],
+                fontWeight: FontWeight.bold),
+          )));
+      notificaciones.addAll(notificacionesHoy);
+    }
+
+    final notificacionesAyer = widget.data.where((notif) =>
+        tsAyer < notif['ts'] && tsToday > notif['ts'] && notif['leido']);
+
+    if (notificacionesAyer.length > 0) {
+      notificaciones.add(
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: Text(
+            'Ayer',
+            style: TextStyle(
+                fontSize: 15,
+                color: Helper.brandColors[8],
+                fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+      notificaciones.addAll(notificacionesAyer);
+    }
+    notificaciones.add(
+      Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: Text(
+            'Previas',
+            style: TextStyle(
+                fontSize: 15,
+                color: Helper.brandColors[8],
+                fontWeight: FontWeight.bold),
+          )),
+    );
+    notificaciones.addAll(
+        widget.data.where((notif) => tsAyer >= notif['ts'] && notif['leido']));
+
+    final notificacionesAnteriores =
+        widget.data.where((notif) => tsAyer >= notif['ts']);
+    return notificaciones;
   }
 }
 
@@ -144,6 +253,7 @@ class _CustomListTile extends StatelessWidget {
   String subtitle;
   double padding;
   double fontSize;
+  int ts;
   dynamic iconAvatar;
   Function()? actionOnTap;
   _CustomListTile(
@@ -154,6 +264,7 @@ class _CustomListTile extends StatelessWidget {
       this.iconAvatar = Icons.abc,
       this.padding = 5,
       this.fontSize = 17,
+      this.ts = 0,
       this.actionOnTap = null})
       : super(key: key);
 
@@ -169,35 +280,51 @@ class _CustomListTile extends StatelessWidget {
             decoration: BoxDecoration(
                 color: _color, borderRadius: BorderRadius.circular(10)),
             child: ListTile(
-              leading: Container(
-                padding: EdgeInsets.all(1),
-                decoration: BoxDecoration(
-                    color:
-                        !esPar ? Helper.brandColors[8].withOpacity(.8) : null,
-                    borderRadius: BorderRadius.circular(100)),
-                child: CircleAvatar(
-                  backgroundColor: Helper.brandColors[0],
-                  child: Icon(iconAvatar),
+                leading: Container(
+                  padding: EdgeInsets.all(1),
+                  decoration: BoxDecoration(
+                      color:
+                          !esPar ? Helper.brandColors[8].withOpacity(.8) : null,
+                      borderRadius: BorderRadius.circular(100)),
+                  child: CircleAvatar(
+                    backgroundColor: Helper.brandColors[0],
+                    child: Icon(iconAvatar),
+                  ),
                 ),
-              ),
-              title: Text(title,
-                  style: TextStyle(
-                      color: Helper.brandColors[5], fontSize: fontSize)),
-              subtitle: this.subtitle != ''
-                  ? Text(
-                      subtitle,
-                      style: TextStyle(
-                          color: Helper.brandColors[8].withOpacity(.8)),
-                    )
-                  : null,
-              trailing: actionOnTap == null
-                  ? null
-                  : Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Helper.brandColors[3],
+                title: Text(title,
+                    style: TextStyle(
+                        color: Helper.brandColors[5], fontSize: fontSize)),
+                subtitle: this.subtitle != ''
+                    ? Text(
+                        subtitle,
+                        style: TextStyle(
+                            color: Helper.brandColors[8].withOpacity(.8)),
+                      )
+                    : null,
+                onTap: actionOnTap,
+                trailing: Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.bottomRight,
+                        // color: Colors.red,
+                        width: 70,
+                        child: Text(
+                          Helper.getFechaHoraFromTS(this.ts,
+                              fechaSinHora: true),
+                          style: TextStyle(color: Helper.brandColors[3]),
+                        ),
+                      ),
                     ),
-              onTap: actionOnTap,
-            ),
+                  ],
+                )
+                // trailing: actionOnTap == null
+                //     ? null
+                //     : Icon(
+                //         Icons.arrow_forward_ios_rounded,
+                //         color: Helper.brandColors[3],
+                //       ),
+                ),
           ),
         ],
       ),

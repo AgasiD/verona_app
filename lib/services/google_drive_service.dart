@@ -10,7 +10,7 @@ class GoogleDriveService extends ChangeNotifier {
   late XFile _img;
   late List<XFile> _imgs;
   late XFile _imgPedido;
-  String rootDrive = '1KKHAUhPR_C1Sh_MnxMLpRP8NPa_MESRT';
+  String rootDrive = '1yT0HU9X49RQGy6jK0rTE0FX0RFJwBfkf';
   late FilePickerResult _document;
 
   Future grabarImagen(String fileName, {String? driveId, XFile? imagen}) async {
@@ -32,10 +32,23 @@ class GoogleDriveService extends ChangeNotifier {
 
   grabarImagenPedido(String fileName, String driveFolderId) async {
     if (_imgPedido != null) {
+      //obtener drive id de carpeta imagenes -> pedido/evidencia
+      final response = await this.obtenerDocumentos(driveFolderId);
+      var imageFolder = (response.data['files'] as List<dynamic>)
+          .firstWhere((file) => file['name'] == '06- Imagenes');
+
+      final responseAux = await this.obtenerDocumentos(imageFolder['id']);
+      var imageFolderEvidencia = (responseAux.data['files'] as List<dynamic>)
+          .firstWhere(
+              (file) => file['name'].toString().contains('01- Pedidos'));
+
+      final idFolder = imageFolderEvidencia['id'];
+
       final datos = await this
           ._http
-          .uploadImage(_imgPedido, _endpoint + "/$fileName/jpg/$driveFolderId");
-      print('imagen grabada');
+          .uploadImage(_imgPedido, _endpoint + "/$fileName/jpg/$idFolder");
+      final autorizar = await setPermisosToFile(datos);
+
       return datos;
     } else {
       print('No se asigno imagen');
@@ -46,7 +59,6 @@ class GoogleDriveService extends ChangeNotifier {
     try {
       if (_document != null) {
         final to = _endpoint + "/$fileName/$extension/$parent";
-
         final datos = await this._http.uploadDocument(_document, to);
         notifyListeners();
         return datos;
@@ -56,6 +68,11 @@ class GoogleDriveService extends ChangeNotifier {
     } catch (err) {
       print('error');
     }
+  }
+
+  setPermisosToFile(String fileId) async {
+    final datos = await this._http.post('$_endpoint/setPermisos/$fileId', {});
+    // final response = MyResponse.fromJson(datos['response']);
   }
 
   getExtension() {

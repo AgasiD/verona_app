@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -147,13 +148,52 @@ class CustomDrawer extends StatelessWidget {
   }) : super(key: key);
 
   final TextStyle textStyle;
-  final List<Map<String, String>> menu;
+  final List<Map<String, dynamic>> menu;
 
   @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _pref = new Preferences();
+
+    final menuVista = _pref.role == 1
+        ? menu
+            .map((e) => TextButton(
+                  child: Row(children: [
+                    Icon(e['icon'], color: Helper.brandColors[8]),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Text(
+                        '${e["name"]}',
+                        style: textStyle,
+                      ),
+                    ),
+                  ]),
+                  onPressed: () {
+                    Navigator.pushNamed(context, e["route"].toString(),
+                        arguments: e['args'] ?? null);
+                  },
+                ))
+            .toList()
+        : menu
+            .sublist(0, 1)
+            .map((e) => TextButton(
+                  child: Row(children: [
+                    Icon(e['icon'], color: Helper.brandColors[8]),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Text(
+                        '${e["name"]}',
+                        style: textStyle,
+                      ),
+                    ),
+                  ]),
+                  onPressed: () {
+                    Navigator.pushNamed(context, e["route"].toString(),
+                        arguments: e['args'] ?? null);
+                  },
+                ))
+            .toList();
     return Drawer(
         child: Container(
       color: Helper.brandColors[2],
@@ -203,31 +243,9 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 35),
-              child: _pref.role == 1
-                  ? Column(
-                      children: menu
-                          .map((e) => TextButton(
-                                child: Row(children: [
-                                  Icon(Icons.person_add_alt_sharp,
-                                      color: Helper.brandColors[8]),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 15.0),
-                                    child: Text(
-                                      '${e["name"]}',
-                                      style: textStyle,
-                                    ),
-                                  ),
-                                ]),
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, e["route"].toString());
-                                },
-                              ))
-                          .toList())
-                  : Container(),
-            )
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 35),
+                child: Column(children: menuVista))
           ],
         ),
       ),
@@ -350,10 +368,11 @@ class CustomInput extends StatefulWidget {
   final TextInputType teclado;
   final TextEditingController textController;
   final double width;
-  IconButton iconButton;
-  final int lines;
+  IconButton? iconButton;
+  final int? lines;
   final bool validaError;
   final bool enable;
+  final bool readOnly;
   String? Function(String?) validarInput;
   Function(String) onChange;
   static void _passedOnChange(String? input) {}
@@ -368,15 +387,13 @@ class CustomInput extends StatefulWidget {
     this.isPassword = false,
     this.teclado = TextInputType.text,
     this.width = double.infinity,
-    this.lines = 1,
+    this.lines = null,
     this.validaError = false,
     this.initialValue = '',
     this.textInputAction = TextInputAction.next,
     this.enable = true,
-    this.iconButton = const IconButton(
-      onPressed: null,
-      icon: Icon(null),
-    ),
+    this.readOnly = false,
+    this.iconButton = null,
     required this.textController,
     this.validarInput = _passedFunction,
     this.onChange = _passedOnChange,
@@ -415,8 +432,9 @@ class _CustomInputState extends State<CustomInput> {
           child: TextFormField(
             textCapitalization: TextCapitalization.sentences,
             enabled: widget.enable,
+            readOnly: widget.readOnly,
             controller: widget.textController,
-            maxLines: widget.lines,
+            maxLines: widget.lines ?? 1,
             autocorrect: false,
             keyboardType: widget.teclado,
             keyboardAppearance: Brightness.dark,
@@ -762,71 +780,6 @@ class SecondaryButton extends StatelessWidget {
   }
 }
 
-openLoadingDialog(BuildContext context, {String mensaje = ''}) {
-  if (Platform.isAndroid) {
-    showDialog(
-        context: context, builder: (context) => Loading(mensaje: mensaje));
-  } else {
-    showCupertinoDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(title: Text(mensaje)),
-    );
-  }
-  return context;
-}
-
-void closeLoadingDialog(BuildContext context) {
-  if (Platform.isAndroid) {
-    Navigator.of(context, rootNavigator: true).pop();
-  } else {
-    Navigator.of(context, rootNavigator: true).pop();
-  }
-}
-
-void openDialogConfirmation(
-    BuildContext context, Function onPressed, String mensaje) {
-  if (Platform.isAndroid) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text(mensaje),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
-                ),
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onPressed(context);
-                    },
-                    child: Text('Confirmar')),
-              ],
-            ));
-  } else {
-    showCupertinoDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(
-        title: Text(mensaje),
-        actions: [
-          CupertinoDialogAction(
-            child: Text('Confirmar'),
-            onPressed: () {
-              Navigator.pop(context);
-              onPressed(context);
-            },
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: Text('Cancelar'),
-            onPressed: () => Navigator.pop(context),
-          )
-        ],
-      ),
-    );
-  }
-}
-
 void openBottomSheet(
     BuildContext context, String titulo, String subtitulo, List actions) {
   if (Platform.isIOS) {
@@ -887,6 +840,71 @@ void openBottomSheet(
   }
 }
 
+void openDialogConfirmation(
+    BuildContext context, Function onPressed, String mensaje) {
+  if (Platform.isAndroid) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(mensaje),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
+                ),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onPressed(context);
+                    },
+                    child: Text('Confirmar')),
+              ],
+            ));
+  } else {
+    showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(mensaje),
+        actions: [
+          CupertinoDialogAction(
+            child: Text('Confirmar'),
+            onPressed: () async {
+              Navigator.pop(context);
+              onPressed(context);
+            },
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+openLoadingDialog(BuildContext context, {String mensaje = ''}) {
+  if (Platform.isAndroid) {
+    showDialog(
+        context: context, builder: (context) => Loading(mensaje: mensaje));
+  } else {
+    showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(title: Text(mensaje)),
+    );
+  }
+  return context;
+}
+
+void closeLoadingDialog(BuildContext context) {
+  if (Platform.isAndroid) {
+    Navigator.of(context, rootNavigator: true).pop();
+  } else {
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+}
+
 void openAlertDialog(BuildContext context, String mensaje,
     {String? subMensaje}) {
   if (Platform.isAndroid) {
@@ -896,7 +914,9 @@ void openAlertDialog(BuildContext context, String mensaje,
               title: Text(mensaje),
               content: subMensaje != null && subMensaje != ''
                   ? Text(subMensaje!)
-                  : Container(),
+                  : Container(
+                      height: 0,
+                    ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -993,6 +1013,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
   @override
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context);
+    final _socketService = Provider.of<SocketService>(context);
 
     return Container(
       decoration: BoxDecoration(color: Helper.brandColors[1]),
@@ -1012,21 +1033,27 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               }),
           CustomNavigatorButton(
             showNotif: false,
-            icono: Icons.person_outline,
+            icono: Icons.holiday_village_outlined,
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {
-                Navigator.pushNamed(context, ObrasPage.routeName);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    ObrasPage.routeName,
+                    (Route<dynamic> route) => route.isFirst);
+                // Navigator.pushNamed(context, ObrasPage.routeName);
               }
             },
           ),
           CustomNavigatorButton(
-            showNotif: false,
+            showNotif: _socketService.tieneNovedadesNotif(),
             icono: Icons.notifications_none_rounded,
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != NotificacionesPage.routeName) {
-                Navigator.pushNamed(context, NotificacionesPage.routeName);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    NotificacionesPage.routeName,
+                    (Route<dynamic> route) => route.isFirst);
+                // Navigator.pushNamed(context, NotificacionesPage.routeName);
               }
             },
           ),
@@ -1037,7 +1064,9 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ChatList.routeName) {
                 _chatService.tieneMensaje = false;
-                Navigator.pushNamed(context, ChatList.routeName);
+                // Navigator.pushNamed(context, ChatList.routeName);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    ChatList.routeName, (Route<dynamic> route) => true);
                 setState(() {});
               }
             },
@@ -1278,7 +1307,12 @@ class _ChatsListState extends State<ChatsList> {
   late SocketService _socketService;
   Preferences _pref = new Preferences();
   String txtBuscar = '';
+
   @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     dataFiltrada = widget.data;
@@ -1334,7 +1368,7 @@ class _ChatsListState extends State<ChatsList> {
                   ),
                 )
               : Container(
-                  height: MediaQuery.of(context).size.height - 205,
+                  height: MediaQuery.of(context).size.height - 180,
                   child: ListView.builder(
                       itemCount: dataFiltrada.length,
                       itemBuilder: ((context, index) {
@@ -1527,7 +1561,9 @@ class CustomListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
-
+    final profileImage = (avatar.isEmpty
+        ? AssetImage('assets/user.png')
+        : NetworkImage(avatar)) as ImageProvider;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: this.padding),
       child: Column(
@@ -1544,14 +1580,16 @@ class CustomListTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100)),
                 child: CircleAvatar(
                   backgroundColor: Helper.brandColors[0],
+                  backgroundImage: profileImage,
                   child: textAvatar
-                      ? Text(
-                          avatar,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Helper.brandColors[5],
-                          ),
-                        )
+                      ? Container()
+                      // Text(
+                      //     avatar,
+                      //     textAlign: TextAlign.center,
+                      //     style: TextStyle(
+                      //       color: Helper.brandColors[5],
+                      //     ),
+                      //   )
                       : Icon(iconAvatar),
                 ),
               ),

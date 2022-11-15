@@ -25,41 +25,44 @@ class Pedido {
       this.fechaDeseada = '',
       this.indicaciones = '',
       this.estado = 0,
-      this.nombreUsuario = ''});
+      this.nombreUsuario = '',
+      this.entregaExterna = false});
 
   String id;
   String idUsuario;
   String idObra;
   String nota;
   String titulo;
-  int prioridad;
-  int ts;
-  int tsAsignado;
-  int tsCerrado;
   String usuarioAsignado;
   String imagenId;
   String fechaEstimada;
   String fechaDeseada;
   String indicaciones;
   String nombreUsuario;
+  bool entregaExterna;
+  int prioridad;
+  int ts;
+  int tsAsignado;
+  int tsCerrado;
   int estado;
 
   factory Pedido.fromJson(Map<String, dynamic> json) => Pedido(
       id: json["id"],
       idUsuario: json["idUsuario"],
       idObra: json["idObra"] ?? '',
-      nota: json["nota"],
+      nota: json["nota"] ?? '',
       prioridad: json["prioridad"],
       usuarioAsignado: json["usuarioAsignado"] ?? '',
       ts: json["ts"],
-      tsAsignado: json['tsAsignado'],
-      tsCerrado: json['tsCerrado'],
+      tsAsignado: json['tsAsignado'] ?? 0,
+      tsCerrado: json['tsCerrado'] ?? 0,
       imagenId: json['imagenId'] ?? '',
       fechaEstimada: json['fechaEstimada'] ?? '',
       fechaDeseada: json['fechaDeseada'] ?? '',
       indicaciones: json['indicaciones'] ?? '',
       estado: json['estado'] ?? 0,
       nombreUsuario: json['nombreUsuario'] ?? '',
+      entregaExterna: json["entregaExterna"] ?? false,
       titulo: json['titulo'] ?? 'Sin titulo');
 
   Map<String, dynamic> toJson() => {
@@ -77,6 +80,7 @@ class Pedido {
         "fechaDeseada": fechaDeseada,
         "indicaciones": indicaciones,
         "estado": estado,
-        "titulo": titulo
+        "titulo": titulo,
+        "entregaExterna": entregaExterna
       };
 }

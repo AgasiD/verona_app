@@ -1,3 +1,4 @@
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -88,21 +89,39 @@ class ImgGalleryPage extends StatelessWidget {
                                   //       arguments: {"imagenId": e['id']});
                                   // }
 
-                                  if (getType(e['mimeType']) == 'jpg') {
-                                    Navigator.pushNamed(
-                                        (context), ImagenViewer.routeName,
-                                        arguments: {'imagenId': e['id']});
-                                  } else if (getType(e['mimeType'])
-                                          .toLowerCase() ==
+                                  // if (getType(e['mimeType']) == 'jpg') {
+                                  //   Navigator.pushNamed(
+                                  //       (context), ImagenViewer.routeName,
+                                  //       arguments: {'imagenId': e['id']});
+                                  // } else
+                                  if (getType(e['mimeType']).toLowerCase() ==
                                       'Carpeta'.toLowerCase()) {
                                     Navigator.pushNamed(
                                         (context), ImgGalleryPage.routeName,
                                         arguments: {'driveId': e['id']});
                                   } else {
                                     final Uri _url = Uri.parse(
-                                        'https://drive.google.com/file/d/${e['id']}/view?usp=sharing');
+                                        'https://drive.google.com/file/d/${e['id']}');
+
+                                    // var isAppInstalledResult =
+                                    //     await LaunchApp.isAppInstalled(
+                                    //   androidPackageName:
+                                    //       'net.pulsesecure.pulsesecure',
+                                    //   iosUrlScheme: 'pulsesecure://',
+                                    //   // openStore: false
+                                    // );
+                                    // var openAppResult = await LaunchApp.openApp(
+                                    //     androidPackageName:
+                                    //         'net.pulsesecure.pulsesecure',
+                                    //     iosUrlScheme: 'pulsesecure://',
+                                    //     appStoreLink:
+                                    //         'itms-apps://apps.apple.com/ar/app/google-drive-almacenamiento/id507874739'
+                                    //     // openStore: false
+                                    //     );
+
                                     if (await canLaunchUrl(_url))
-                                      await launchUrl(_url);
+                                      await launchUrl(_url,
+                                          mode: LaunchMode.externalApplication);
                                     else
                                       openAlertDialog(context,
                                           'No se puede visualizar el documento');
@@ -136,12 +155,14 @@ class ImgGalleryPage extends StatelessWidget {
                                             placeholder:
                                                 AssetImage('assets/image.png'),
                                             image: Helper.imageNetwork(
-                                                e['thumbnailLink']
+                                                e['thumbnailLink'] ??
+                                                    'https://www.iconpacks.net/icons/2/free-file-icon-1453-thumb.png'
                                                 // 'https://drive.google.com/uc?export=view&id=${e['id']}'
                                                 )),
                                     Text(
                                       e['name'],
                                       style: TextStyle(
+                                          overflow: TextOverflow.ellipsis,
                                           fontSize: 15,
                                           color: Helper.brandColors[3]),
                                     )

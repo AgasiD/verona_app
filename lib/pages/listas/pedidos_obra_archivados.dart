@@ -6,141 +6,43 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/pedido.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
-import 'package:verona_app/pages/listas/pedidos_obra_archivados.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
-class PedidoList extends StatelessWidget {
-  const PedidoList({Key? key}) : super(key: key);
-  static final routeName = 'pedido_list';
+class PedidosArchivadosList extends StatelessWidget {
+  const PedidosArchivadosList({Key? key}) : super(key: key);
+  static final routeName = 'pedidos_archivados_list';
 
   @override
   Widget build(BuildContext context) {
     final _pref = new Preferences();
     final _obraService = Provider.of<ObraService>(context);
     Future future;
+    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    final pedidos = arguments['archivados'];
 
-    if (_pref.role == 6) {
-      future = _obraService.obtenerPedidosAsignadosDelivery(
-          _obraService.obra.id, _pref.id);
-    } else {
-      future = _obraService.obtenerPedidos(_obraService.obra.id);
-    }
+    final agrupado = getPedidosAgrupadosxEstado(pedidos);
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
         child: SafeArea(
-          child: FutureBuilder(
-              future: future,
-              builder: (context, snapshot) {
-                if (snapshot.data == null) {
-                  return Loading(mensaje: 'Cargando equipo asignado');
-                } else {
-                  final response = snapshot.data as MyResponse;
-                  if (!response.fallo) {
-                    final pedidos = response.data as List<dynamic>;
-                    final _pref = new Preferences();
-                    if (pedidos.length > 0) {
-                      final agrupado = getPedidosAgrupadosxEstado(pedidos);
-                      return Container(
-                          height: MediaQuery.of(context).size.height,
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: agrupado.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return _PedidosByEstado(
-                                          estado: agrupado[index]["estado"],
-                                          pedidos: agrupado[index]['data']);
-                                    }),
-                              ),
-                              _pref.role != 6
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        MainButton(
-                                          width: 150,
-                                          height: 20,
-                                          color: Helper.brandColors[8],
-                                          onPressed: () {
-                                            Navigator.pushNamed(
-                                                context, PedidoForm.routeName,
-                                                arguments: {
-                                                  'obraId': _obraService.obra.id
-                                                });
-                                          },
-                                          text: 'Crear pedido',
-                                          fontSize: 15,
-                                        ),
-                                      ],
-                                    )
-                                  : Container()
-                            ],
-                          ));
-                    } else {
-                      return Column(
-                        children: [
-                          Container(
-                              height: MediaQuery.of(context).size.height - 220,
-                              width: MediaQuery.of(context).size.width,
-                              child: Center(
-                                child: Text(
-                                  'Aún no hay pedidos solicitados',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Helper.brandColors[4]),
-                                ),
-                              )),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Helper.habilitaByRole([1, 2, 4, 5])
-                              ? Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    MainButton(
-                                      width: 150,
-                                      height: 20,
-                                      color: Helper.brandColors[8],
-                                      onPressed: () {
-                                        Navigator.pushNamed(
-                                            context, PedidoForm.routeName,
-                                            arguments: {
-                                              'obraId': _obraService.obra.id
-                                            });
-                                      },
-                                      text: 'Crear pedido',
-                                      fontSize: 15,
-                                    ),
-                                  ],
-                                )
-                              : Container()
-                        ],
-                      );
-                    }
-                  } else {
-                    return Container(
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
-                        child: Center(
-                          child: Text(
-                            'Error al recuperar pedidos: ${response.error}',
-                            style: TextStyle(
-                                fontSize: 18, color: Helper.brandColors[4]),
-                          ),
-                        ));
-                  }
-                }
-              }),
-        ),
+            child: Container(
+                height: MediaQuery.of(context).size.height,
+                child: Column(children: [
+                  Expanded(
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: agrupado.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return _PedidosByEstado(
+                              estado: agrupado[index]["estado"],
+                              pedidos: agrupado[index]['data']);
+                        }),
+                  ),
+                ]))),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
@@ -148,13 +50,12 @@ class PedidoList extends StatelessWidget {
 
   getPedidosAgrupadosxEstado(List pedidos) {
     List<dynamic> agrupados = [];
-    const estados = Helper.ESTADOSPEDIDO;
+    const estados = [5];
     estados.forEach((estado) {
       List<dynamic> agrupacion = [];
       agrupacion =
           pedidos.where((element) => element['estado'] == estado).toList();
-      agrupados
-          .add({"estado": Helper.getEstadoPedido(estado), "data": agrupacion});
+      agrupados.add({"estado": Helper.getEstadoPedido(5), "data": agrupacion});
     });
     return agrupados;
   }
@@ -165,15 +66,12 @@ class _PedidosByEstado extends StatelessWidget {
       : super(key: key);
 
   List<dynamic> pedidos;
-  List<dynamic> pedidosArchivados = [];
   String estado;
 
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final _socketService = Provider.of<SocketService>(context);
-    final esEstadoCerrado = estado.toUpperCase() == 'CERRADO';
-    if (esEstadoCerrado) filtrarPedidosxFechaCerrada();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -187,16 +85,6 @@ class _PedidosByEstado extends StatelessWidget {
           child: ListTile(
             title: Text(estado.toUpperCase()),
             textColor: Helper.brandColors[5],
-            trailing: esEstadoCerrado
-                ? IconButton(
-                    onPressed: () => Navigator.pushNamed(
-                        context, PedidosArchivadosList.routeName,
-                        arguments: {'archivados': pedidosArchivados}),
-                    icon: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Helper.brandColors[4],
-                    ))
-                : null,
           ),
         ),
         pedidos.length > 0
@@ -216,8 +104,6 @@ class _PedidosByEstado extends StatelessWidget {
                   return Column(
                     children: [
                       _CustomListTile(
-                        esNovedad: _tieneNovedad(_obraService.obra.id,
-                            pedidos[index]['id'], _socketService),
                         esPar: false,
                         title:
                             "${pedidos[index]['titulo'].toString().toUpperCase()}",
@@ -263,35 +149,6 @@ class _PedidosByEstado extends StatelessWidget {
       ],
     );
   }
-
-  _tieneNovedad(String obraId, String pedidoId, SocketService _socketService) {
-    final dato = (_socketService.novedades ?? []).indexWhere((novedad) =>
-        novedad['tipo'] == 1 &&
-        novedad['obraId'] == obraId &&
-        novedad['pedidoId'] == pedidoId);
-    return dato >= 0;
-  }
-
-  void filtrarPedidosxFechaCerrada() {
-    pedidosArchivados = pedidos
-        .where((element) =>
-            element['tsCerrado'] <=
-            DateTime.now().subtract(Duration(days: 5)).millisecondsSinceEpoch)
-        .toList();
-    pedidos = pedidos
-        .where((element) =>
-            element['tsCerrado'] >
-            DateTime.now().subtract(Duration(days: 5)).millisecondsSinceEpoch)
-        .toList();
-  }
-
-  // pedidosArchivados() {
-  //   return pedidos
-  //       .where((element) =>
-  //           element['tsCerrado'] <
-  //           DateTime.now().subtract(Duration(days: 5)).millisecondsSinceEpoch)
-  //       .toList();
-  // }
 }
 
 class _CustomListTile extends StatelessWidget {

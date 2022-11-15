@@ -179,7 +179,7 @@ class __customTileAddedState extends State<_customTileAdded> {
             }
             closeLoadingDialog(context);
             Helper.showSnackBar(context, mensaje, TextStyle(fontSize: 15),
-                Duration(milliseconds: 500));
+                Duration(milliseconds: 500), null);
             setState(() {});
           },
           title: Text(

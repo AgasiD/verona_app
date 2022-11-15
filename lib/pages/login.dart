@@ -39,7 +39,7 @@ class LoginPage extends StatelessWidget {
                 size: 200,
               ),
               _Form(),
-              _Labels(),
+              // _Labels(),
               Text(
                 'Powered by e-Drex©',
                 style: TextStyle(color: Helper.brandColors[4]),
@@ -103,7 +103,7 @@ class __FormState extends State<_Form> {
               if (response.fallo) {
                 openAlertDialog(context, response.error);
               } else {
-                _usuario.usuario = Miembro.fromJson(response.data['usuario']);
+                _usuario.usuario = Miembro.fromJson(response.data);
                 final token = '';
                 // response.data['token'];
 
@@ -126,7 +126,7 @@ class __FormState extends State<_Form> {
   }
 
   void guardarUserData(Miembro usuario, String token) {
-    pref.id = usuario.dni;
+    pref.id = usuario.id;
     pref.nombre = '${usuario.nombre} ${usuario.apellido}';
     pref.role = usuario.role;
     pref.token = token;

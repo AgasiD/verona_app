@@ -143,7 +143,8 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                           ),
                           onPressed: () {
                             Navigator.pushReplacementNamed(
-                                context, MiembroForm.routeName);
+                                context, MiembroForm.routeName,
+                                arguments: {"usuarioId": null});
                           },
                         ),
                   textController: _txtPersonalCtrl,
@@ -166,7 +167,7 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
           ),
           _txtPersonalCtrl.text == ''
               ? SizedBox(
-                  height: MediaQuery.of(context).size.height - 290,
+                  height: MediaQuery.of(context).size.height - 280,
                   width: MediaQuery.of(context).size.width,
                   child: ListView.builder(
                     itemCount: widget.grupos.length,
@@ -237,10 +238,12 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                   ),
                 )
               : SizedBox(
-                  height: MediaQuery.of(context).size.height - 291,
+                  height: MediaQuery.of(context).size.height - 280,
                   width: MediaQuery.of(context).size.width,
-                  child: Column(
-                    children: miembros,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: miembros,
+                    ),
                   ),
                 ),
           Container(
@@ -336,11 +339,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
               _obraService.obra.quitarPersonal(widget.personal);
               closeLoadingDialog(context);
               Helper.showSnackBar(
-                context,
-                snackText,
-                null,
-                Duration(milliseconds: 700),
-              );
+                  context, snackText, null, Duration(milliseconds: 700), null);
             }
           }
 

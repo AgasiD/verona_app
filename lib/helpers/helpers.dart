@@ -50,14 +50,15 @@ class Helper {
   //   return hmacSha256.convert(bytes).toString();
   // }
 
-  static void showSnackBar(
-      BuildContext context, String txt, TextStyle? style, Duration? duracion) {
+  static void showSnackBar(BuildContext context, String txt, TextStyle? style,
+      Duration? duracion, SnackBarAction? actions) {
     if (duracion == null) {
       duracion = Duration(seconds: 2);
     }
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       duration: duracion,
+      action: actions,
       content: Text(
         txt,
         textAlign: TextAlign.center,
@@ -135,13 +136,10 @@ class Helper {
   static ImageProvider imageNetwork(String url,
       {double height = 100, double width = 100}) {
     try {
-      url = Environment.isProduction
-          ? url
-          : 'https://icon-library.com/images/none-icon/none-icon-0.jpg';
-      return NetworkImage(url, headers: {
-        "Authorization":
-            "Bearer ya29.A0ARrdaM_6GO94psBfX0G8FhqeJLZ2ItNjaOOVYcYBwRmNssneRoaF82hENqCcrQrVfMKrJEjtyEdVPO7nxiJUU3xZiKkYLTWrTm8-PSJV-kiuxErcHwX_2Vd31vi6VfS8XDw9IRwnalhvtTqzE2H2RP7z40NRNg"
-      });
+      // url = Environment.isProduction
+      //     ? url
+      //     : 'https://icon-library.com/images/none-icon/none-icon-0.jpg';
+      return NetworkImage(url);
     } catch (e) {
       return AssetImage('assets/image.png');
     }
@@ -165,7 +163,7 @@ class Helper {
     return 'Admin';
   }
 
-  static String getFechaHoraFromTS(int ts) {
+  static String getFechaHoraFromTS(int ts, {bool fechaSinHora = false}) {
     final tiempoMensaje = DateTime.fromMillisecondsSinceEpoch(ts);
 
     var fecha = DateFormat('dd/MM/yy').format(tiempoMensaje);
@@ -176,7 +174,11 @@ class Helper {
     final fechaMensaje;
     if (ts < DateTime.now().millisecondsSinceEpoch - 24 * 3600000 * 7) {
       //mostrar fecha
-      fechaMensaje = '$fecha  ${hora}:${minutos}';
+      if (fechaSinHora) {
+        fechaMensaje = fecha;
+      } else {
+        fechaMensaje = '$fecha  ${hora}:${minutos}';
+      }
     } else if (ts < DateTime.now().millisecondsSinceEpoch - 24 * 3600000) {
       //mostrar dia
       fechaMensaje =

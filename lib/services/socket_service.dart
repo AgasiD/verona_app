@@ -16,12 +16,13 @@ class SocketService with ChangeNotifier {
   IO.Socket get socket => this._socket;
   int unreadNotifications = 0;
   bool conectando = false;
+  List<dynamic> novedades = [];
   void connect(clientId) {
     if (clientId != null && clientId.toString().trim() != '' && !conectando) {
       conectando = true;
       final url = Environment.isProduction
-          ? 'https://veronaserver.herokuapp.com'
-          : 'http://192.168.0.155:8008';
+          ? 'https://${Environment.API_URL}'
+          : 'http://${Environment.API_URL}';
       if (this._serverStatus == ServerStatus.Offline) {
         this._serverStatus = ServerStatus.Connecting;
         this._socket = IO.io(url, {
@@ -32,30 +33,13 @@ class SocketService with ChangeNotifier {
         });
       }
 
-      // Accion al conectarse al servidor
-
-      this._socket.onConnect((_) {
-        this._serverStatus = ServerStatus.Online;
-        print('----------CONECTADO CON EL SERVIDOR----------');
-        conectando = false;
-        notifyListeners();
-      });
-
+      toConnect(clientId);
       obtenerNotificaciones(clientId);
       // Accion al desconectarse del servidor
-      this._socket.onDisconnect((_) {
-        print('usuario desconectado');
-        this._serverStatus = ServerStatus.Offline;
-        this.socket.disconnect();
-        notifyListeners();
-      });
+      toDisconnect();
+      obtenerNovedad();
 
-      socket.on('notifications-count', (data) {
-        final notif = data as List<dynamic>;
-        unreadNotifications =
-            notif.where((element) => !element['leido']).length;
-        notifyListeners();
-      });
+      conectando = false;
     }
   }
 
@@ -63,12 +47,56 @@ class SocketService with ChangeNotifier {
     this.socket.disconnect();
   }
 
+  obtenerNovedad() {
+    socket.on('novedad', (data) {
+      novedades = data ?? [];
+      notifyListeners();
+    });
+  }
+
+  void quitarNovedad(usuarioId, novedadesId) {
+    this._socket.emit('quitar-novedad', {usuarioId, novedadesId});
+  }
+
+  toConnect(clientId) {
+    // Accion al conectarse al servidor
+
+    this._socket.onConnect((_) {
+      this._serverStatus = ServerStatus.Online;
+      print('----------CONECTADO CON EL SERVIDOR----------');
+      obtenerNovedades(clientId);
+      conectando = false;
+      notifyListeners();
+    });
+  }
+
+  toDisconnect() {
+    this._socket.onDisconnect((_) {
+      print('usuario desconectado');
+      this._serverStatus = ServerStatus.Offline;
+      this.socket.disconnect();
+      notifyListeners();
+    });
+  }
+
+/* socket.on('notifications-count', (data) {
+        final notif = data as List<dynamic>;
+        unreadNotifications =
+            notif.where((element) => !element['leido']).length;
+        notifyListeners();
+      }); */
+
   void enviarMensaje(Message mensaje) async {
     this._socket.emit('nuevo-mensaje', mensaje.toMap());
   }
 
   void obtenerNotificaciones(String userId) {
     this._socket.emit('notifications-count', userId);
+  }
+
+  void obtenerNovedades(String userId) {
+    print('obtenerNovedades');
+    this._socket.emit('novedades', userId);
   }
 
   void leerNotificaciones(String userId) {
@@ -90,4 +118,24 @@ class SocketService with ChangeNotifier {
   void agregarInactividad(Inactividad inactividad, String obraId) async {
     this._socket.emit('nueva-inactividad', [inactividad.toMap(), obraId]);
   }
+
+  tieneNovedadesNotif() {
+    return novedades.where((novedad) => novedad['menu'] < 7).length > 0;
+  }
 }
+
+
+
+
+
+
+/*
+
+Obra -> Documentos
+Obra -> Galeria de imagenes
+Obra -> Etapas
+Obra -> Pedidos -> id pedido
+Obra -> Chat Grupal
+Obra -> Chat Grupal externo
+
+*/

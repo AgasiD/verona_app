@@ -27,9 +27,18 @@ class ObraService extends ChangeNotifier {
 
   Future<Obra> obtenerObra(String obraId) async {
     final datos = await this._http.get('$_endpoint/$obraId');
+    final data = Obra.fromMap(datos["obra"]);
+    this.obra = data;
+    notifyListeners();
+    return data;
+  }
+
+  Future<Obra> obtenerEquipo(String obraId) async {
+    final datos = await this._http.get('$_endpoint/$obraId');
     final json = datos["obra"];
     final data = Obra.fromMap(json);
     this.obra = data;
+    notifyListeners();
     return data;
   }
 

@@ -22,22 +22,22 @@ class EquipoList extends StatelessWidget {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-              future: _obraService.obtenerObra(obraId),
+              future: _obraService.obtenerEquipo(obraId),
               builder: (context, snapshot) {
                 if (snapshot.data == null) {
                   return Loading(mensaje: 'Cargando equipo asignado');
                 } else {
-                  final obra = snapshot.data as Obra;
+                  final obra = _obraService.obra;
                   final _pref = new Preferences();
                   if (obra.equipo.length > 0) {
                     final dataTile = obra.equipo.map((e) => Helper.toCustomTile(
                         '${e.nombre + ' ' + e.apellido}',
                         Helper.getProfesion(e.role),
-                        '${e.nombre[0] + e.apellido[0]}'));
+                        '${e.profileURL}'));
                     return Column(
                       children: [
                         Container(
-                          height: MediaQuery.of(context).size.height - 210,
+                          height: MediaQuery.of(context).size.height - 220,
                           color: Helper.brandColors[1],
                           child: CustomListView(
                               padding: 15, data: dataTile.toList()),

@@ -49,7 +49,8 @@ class _ChatPageState extends State<ChatPage>
     final chatId = arguments['chatId'];
 
     final txtController = TextEditingController();
-
+    final _socketService = Provider.of<SocketService>(context, listen: false);
+    quitarNovedad(chatId, _socketService);
     return Container(
       color: Colors.white,
       child: FutureBuilder(
@@ -73,6 +74,15 @@ class _ChatPageState extends State<ChatPage>
             }
           }),
     );
+  }
+
+  void quitarNovedad(String chatId, SocketService _socketService) {
+    final dato = (_socketService.novedades ?? []).where(
+        (novedad) => novedad['tipo'] == 1 && novedad['chatId'] == chatId);
+
+    if (dato.length == 0) return;
+    final _pref = Preferences();
+    _socketService.quitarNovedad(_pref.id, dato.map((e) => e['id']).toList());
   }
 }
 
@@ -101,8 +111,12 @@ class _CustomChatBarState extends State<_CustomChatBar> {
   }
 
   @override
+  void deactivate() {
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -220,31 +234,49 @@ class _ListMessageBoxState extends State<ListMessageBox>
     });
 
     cargarHistorial();
+    leerUltimoMensaje(mensajes.first);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    // _socketService.socket.off('nuevo-mensaje');
+
+    super.dispose();
+  }
+
+  void leerUltimoMensaje(mensaje) async {
     if (mensajes.length > 0) {
-      _usuarioService
-          .ultimoMensajeLeido(_pref.id, widget.chatId, mensajes.first.ts ?? 0)
-          .then((value) {
-        _chatService.notifyListeners();
-        print('ntify');
-      });
+      // print(mensajes.first.ts);
+      await _usuarioService.ultimoMensajeLeido(
+          _pref.id, widget.chatId, mensaje.ts ?? 0);
+      _chatService.notifyListeners();
     }
   }
 
-  void _recibirMensaje(dynamic data) {
-    final mensaje = Message.fromMap(data);
-    if (mensaje.chatId == _chatService.chat.chatId) {
-      //si el mensaje pertenece al chat actual
+  void _recibirMensaje(dynamic data) async {
+    if (this.mounted) {
+      final mensaje = Message.fromMap(data);
+      if (mensaje.chatId == _chatService.chat.chatId) {
+        //si el mensaje pertenece al chat actual
 
-      if (mensaje.from == _pref.id) {
-        //si es mensaje propio
+        if (mensaje.from != _pref.id) {
+          agregarMensaje(mensaje, false);
+          // print(mensaje.ts);
+          ModalRoute.of(context)!.settings.name == ChatPage.routeName
+              ? leerUltimoMensaje(mensaje)
+              : false;
+          // print(mensajes.last.ts);
+
+          //Vibration.vibrate(duration: 75, amplitude: 128);
+        } else {
+          //si es mensaje propio
+
+        }
       } else {
-        agregarMensaje(mensaje, false);
-        //Vibration.vibrate(duration: 75, amplitude: 128);
+        // no hacer nada
 
       }
-    } else {
-      // no hacer nada
-
     }
   }
 
@@ -263,6 +295,7 @@ class _ListMessageBoxState extends State<ListMessageBox>
       mBox.animatorController!.forward();
       //lo inserto al final de la pantalla (como mensaje reciente)
       mensajesBox.insert(0, mBox);
+
       // if (this.mounted) {
       setState(() {});
     }
