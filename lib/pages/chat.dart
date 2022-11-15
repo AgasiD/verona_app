@@ -240,16 +240,23 @@ class _ListMessageBoxState extends State<ListMessageBox>
     }
   }
 
-  void _recibirMensaje(dynamic data) {
+  void _recibirMensaje(dynamic data) async {
     final mensaje = Message.fromMap(data);
     if (mensaje.chatId == _chatService.chat.chatId) {
       //si el mensaje pertenece al chat actual
 
-      if (mensaje.from == _pref.id) {
-        //si es mensaje propio
-      } else {
+      if (mensaje.from != _pref.id) {
         agregarMensaje(mensaje, false);
+        if (mensajes.length > 0) {
+          await _usuarioService.ultimoMensajeLeido(
+              _pref.id, widget.chatId, mensajes.first.ts ?? 0);
+
+          _chatService.notifyListeners();
+          print('actualiza ultimo mensaje');
+        }
         //Vibration.vibrate(duration: 75, amplitude: 128);
+      } else {
+        //si es mensaje propio
 
       }
     } else {
