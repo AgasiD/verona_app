@@ -19,7 +19,6 @@ import 'package:verona_app/pages/listas/propietarios.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
-import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ObraPage extends StatelessWidget {

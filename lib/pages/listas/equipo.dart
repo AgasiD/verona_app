@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class EquipoList extends StatelessWidget {
@@ -17,6 +17,9 @@ class EquipoList extends StatelessWidget {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
     final _obraService = Provider.of<ObraService>(context, listen: false);
+
+    final _socketService = Provider.of<SocketService>(context, listen: false);
+    quitarNovedad(_socketService, _obraService);
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
@@ -110,5 +113,24 @@ class EquipoList extends StatelessWidget {
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
+  }
+
+  tieneNovedad(String obraId, int listItem, SocketService _socketService) {
+    final dato = _socketService.novedades.indexWhere((novedad) =>
+        novedad['tipo'] == 1 &&
+        novedad['obraId'] == obraId &&
+        novedad['menu'] == listItem);
+    return dato >= 0;
+  }
+
+  void quitarNovedad(SocketService _socketService, ObraService _obraService) {
+    final dato = (_socketService.novedades ?? []).where((novedad) =>
+        novedad['tipo'] == 1 &&
+        novedad['obraId'] == _obraService.obra.id &&
+        novedad['menu'] == 2);
+
+    if (dato.length == 0) return;
+    final _pref = Preferences();
+    _socketService.quitarNovedad(_pref.id, dato.map((e) => e['id']).toList());
   }
 }
