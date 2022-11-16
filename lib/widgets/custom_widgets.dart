@@ -1058,7 +1058,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
             },
           ),
           CustomNavigatorButton(
-            showNotif: _chatService.tieneMensaje,
+            showNotif: _socketService.tieneMensaje,
             icono: Icons.message_outlined,
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;

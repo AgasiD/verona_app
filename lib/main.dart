@@ -202,10 +202,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         // final snackBar = _initSnackMessage(data, navigatorKey);
 
         Navigator.of(navigatorKey.currentContext!).popUntil((route) {
-          if (!route.settings.name!.contains('chat')) {
+          if (route.settings.name! != ChatPage.routeName) {
             // messengerKey.currentState?.showSnackBar(snackBar);
             if (data['individual'] ?? true) {
-              _chatService.tieneMensaje = true;
+              _socket.tieneMensaje = true;
             }
           }
           return true;

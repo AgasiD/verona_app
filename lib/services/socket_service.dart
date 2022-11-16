@@ -15,6 +15,8 @@ class SocketService with ChangeNotifier {
   ServerStatus get serverStatus => this._serverStatus;
   IO.Socket get socket => this._socket;
   int unreadNotifications = 0;
+  bool tieneMensaje = false;
+
   bool conectando = false;
   List<dynamic> novedades = [];
   void connect(clientId) {
@@ -34,7 +36,9 @@ class SocketService with ChangeNotifier {
       }
 
       toConnect(clientId);
-      obtenerNotificaciones(clientId);
+      escucharNotificaciones();
+      pedirNotificaciones(clientId);
+      tieneChatsSinLeer(clientId);
       // Accion al desconectarse del servidor
       toDisconnect();
       obtenerNovedad();
@@ -50,6 +54,13 @@ class SocketService with ChangeNotifier {
   obtenerNovedad() {
     socket.on('novedad', (data) {
       novedades = data ?? [];
+      notifyListeners();
+    });
+  }
+
+  void tieneChatsSinLeer(clientId) {
+    socket.on('chatSinLeer', (data) {
+      tieneMensaje = data;
       notifyListeners();
     });
   }
@@ -90,7 +101,7 @@ class SocketService with ChangeNotifier {
     this._socket.emit('nuevo-mensaje', mensaje.toMap());
   }
 
-  void obtenerNotificaciones(String userId) {
+  void pedirNotificaciones(String userId) {
     this._socket.emit('notifications-count', userId);
   }
 
@@ -121,6 +132,12 @@ class SocketService with ChangeNotifier {
 
   tieneNovedadesNotif() {
     return novedades.where((novedad) => novedad['menu'] < 7).length > 0;
+  }
+
+  void escucharNotificaciones() {
+    socket.on('notifications-count', (data) {
+      print(data);
+    });
   }
 }
 
