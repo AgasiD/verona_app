@@ -45,7 +45,6 @@ class _ChatListState extends State<ChatList> with RouteAware {
                 } else {
                   final response = snapshot.data as MyResponse;
                   final chats = response.data as List;
-
                   if (chats.length > 0) {
                     return _UsuariosChats(
                         chats: chats, txtController: txtController);
