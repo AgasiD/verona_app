@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:image_fade/image_fade.dart';
@@ -509,9 +510,11 @@ class _CustomExpansionState extends State<_CustomExpansion> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> children = List.from(widget.data.map((e) =>
-        CaracteristicaButton(
-            action: e.accion, text: e.titulo, icon: e.icon, listItem: e.list)));
+    List<Widget> children = List.from(widget.data.map((e) => FadeInLeft(
+          delay: Duration(milliseconds: e.list * 75),
+          child: CaracteristicaButton(
+              action: e.accion, text: e.titulo, icon: e.icon, listItem: e.list),
+        )));
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(children: children),

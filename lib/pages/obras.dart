@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:image_fade/image_fade.dart';
@@ -303,7 +304,7 @@ class _CustomObrasState extends State<_CustomObras> {
               shrinkWrap: true,
               itemCount: widget.obrasFiltradas.length,
               itemBuilder: (BuildContext ctx, index) {
-                return _obraCard(context, widget.obrasFiltradas[index]);
+                return _obraCard(context, widget.obrasFiltradas[index], index);
               })
           : Center(
               child: Text(
@@ -315,7 +316,7 @@ class _CustomObrasState extends State<_CustomObras> {
   }
 }
 
-Container _obraCard(BuildContext context, Obra obra) {
+ZoomIn _obraCard(BuildContext context, Obra obra, int index) {
   var imagen = obra.imageURL == ''
       ? Helper.imageNetwork(
           'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
@@ -324,112 +325,116 @@ Container _obraCard(BuildContext context, Obra obra) {
           );
   final _socketService = Provider.of<SocketService>(context);
 
-  return Container(
-    margin: EdgeInsets.symmetric(horizontal: 15),
-    child: GestureDetector(
-        onTap: (() => Navigator.pushNamed(context, ObraPage.routeName,
-            arguments: {'obraId': obra.id})),
-        child: Container(
-          child: Card(
-            elevation: 10,
-            color: Helper.brandColors[2],
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  width: MediaQuery.of(context).size.width * .47,
-                  child: Stack(children: [
-                    tieneNovedad(obra.id, _socketService)
-                        ? Positioned(
-                            top: 10,
-                            left: 10,
-                            child: Badge(
-                              badgeColor: Helper.brandColors[8],
-                              badgeContent: Padding(
-                                padding: const EdgeInsets.all(0),
-                                // child: Text(badgeData.toString()),
-                              ),
-                            ))
-                        : Container(),
-                    Column(
-                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(obra.nombre,
-                                  style: TextStyle(
-                                      color: Helper.brandColors[3],
-                                      fontSize: 21,
-                                      fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(obra.lote,
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Helper.brandColors[8],
-                                  fontWeight: FontWeight.bold)),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Container(
-                            // alignment: Alignment.topRight,
-                            margin: EdgeInsets.only(bottom: 10),
-                            child: Column(
+  return ZoomIn(
+    delay: Duration(milliseconds: (index + 1) * 100),
+    child: Container(
+      margin: EdgeInsets.symmetric(horizontal: 15),
+      child: GestureDetector(
+          onTap: (() => Navigator.pushNamed(context, ObraPage.routeName,
+              arguments: {'obraId': obra.id})),
+          child: Container(
+            child: Card(
+              elevation: 10,
+              color: Helper.brandColors[2],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    width: MediaQuery.of(context).size.width * .47,
+                    child: Stack(children: [
+                      tieneNovedad(obra.id, _socketService)
+                          ? Positioned(
+                              top: 10,
+                              left: 10,
+                              child: Badge(
+                                badgeColor: Helper.brandColors[8],
+                                badgeContent: Padding(
+                                  padding: const EdgeInsets.all(0),
+                                  // child: Text(badgeData.toString()),
+                                ),
+                              ))
+                          : Container(),
+                      Column(
+                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                    '${(obra.porcentajeRealizado).toString()}%',
+                                Text(obra.nombre,
                                     style: TextStyle(
                                         color: Helper.brandColors[3],
-                                        fontSize: 15,
+                                        fontSize: 21,
                                         fontWeight: FontWeight.bold)),
-                                Container(
-                                  margin: EdgeInsets.symmetric(vertical: 3),
-                                  padding: EdgeInsets.symmetric(horizontal: 30),
-                                  child: LinearProgressIndicator(
-                                    value: obra.porcentajeRealizado / 100,
-                                    semanticsLabel: 'HoLA',
-                                    backgroundColor: Helper.brandColors[3],
-                                    color: Helper.brandColors[8],
-                                  ),
-                                ),
                               ],
                             ),
-                          ),
-                          // Text('', style: TextStyle(color: Helper.brandColors[3])),
-                        ]),
-                  ]),
-                ),
-                // Hero(
-                //   tag: obra.id,
-                //   child:
-                // Image(image: image, loadingBuilder: ),
-                ImageFade(
-                  width: MediaQuery.of(context).size.width * .43,
-                  height: 120,
-                  image: NetworkImage(obra.imageURL),
-                  loadingBuilder: (context, progress, chunkEvent) => Center(
-                      child: CircularProgressIndicator(
-                    value: progress,
-                    color: Helper.brandColors[8],
-                  )),
-
-                  // displayed when an error occurs:
-                  errorBuilder: (context, error) => Container(
-                    color: Helper.brandColors[8],
-                    alignment: Alignment.center,
-                    child: Image(image: AssetImage('assets/image.png')),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(obra.lote,
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Helper.brandColors[8],
+                                    fontWeight: FontWeight.bold)),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                              // alignment: Alignment.topRight,
+                              margin: EdgeInsets.only(bottom: 10),
+                              child: Column(
+                                children: [
+                                  Text(
+                                      '${(obra.porcentajeRealizado).toString()}%',
+                                      style: TextStyle(
+                                          color: Helper.brandColors[3],
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold)),
+                                  Container(
+                                    margin: EdgeInsets.symmetric(vertical: 3),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 30),
+                                    child: LinearProgressIndicator(
+                                      value: obra.porcentajeRealizado / 100,
+                                      semanticsLabel: 'HoLA',
+                                      backgroundColor: Helper.brandColors[3],
+                                      color: Helper.brandColors[8],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Text('', style: TextStyle(color: Helper.brandColors[3])),
+                          ]),
+                    ]),
                   ),
-                ),
-              ],
+                  // Hero(
+                  //   tag: obra.id,
+                  //   child:
+                  // Image(image: image, loadingBuilder: ),
+                  ImageFade(
+                    width: MediaQuery.of(context).size.width * .43,
+                    height: 120,
+                    image: NetworkImage(obra.imageURL),
+                    loadingBuilder: (context, progress, chunkEvent) => Center(
+                        child: CircularProgressIndicator(
+                      value: progress,
+                      color: Helper.brandColors[8],
+                    )),
+
+                    // displayed when an error occurs:
+                    errorBuilder: (context, error) => Container(
+                      color: Helper.brandColors[8],
+                      alignment: Alignment.center,
+                      child: Image(image: AssetImage('assets/image.png')),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        )),
+          )),
+    ),
   );
 }
 
