@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:animate_do/animate_do.dart';
+import 'package:animated_flip_counter/animated_flip_counter.dart';
+
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:image_fade/image_fade.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
@@ -35,239 +38,184 @@ class ObraPage extends StatelessWidget {
     final _pref = new Preferences();
     final esDelivery = _pref.role == 6;
     _socketService = Provider.of<SocketService>(context);
+    final obra = _service.obra;
+    var imagen = obra.imageURL == ''
+        ? Helper.imageNetwork(
+            'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
+        : Helper.imageNetwork(obra.imageURL);
 
     return Scaffold(
         bottomNavigationBar: CustomNavigatorFooter(),
-        body: FutureBuilder(
-            future: _service.obtenerObra(obraId),
-            builder: (context, snapshot) {
-              if (snapshot.data == null) {
-                return Loading(
-                  mensaje: 'Cargando Obra',
-                );
-              } else {
-                final obra = snapshot.data as Obra;
-                var imagen = obra.imageURL == ''
-                    ? Helper.imageNetwork(
-                        'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-                    : Helper.imageNetwork(obra.imageURL);
+        body: Container(
+            color: Helper.brandColors[1],
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Helper.brandColors[2],
+                  pinned: false,
+                  snap: false,
+                  floating: false,
+                  expandedHeight: 220.0,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Hero(
+                      tag: obra.id,
+                      child: ImageFade(
+                        width: MediaQuery.of(context).size.width * .43,
+                        image: NetworkImage(obra.imageURL),
+                        loadingBuilder: (context, progress, chunkEvent) =>
+                            Center(
+                                child: CircularProgressIndicator(
+                          value: progress,
+                          color: Helper.brandColors[8],
+                        )),
 
-                return Container(
-                    color: Helper.brandColors[1],
-                    child: CustomScrollView(
-                      slivers: <Widget>[
-                        SliverAppBar(
-                          automaticallyImplyLeading: false,
-                          backgroundColor: Helper.brandColors[2],
-                          pinned: false,
-                          snap: false,
-                          floating: false,
-                          expandedHeight: 220.0,
-                          flexibleSpace: FlexibleSpaceBar(
-                            background: Hero(
-                              tag: obra.id,
-                              child: ImageFade(
-                                width: MediaQuery.of(context).size.width * .43,
-                                image: NetworkImage(obra.imageURL),
-                                loadingBuilder:
-                                    (context, progress, chunkEvent) => Center(
-                                        child: CircularProgressIndicator(
-                                  value: progress,
-                                  color: Helper.brandColors[8],
-                                )),
-
-                                // displayed when an error occurs:
-                                errorBuilder: (context, error) => Container(
-                                  color: Helper.brandColors[8],
-                                  alignment: Alignment.center,
-                                  child: Image(
-                                      image: AssetImage('assets/image.png')),
-                                ),
-                              ),
-
-                              // Image(
-                              //   image: imagen,
-                              //   // height: 250,
-                              //   width: MediaQuery.of(context).size.width,
-
-                              //   // placeholder:
-                              //   //     AssetImage('assets/loading-image.gif'),
-                              //   errorBuilder: (_, obj, st) {
-                              //     return Container(
-                              //         child: Image(
-                              //             image: AssetImage(
-                              //                 'assets/image.png')));
-                              //   },
-                              // )
+                        // displayed when an error occurs:
+                        errorBuilder: (context, error) => Container(
+                          color: Helper.brandColors[8],
+                          alignment: Alignment.center,
+                          child: Image(image: AssetImage('assets/image.png')),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return Container(
+                        width: MediaQuery.of(context).size.width,
+                        child: SingleChildScrollView(
+                          child: Column(children: [
+                            _ObraBigrafy(
+                              nombre: obra.nombre,
+                              barrio: obra.barrio,
+                              descripcion: obra.descripcion,
+                              lote: obra.lote.toString(),
+                              obraId: obraId,
                             ),
-                          ),
-                        ),
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                              return Container(
-                                width: MediaQuery.of(context).size.width,
-                                child: SingleChildScrollView(
-                                  child: Column(children: [
-                                    _ObraBigrafy(
-                                      nombre: obra.nombre,
-                                      barrio: obra.barrio,
-                                      descripcion: obra.descripcion,
-                                      lote: obra.lote.toString(),
-                                      obraId: obraId,
-                                    ),
-                                    CaracteristicaObra(),
-                                    !esDelivery
-                                        ? _DiasView(obra: obra, obraId: obraId)
-                                        : Container(),
-                                    !esDelivery
-                                        ? Container(
-                                            margin: const EdgeInsets.symmetric(
-                                                vertical: 25.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                _pref.role != 3
-                                                    ? CustomNavigatorButton(
-                                                        icono: Icons
-                                                            .groups_outlined,
-                                                        accion: () {
-                                                          Navigator.pushNamed(
-                                                              context,
-                                                              ChatPage
-                                                                  .routeName,
-                                                              arguments: {
-                                                                'chatId':
-                                                                    obra.chatI
-                                                              });
-                                                        },
-                                                        showNotif:
-                                                            tieneMensajeSinLeer(
-                                                                obra.nombre,
-                                                                obra.chatI),
-                                                      )
-                                                    : Container(width: 60),
-                                                CustomNavigatorButton(
-                                                  icono: Icons.chat,
-                                                  accion: () {
-                                                    _pref.role != 3
-                                                        ? openDialogConfirmation(
-                                                            context, (ctx) {
-                                                            Navigator.pushNamed(
-                                                                ctx,
-                                                                ChatPage
-                                                                    .routeName,
-                                                                arguments: {
-                                                                  'chatId':
-                                                                      obra.chatE
-                                                                });
-                                                          },
-                                                            'Abrirá chat con propietarios')
-                                                        : Navigator.pushNamed(
-                                                            context,
-                                                            ChatPage.routeName,
-                                                            arguments: {
-                                                                'chatId':
-                                                                    obra.chatE
-                                                              });
-                                                    ;
+                            CaracteristicaObra(),
+                            !esDelivery
+                                ? _DiasView(obra: obra, obraId: obraId)
+                                : Container(),
+                            !esDelivery
+                                ? Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        vertical: 25.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        _pref.role != 3
+                                            ? CustomNavigatorButton(
+                                                icono: Icons.groups_outlined,
+                                                accion: () {
+                                                  Navigator.pushNamed(context,
+                                                      ChatPage.routeName,
+                                                      arguments: {
+                                                        'chatId': obra.chatI
+                                                      });
+                                                },
+                                                showNotif: tieneMensajeSinLeer(
+                                                    obra.nombre, obra.chatI),
+                                              )
+                                            : Container(width: 60),
+                                        CustomNavigatorButton(
+                                          icono: Icons.chat,
+                                          accion: () {
+                                            _pref.role != 3
+                                                ? openDialogConfirmation(
+                                                    context, (ctx) {
+                                                    Navigator.pushNamed(
+                                                        ctx, ChatPage.routeName,
+                                                        arguments: {
+                                                          'chatId': obra.chatE
+                                                        });
                                                   },
-                                                  showNotif:
-                                                      tieneMensajeSinLeer(
-                                                          obra.nombre,
-                                                          obra.chatE),
-                                                )
-                                              ],
-                                            ),
-                                          )
-                                        : Container(),
-                                    _pref.role == 1
-                                        ? Container(
-                                            margin: EdgeInsets.only(top: 25),
-                                            child: TextButton(
-                                                style: ButtonStyle(
-                                                    backgroundColor:
-                                                        MaterialStateProperty
-                                                            .all(Color.fromARGB(
-                                                                255,
-                                                                122,
-                                                                9,
-                                                                1))),
-                                                child: Container(
-                                                  width: 150,
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: [
-                                                      Text(
-                                                        'Eliminar obra',
-                                                        style: TextStyle(
-                                                            color: Helper
-                                                                .brandColors[5]),
-                                                      ),
-                                                      Icon(
-                                                        Icons.delete,
-                                                        color: Helper
-                                                            .brandColors[5],
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  openDialogConfirmation(
-                                                      context, (context) async {
-                                                    // eliminar obra
-                                                    openLoadingDialog(context,
-                                                        mensaje:
-                                                            'Eliminando obra...');
-                                                    final response =
-                                                        await _service
-                                                            .eliminarObra(
-                                                                obraId);
-                                                    closeLoadingDialog(context);
-                                                    if (response.fallo) {
-                                                      openAlertDialog(context,
-                                                          'Error al elimiar obra',
-                                                          subMensaje:
-                                                              response.error);
-                                                    } else {
-                                                      openAlertDialog(context,
-                                                          'Obra eliminada con éxito');
-                                                      Timer(
-                                                          Duration(
-                                                              milliseconds:
-                                                                  750),
-                                                          () =>
-                                                              closeLoadingDialog(
-                                                                  context));
-                                                      Timer(
-                                                          Duration(
-                                                              milliseconds:
-                                                                  750),
-                                                          () => Navigator
-                                                                  .pushReplacementNamed(
-                                                                context,
-                                                                ObrasPage
-                                                                    .routeName,
-                                                              ));
-                                                    }
-                                                  }, 'Confirmar para eliminar obra');
-                                                }),
-                                          )
-                                        : Container()
-                                  ]),
-                                ),
-                              );
-                            },
-                            childCount: 1,
-                          ),
+                                                    'Abrirá chat con propietarios')
+                                                : Navigator.pushNamed(
+                                                    context, ChatPage.routeName,
+                                                    arguments: {
+                                                        'chatId': obra.chatE
+                                                      });
+                                            ;
+                                          },
+                                          showNotif: tieneMensajeSinLeer(
+                                              obra.nombre, obra.chatE),
+                                        )
+                                      ],
+                                    ),
+                                  )
+                                : Container(),
+                            _pref.role == 1
+                                ? Container(
+                                    margin: EdgeInsets.only(top: 25),
+                                    child: TextButton(
+                                        style: ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStateProperty.all(
+                                                    Color.fromARGB(
+                                                        255, 122, 9, 1))),
+                                        child: Container(
+                                          width: 150,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              Text(
+                                                'Eliminar obra',
+                                                style: TextStyle(
+                                                    color:
+                                                        Helper.brandColors[5]),
+                                              ),
+                                              Icon(
+                                                Icons.delete,
+                                                color: Helper.brandColors[5],
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          openDialogConfirmation(context,
+                                              (context) async {
+                                            // eliminar obra
+                                            openLoadingDialog(context,
+                                                mensaje: 'Eliminando obra...');
+                                            final response = await _service
+                                                .eliminarObra(obraId);
+                                            closeLoadingDialog(context);
+                                            if (response.fallo) {
+                                              openAlertDialog(context,
+                                                  'Error al elimiar obra',
+                                                  subMensaje: response.error);
+                                            } else {
+                                              openAlertDialog(context,
+                                                  'Obra eliminada con éxito');
+                                              Timer(
+                                                  Duration(milliseconds: 750),
+                                                  () => closeLoadingDialog(
+                                                      context));
+                                              Timer(
+                                                  Duration(milliseconds: 750),
+                                                  () => Navigator
+                                                          .pushReplacementNamed(
+                                                        context,
+                                                        ObrasPage.routeName,
+                                                      ));
+                                            }
+                                          }, 'Confirmar para eliminar obra');
+                                        }),
+                                  )
+                                : Container()
+                          ]),
                         ),
-                      ],
-                    ));
-              }
-            }));
+                      );
+                    },
+                    childCount: 1,
+                  ),
+                ),
+              ],
+            )));
   }
 
   tieneMensajeSinLeer(String obraId, String chatId) {
@@ -281,8 +229,8 @@ class ObraPage extends StatelessWidget {
   }
 }
 
-class _DiasView extends StatelessWidget {
-  const _DiasView({
+class _DiasView extends StatefulWidget {
+  _DiasView({
     Key? key,
     required this.obra,
     required this.obraId,
@@ -292,9 +240,35 @@ class _DiasView extends StatelessWidget {
   final String obraId;
 
   @override
+  State<_DiasView> createState() => _DiasViewState();
+}
+
+class _DiasViewState extends State<_DiasView> {
+  int diasEstimados = 0;
+  int diasInactivos = 0;
+  int diasTranscurridos = 0;
+  bool ok = true;
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final _service = Provider.of<ObraService>(context);
+    if (ok) {
+      ok = false;
 
+      Future.delayed(Duration(milliseconds: 1500), () {
+        diasEstimados = widget.obra.diasEstimados;
+        diasInactivos = widget.obra.diasInactivos.length;
+        diasTranscurridos = widget.obra.diasTranscurridos;
+
+        setState(() {});
+      });
+    }
     return Container(
       margin: EdgeInsets.only(top: 25),
       height: 60,
@@ -304,9 +278,11 @@ class _DiasView extends StatelessWidget {
         children: [
           Column(
             children: [
-              Text(
-                obra.diasEstimados.toString(),
-                style: TextStyle(
+              AnimatedFlipCounter(
+                wholeDigits: widget.obra.diasEstimados < 100 ? 2 : 3,
+                duration: Duration(seconds: 1),
+                value: diasEstimados, // pass in a value like 2014
+                textStyle: TextStyle(
                     fontSize: 23,
                     fontWeight: FontWeight.bold,
                     color: Helper.brandColors[8]),
@@ -328,9 +304,15 @@ class _DiasView extends StatelessWidget {
           ),
           Column(
             children: [
-              Text(
-                obra.diasTranscurridos.toString(),
-                style: TextStyle(
+              AnimatedFlipCounter(
+                wholeDigits: widget.obra.diasTranscurridos < 10
+                    ? 1
+                    : widget.obra.diasTranscurridos < 100
+                        ? 2
+                        : 3,
+                duration: Duration(seconds: 1),
+                value: diasTranscurridos, // pass in a value like 2014
+                textStyle: TextStyle(
                     fontSize: 23,
                     fontWeight: FontWeight.bold,
                     color: Helper.brandColors[8]),
@@ -353,15 +335,21 @@ class _DiasView extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pushNamed(context, InactividadesPage.routeName,
-                  arguments: {'obraId': obraId});
+                  arguments: {'obraId': widget.obraId});
             },
             style: ButtonStyle(
               padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0)),
             ),
             child: Column(children: [
-              Text(
-                obra.diasInactivos.length.toString(),
-                style: TextStyle(
+              AnimatedFlipCounter(
+                wholeDigits: widget.obra.diasInactivos.length < 10
+                    ? 1
+                    : widget.obra.diasInactivos.length < 100
+                        ? 2
+                        : 3,
+                duration: Duration(seconds: 1),
+                value: diasInactivos, // pass in a value like 2014
+                textStyle: TextStyle(
                     fontSize: 23,
                     fontWeight: FontWeight.bold,
                     color: Helper.brandColors[8]),
@@ -439,9 +427,18 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         list: 3,
         titulo: 'Documentos',
         values: [].toList(),
-        accion: () {
-          Navigator.pushNamed(context, ImgGalleryPage.routeName,
-              arguments: {'driveId': obra.driveFolderId});
+        accion: () async {
+          if (_pref.role == 3) {
+            final Uri _url = Uri.parse(
+                'https://drive.google.com/drive/u/0/folders/${obra.driveFolderId}');
+            if (await canLaunchUrl(_url))
+              await launchUrl(_url, mode: LaunchMode.externalApplication);
+            else
+              openAlertDialog(context, 'No se puede visualizar el documento');
+          } else {
+            Navigator.pushNamed(context, ImgGalleryPage.routeName,
+                arguments: {'driveId': obra.driveFolderId});
+          }
         },
       );
       items.add(doc);
@@ -451,8 +448,17 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         list: 4,
         titulo: 'Galeria de imagenes',
         values: [].toList(),
-        accion: () {
-          Navigator.pushNamed(context, ImgGalleryPage.routeName);
+        accion: () async {
+          if (_pref.role == 3) {
+            final Uri _url = Uri.parse(
+                'https://drive.google.com/drive/u/0/folders/${obra.imgFolderId}');
+            if (await canLaunchUrl(_url))
+              await launchUrl(_url, mode: LaunchMode.externalApplication);
+            else
+              openAlertDialog(context, 'No se puede visualizar el documento');
+          } else {
+            Navigator.pushNamed(context, ImgGalleryPage.routeName);
+          }
         },
       );
       items.add(imgs);

@@ -106,7 +106,6 @@ class SocketService with ChangeNotifier {
   }
 
   void obtenerNovedades(String userId) {
-    print('obtenerNovedades');
     this._socket.emit('novedades', userId);
   }
 
@@ -135,9 +134,7 @@ class SocketService with ChangeNotifier {
   }
 
   void escucharNotificaciones() {
-    socket.on('notifications-count', (data) {
-      print(data);
-    });
+    socket.on('notifications-count', (data) {});
   }
 }
 

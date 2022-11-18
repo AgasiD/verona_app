@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/obra.dart';
@@ -26,7 +27,8 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<Obra> obtenerObra(String obraId) async {
-    final datos = await this._http.get('$_endpoint/$obraId');
+    final body = {"propietario": new Preferences().role == 3};
+    final datos = await this._http.post('$_endpoint/$obraId', body);
     final data = Obra.fromMap(datos["obra"]);
     this.obra = data;
     notifyListeners();
@@ -34,7 +36,7 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<Obra> obtenerEquipo(String obraId) async {
-    final datos = await this._http.get('$_endpoint/$obraId');
+    final datos = await this._http.post('$_endpoint/$obraId', {});
     final json = datos["obra"];
     final data = Obra.fromMap(json);
     this.obra = data;

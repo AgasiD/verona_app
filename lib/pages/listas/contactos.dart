@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -134,9 +135,12 @@ class _ListViewSearchState extends State<_ListViewSearch> {
                   child: ListView.builder(
                       itemCount: dataFiltrada.length,
                       itemBuilder: (_, index) {
-                        return _ContactTile(
-                          personal: dataFiltrada[index],
-                          index: index,
+                        return FadeInRight(
+                          delay: Duration(milliseconds: index * 50),
+                          child: _ContactTile(
+                            personal: dataFiltrada[index],
+                            index: index,
+                          ),
                         );
                       })),
         ],

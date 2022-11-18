@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -1151,17 +1152,20 @@ class _CustomListViewState extends State<CustomListView> {
               if (index % 2 == 0) {
                 esPar = true;
               }
-              return CustomListTile(
-                fontSize: widget.fontSize,
-                textAvatar: widget.textAvatar,
-                iconAvatar: widget.iconAvatar,
-                esPar: esPar,
-                title: widget.data[index]['title'],
-                subtitle: widget.data[index]['subtitle'],
-                avatar: widget.data[index]['avatar'],
-                onTap: widget.tapeable,
-                actionOnTap: widget.actionOnTap,
-                padding: widget.padding,
+              return FadeInRight(
+                delay: Duration(milliseconds: index * 50),
+                child: CustomListTile(
+                  fontSize: widget.fontSize,
+                  textAvatar: widget.textAvatar,
+                  iconAvatar: widget.iconAvatar,
+                  esPar: esPar,
+                  title: widget.data[index]['title'],
+                  subtitle: widget.data[index]['subtitle'],
+                  avatar: widget.data[index]['avatar'],
+                  onTap: widget.tapeable,
+                  actionOnTap: widget.actionOnTap,
+                  padding: widget.padding,
+                ),
               );
             }));
   }
@@ -1383,27 +1387,32 @@ class _ChatsListState extends State<ChatsList> {
                             ? 'Yo'
                             : dataFiltrada[index]['usuarioUltimoMensaje']
                                 ['nombreUsuario'];
-                        return CustomListTileMessage(
-                          badgeData: dataFiltrada[index]['cantMsgSinLeer'],
-                          esPar: esPar,
-                          title:
-                              '${dataFiltrada[index]['nombre'].toString().trim()}',
-                          subtitle: (dataFiltrada[index]['ultimoMensaje'] == ''
-                              ? ''
-                              : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} '),
-                          avatar: (dataFiltrada[index]['nombre'][0] +
-                                  dataFiltrada[index]['nombre'][1])
-                              .toString()
-                              .toUpperCase(),
-                          fontSize: 18,
-                          onTap: true,
-                          bold:
-                              (dataFiltrada[index]['cantMsgSinLeer'] as int) > 0
-                                  ? true
-                                  : false,
-                          actionOnTap: () => Navigator.pushNamed(
-                              context, ChatPage.routeName,
-                              arguments: arg),
+                        return FadeInRight(
+                          delay: Duration(milliseconds: index * 50),
+                          child: CustomListTileMessage(
+                            badgeData: dataFiltrada[index]['cantMsgSinLeer'],
+                            esPar: esPar,
+                            title:
+                                '${dataFiltrada[index]['nombre'].toString().trim()}',
+                            subtitle: (dataFiltrada[index]['ultimoMensaje'] ==
+                                    ''
+                                ? ''
+                                : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} '),
+                            avatar: (dataFiltrada[index]['nombre'][0] +
+                                    dataFiltrada[index]['nombre'][1])
+                                .toString()
+                                .toUpperCase(),
+                            fontSize: 18,
+                            onTap: true,
+                            bold:
+                                (dataFiltrada[index]['cantMsgSinLeer'] as int) >
+                                        0
+                                    ? true
+                                    : false,
+                            actionOnTap: () => Navigator.pushNamed(
+                                context, ChatPage.routeName,
+                                arguments: arg),
+                          ),
                         );
                       })),
                 )
@@ -1621,3 +1630,43 @@ class CustomListTile extends StatelessWidget {
     ;
   }
 }
+
+// class Custom_Flip_Counter extends StatefulWidget {
+//   Custom_Flip_Counter(
+//       {Key? key,
+//       required this.textStyle,
+//       required this.duration,
+//       this.from = 0,
+//       required this.to})
+//       : super(key: key);
+
+//   TextStyle textStyle;
+//   Duration? duration;
+//   int from;
+//   int to;
+//   int current = 0;
+//   @override
+//   State<Custom_Flip_Counter> createState() => _Custom_Flip_CounterState();
+// }
+
+// class _Custom_Flip_CounterState extends State<Custom_Flip_Counter> {
+//   late Text textWidget;
+//   @override
+//   Widget build(BuildContext context) {
+//     if (widget.current > widget.to) {
+//       Future.delayed(Duration(milliseconds: 50), () {
+//         widget.current = widget.current + 1;
+//         textWidget = Text(
+//           widget.current.toString(),
+//           style: widget.textStyle,
+//         );
+//       });
+//       return textWidget;
+//     } else {
+//       return Text(
+//         widget.to.toString(),
+//         style: widget.textStyle,
+//       );
+//     }
+//   }
+// }
