@@ -288,7 +288,7 @@ class _DiasViewState extends State<_DiasView> {
                     color: Helper.brandColors[8]),
               ),
               Text(
-                'Dias estimados',
+                'Días estimados',
                 style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
@@ -302,30 +302,30 @@ class _DiasViewState extends State<_DiasView> {
             indent: 15,
             endIndent: 15,
           ),
-          Column(
-            children: [
-              AnimatedFlipCounter(
-                wholeDigits: widget.obra.diasTranscurridos < 10
-                    ? 1
-                    : widget.obra.diasTranscurridos < 100
-                        ? 2
-                        : 3,
-                duration: Duration(seconds: 1),
-                value: diasTranscurridos, // pass in a value like 2014
-                textStyle: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                    color: Helper.brandColors[8]),
-              ),
-              Text(
-                'Dias transcurridos',
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: Helper.brandColors[5]),
-              )
-            ],
-          ),
+          // Column(
+          //   children: [
+          //     AnimatedFlipCounter(
+          //       wholeDigits: widget.obra.diasTranscurridos < 10
+          //           ? 1
+          //           : widget.obra.diasTranscurridos < 100
+          //               ? 2
+          //               : 3,
+          //       duration: Duration(seconds: 1),
+          //       value: diasTranscurridos, // pass in a value like 2014
+          //       textStyle: TextStyle(
+          //           fontSize: 23,
+          //           fontWeight: FontWeight.bold,
+          //           color: Helper.brandColors[8]),
+          //     ),
+          //     Text(
+          //       'Días transcurridos',
+          //       style: TextStyle(
+          //           fontSize: 13,
+          //           fontWeight: FontWeight.w400,
+          //           color: Helper.brandColors[5]),
+          //     )
+          //   ],
+          // ),
           VerticalDivider(
             width: 25,
             color: Colors.black45,
@@ -355,7 +355,7 @@ class _DiasViewState extends State<_DiasView> {
                     color: Helper.brandColors[8]),
               ),
               Text(
-                'Dias inactivos',
+                'Días inactivos',
                 style: TextStyle(
                     color: Helper.brandColors[5],
                     fontSize: 13,
@@ -430,7 +430,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         accion: () async {
           if (_pref.role == 3) {
             final Uri _url = Uri.parse(
-                'https://drive.google.com/drive/u/0/folders/${obra.driveFolderId}');
+                'https://drive.google.com/drive/u/0/folders/${obra.rootDriveCliente}');
             if (await canLaunchUrl(_url))
               await launchUrl(_url, mode: LaunchMode.externalApplication);
             else
@@ -451,13 +451,14 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         accion: () async {
           if (_pref.role == 3) {
             final Uri _url = Uri.parse(
-                'https://drive.google.com/drive/u/0/folders/${obra.imgFolderId}');
+                'https://drive.google.com/drive/u/0/folders/${obra.folderImagesCliente}');
             if (await canLaunchUrl(_url))
               await launchUrl(_url, mode: LaunchMode.externalApplication);
             else
               openAlertDialog(context, 'No se puede visualizar el documento');
           } else {
-            Navigator.pushNamed(context, ImgGalleryPage.routeName);
+            Navigator.pushNamed(context, ImgGalleryPage.routeName,
+                arguments: {'driveId': obra.folderImages});
           }
         },
       );

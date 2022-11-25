@@ -24,6 +24,9 @@ class Obra {
   String imgFolderId;
   String lote;
   String nombre;
+  String folderImages;
+  String rootDriveCliente;
+  String folderImagesCliente;
   String placeHolderImage = 'https://via.placeholder.com/300x150';
   String? driveFolderId;
   String? ts;
@@ -49,6 +52,9 @@ class Obra {
     this.enabledFiles = const [],
     ts,
     this.imageURL = '',
+    this.folderImages = '',
+    this.rootDriveCliente = '',
+    this.folderImagesCliente = '',
   }) {
     this.nombre = nombre;
     this.id = id;
@@ -72,6 +78,9 @@ class Obra {
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
     this.imageURL = imageURL;
+    this.folderImages = folderImages;
+    this.rootDriveCliente = rootDriveCliente;
+    this.folderImagesCliente = folderImagesCliente;
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
@@ -99,6 +108,9 @@ class Obra {
           .toList(),
       pedidos: json["pedidos"] ?? [],
       enabledFiles: json["enabledFiles"] as List<dynamic>,
+      folderImages: json['folderImages'] ?? '',
+      rootDriveCliente: json['rootDriveCliente'] ?? '',
+      folderImagesCliente: json['folderImagesCliente'] ?? '',
       imageURL: json['imageURL'] ?? '');
 
   toMap() => {
