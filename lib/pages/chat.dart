@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/pages/search_message.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -47,6 +48,7 @@ class _ChatPageState extends State<ChatPage>
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final chatId = arguments['chatId'];
+    final fromTS = arguments['fromTS'] ?? 0;
 
     final txtController = TextEditingController();
     final _socketService = Provider.of<SocketService>(context, listen: false);
@@ -54,7 +56,8 @@ class _ChatPageState extends State<ChatPage>
     return Container(
       color: Colors.white,
       child: FutureBuilder(
-          future: _chatService.loadChat(chatId: chatId, limit: 25, offset: 0),
+          future: _chatService.loadChat(
+              chatId: chatId, limit: 25, offset: 0, fromTS: fromTS),
           builder: (_, snapshot) {
             if (snapshot.data == null) {
               return Loading(
@@ -66,11 +69,18 @@ class _ChatPageState extends State<ChatPage>
                   : chatName = _chatService.chat.chatName;
 
               return Scaffold(
-                  appBar: _CustomChatBar(chatName: chatName),
+                  appBar: _CustomChatBar(chatName: chatName, chatId: chatId),
+                  // floatingActionButton: FloatingActionButton(
+
+                  //   onPressed: () {},
+                  //   child: Icon(Icons.arrow_downward_rounded),
+                  // ),
                   body: ListMessageBox(
-                      members: _chatService.chat.members,
-                      txtController: txtController,
-                      chatId: chatId));
+                    members: _chatService.chat.members,
+                    txtController: txtController,
+                    chatId: chatId,
+                    esBusqueda: fromTS > 0,
+                  ));
             }
           }),
     );
@@ -87,12 +97,11 @@ class _ChatPageState extends State<ChatPage>
 }
 
 class _CustomChatBar extends StatefulWidget implements PreferredSizeWidget {
-  _CustomChatBar({
-    Key? key,
-    this.chatName = '',
-  }) : super(key: key);
+  _CustomChatBar({Key? key, this.chatName = '', required this.chatId})
+      : super(key: key);
 
   String chatName;
+  String chatId;
 
   @override
   State<_CustomChatBar> createState() => _CustomChatBarState();
@@ -134,15 +143,24 @@ class _CustomChatBarState extends State<_CustomChatBar> {
                   style: TextStyle(color: Helper.brandColors[8]))
             ],
           ),
-          _socketService.socket.connected
-              ? CircleAvatar(
-                  maxRadius: 5,
-                  backgroundColor: Colors.green[400],
-                )
-              : CircleAvatar(
-                  maxRadius: 5,
-                  backgroundColor: Colors.red[400],
-                )
+          // _socketService.socket.connected
+          //     ? CircleAvatar(
+          //         maxRadius: 5,
+          //         backgroundColor: Colors.green[400],
+          //       )
+          //     : CircleAvatar(
+          //         maxRadius: 5,
+          //         backgroundColor: Colors.red[400],
+          //       ),
+          IconButton(
+              onPressed: () => Navigator.pushNamed(
+                      context, Search_Message_Screen.routeName, arguments: {
+                    "chatId": widget.chatId,
+                    "chatName": widget.chatName
+                  }),
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              icon: Icon(Icons.search))
         ],
       ),
     );
@@ -159,16 +177,18 @@ class _CustomChatBarState extends State<_CustomChatBar> {
 }
 
 class ListMessageBox extends StatefulWidget {
-  ListMessageBox({
-    Key? key,
-    required this.members,
-    required this.txtController,
-    required this.chatId,
-  }) : super(key: key);
+  ListMessageBox(
+      {Key? key,
+      required this.members,
+      required this.txtController,
+      required this.chatId,
+      this.esBusqueda = false})
+      : super(key: key);
 
   List<dynamic> members;
   final TextEditingController txtController;
   final String chatId;
+  bool esBusqueda;
 
   @override
   State<ListMessageBox> createState() => _ListMessageBoxState();
@@ -234,7 +254,7 @@ class _ListMessageBoxState extends State<ListMessageBox>
     });
 
     cargarHistorial();
-    leerUltimoMensaje(mensajes.first);
+    if (mensajes.isNotEmpty) leerUltimoMensaje(mensajes.first);
   }
 
   @override
@@ -313,12 +333,22 @@ class _ListMessageBoxState extends State<ListMessageBox>
   //   super.dispose();
 
   // }
+  final ScrollController _controller = ScrollController();
+  void _scrollDown() {
+    _controller.jumpTo(_controller.position.maxScrollExtent - 1050);
+    // _controller.animateTo(
+    //   _controller.position.maxScrollExtent - 550,
+    //   duration: Duration(seconds: 1),
+    //   curve: Curves.fastOutSlowIn,
+    // );
+  }
 
   @override
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context, listen: false);
     _socketService.connect(_pref.id);
-
+    if (widget.esBusqueda)
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollDown());
     return Container(
       width: MediaQuery.of(context).size.width,
       margin: EdgeInsets.only(top: 0),
@@ -353,6 +383,7 @@ class _ListMessageBoxState extends State<ListMessageBox>
               },
             ),
             child: ListView.builder(
+              controller: _controller,
               reverse: true,
               itemCount: mensajesBox.length,
               itemBuilder: (_, i) => mensajesBox.toList()[i],

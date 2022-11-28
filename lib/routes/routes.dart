@@ -32,6 +32,7 @@ import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/pages/listas/pedidos.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/pages/prueba.dart';
+import 'package:verona_app/pages/search_message.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
@@ -69,4 +70,5 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   TareasExtrasPage.routeName: (_) => TareasExtrasPage(),
   EtapasExtrasPage.routeName: (_) => EtapasExtrasPage(),
   PedidosArchivadosList.routeName: (_) => PedidosArchivadosList(),
+  Search_Message_Screen.routeName: (_) => Search_Message_Screen(),
 };
