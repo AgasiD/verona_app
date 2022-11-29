@@ -22,6 +22,7 @@ class EquipoList extends StatelessWidget {
     final obra = _obraService.obra;
     final _pref = new Preferences();
     quitarNovedad(_socketService, _obraService);
+    obra.equipo.sort(((a, b) => a.nombre.compareTo(b.nombre)));
     final dataTile = obra.equipo.map((e) => Helper.toCustomTile(
         '${e.nombre + ' ' + e.apellido}',
         Helper.getProfesion(e.role),

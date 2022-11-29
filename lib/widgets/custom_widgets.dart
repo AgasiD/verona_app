@@ -1315,12 +1315,11 @@ class _ChatsListState extends State<ChatsList> {
   @override
   void initState() {
     super.initState();
+    dataFiltrada = widget.data;
   }
 
   @override
   Widget build(BuildContext context) {
-    dataFiltrada = widget.data;
-
     return SingleChildScrollView(
       child: Column(
         children: [

@@ -16,7 +16,7 @@ class ChatService extends ChangeNotifier {
       int limit = 20,
       int fromTS = 0}) async {
     this.chatId = chatId;
-
+    print('LOAD CHAT');
     final datos =
         await this._http.get('$_endpoint/$chatId/$offset/$limit/$fromTS');
     final data = MyResponse.fromJson(datos['response']);

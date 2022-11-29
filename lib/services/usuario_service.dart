@@ -53,7 +53,7 @@ class UsuarioService extends ChangeNotifier {
   grabarUsuario(dynamic usuario) async {
     final data = await this._http.post(_endpoint, usuario.toJson());
     final response = MyResponse.fromJson(data['response']);
-    // notifyListeners();
+    notifyListeners();
     return response;
   }
 

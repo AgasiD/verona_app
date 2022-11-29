@@ -38,7 +38,7 @@ class _ContactsPageState extends State<ContactsPage> {
                 return Loading(mensaje: 'Cargando contactos');
               } else {
                 final contactos = (snapshot.data as List<dynamic>)
-                    .where((e) => e.dni != _pref.id)
+                    .where((e) => e.id != _pref.id)
                     .toList();
                 contactos.sort((a, b) {
                   return a.nombre

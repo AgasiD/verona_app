@@ -22,11 +22,11 @@ class MiembroForm extends StatefulWidget {
   State<MiembroForm> createState() => _MiembroFormState();
 }
 
-final TextEditingController txtNombreCtrl = TextEditingController();
-final TextEditingController txtApellidoCtrl = TextEditingController();
-final TextEditingController txtDNICtrl = TextEditingController();
-final TextEditingController txtTelefonoCtrl = TextEditingController();
-final TextEditingController txtMailCtrl = TextEditingController();
+final TextEditingController _txtNombreCtrl = TextEditingController();
+final TextEditingController _txtApellidoCtrl = TextEditingController();
+final TextEditingController _txtDNICtrl = TextEditingController();
+final TextEditingController _txtTelefonoCtrl = TextEditingController();
+final TextEditingController _txtMailCtrl = TextEditingController();
 String personalSelected = '2';
 late String? usuarioId;
 
@@ -42,11 +42,11 @@ class _MiembroFormState extends State<MiembroForm> {
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: usuarioId == null
               ? _Form(
-                  txtNombreCtrl: txtNombreCtrl,
-                  txtApellidoCtrl: txtApellidoCtrl,
-                  txtDNICtrl: txtDNICtrl,
-                  txtTelefonoCtrl: txtTelefonoCtrl,
-                  txtMailCtrl: txtMailCtrl)
+                  txtNombreCtrl: _txtNombreCtrl,
+                  txtApellidoCtrl: _txtApellidoCtrl,
+                  txtDNICtrl: _txtDNICtrl,
+                  txtTelefonoCtrl: _txtTelefonoCtrl,
+                  txtMailCtrl: _txtMailCtrl)
               : FutureBuilder(
                   future: _usuarioService.obtenerUsuario(usuarioId),
                   builder: (context, snapshot) {
@@ -59,18 +59,18 @@ class _MiembroFormState extends State<MiembroForm> {
                           snapshot.data as Map<String, dynamic>);
                       if (!response.fallo) {
                         final usuario = Miembro.fromJson(response.data);
-                        txtNombreCtrl.text = usuario.nombre;
-                        txtApellidoCtrl.text = usuario.apellido;
-                        txtDNICtrl.text = usuario.dni;
-                        txtTelefonoCtrl.text = usuario.telefono;
-                        txtMailCtrl.text = usuario.email;
+                        _txtNombreCtrl.text = usuario.nombre;
+                        _txtApellidoCtrl.text = usuario.apellido;
+                        _txtDNICtrl.text = usuario.dni;
+                        _txtTelefonoCtrl.text = usuario.telefono;
+                        _txtMailCtrl.text = usuario.email;
                         personalSelected = usuario.role.toString();
                         return _Form(
-                          txtNombreCtrl: txtNombreCtrl,
-                          txtApellidoCtrl: txtApellidoCtrl,
-                          txtDNICtrl: txtDNICtrl,
-                          txtTelefonoCtrl: txtTelefonoCtrl,
-                          txtMailCtrl: txtMailCtrl,
+                          txtNombreCtrl: _txtNombreCtrl,
+                          txtApellidoCtrl: _txtApellidoCtrl,
+                          txtDNICtrl: _txtDNICtrl,
+                          txtTelefonoCtrl: _txtTelefonoCtrl,
+                          txtMailCtrl: _txtMailCtrl,
                           edit: true,
                         );
                       } else {
@@ -289,6 +289,8 @@ class _Form extends StatelessWidget {
                             color: Helper.brandColors[2],
                             text: 'Cancelar',
                             onPressed: () {
+                              resetForm();
+
                               Navigator.pop(context);
                             }),
                       ],
@@ -339,8 +341,7 @@ class _Form extends StatelessWidget {
             : openAlertDialog(context, 'Personal creado');
         resetForm();
         Timer(Duration(milliseconds: 750), () => Navigator.pop(context));
-        Timer(Duration(milliseconds: 750),
-            () => edit ? Navigator.pop(context) : Navigator.pop(context));
+        Timer(Duration(milliseconds: 750), () => Navigator.pop(context));
       }
     } else {
       closeLoadingDialog(context);

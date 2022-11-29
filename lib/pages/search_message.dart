@@ -172,31 +172,34 @@ class _Searche_Message extends StatelessWidget {
 
     return FadeIn(
       child: ListTile(
-        title: Text(
-          mensaje.from == _pref.id ? 'Yo' : mensaje.name,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(
-          mensaje.mensaje,
-          style: TextStyle(color: Helper.brandColors[8]),
-        ),
-        iconColor: Helper.brandColors[3],
-        textColor: Helper.brandColors[3],
-        tileColor: Helper.brandColors[0],
-        trailing: Wrap(alignment: WrapAlignment.end, children: [
-          Text(
-            Helper.getFechaHoraFromTS(mensaje.ts),
-            style: TextStyle(color: Helper.brandColors[3]),
+          title: Text(
+            mensaje.from == _pref.id ? 'Yo' : mensaje.name,
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          Icon(Icons.arrow_forward_ios_rounded),
-        ]),
-        onTap: () => Navigator.pushNamed(context, ChatPage.routeName,
-            arguments: {
-              "chatName": mensaje.name,
-              "chatId": mensaje.chatId,
-              "fromTS": mensaje.ts
-            }),
-      ),
+          subtitle: Text(
+            mensaje.mensaje,
+            style: TextStyle(color: Helper.brandColors[8]),
+          ),
+          iconColor: Helper.brandColors[3],
+          textColor: Helper.brandColors[3],
+          tileColor: Helper.brandColors[0],
+          trailing: Wrap(alignment: WrapAlignment.end, children: [
+            Text(
+              Helper.getFechaHoraFromTS(mensaje.ts),
+              style: TextStyle(color: Helper.brandColors[3]),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded),
+          ]),
+          onTap: () => Navigator.pop(context, mensaje.ts)
+          // Navigator.pushNamedAndRemoveUntil(
+          //     context, ChatPage.routeName, (Route<dynamic> route) => true,
+          //     arguments: {
+          //       "chatName": mensaje.name,
+          //       "chatId": mensaje.chatId,
+          //       "fromTS": mensaje.ts
+          //     }),
+          // context, ChatPage.routeName,
+          ),
     );
   }
 }
