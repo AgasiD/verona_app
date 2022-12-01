@@ -1379,6 +1379,7 @@ class _ChatsListState extends State<ChatsList> {
                         final arg = {
                           'chatId': dataFiltrada[index]['id'],
                           'chatName': dataFiltrada[index]['nombre'],
+                          'profileURL': dataFiltrada[index]['avatar']
                         };
                         String nombreMensaje = dataFiltrada[index]
                                     ['usuarioUltimoMensaje']['idUsuario'] ==
@@ -1397,10 +1398,7 @@ class _ChatsListState extends State<ChatsList> {
                                     ''
                                 ? ''
                                 : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} '),
-                            avatar: (dataFiltrada[index]['nombre'][0] +
-                                    dataFiltrada[index]['nombre'][1])
-                                .toString()
-                                .toUpperCase(),
+                            avatar: (dataFiltrada[index]['avatar']),
                             fontSize: 18,
                             onTap: true,
                             bold:
@@ -1460,7 +1458,10 @@ class CustomListTileMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
-
+    final profileImage = (avatar.isEmpty
+        ? AssetImage('assets/user.png')
+        : NetworkImage(avatar)) as ImageProvider;
+//HOLA
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: this.padding),
       child: Column(
@@ -1477,15 +1478,17 @@ class CustomListTileMessage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100)),
                 child: CircleAvatar(
                   backgroundColor: Helper.brandColors[0],
-                  child: textAvatar
-                      ? Text(
-                          avatar,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Helper.brandColors[5],
-                          ),
-                        )
-                      : Icon(iconAvatar),
+                  backgroundImage: profileImage,
+
+                  //   child: textAvatar
+                  //       ? Text(
+                  //           avatar,
+                  //           textAlign: TextAlign.center,
+                  //           style: TextStyle(
+                  //             color: Helper.brandColors[5],
+                  //           ),
+                  //         )
+                  //       : Icon(iconAvatar),
                 ),
               ),
               title: Padding(
@@ -1566,6 +1569,7 @@ class CustomListTile extends StatelessWidget {
       this.actionOnTap = null})
       : super(key: key);
 
+//HOLA2
   @override
   Widget build(BuildContext context) {
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];

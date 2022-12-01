@@ -16,6 +16,7 @@ class SocketService with ChangeNotifier {
   IO.Socket get socket => this._socket;
   int unreadNotifications = 0;
   bool tieneMensaje = false;
+  List<dynamic> usuariosOnline = [];
 
   bool conectando = false;
   List<dynamic> novedades = [];
@@ -39,6 +40,7 @@ class SocketService with ChangeNotifier {
       escucharNotificaciones();
       pedirNotificaciones(clientId);
       tieneChatsSinLeer(clientId);
+      getUsuariosOnline();
       // Accion al desconectarse del servidor
       toDisconnect();
       obtenerNovedad();
@@ -61,6 +63,13 @@ class SocketService with ChangeNotifier {
   void tieneChatsSinLeer(clientId) {
     socket.on('chatSinLeer', (data) {
       tieneMensaje = data;
+      notifyListeners();
+    });
+  }
+
+  void getUsuariosOnline() {
+    socket.on('usuarion-online', (data) {
+      usuariosOnline = data;
       notifyListeners();
     });
   }

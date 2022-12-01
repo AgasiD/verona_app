@@ -49,6 +49,7 @@ class _ChatPageState extends State<ChatPage>
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final chatId = arguments['chatId'];
+    final imageURL = arguments['profileURL'];
     // final fromTS = arguments['fromTS'] ?? 0;
 
     final txtController = TextEditingController();
@@ -72,6 +73,7 @@ class _ChatPageState extends State<ChatPage>
               return Scaffold(
                   appBar: _CustomChatBar(
                       chatName: chatName,
+                      profileURL: imageURL ?? '',
                       chatId: chatId,
                       fromTS: fromTS,
                       action: buscarMensaje),
@@ -111,10 +113,12 @@ class _CustomChatBar extends StatefulWidget implements PreferredSizeWidget {
     required this.chatId,
     required this.fromTS,
     required this.action,
+    required this.profileURL,
   }) : super(key: key);
 
   String chatName;
   String chatId;
+  String profileURL;
   int fromTS;
   void Function(int) action;
 
@@ -147,11 +151,18 @@ class _CustomChatBarState extends State<_CustomChatBar> {
   @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
+    final profileImage = (widget.profileURL.isEmpty
+        ? AssetImage('assets/user.png')
+        : NetworkImage(widget.profileURL)) as ImageProvider;
     return AppBar(
       backgroundColor: Helper.brandColors[0],
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          CircleAvatar(
+            backgroundColor: Helper.brandColors[0],
+            backgroundImage: profileImage,
+          ),
           Column(
             children: [
               Text('${widget.chatName}',

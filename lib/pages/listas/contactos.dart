@@ -2,11 +2,13 @@ import 'package:animate_do/animate_do.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/services/chat_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -171,10 +173,18 @@ class __ContactTileState extends State<_ContactTile> {
     }
   }
 
+  bool isConnected = false;
+  late SocketService _socketService;
+
   @override
   Widget build(BuildContext context) {
     final _chat = Provider.of<ChatService>(context);
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
+    _socketService = Provider.of<SocketService>(context);
+    isConnected = usuarioConectado(widget.personal.id);
+    final profileImage = (widget.personal.profileURL.isEmpty
+        ? AssetImage('assets/user.png')
+        : NetworkImage(widget.personal.profileURL)) as ImageProvider;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -191,16 +201,7 @@ class __ContactTileState extends State<_ContactTile> {
                     borderRadius: BorderRadius.circular(100)),
                 child: CircleAvatar(
                   backgroundColor: Helper.brandColors[0],
-                  child: Text(
-                    (widget.personal.nombre[0] ??
-                            "" + widget.personal.apellido[0] ??
-                            "")
-                        .toUpperCase(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Helper.brandColors[5],
-                    ),
-                  ),
+                  backgroundImage: profileImage,
                 ),
               ),
               title:
@@ -212,9 +213,20 @@ class __ContactTileState extends State<_ContactTile> {
                 Helper.getProfesion(widget.personal.role),
                 style: TextStyle(color: Helper.brandColors[8].withOpacity(.8)),
               ),
-              trailing: Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Helper.brandColors[3],
+              trailing: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 30,
+                children: [
+                  Badge(
+                    badgeColor: isConnected
+                        ? Color.fromARGB(255, 163, 255, 167)!
+                        : Color.fromARGB(255, 182, 43, 57)!,
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Helper.brandColors[3],
+                  ),
+                ],
               ),
               onTap: () async {
                 openLoadingDialog(context, mensaje: 'Creando chat...');
@@ -239,5 +251,9 @@ class __ContactTileState extends State<_ContactTile> {
         ],
       ),
     );
+  }
+
+  bool usuarioConectado(String id) {
+    return _socketService.usuariosOnline.contains(id) ? true : false;
   }
 }
