@@ -1320,6 +1320,7 @@ class _ChatsListState extends State<ChatsList> {
 
   @override
   Widget build(BuildContext context) {
+    _socketService = Provider.of<SocketService>(context);
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1400,6 +1401,8 @@ class _ChatsListState extends State<ChatsList> {
                                 : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} '),
                             avatar: (dataFiltrada[index]['avatar']),
                             fontSize: 18,
+                            isConnected: usuarioConectado(
+                                dataFiltrada[index]['contacto']),
                             onTap: true,
                             bold:
                                 (dataFiltrada[index]['cantMsgSinLeer'] as int) >
@@ -1416,6 +1419,10 @@ class _ChatsListState extends State<ChatsList> {
         ],
       ),
     );
+  }
+
+  bool usuarioConectado(String id) {
+    return _socketService.usuariosOnline.contains(id) ? true : false;
   }
 
   setUltimoMensaje(Message msg) {
@@ -1451,9 +1458,11 @@ class CustomListTileMessage extends StatelessWidget {
       this.onTap = false,
       this.fontSize = 10,
       this.bold = false,
+      required this.isConnected,
       required this.badgeData,
       this.actionOnTap = null})
       : super(key: key);
+  bool isConnected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -1461,7 +1470,7 @@ class CustomListTileMessage extends StatelessWidget {
     final profileImage = (avatar.isEmpty
         ? AssetImage('assets/user.png')
         : NetworkImage(avatar)) as ImageProvider;
-//HOLA
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: this.padding),
       child: Column(
@@ -1525,6 +1534,11 @@ class CustomListTileMessage extends StatelessWidget {
                             ),
                           )
                         : Container(),
+                    Badge(
+                      badgeColor: isConnected
+                          ? Color.fromARGB(255, 163, 255, 167)!
+                          : Color.fromARGB(255, 182, 43, 57)!,
+                    ),
                     Icon(
                       Icons.arrow_forward_ios_rounded,
                       color: Helper.brandColors[3],
@@ -1540,6 +1554,9 @@ class CustomListTileMessage extends StatelessWidget {
     );
     ;
   }
+  //   bool usuarioConectado(String id) {
+  //   return _socketService.usuariosOnline.contains(id) ? true : false;
+  // }
 }
 
 class CustomListTile extends StatelessWidget {

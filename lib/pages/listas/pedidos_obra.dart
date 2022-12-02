@@ -37,7 +37,7 @@ class PedidoList extends StatelessWidget {
               future: future,
               builder: (context, snapshot) {
                 if (snapshot.data == null) {
-                  return Loading(mensaje: 'Cargando equipo asignado');
+                  return Loading(mensaje: 'Cargando pedidos');
                 } else {
                   final response = snapshot.data as MyResponse;
                   if (!response.fallo) {

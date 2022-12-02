@@ -27,7 +27,7 @@ class PersonalADM extends StatelessWidget {
               future: _usuarioService.obtenerPersonal(),
               builder: (context, snapshot) {
                 if (snapshot.data == null) {
-                  return Loading(mensaje: 'Cargando equipo asignado');
+                  return Loading(mensaje: 'Cargando personal...');
                 } else {
                   var personal = snapshot.data as List<Miembro>;
                   personal =

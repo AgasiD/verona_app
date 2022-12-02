@@ -154,20 +154,24 @@ class _CustomChatBarState extends State<_CustomChatBar> {
     final profileImage = (widget.profileURL.isEmpty
         ? AssetImage('assets/user.png')
         : NetworkImage(widget.profileURL)) as ImageProvider;
+    final nombre = widget.chatName;
     return AppBar(
       backgroundColor: Helper.brandColors[0],
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           CircleAvatar(
             backgroundColor: Helper.brandColors[0],
             backgroundImage: profileImage,
           ),
-          Column(
-            children: [
-              Text('${widget.chatName}',
-                  style: TextStyle(color: Helper.brandColors[8]))
-            ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text('${nombre}',
+                  style: TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                      color: Helper.brandColors[8])),
+            ),
           ),
           // _socketService.socket.connected
           //     ? CircleAvatar(
