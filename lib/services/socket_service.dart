@@ -17,6 +17,7 @@ class SocketService with ChangeNotifier {
   int unreadNotifications = 0;
   bool tieneMensaje = false;
   List<dynamic> usuariosOnline = [];
+  List<dynamic> chats = [];
 
   bool conectando = false;
   List<dynamic> novedades = [];
@@ -39,7 +40,8 @@ class SocketService with ChangeNotifier {
       toConnect(clientId);
       escucharNotificaciones();
       pedirNotificaciones(clientId);
-      tieneChatsSinLeer(clientId);
+      tieneChatsSinLeer();
+      escucharChats();
       getUsuariosOnline();
       // Accion al desconectarse del servidor
       toDisconnect();
@@ -60,7 +62,18 @@ class SocketService with ChangeNotifier {
     });
   }
 
-  void tieneChatsSinLeer(clientId) {
+  escucharChats() {
+    socket.on('chats', (data) {
+      chats = data;
+      notifyListeners();
+    });
+  }
+
+  pedirChats(String clientID) {
+    socket.emit('chats', clientID);
+  }
+
+  void tieneChatsSinLeer() {
     socket.on('chatSinLeer', (data) {
       tieneMensaje = data;
       notifyListeners();

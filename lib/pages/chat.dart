@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'dart:io';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -306,7 +307,6 @@ class _ListMessageBoxState extends State<ListMessageBox>
   @override
   void dispose() {
     // TODO: implement dispose
-    // _socketService.socket.off('nuevo-mensaje');
 
     super.dispose();
   }
@@ -375,7 +375,6 @@ class _ListMessageBoxState extends State<ListMessageBox>
   // @override
   // void dispose() {
   //   // TODO: implement dispose
-  //   // _socketService.socket.off('nuevo-mensaje');
   //   super.dispose();
 
   // }
@@ -398,6 +397,8 @@ class _ListMessageBoxState extends State<ListMessageBox>
     );
   }
 
+  bool mostrar = false;
+
   @override
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context, listen: false);
@@ -407,6 +408,10 @@ class _ListMessageBoxState extends State<ListMessageBox>
         _scrollToTop();
         widget.toTop = false;
       });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      mostrar = isBotton();
+      setState(() {});
+    });
     return Stack(
       children: [
         Container(
@@ -482,17 +487,27 @@ class _ListMessageBoxState extends State<ListMessageBox>
         ),
         // widget.esBusqueda
         //     ?
-        Positioned(
-          right: 10,
-          bottom: 100,
-          child: CustomNavigatorButton(
-              icono: Icons.arrow_downward_rounded,
-              accion: () => _scrollDown(),
-              showNotif: false),
+        Visibility(
+          visible: mostrar,
+          child: Positioned(
+            right: 10,
+            bottom: 100,
+            child: ZoomIn(
+              child: CustomNavigatorButton(
+                  icono: Icons.arrow_downward_rounded,
+                  accion: () => _scrollDown(),
+                  showNotif: false),
+            ),
+          ),
         )
-        // : Container(),
       ],
     );
+  }
+
+  isBotton() {
+    return _controller.position.minScrollExtent == _controller.position.pixels
+        ? false
+        : true;
   }
 }
 
@@ -548,41 +563,41 @@ class __InputChatState extends State<_InputChat> {
               // setState(() {});
             },
           )),
-          Container(
-              child: Row(
-            children: [
-              IconButton(
-                  onPressed: () {}, icon: Icon(Icons.attach_file_outlined)),
-              Platform.isAndroid
-                  ? widget.txtCtrl.text == ''
-                      ? IconButton(
-                          onPressed: () {}, icon: Icon(Icons.mic_none_rounded))
-                      : IconButton(
-                          icon: Icon(Icons.send),
-                          onPressed: () {
-                            _socket.socket.connected
-                                ? enviarMensaje(_socket)
-                                : openAlertDialog(
-                                    context, 'No hay conexión con el servidor');
-                          },
-                        )
-                  : widget.txtCtrl.text == ''
-                      ? IconButton(
-                          onPressed: _socket.socket.connected ? () {} : null,
-                          icon: Icon(Icons.mic_none_rounded))
-                      : CupertinoButton(
-                          child: Text(
-                            'Enviar',
-                            style: TextStyle(fontSize: 15),
-                          ),
-                          onPressed: () {
-                            _socket.socket.connected
-                                ? enviarMensaje(_socket)
-                                : openAlertDialog(
-                                    context, 'No hay conexión con el servidor');
-                          })
-            ],
-          ))
+          Visibility(
+            visible: false,
+            child: Container(
+                child: Row(
+              children: [
+                IconButton(
+                    onPressed: () {}, icon: Icon(Icons.attach_file_outlined)),
+              ],
+            )),
+          ),
+          Platform.isAndroid
+              ? widget.txtCtrl.text == ''
+                  ? Container()
+                  : IconButton(
+                      icon: Icon(Icons.send),
+                      onPressed: () {
+                        _socket.socket.connected
+                            ? enviarMensaje(_socket)
+                            : openAlertDialog(
+                                context, 'No hay conexión con el servidor');
+                      },
+                    )
+              : widget.txtCtrl.text == ''
+                  ? Container()
+                  : CupertinoButton(
+                      child: Text(
+                        'Enviar',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      onPressed: () {
+                        _socket.socket.connected
+                            ? enviarMensaje(_socket)
+                            : openAlertDialog(
+                                context, 'No hay conexión con el servidor');
+                      })
         ],
       ),
     );
