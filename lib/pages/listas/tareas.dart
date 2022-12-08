@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/pages/listas/asigna_tareas_extras.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -18,10 +19,15 @@ class TareasCheckList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+
+    final subetapaId = arguments['subetapaId'];
     final etapaId = arguments['etapaId'];
+
     final _obraService = Provider.of<ObraService>(context);
     tareas = _obraService.obra.etapas
         .singleWhere((etapa) => etapa.id == etapaId)
+        .subetapas
+        .singleWhere((subetapa) => subetapa.id == subetapaId)
         .tareas;
 
     // tareas = [new Tarea(descripcion: '12332', etapa: '111', isDefault: false)];
@@ -97,21 +103,21 @@ class _TareaTileState extends State<_TareaTile> {
       ),
       onChanged: (value) async {
         openLoadingDialog(context, mensaje: 'Actualizando...');
-        final response = await _obraService.actualizarTarea(
-            _obraService.obra.id,
-            widget.tarea.etapa,
-            widget.tarea.id,
-            value!,
-            new Preferences().id,
-            DateTime.now().millisecondsSinceEpoch);
+        // final response = await _obraService.actualizarTarea(
+        //     _obraService.obra.id,
+        //     widget.tarea.subetapa,
+        //     widget.tarea.id,
+        //     value!,
+        //     new Preferences().id,
+        //     DateTime.now().millisecondsSinceEpoch);
         closeLoadingDialog(context);
         widget.tarea.realizado = value!;
         _obraService.notifyListeners();
 
-        if (response.fallo) {
-          openAlertDialog(context, 'Error al actualizar tarea',
-              subMensaje: response.error);
-        }
+        // if (response.fallo) {
+        //   openAlertDialog(context, 'Error al actualizar tarea',
+        //       subMensaje: response.error);
+        // }
 
         setState(() {});
       },

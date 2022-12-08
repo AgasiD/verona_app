@@ -1,6 +1,7 @@
 import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/propietario.dart';
+import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/pages/listas/etapas.dart';
 
@@ -12,6 +13,7 @@ class Obra {
   List<dynamic> enabledFiles;
   List<dynamic> pedidos;
   List<Etapa> etapas;
+
   List<Miembro> equipo;
   List<Propietario> propietarios;
   String barrio;
@@ -140,8 +142,8 @@ class Obra {
     int cantTotalTareas = 0;
     int cantTotalTaresHechas = 0;
     etapas.forEach((etapa) {
-      cantTotalTareas = cantTotalTareas + etapa.cantTareas;
-      cantTotalTaresHechas = cantTotalTaresHechas + etapa.cantTareasTerminadas;
+      cantTotalTareas += etapa.totalTareas;
+      cantTotalTaresHechas += etapa.cantSubtareasTerminadas;
     });
     return double.parse(
         (cantTotalTaresHechas / cantTotalTareas * 100).toStringAsFixed(2));
@@ -175,24 +177,17 @@ class Obra {
     }
   }
 
-  sumarTarea(String etapaId, Tarea tarea) {
+  sumarTarea(String etapaId, Subetapa subetapa) {
     final indexEtapa = etapas.indexWhere((etapa) => etapa.id == etapaId);
-    etapas[indexEtapa].tareas.add(tarea);
+    etapas[indexEtapa].subetapas.add(subetapa);
   }
 
-  quitarTarea(String etapa, Tarea tarea) {
+  quitarTarea(String etapa, Subetapa subetapa) {
     final indexEtapa = etapas.indexWhere((etapaAux) => etapaAux.id == etapa);
     final indexTarea = etapas[indexEtapa]
-        .tareas
-        .indexWhere((tareaAux) => tareaAux.id == tarea.id);
-    etapas[indexEtapa].tareas.removeAt(indexTarea);
-  }
-
-  void actualizaTarea(String idtapa, String id, bool value) {
-    final etapaIndex = etapas.indexWhere((etapa) => etapa.id == idtapa);
-    final tareaIndex =
-        etapas[etapaIndex].tareas.indexWhere((tarea) => tarea.id == id);
-    etapas[etapaIndex].tareas[tareaIndex].realizado = value;
+        .subetapas
+        .indexWhere((tareaAux) => tareaAux.id == subetapa.id);
+    etapas[indexEtapa].subetapas.removeAt(indexTarea);
   }
 
   sumarEtapa(Etapa etapa) {
