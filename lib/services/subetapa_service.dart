@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/services/http_service.dart';
 
-class EtapaService extends ChangeNotifier {
+class SubetapaService extends ChangeNotifier {
   HttpService _http = new HttpService();
-  final _endpoint = 'api/etapa';
+  final _endpoint = 'api/subetapa';
 
   Future<MyResponse> obtenerEtapasExtras() async {
     final datos = await this._http.get('$_endpoint/extras');
@@ -14,7 +14,7 @@ class EtapaService extends ChangeNotifier {
   }
 
   Future<MyResponse> grabar(Map<String, dynamic> data) async {
-    final datos = await this._http.post('$_endpoint/nuevaEtapa', data);
+    final datos = await this._http.post('$_endpoint/nuevaSubetapa', data);
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
     return resp;

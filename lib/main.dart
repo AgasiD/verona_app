@@ -18,6 +18,7 @@ import 'package:verona_app/services/image_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
+import 'package:verona_app/services/subetapa_service.dart';
 import 'package:verona_app/services/tarea_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:vibration/vibration.dart';
@@ -86,6 +87,9 @@ class _AppStateState extends State<AppState> {
         ),
         ChangeNotifierProvider(
           create: (_) => SocketService(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SubetapaService(),
         ),
 
         ChangeNotifierProvider(

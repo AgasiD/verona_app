@@ -155,10 +155,17 @@ class ObraService extends ChangeNotifier {
     return resp;
   }
 
-  Future<MyResponse> actualizarTarea(String obraId, String etapaId,
-      String tareaId, bool realizada, String usuarioId, int ts) async {
+  Future<MyResponse> actualizarTarea(
+      String obraId,
+      String etapaId,
+      String subetapaId,
+      String tareaId,
+      bool realizada,
+      String usuarioId,
+      int ts) async {
     final body = {
       "etapaId": etapaId,
+      "subetapaId": subetapaId,
       "tareaId": tareaId,
       "valor": realizada,
       "usuarioId": usuarioId,
@@ -183,8 +190,13 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<MyResponse> quitarTarea(
-      String etapaId, String tareaId, String obraId) async {
-    final body = {"tareaId": tareaId, "etapaId": etapaId, "obraId": obraId};
+      String etapaId, String subetapa, String tareaId, String obraId) async {
+    final body = {
+      "subetapaId": subetapa,
+      "tareaId": tareaId,
+      "etapaId": etapaId,
+      "obraId": obraId
+    };
     final datos = await this._http.put('$_endpoint/quitarTarea', body);
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);

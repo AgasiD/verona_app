@@ -177,16 +177,23 @@ class Obra {
     }
   }
 
-  sumarTarea(String etapaId, Subetapa subetapa) {
+  sumarTarea(String etapaId, Tarea tarea) {
     final indexEtapa = etapas.indexWhere((etapa) => etapa.id == etapaId);
-    etapas[indexEtapa].subetapas.add(subetapa);
+    final indexSubetapa = etapas[indexEtapa]
+        .subetapas
+        .indexWhere((subetapa) => subetapa.id == tarea.subetapa);
+    etapas[indexEtapa].subetapas[indexSubetapa].tareas.add(tarea);
   }
 
-  quitarTarea(String etapa, Subetapa subetapa) {
-    final indexEtapa = etapas.indexWhere((etapaAux) => etapaAux.id == etapa);
-    final indexTarea = etapas[indexEtapa]
+  quitarTarea(String etapaId, Tarea tarea) {
+    final indexEtapa = etapas.indexWhere((etapa) => etapa.id == etapaId);
+    final indexSubetapa = etapas[indexEtapa]
         .subetapas
-        .indexWhere((tareaAux) => tareaAux.id == subetapa.id);
+        .indexWhere((subetapa) => subetapa.id == tarea.subetapa);
+    final indexTarea = etapas[indexEtapa]
+        .subetapas[indexSubetapa]
+        .tareas
+        .indexWhere((tareaAux) => tareaAux.id == tarea.id);
     etapas[indexEtapa].subetapas.removeAt(indexTarea);
   }
 

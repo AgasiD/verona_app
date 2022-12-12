@@ -4,6 +4,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/models/tarea.dart';
+import 'package:verona_app/pages/forms/tarea.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/tarea_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -15,6 +16,7 @@ class TareasExtrasPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final etapaId = arguments['etapaId'];
+    final subetapaId = arguments['subetapaId'];
     final _tareaService = Provider.of<TareaService>(context, listen: false);
     final _obraService = Provider.of<ObraService>(context, listen: false);
     return Scaffold(
@@ -23,11 +25,20 @@ class TareasExtrasPage extends StatelessWidget {
         backgroundColor: Helper.brandColors[1],
         automaticallyImplyLeading: false,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.pushNamed(
+            context, Etapa_Sub_Tarea_Form.routeName,
+            arguments: {'etapaId': etapaId, 'subetapaId': subetapaId}),
+        backgroundColor: Helper.brandColors[8],
+        mini: true,
+        child: Icon(Icons.add),
+        splashColor: null,
+      ),
       body: Container(
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-            future: _tareaService.obtenerTareasExtras(etapaId),
+            future: _tareaService.obtenerTareasExtras(subetapaId),
             builder: (context, snapshot) {
               if (snapshot.data == null) {
                 return Loading(
@@ -36,14 +47,20 @@ class TareasExtrasPage extends StatelessWidget {
               } else {
                 final response = snapshot.data as MyResponse;
                 final lista = response.data as List<dynamic>;
-                final tareas = lista.map((e) => Subetapa.fromJson(e)).toList();
-                final index = _obraService.obra.etapas
+                final tareas = lista.map((e) => Tarea.fromJson(e)).toList();
+                final indexEtapa = _obraService.obra.etapas
                     .indexWhere((etapa) => etapa.id == etapaId);
-                final tareasAsignadas =
-                    _obraService.obra.etapas[index].subetapas;
-                return Container();
-                // return _SearchListGroupView(
-                //     tareas: tareas, tareasAsignadas: tareasAsignadas);
+                final indexSubetapa = _obraService
+                    .obra.etapas[indexEtapa].subetapas
+                    .indexWhere((subetapa) => subetapa.id == subetapaId);
+                final tareasAsignadas = _obraService
+                    .obra.etapas[indexEtapa].subetapas[indexSubetapa].tareas;
+
+                return _SearchListGroupView(
+                  tareas: tareas,
+                  tareasAsignadas: tareasAsignadas,
+                  etapaId: etapaId,
+                );
               }
             },
           ),
@@ -55,14 +72,16 @@ class TareasExtrasPage extends StatelessWidget {
 }
 
 class _SearchListGroupView extends StatefulWidget {
-  _SearchListGroupView({
-    Key? key,
-    required this.tareas,
-    required this.tareasAsignadas,
-  }) : super(key: key);
+  _SearchListGroupView(
+      {Key? key,
+      required this.tareas,
+      required this.tareasAsignadas,
+      required this.etapaId})
+      : super(key: key);
 
   List<Tarea> tareas;
   List<Tarea> tareasAsignadas;
+  String etapaId;
   @override
   State<_SearchListGroupView> createState() => __SearchListGroupViewState();
 }
@@ -92,6 +111,7 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                               _CustomAddListTile(
                                 tarea: widget.tareas[index],
                                 asignado: asignado,
+                                etapaId: widget.etapaId,
                               ),
                               Divider(
                                 color: Helper.brandColors[3],
@@ -119,11 +139,16 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
 }
 
 class _CustomAddListTile extends StatefulWidget {
-  _CustomAddListTile({Key? key, required this.tarea, this.asignado = false})
+  _CustomAddListTile(
+      {Key? key,
+      required this.tarea,
+      this.asignado = false,
+      required this.etapaId})
       : super(key: key);
 
   final Tarea tarea;
   bool asignado;
+  String etapaId;
 
   @override
   State<_CustomAddListTile> createState() => _CustomAddListTileState();
@@ -162,7 +187,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
               openAlertDialog(context, 'Error al asignar tarea',
                   subMensaje: response.error);
             } else {
-              // _obraService.obra.sumarTarea(widget.tarea.etapa, widget.tarea);
+              _obraService.obra.sumarTarea(widget.etapaId, widget.tarea);
               widget.asignado = true;
               closeLoadingDialog(context);
               snackText = 'Tarea asignada';
@@ -173,7 +198,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
             //Quitar tarea
             openLoadingDialog(context, mensaje: 'Quitando tarea...');
 
-            final response = await _obraService.quitarTarea(
+            final response = await _obraService.quitarTarea(widget.etapaId,
                 widget.tarea.subetapa, widget.tarea.id, _obraService.obra.id);
 
             if (response.fallo) {
@@ -181,7 +206,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
               openAlertDialog(context, 'Error al quitar tarea',
                   subMensaje: response.error);
             } else {
-              // _obraService.obra.quitarTarea(widget.tarea.etapa, widget.tarea);
+              _obraService.obra.quitarTarea(widget.etapaId, widget.tarea);
               widget.asignado = false;
               closeLoadingDialog(context);
               Helper.showSnackBar(

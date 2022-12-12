@@ -12,7 +12,7 @@ import 'package:verona_app/widgets/custom_widgets.dart';
 
 class TareasCheckList extends StatelessWidget {
   TareasCheckList({Key? key}) : super(key: key);
-  static final routeName = 'TareasChecList';
+  static final routeName = 'TareasCheckList';
 
   List<Tarea> tareas = [];
 
@@ -48,6 +48,7 @@ class TareasCheckList extends StatelessWidget {
                       subMensaje: tareas[index].descripcion);
                 },
                 child: _TareaTile(
+                  etapaId: etapaId,
                   tarea: tareas[index],
                   index: index,
                 ),
@@ -60,7 +61,7 @@ class TareasCheckList extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(
             context, TareasExtrasPage.routeName,
-            arguments: {'etapaId': etapaId}),
+            arguments: {'etapaId': etapaId, 'subetapaId': subetapaId}),
         backgroundColor: Helper.brandColors[8],
         mini: true,
         child: Icon(Icons.add),
@@ -71,11 +72,16 @@ class TareasCheckList extends StatelessWidget {
 }
 
 class _TareaTile extends StatefulWidget {
-  _TareaTile({Key? key, required this.tarea, required this.index})
+  _TareaTile(
+      {Key? key,
+      required this.tarea,
+      required this.index,
+      required this.etapaId})
       : super(key: key);
 
   Tarea tarea;
   int index;
+  String etapaId;
 
   @override
   State<_TareaTile> createState() => _TareaTileState();
@@ -103,21 +109,22 @@ class _TareaTileState extends State<_TareaTile> {
       ),
       onChanged: (value) async {
         openLoadingDialog(context, mensaje: 'Actualizando...');
-        // final response = await _obraService.actualizarTarea(
-        //     _obraService.obra.id,
-        //     widget.tarea.subetapa,
-        //     widget.tarea.id,
-        //     value!,
-        //     new Preferences().id,
-        //     DateTime.now().millisecondsSinceEpoch);
+        final response = await _obraService.actualizarTarea(
+            _obraService.obra.id,
+            widget.etapaId,
+            widget.tarea.subetapa,
+            widget.tarea.id,
+            value!,
+            new Preferences().id,
+            DateTime.now().millisecondsSinceEpoch);
         closeLoadingDialog(context);
         widget.tarea.realizado = value!;
         _obraService.notifyListeners();
 
-        // if (response.fallo) {
-        //   openAlertDialog(context, 'Error al actualizar tarea',
-        //       subMensaje: response.error);
-        // }
+        if (response.fallo) {
+          openAlertDialog(context, 'Error al actualizar tarea',
+              subMensaje: response.error);
+        }
 
         setState(() {});
       },
