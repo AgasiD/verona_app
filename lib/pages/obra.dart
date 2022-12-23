@@ -247,11 +247,12 @@ class _DiasViewState extends State<_DiasView> {
   int diasEstimados = 0;
   int diasInactivos = 0;
   int diasTranscurridos = 0;
-  bool ok = true;
+  bool ok = true, activeST = true;
 
   @override
   void dispose() {
     // TODO: implement dispose
+    activeST = false;
     super.dispose();
   }
 
@@ -265,8 +266,7 @@ class _DiasViewState extends State<_DiasView> {
         diasEstimados = widget.obra.diasEstimados;
         diasInactivos = widget.obra.diasInactivos.length;
         diasTranscurridos = widget.obra.diasTranscurridos;
-
-        setState(() {});
+        if (activeST) setState(() {});
       });
     }
     return Container(
@@ -409,7 +409,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
       //Desplegable de equipo
       final team = Item(
-        icon: Icons.groups_rounded,
+        icon: Icons.groups_outlined,
         list: 2,
         titulo: 'Equipo',
         values: [].toList(),
@@ -423,7 +423,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
       //Desplegable de docs
       final doc = Item(
-        icon: Icons.file_copy,
+        icon: Icons.file_copy_outlined,
         list: 3,
         titulo: 'Documentos',
         values: [].toList(),
@@ -465,13 +465,22 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       items.add(imgs);
 
       final status = Item(
-        icon: Icons.account_tree,
+        icon: Icons.account_tree_outlined,
         list: 5,
-        titulo: 'Etapas',
+        titulo: 'Control de obra',
         values: [].toList(),
         accion: () => Navigator.pushNamed(context, EtapasObra.routeName),
       );
       items.add(status);
+
+      final certificados = Item(
+        icon: Icons.library_add_check_outlined,
+        list: 5,
+        titulo: 'Certificados de obra',
+        values: [].toList(),
+        accion: () => {},
+      );
+      items.add(certificados);
 
       final pedidos = Item(
         icon: Icons.request_page_outlined,

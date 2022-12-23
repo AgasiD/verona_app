@@ -5,8 +5,9 @@ import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/etapa.dart';
 import 'package:verona_app/pages/forms/subetapa.dart';
-import 'package:verona_app/pages/forms/tarea.dart';
+import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
 import 'package:verona_app/pages/listas/asigna_etapas_extras.dart';
+import 'package:verona_app/pages/listas/asigna_subetapas_extras.dart';
 import 'package:verona_app/pages/listas/asigna_tareas_extras.dart';
 import 'package:verona_app/pages/listas/contactos.dart';
 import 'package:verona_app/pages/forms/documento.dart';
@@ -78,4 +79,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   Etapa_Sub_Tarea_Form.routeName: (_) => Etapa_Sub_Tarea_Form(),
   Subetapa_Form.routeName: (_) => Subetapa_Form(),
   Etapa_Form.routeName: (_) => Etapa_Form(),
+  SubetapasExtrasPage.routeName: (_) => SubetapasExtrasPage(),
+  EtapasExtrasPage.routeName: (_) => EtapasExtrasPage(),
 };

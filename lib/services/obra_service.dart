@@ -179,8 +179,13 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<MyResponse> asignarTarea(
-      String etapaId, String tareaId, String obraId) async {
-    final body = {"tareaId": tareaId, "etapaId": etapaId, "obraId": obraId};
+      String etapaId, String subetapaId, String tareaId, String obraId) async {
+    final body = {
+      "tareaId": tareaId,
+      "subetapaId": subetapaId,
+      "etapaId": etapaId,
+      "obraId": obraId
+    };
     final datos = await this._http.put('$_endpoint/asignarTarea', body);
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
@@ -218,6 +223,45 @@ class ObraService extends ChangeNotifier {
   Future<MyResponse> quitarEtapa(String etapaId, String obraId) async {
     final body = {"etapaId": etapaId, "obraId": obraId};
     final datos = await this._http.put('$_endpoint/quitarEtapa', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  Future<MyResponse> eliminarEtapa(obraId, etapaId) async {
+    final body = {"etapaId": etapaId, "obraId": obraId};
+    final datos =
+        await this._http.put('$_endpoint/eliminarEtapaFromObra', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  quitarSubetapa(etapaId, subetapaId, obraId) async {
+    final body = {
+      "etapaId": etapaId,
+      "subetapaId": subetapaId,
+      "obraId": obraId
+    };
+    final datos = await this._http.put('$_endpoint/quitarSubetapa', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  asignarSubEtapa(String etapaId, String subetapaId, String obraId) async {
+    final body = {
+      "etapaId": etapaId,
+      "subetapaId": subetapaId,
+      "obraId": obraId
+    };
+    final datos = await this._http.put('$_endpoint/asignarSubetapa', body);
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
     notifyListeners();

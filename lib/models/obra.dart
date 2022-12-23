@@ -194,7 +194,7 @@ class Obra {
         .subetapas[indexSubetapa]
         .tareas
         .indexWhere((tareaAux) => tareaAux.id == tarea.id);
-    etapas[indexEtapa].subetapas.removeAt(indexTarea);
+    etapas[indexEtapa].subetapas[indexSubetapa].tareas.removeAt(indexTarea);
   }
 
   sumarEtapa(Etapa etapa) {

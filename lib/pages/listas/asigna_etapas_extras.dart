@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/etapa.dart';
+import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
 import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -19,6 +20,15 @@ class EtapasExtrasPage extends StatelessWidget {
         title: Text('Etapas extras'),
         backgroundColor: Helper.brandColors[1],
         automaticallyImplyLeading: false,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.pushNamed(
+            context, Etapa_Sub_Tarea_Form.routeName,
+            arguments: {}),
+        backgroundColor: Helper.brandColors[8],
+        mini: true,
+        child: Icon(Icons.add),
+        splashColor: null,
       ),
       body: Container(
         color: Helper.brandColors[1],

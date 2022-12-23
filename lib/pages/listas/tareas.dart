@@ -1,10 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/pages/listas/asigna_tareas_extras.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -37,25 +38,23 @@ class TareasCheckList extends StatelessWidget {
       body: SingleChildScrollView(
           child: Container(
         height: MediaQuery.of(context).size.height - 100,
-        child: ListView.builder(
-          itemCount: tareas.length,
-          itemBuilder: (context, index) {
-            return Container(
-              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
-              child: GestureDetector(
-                onLongPress: () {
-                  openAlertDialog(context, 'Descripción',
-                      subMensaje: tareas[index].descripcion);
+        child: tareas.length > 0
+            ? ListView.builder(
+                itemCount: tareas.length,
+                itemBuilder: (context, index) {
+                  return _TareaTile(
+                    etapaId: etapaId,
+                    tarea: tareas[index],
+                    index: index,
+                  );
                 },
-                child: _TareaTile(
-                  etapaId: etapaId,
-                  tarea: tareas[index],
-                  index: index,
+              )
+            : Center(
+                child: Text(
+                  'Aún no hay tareas ',
+                  style: TextStyle(fontSize: 20, color: Helper.brandColors[4]),
                 ),
               ),
-            );
-          },
-        ),
       )),
       bottomNavigationBar: CustomNavigatorFooter(),
       floatingActionButton: FloatingActionButton(
@@ -97,38 +96,156 @@ class _TareaTileState extends State<_TareaTile> {
   @override
   Widget build(BuildContext context) {
     _obraService = Provider.of<ObraService>(context, listen: false);
+    final _pref = new Preferences();
 
-    return CheckboxListTile(
-      tileColor: Helper.brandColors[2],
-      checkColor: Helper.brandColors[5],
-      activeColor: Helper.brandColors[8],
-      title: Text(
-        '${widget.index + 1} - ${widget.tarea.descripcion}',
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: Helper.brandColors[3]),
-      ),
-      onChanged: (value) async {
-        openLoadingDialog(context, mensaje: 'Actualizando...');
-        final response = await _obraService.actualizarTarea(
-            _obraService.obra.id,
-            widget.etapaId,
-            widget.tarea.subetapa,
-            widget.tarea.id,
-            value!,
-            new Preferences().id,
-            DateTime.now().millisecondsSinceEpoch);
-        closeLoadingDialog(context);
-        widget.tarea.realizado = value!;
-        _obraService.notifyListeners();
+    final checkboxTile = Container(
+        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+        child: GestureDetector(
+            onLongPress: () {
+              openAlertDialog(context, 'Descripción',
+                  subMensaje: widget.tarea.descripcion);
+            },
+            child: CheckboxListTile(
+              tileColor: Helper.brandColors[2],
+              checkColor: Helper.brandColors[5],
+              activeColor: Helper.brandColors[8],
+              title: Text(
+                '${widget.index + 1} - ${widget.tarea.descripcion}',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Helper.brandColors[3]),
+              ),
+              onChanged: (value) async {
+                openLoadingDialog(context, mensaje: 'Actualizando...');
+                final response = await _obraService.actualizarTarea(
+                    _obraService.obra.id,
+                    widget.etapaId,
+                    widget.tarea.subetapa,
+                    widget.tarea.id,
+                    value!,
+                    new Preferences().id,
+                    DateTime.now().millisecondsSinceEpoch);
+                closeLoadingDialog(context);
+                widget.tarea.realizado = value!;
+                _obraService.notifyListeners();
 
-        if (response.fallo) {
-          openAlertDialog(context, 'Error al actualizar tarea',
-              subMensaje: response.error);
-        }
+                if (response.fallo) {
+                  openAlertDialog(context, 'Error al actualizar tarea',
+                      subMensaje: response.error);
+                }
 
-        setState(() {});
-      },
-      value: widget.tarea.realizado,
-    );
+                setState(() {});
+              },
+              value: widget.tarea.realizado,
+            )));
+
+    if (_pref.role == 1)
+      return Dismissible(
+          confirmDismiss: (DismissDirection direction) async {
+            if (ultimaTarea(
+                widget.etapaId, widget.tarea.subetapa, widget.tarea.id)) {
+              openAlertDialog(context, 'No se puede dejar sin tareas');
+
+              return false;
+            }
+            return await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                if (Platform.isAndroid) {
+                  return AlertDialog(
+                    title: const Text("Confirmar"),
+                    content: const Text("Confirmar eliminacion de tarea"),
+                    actions: <Widget>[
+                      TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text('Confirmar')),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text('Cancelar',
+                            style: TextStyle(color: Colors.grey)),
+                      ),
+                    ],
+                  );
+                } else {
+                  return CupertinoAlertDialog(
+                    title: Text('Confirmar eliminacion de tarea'),
+                    actions: [
+                      CupertinoDialogAction(
+                          child: Text('Confirmar'),
+                          onPressed: () async => Navigator.pop(context, true)),
+                      CupertinoDialogAction(
+                        isDestructiveAction: true,
+                        child: Text('Cancelar'),
+                        onPressed: () => Navigator.pop(context, false),
+                      )
+                    ],
+                  );
+                }
+              },
+            );
+          },
+          direction: DismissDirection.endToStart,
+          onDismissed: (direction) async {
+            await eliminarTarea(context, _obraService.obra.id, widget.etapaId,
+                widget.tarea.subetapa, widget.tarea.id);
+          },
+          background: Container(
+            color: Colors.red,
+            child: Container(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Eliminar',
+                  style: TextStyle(color: Helper.brandColors[4], fontSize: 20),
+                ),
+              ),
+            ),
+          ),
+          key: ValueKey<String>(widget.tarea.id),
+          child: checkboxTile);
+
+    return checkboxTile;
+  }
+
+  eliminarTarea(context, obraId, etapaId, subetapaId, tareaId) async {
+    final index =
+        _obraService.obra.etapas.indexWhere((etapa) => etapa.id == etapaId);
+    final indexSub = _obraService.obra.etapas[index].subetapas
+        .indexWhere((subetapa) => subetapa.id == subetapaId);
+
+    final indexTarea = _obraService
+        .obra.etapas[index].subetapas[indexSub].tareas
+        .indexWhere((tarea) => tarea.id == tareaId);
+
+    if (_obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
+        1) {
+      openAlertDialog(context, 'No se puede dejar sin tareas');
+      return;
+    }
+
+    _obraService.obra.etapas[index].subetapas[indexSub].tareas
+        .removeAt(indexTarea);
+    openLoadingDialog(context, mensaje: 'Eliminando tarea...');
+    final response =
+        await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
+    closeLoadingDialog(context);
+    if (response.fallo) {
+      openAlertDialog(context, 'Error al eliminar tarea',
+          subMensaje: response.error);
+    }
+  }
+
+  bool ultimaTarea(etapaId, subetapaId, tareaId) {
+    final index =
+        _obraService.obra.etapas.indexWhere((etapa) => etapa.id == etapaId);
+    final indexSub = _obraService.obra.etapas[index].subetapas
+        .indexWhere((subetapa) => subetapa.id == subetapaId);
+
+    final indexTarea = _obraService
+        .obra.etapas[index].subetapas[indexSub].tareas
+        .indexWhere((tarea) => tarea.id == tareaId);
+
+    return _obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
+        1;
   }
 }

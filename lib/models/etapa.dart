@@ -33,8 +33,10 @@ class Etapa {
     return total;
   }
 
-  double get porcentajeRealizado => double.parse(
-      (cantSubtareasTerminadas / totalTareas * 100).toStringAsFixed(2));
+  double get porcentajeRealizado => totalTareas > 0
+      ? double.parse(
+          (cantSubtareasTerminadas / totalTareas * 100).toStringAsFixed(2))
+      : 0;
 
   String descripcion;
   String id;
@@ -44,7 +46,7 @@ class Etapa {
 
   factory Etapa.fromJson(Map<String, dynamic> json) => Etapa(
         descripcion: json["descripcion"],
-        id: json["id"],
+        id: json["id"] ?? '',
         isDefault: json["isDefault"],
         orden: json["orden"],
         subetapas: json['subetapas'] != null
@@ -60,4 +62,13 @@ class Etapa {
         "orden": orden,
         "subetapas": List<dynamic>.from(subetapas.map((x) => x.toJson())),
       };
+
+  sumarSubetapa(Subetapa subetapa) {
+    subetapas.add(subetapa);
+  }
+
+  quitarSubEtapa(String subetapa) {
+    final indexSubetapa = subetapas.indexWhere((sube) => sube.id == subetapa);
+    subetapas.removeAt(indexSubetapa);
+  }
 }

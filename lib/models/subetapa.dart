@@ -18,8 +18,10 @@ class Subetapa {
   int get cantTareasTerminadas =>
       tareas.where((element) => element.realizado).length;
   bool get realizado => cantTareasTerminadas == cantTareas;
-  double get porcentajeRealizado => double.parse(
-      (cantTareasTerminadas / tareas.length * 100).toStringAsFixed(2));
+  double get porcentajeRealizado => tareas.length > 0
+      ? double.parse(
+          (cantTareasTerminadas / tareas.length * 100).toStringAsFixed(2))
+      : 0;
 
   String descripcion;
   String id;
@@ -29,7 +31,7 @@ class Subetapa {
 
   factory Subetapa.fromJson(Map<String, dynamic> json) => Subetapa(
         descripcion: json["descripcion"],
-        id: json["id"],
+        id: json["id"] ?? '',
         isDefault: json["isDefault"],
         orden: json["orden"],
         tareas: json['tareas'] != null

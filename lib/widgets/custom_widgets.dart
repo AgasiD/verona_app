@@ -842,7 +842,7 @@ void openBottomSheet(
 }
 
 void openDialogConfirmation(
-    BuildContext context, Function onPressed, String mensaje) {
+    BuildContext context, Function onPressed, String mensaje) async {
   if (Platform.isAndroid) {
     showDialog(
         context: context,
@@ -878,6 +878,43 @@ void openDialogConfirmation(
             isDestructiveAction: true,
             child: Text('Cancelar'),
             onPressed: () => Navigator.pop(context),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+Future<bool> openDialogConfirmationReturn(
+    BuildContext context, String mensaje) async {
+  if (Platform.isAndroid) {
+    return await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(mensaje),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
+                ),
+                TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text('Confirmar')),
+              ],
+            ));
+  } else {
+    return await showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(mensaje),
+        actions: [
+          CupertinoDialogAction(
+              child: Text('Confirmar'),
+              onPressed: () async => Navigator.pop(context, true)),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text('Cancelar'),
+            onPressed: () => Navigator.pop(context, false),
           )
         ],
       ),

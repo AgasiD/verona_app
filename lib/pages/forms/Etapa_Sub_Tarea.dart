@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/etapa.dart';
+import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -169,7 +168,7 @@ class _FormState extends State<_Form> {
   }
 
   grabarElemento(context) async {
-    openLoadingDialog(context);
+    openLoadingDialog(context, mensaje: 'Grabando $tipo');
     final _obraService = Provider.of<ObraService>(context, listen: false);
     try {
       final data = {
@@ -179,15 +178,39 @@ class _FormState extends State<_Form> {
         "obraId": _obraService.obra.id,
       };
       if (esEtapa) {
+        // ETAPA
         final _service = Provider.of<EtapaService>(context, listen: false);
-        await _service.grabar(data);
+        final datos = await _service.grabar(data);
         closeLoadingDialog(context);
+
+        if (datos.fallo) {
+          openAlertDialog(context, 'Error al grabar $tipo',
+              subMensaje: datos.error);
+          return;
+        }
+        final etapa = Etapa.fromJson(datos.data);
+        _obraService.obra.etapas.add(etapa);
+        _obraService.notifyListeners();
       } else if (esSubEtapa) {
+        // SUBETAPA
         data.addAll({"etapaId": widget.etapaId!});
         final _service = Provider.of<SubetapaService>(context, listen: false);
-        await _service.grabar(data);
+        final datos = await _service.grabar(data);
         closeLoadingDialog(context);
+
+        if (datos.fallo) {
+          openAlertDialog(context, 'Error al grabar $tipo',
+              subMensaje: datos.error);
+          return;
+        }
+        final subetapa = Subetapa.fromJson(datos.data);
+        _obraService.obra.etapas
+            .singleWhere((etapa) => etapa.id == widget.etapaId)
+            .subetapas
+            .add(subetapa);
+        _obraService.notifyListeners();
       } else {
+        // TAREA
         data.addAll({"etapaId": widget.etapaId!});
         data.addAll({"subetapaId": widget.subetapaId!});
 
@@ -209,6 +232,7 @@ class _FormState extends State<_Form> {
             .add(tarea);
         _obraService.notifyListeners();
       }
+      Navigator.pop(context);
     } catch (err) {
       closeLoadingDialog(context);
       openAlertDialog(

@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/pages/listas/asigna_etapas_extras.dart';
@@ -58,9 +62,14 @@ class _EtapaCard extends StatelessWidget {
   Etapa etapa;
   int index;
 
+  late ObraService _obraService;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final _pref = new Preferences();
+    _obraService = Provider.of<ObraService>(context, listen: false);
+
+    final tile = Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         color: Helper.brandColors[2],
@@ -121,5 +130,75 @@ class _EtapaCard extends StatelessWidget {
         ),
       ),
     );
+
+    if (_pref.role == 1)
+      return Dismissible(
+          confirmDismiss: (DismissDirection direction) async {
+            return await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                if (Platform.isAndroid) {
+                  return AlertDialog(
+                    title: const Text("Confirm"),
+                    content: const Text("Confirmar eliminacion de etapa"),
+                    actions: <Widget>[
+                      TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text('Confirmar')),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text('Cancelar',
+                            style: TextStyle(color: Colors.grey)),
+                      ),
+                    ],
+                  );
+                } else {
+                  return CupertinoAlertDialog(
+                    title: Text('Confirmar eliminacion de etapa'),
+                    actions: [
+                      CupertinoDialogAction(
+                          child: Text('Confirmar'),
+                          onPressed: () async => Navigator.pop(context, true)),
+                      CupertinoDialogAction(
+                        isDestructiveAction: true,
+                        child: Text('Cancelar'),
+                        onPressed: () => Navigator.pop(context, false),
+                      )
+                    ],
+                  );
+                }
+              },
+            );
+          },
+          direction: DismissDirection.endToStart,
+          onDismissed: (direction) async {
+            await eliminarEtapa(context, _obraService.obra.id, etapa.id);
+          },
+          background: Container(
+            color: Colors.red,
+            child: Container(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'Eliminar',
+                style: TextStyle(color: Helper.brandColors[4], fontSize: 20),
+              ),
+            ),
+          ),
+          key: ValueKey<int>(index),
+          child: tile);
+    return tile;
+  }
+
+  eliminarEtapa(context, obraId, etapaId) async {
+    final index =
+        _obraService.obra.etapas.indexWhere((element) => element.id == etapaId);
+    _obraService.obra.etapas.removeAt(index);
+    openLoadingDialog(context, mensaje: 'Eliminando etapa...');
+    final response = await _obraService.quitarEtapa(etapaId, obraId);
+    closeLoadingDialog(context);
+    if (response.fallo) {
+      openAlertDialog(context, 'Error al eliminar etapa',
+          subMensaje: response.error);
+    }
   }
 }
