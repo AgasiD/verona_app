@@ -15,6 +15,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
@@ -132,18 +133,27 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.person_pin_rounded,
         'name': 'Mi perfil',
         'route': PerfilPage.routeName,
-        'args': {'usuarioId': _pref.id}
+        'args': {'usuarioId': _pref.id},
+        'roles': []
       },
       {
         'icon': Icons.person_add_alt_sharp,
         'name': 'Nuevo propietario',
-        'route': PropietarioForm.routeName
+        'route': PropietarioForm.routeName,
+        'roles': [1]
       },
       {
         'icon': Icons.group_sharp,
         'name': 'Personal',
-        'route': PersonalADM.routeName
+        'route': PersonalADM.routeName,
+        'roles': [1]
       },
+      {
+        'icon': Icons.edit_note_rounded,
+        'name': 'Mis anotaciones',
+        'route': AnotacionesPage.routeName,
+        'roles': [1, 2, 7]
+      }
     ];
     final GlobalKey<ScaffoldState> _scaffoldKey =
         new GlobalKey<ScaffoldState>();

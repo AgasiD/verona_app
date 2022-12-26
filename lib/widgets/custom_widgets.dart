@@ -8,7 +8,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -157,44 +156,28 @@ class CustomDrawer extends StatelessWidget {
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _pref = new Preferences();
 
-    final menuVista = _pref.role == 1
-        ? menu
-            .map((e) => TextButton(
-                  child: Row(children: [
-                    Icon(e['icon'], color: Helper.brandColors[8]),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                      child: Text(
-                        '${e["name"]}',
-                        style: textStyle,
-                      ),
+    final menuVista = menu
+        .map((e) => Visibility(
+              visible: (e["roles"] as List<dynamic>).contains(_pref.role) ||
+                  (e['roles'] as List).isEmpty,
+              child: TextButton(
+                child: Row(children: [
+                  Icon(e['icon'], color: Helper.brandColors[8]),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Text(
+                      '${e["name"]}',
+                      style: textStyle,
                     ),
-                  ]),
-                  onPressed: () {
-                    Navigator.pushNamed(context, e["route"].toString(),
-                        arguments: e['args'] ?? null);
-                  },
-                ))
-            .toList()
-        : menu
-            .sublist(0, 1)
-            .map((e) => TextButton(
-                  child: Row(children: [
-                    Icon(e['icon'], color: Helper.brandColors[8]),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                      child: Text(
-                        '${e["name"]}',
-                        style: textStyle,
-                      ),
-                    ),
-                  ]),
-                  onPressed: () {
-                    Navigator.pushNamed(context, e["route"].toString(),
-                        arguments: e['args'] ?? null);
-                  },
-                ))
-            .toList();
+                  ),
+                ]),
+                onPressed: () {
+                  Navigator.pushNamed(context, e["route"].toString(),
+                      arguments: e['args'] ?? null);
+                },
+              ),
+            ))
+        .toList();
     return Drawer(
         child: Container(
       color: Helper.brandColors[2],

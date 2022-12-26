@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
+import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/etapa.dart';
@@ -81,4 +82,5 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   Etapa_Form.routeName: (_) => Etapa_Form(),
   SubetapasExtrasPage.routeName: (_) => SubetapasExtrasPage(),
   EtapasExtrasPage.routeName: (_) => EtapasExtrasPage(),
+  AnotacionesPage.routeName: (_) => AnotacionesPage(),
 };

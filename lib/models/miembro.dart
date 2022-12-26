@@ -1,3 +1,5 @@
+import 'package:verona_app/models/anotacion.dart';
+
 class Miembro {
   Miembro(
       {required this.id,
@@ -10,7 +12,8 @@ class Miembro {
       this.username = '',
       this.externo = false,
       this.chats = const [],
-      this.profileURL = ''});
+      this.profileURL = '',
+      this.anotaciones = null});
   String id;
   String nombre;
   String apellido;
@@ -22,6 +25,7 @@ class Miembro {
   int role;
   bool externo;
   List<dynamic> chats;
+  List<Anotacion>? anotaciones;
 
   factory Miembro.fromJson(Map<String, dynamic> json) => Miembro(
       id: json['id'] ?? '',
@@ -33,7 +37,12 @@ class Miembro {
       role: json["role"] ?? 0,
       chats: json.containsKey('chats') ? json["chats"] : [],
       username: json['username'] ?? '',
-      profileURL: json['profileURL'] ?? '');
+      profileURL: json['profileURL'] ?? '',
+      anotaciones: json['anotaciones'] != null
+          ? (json['anotaciones'] as List)
+              .map((e) => Anotacion.fromJson(e))
+              .toList()
+          : null);
 
   Map<String, dynamic> toJson() => {
         "nombre": this.nombre,
@@ -43,6 +52,21 @@ class Miembro {
         "dni": this.dni,
         "role": this.role,
         "username": this.username,
-        "profileURL": this.profileURL
+        "profileURL": this.profileURL,
+        "anotaciones": this.anotaciones
       };
+
+  agregarAnotacion(Anotacion anota) {
+    if (this.anotaciones == null) this.anotaciones = [];
+    this.anotaciones!.add(anota);
+  }
+
+  eliminarAnotacion(String id) {
+    this.anotaciones!.removeWhere((anotacion) => anotacion.id == id);
+  }
+
+  actualizarAnotacion(Anotacion anota) {
+    final i = this.anotaciones!.indexWhere((element) => element.id == anota.id);
+    this.anotaciones![i] = anota;
+  }
 }
