@@ -141,12 +141,22 @@ class Obra {
   double get porcentajeRealizado {
     int cantTotalTareas = 0;
     int cantTotalTaresHechas = 0;
-    etapas.forEach((etapa) {
-      cantTotalTareas += etapa.totalTareas;
-      cantTotalTaresHechas += etapa.cantSubtareasTerminadas;
-    });
-    return double.parse(
-        (cantTotalTaresHechas / cantTotalTareas * 100).toStringAsFixed(2));
+    if (etapas.length > 0) {
+      etapas.forEach((etapa) {
+        cantTotalTareas += etapa.totalTareas;
+        cantTotalTaresHechas += etapa.cantSubtareasTerminadas;
+      });
+    } else {
+      cantTotalTareas = 0;
+      cantTotalTaresHechas = 0;
+      return 0;
+    }
+
+    if (cantTotalTareas > 0)
+      return double.parse(
+          (cantTotalTaresHechas / cantTotalTareas * 100).toStringAsFixed(2));
+    else
+      return 0;
   }
 
   estaPropietario(usuarioId) {

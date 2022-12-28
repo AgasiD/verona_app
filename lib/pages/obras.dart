@@ -117,6 +117,7 @@ class _ObrasPageState extends State<ObrasPage> {
   List<Obra> obras = [];
   List<Obra> obrasFiltradas = [];
   int cant = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -155,10 +156,9 @@ class _ObrasPageState extends State<ObrasPage> {
         'roles': [1, 2, 7]
       }
     ];
-    final GlobalKey<ScaffoldState> _scaffoldKey =
-        new GlobalKey<ScaffoldState>();
 
     return Scaffold(
+      key: _scaffoldKey,
       drawer: CustomDrawer(textStyle: textStyle, menu: menu),
       body: Container(
         color: Helper.brandColors[1],
@@ -169,16 +169,22 @@ class _ObrasPageState extends State<ObrasPage> {
                 controller: _refreshController,
                 onRefresh: () => _onRefresh(_obras),
                 header: header,
-                child: _SearchListView(obras: obras))),
+                child: _SearchListView(obras: obras, openDrawer: openDrawer))),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
+
+  openDrawer() {
+    _scaffoldKey.currentState!.openDrawer();
+  }
 }
 
 class _SearchListView extends StatefulWidget {
-  _SearchListView({Key? key, required this.obras}) : super(key: key);
+  _SearchListView({Key? key, required this.obras, required this.openDrawer})
+      : super(key: key);
   List<Obra> obras;
+  Function openDrawer;
 
   @override
   State<_SearchListView> createState() => __SearchListViewState();
@@ -212,6 +218,7 @@ class __SearchListViewState extends State<_SearchListView> {
                   return _CustomObras(
                     obras: obras,
                     obrasFiltradas: obras,
+                    openDrawer: widget.openDrawer,
                   );
                 } else {
                   return Container(
@@ -229,7 +236,12 @@ class __SearchListViewState extends State<_SearchListView> {
 class _CustomObras extends StatefulWidget {
   List<Obra> obras;
   List<Obra> obrasFiltradas;
-  _CustomObras({Key? key, required this.obras, required this.obrasFiltradas})
+  Function openDrawer;
+  _CustomObras(
+      {Key? key,
+      required this.obras,
+      required this.obrasFiltradas,
+      required this.openDrawer})
       : super(key: key);
 
   @override
@@ -247,46 +259,58 @@ class _CustomObrasState extends State<_CustomObras> {
         margin: EdgeInsets.only(top: 20),
         width: MediaQuery.of(context).size.width * .95,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            CustomInput(
-              width: MediaQuery.of(context).size.width * .95,
-              hintText: 'Nombre de proyecto',
-              icono: Icons.search,
-              textInputAction: TextInputAction.search,
-              validaError: false,
-              iconButton: obrasTxtController.text != ''
-                  ? IconButton(
-                      splashColor: null,
-                      icon: Icon(
-                        Icons.cancel_outlined,
-                        color: Colors.red.withAlpha(200),
+            IconButton(
+                onPressed: () => widget.openDrawer(),
+                icon: Icon(
+                  Icons.menu,
+                  size: 35,
+                  color: Helper.brandColors[8],
+                )),
+            Expanded(
+              child: CustomInput(
+                width: MediaQuery.of(context).size.width * .87,
+                hintText: 'Nombre de proyecto',
+                icono: Icons.search,
+                textInputAction: TextInputAction.search,
+                validaError: false,
+                iconButton: obrasTxtController.text != ''
+                    ? IconButton(
+                        splashColor: null,
+                        icon: Icon(
+                          Icons.cancel_outlined,
+                          color: Colors.red.withAlpha(200),
+                        ),
+                        onPressed: () {
+                          obrasTxtController.text = '';
+                          widget.obrasFiltradas = widget.obras;
+                          setState(() {});
+                        },
+                      )
+                    : IconButton(
+                        color: Helper.brandColors[4],
+                        icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
+                        onPressed: _pref.role == 1
+                            ? () {
+                                Navigator.pushNamed(context, ObraForm.routeName,
+                                    arguments: {
+                                      'formName': ObraForm.routeName
+                                    });
+                              }
+                            : null,
                       ),
-                      onPressed: () {
-                        obrasTxtController.text = '';
-                        widget.obrasFiltradas = widget.obras;
-                        setState(() {});
-                      },
-                    )
-                  : IconButton(
-                      color: Helper.brandColors[4],
-                      icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
-                      onPressed: _pref.role == 1
-                          ? () {
-                              Navigator.pushNamed(context, ObraForm.routeName,
-                                  arguments: {'formName': ObraForm.routeName});
-                            }
-                          : null,
-                    ),
-              textController: obrasTxtController,
-              onChange: (text) {
-                widget.obrasFiltradas = widget.obras
-                    .where((obra) =>
-                        obra.nombre.toLowerCase().contains(text.toLowerCase()))
-                    .toList();
-                setState(() {});
-              },
+                textController: obrasTxtController,
+                onChange: (text) {
+                  widget.obrasFiltradas = widget.obras
+                      .where((obra) => obra.nombre
+                          .toLowerCase()
+                          .contains(text.toLowerCase()))
+                      .toList();
+                  setState(() {});
+                },
+              ),
             ),
           ],
         ),

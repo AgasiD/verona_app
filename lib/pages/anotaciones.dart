@@ -77,7 +77,7 @@ class _Action_FormState extends State<Action_Form> {
         child: widget.usuario.anotaciones == null ||
                 widget.usuario.anotaciones!.isEmpty
             ? Center(
-                child: Text('No tiene anotaciones',
+                child: Text('¡Escribí tu primer anotación!',
                     style:
                         TextStyle(fontSize: 20, color: Helper.brandColors[4])))
             : ListView.builder(

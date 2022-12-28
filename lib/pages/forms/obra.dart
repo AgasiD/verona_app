@@ -17,6 +17,7 @@ import 'package:verona_app/pages/addpropietarios.dart';
 
 import 'package:verona_app/pages/form.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
+import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/image_service.dart';
 import 'package:verona_app/services/loading_service.dart';
@@ -319,12 +320,10 @@ class _FormState extends State<_Form> {
         widget.txtDuracion.text = '';
         widget.txtDescrip.text = '';
         closeLoadingDialog(context);
-        Timer(Duration(milliseconds: 750), () {
-          openLoadingDialog(context, mensaje: 'Obra guardada');
-        });
-        Timer(Duration(milliseconds: 750), () {
-          Navigator.of(context).popAndPushNamed('obras');
-        });
+
+        await openAlertDialogReturn(context, 'Obra creada con éxito');
+        Navigator.pushReplacementNamed(context, ObraPage.routeName,
+            arguments: {"obraId": obraResponse.id});
       } else {
         openAlertDialog(context, 'Formulario invalido');
       }

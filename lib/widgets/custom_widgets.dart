@@ -926,6 +926,46 @@ void closeLoadingDialog(BuildContext context) {
   }
 }
 
+Future<bool> openAlertDialogReturn(BuildContext context, String mensaje,
+    {String? subMensaje}) async {
+  if (Platform.isAndroid) {
+    return await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(mensaje),
+              content: subMensaje != null && subMensaje != ''
+                  ? Text(subMensaje!)
+                  : Container(
+                      height: 0,
+                    ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text('Cerrar'),
+                ),
+              ],
+            ));
+  } else {
+    return await showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(mensaje),
+        content: subMensaje != null && subMensaje != ''
+            ? Text(subMensaje!)
+            : Container(),
+        actions: [
+          CupertinoDialogAction(
+            child: Text('Cerrar'),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 void openAlertDialog(BuildContext context, String mensaje,
     {String? subMensaje}) {
   if (Platform.isAndroid) {

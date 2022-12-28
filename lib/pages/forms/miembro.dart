@@ -10,6 +10,7 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
+import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -337,11 +338,12 @@ class _Form extends StatelessWidget {
                 subMensaje: response.error);
       } else {
         edit
-            ? openAlertDialog(context, 'Personal actualizado')
-            : openAlertDialog(context, 'Personal creado');
+            ? await openAlertDialogReturn(context, 'Personal actualizado')
+            : await openAlertDialogReturn(context, 'Personal creado');
         resetForm();
-        Timer(Duration(milliseconds: 750), () => Navigator.pop(context));
-        Timer(Duration(milliseconds: 750), () => Navigator.pop(context));
+
+        Navigator.pushReplacementNamed(context, PerfilPage.routeName,
+            arguments: {"usuarioId": response.data['id']});
       }
     } else {
       closeLoadingDialog(context);

@@ -112,7 +112,7 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
             height: MediaQuery.of(context).size.height - 200,
             width: MediaQuery.of(context).size.width,
             child: Center(
-                child: Text('No hay tareas para agregar',
+                child: Text('No hay etapas para agregar',
                     style: TextStyle(fontSize: 20, color: Colors.grey[400]))));
   }
 

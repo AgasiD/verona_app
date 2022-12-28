@@ -18,19 +18,24 @@ class Etapa {
   int get cantSubEtapas => subetapas.length;
   int get cantSubtareasTerminadas {
     int terminadas = 0;
-
-    subetapas.forEach((sub) {
-      terminadas += sub.cantTareasTerminadas;
-    });
+    if (subetapas.length > 0) {
+      subetapas.forEach((sub) {
+        terminadas += sub.cantTareasTerminadas;
+      });
+    }
     return terminadas;
   }
 
   int get totalTareas {
     int total = 0;
-    subetapas.forEach((sub) {
-      total += sub.cantTareas;
-    });
-    return total;
+    if (subetapas.length > 0) {
+      subetapas.forEach((sub) {
+        total += sub.cantTareas;
+      });
+      return total;
+    } else {
+      return 0;
+    }
   }
 
   double get porcentajeRealizado => totalTareas > 0
