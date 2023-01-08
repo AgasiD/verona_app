@@ -17,6 +17,7 @@ class SubetapaService extends ChangeNotifier {
     final datos = await this._http.post('$_endpoint/nuevaSubetapa', data);
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
+    notifyListeners();
     return resp;
   }
 
@@ -25,6 +26,16 @@ class SubetapaService extends ChangeNotifier {
         await this._http.get('$_endpoint/obtenerSubetapasExtras/$etapaId');
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
+
+    return resp;
+  }
+
+  Future<MyResponse> eliminarSubetapa(subetapaId) async {
+    final datos =
+        await this._http.delete('$_endpoint/eliminarSubetapa/$subetapaId');
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
     return resp;
   }
 }

@@ -544,6 +544,8 @@ class __InputChatState extends State<_InputChat> {
             textCapitalization: TextCapitalization.sentences,
             textInputAction: TextInputAction.send,
             focusNode: focusNode,
+            maxLines: 5,
+            minLines: 1,
             decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Escriba mensaje',

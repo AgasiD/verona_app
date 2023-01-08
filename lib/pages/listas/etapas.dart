@@ -19,17 +19,20 @@ class EtapasObra extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context);
+    final _pref = new Preferences();
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
       body: _Etapas(etapas: _obraService.obra.etapas),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            Navigator.pushNamed(context, EtapasExtrasPage.routeName),
-        backgroundColor: Helper.brandColors[8],
-        mini: true,
-        child: Icon(Icons.add),
-        splashColor: null,
-      ),
+      floatingActionButton: !(_pref == 1 || _pref == 2 || _pref == 7)
+          ? FloatingActionButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, EtapasExtrasPage.routeName),
+              backgroundColor: Helper.brandColors[8],
+              mini: true,
+              child: Icon(Icons.add),
+              splashColor: null,
+            )
+          : null,
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
@@ -192,7 +195,7 @@ class _EtapaCard extends StatelessWidget {
   eliminarEtapa(context, obraId, etapaId) async {
     final index =
         _obraService.obra.etapas.indexWhere((element) => element.id == etapaId);
-    _obraService.obra.etapas.removeAt(index);
+    _obraService.obra.quitarEtapa(etapaId);
     openLoadingDialog(context, mensaje: 'Eliminando etapa...');
     final response = await _obraService.quitarEtapa(etapaId, obraId);
     closeLoadingDialog(context);

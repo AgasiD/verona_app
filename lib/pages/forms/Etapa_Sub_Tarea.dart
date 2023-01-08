@@ -91,7 +91,7 @@ class _FormState extends State<_Form> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Agregar para próximos proyectos',
+                'Guardar para próximos proyectos',
                 style: TextStyle(color: Helper.brandColors[8], fontSize: 16),
               ),
               Switch(
@@ -112,7 +112,7 @@ class _FormState extends State<_Form> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Es default para próximos proyectos',
+                  'Es default para proyectos futuros',
                   style: TextStyle(
                       overflow: TextOverflow.ellipsis,
                       color: Helper.brandColors[8],

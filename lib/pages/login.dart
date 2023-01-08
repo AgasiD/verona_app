@@ -20,7 +20,7 @@ class LoginPage extends StatelessWidget {
     double width = double.infinity;
     bool esWeb = false;
     if (MediaQuery.of(context).size.width > 1000) {
-      width = 400;
+      width = 600;
       esWeb = true;
     }
     return Scaffold(
@@ -28,23 +28,25 @@ class LoginPage extends StatelessWidget {
       body: SafeArea(
           child: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
-        child: Container(
-          width: width,
-          height: MediaQuery.of(context).size.height * .9,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Logo(
-                ring: true,
-                size: 200,
-              ),
-              _Form(),
-              // _Labels(),
-              Text(
-                'Powered by e-Drex©',
-                style: TextStyle(color: Helper.brandColors[4]),
-              ),
-            ],
+        child: Center(
+          child: Container(
+            width: width,
+            height: MediaQuery.of(context).size.height * .9,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Logo(
+                  ring: true,
+                  size: 200,
+                ),
+                _Form(),
+                // _Labels(),
+                Text(
+                  'Powered by e-Drex©',
+                  style: TextStyle(color: Helper.brandColors[4]),
+                ),
+              ],
+            ),
           ),
         ),
       )),

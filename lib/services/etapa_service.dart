@@ -17,6 +17,16 @@ class EtapaService extends ChangeNotifier {
     final datos = await this._http.post('$_endpoint/nuevaEtapa', data);
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  Future<MyResponse> eliminarEtapa(etapaId) async {
+    final datos = await this._http.delete('$_endpoint/eliminarEtapa/$etapaId');
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
     return resp;
   }
 }

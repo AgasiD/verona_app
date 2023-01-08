@@ -66,7 +66,8 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<MyResponse> agregarUsuario(obraId, String dni) async {
-    final data = await this._http.put('$_endpoint/$obraId/$dni', {});
+    final data =
+        await this._http.put('$_endpoint/agregarUsuario/$obraId/$dni', {});
     final response = MyResponse.fromJson(data['response']);
 
     notifyListeners();
@@ -268,4 +269,22 @@ class ObraService extends ChangeNotifier {
 
     return resp;
   }
+
+  Future<MyResponse> actualizarOrdenTareas(
+      obraId, etapaId, subetapaId, tareas) async {
+    final body = {
+      "etapaId": etapaId,
+      "subetapaId": subetapaId,
+      "tareas": tareas,
+    };
+    final datos = await this
+        ._http
+        .put('$_endpoint/actualizarOrdenTareas/${obraId}', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
+    return resp;
+  }
+
+  eliminarSubetapa(subetapaId) {}
 }

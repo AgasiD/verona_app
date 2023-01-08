@@ -20,20 +20,23 @@ class SubEtapasObra extends StatelessWidget {
     final _obraService = Provider.of<ObraService>(context);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final index = arguments['index'];
+    final _pref = new Preferences();
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
       body: _SubEtapas(
           etapaId: _obraService.obra.etapas[index].id,
           subetapas: _obraService.obra.etapas[index].subetapas),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(
-            context, SubetapasExtrasPage.routeName,
-            arguments: {'etapaId': _obraService.obra.etapas[index].id}),
-        backgroundColor: Helper.brandColors[8],
-        mini: true,
-        child: Icon(Icons.add),
-        splashColor: null,
-      ),
+      floatingActionButton: !(_pref == 1 || _pref == 2 || _pref == 7)
+          ? FloatingActionButton(
+              onPressed: () => Navigator.pushNamed(
+                  context, SubetapasExtrasPage.routeName,
+                  arguments: {'etapaId': _obraService.obra.etapas[index].id}),
+              backgroundColor: Helper.brandColors[8],
+              mini: true,
+              child: Icon(Icons.add),
+              splashColor: null,
+            )
+          : null,
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }

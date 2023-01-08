@@ -213,16 +213,12 @@ class CustomDrawer extends StatelessWidget {
                       Icon(Icons.logout, color: Helper.brandColors[8])
                     ]),
                 onPressed: () async {
-                  final response = await _usuarioService.deleteDevice(
-                      _pref.id, NotificationService.token!);
-                  if (response.fallo) {
-                    openAlertDialog(
-                        context, 'No se ha desasociado el dispositivo',
-                        subMensaje: response.error);
-                  }
-                  _pref.logged = false;
-                  _socketService.disconnect();
-                  Navigator.pushReplacementNamed(context, LoginPage.routeName);
+                  final confirma = await openDialogConfirmationReturn(
+                      context, 'Confirme para cerrar sesión');
+                  confirma
+                      ? await cerrarSesion(
+                          _usuarioService, _pref, context, _socketService)
+                      : false;
                 },
               ),
             ),
@@ -234,6 +230,19 @@ class CustomDrawer extends StatelessWidget {
         ),
       ),
     ));
+  }
+
+  Future<void> cerrarSesion(UsuarioService _usuarioService, Preferences _pref,
+      BuildContext context, SocketService _socketService) async {
+    final response = await _usuarioService.deleteDevice(
+        _pref.id, NotificationService.token!);
+    if (response.fallo) {
+      openAlertDialog(context, 'No se ha desasociado el dispositivo',
+          subMensaje: response.error);
+    }
+    _pref.logged = false;
+    _socketService.disconnect();
+    Navigator.pushReplacementNamed(context, LoginPage.routeName);
   }
 }
 
@@ -868,13 +877,14 @@ void openDialogConfirmation(
   }
 }
 
-Future<bool> openDialogConfirmationReturn(
-    BuildContext context, String mensaje) async {
+Future<bool> openDialogConfirmationReturn(BuildContext context, String mensaje,
+    {String? subMensaje = null}) async {
   if (Platform.isAndroid) {
     return await showDialog(
         context: context,
         builder: (context) => AlertDialog(
               title: Text(mensaje),
+              content: subMensaje == null ? null : Text(subMensaje),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
@@ -890,6 +900,7 @@ Future<bool> openDialogConfirmationReturn(
       context: context,
       builder: (_) => CupertinoAlertDialog(
         title: Text(mensaje),
+        content: subMensaje == null ? null : Text(subMensaje),
         actions: [
           CupertinoDialogAction(
               child: Text('Confirmar'),

@@ -55,8 +55,8 @@ android {
         applicationId "com.edrex.veronaapp"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 61
-        versionName "1.6.1"
+        versionCode 70
+        versionName "1.7.0"
     }
 
     signingConfigs {

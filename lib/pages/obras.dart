@@ -351,6 +351,7 @@ class _CustomObrasState extends State<_CustomObras> {
   }
 
   ZoomIn _obraCard(BuildContext context, Obra obra, int index) {
+    final heightCard = MediaQuery.of(context).size.height * .2;
     var imagen = obra.imageURL == ''
         ? Helper.imageNetwork(
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
@@ -362,6 +363,7 @@ class _CustomObrasState extends State<_CustomObras> {
     return ZoomIn(
       delay: Duration(milliseconds: (index + 1) * 100),
       child: Container(
+        height: heightCard,
         margin: EdgeInsets.symmetric(horizontal: 15),
         child: GestureDetector(
             onTap: (() {
@@ -393,7 +395,7 @@ class _CustomObrasState extends State<_CustomObras> {
                                 ))
                             : Container(),
                         Column(
-                            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Row(
@@ -450,21 +452,23 @@ class _CustomObrasState extends State<_CustomObras> {
                     //   tag: obra.id,
                     //   child:
                     // Image(image: image, loadingBuilder: ),
-                    ImageFade(
-                      width: MediaQuery.of(context).size.width * .43,
-                      height: 120,
-                      image: NetworkImage(obra.imageURL),
-                      loadingBuilder: (context, progress, chunkEvent) => Center(
-                          child: CircularProgressIndicator(
-                        value: progress,
-                        color: Helper.brandColors[8],
-                      )),
+                    Expanded(
+                      child: ImageFade(
+                        // width: MediaQuery.of(context).size.width * .43,
+                        image: NetworkImage(obra.imageURL),
+                        loadingBuilder: (context, progress, chunkEvent) =>
+                            Center(
+                                child: CircularProgressIndicator(
+                          value: progress,
+                          color: Helper.brandColors[8],
+                        )),
 
-                      // displayed when an error occurs:
-                      errorBuilder: (context, error) => Container(
-                        color: Helper.brandColors[8],
-                        alignment: Alignment.center,
-                        child: Image(image: AssetImage('assets/image.png')),
+                        // displayed when an error occurs:
+                        errorBuilder: (context, error) => Container(
+                          color: Helper.brandColors[8],
+                          alignment: Alignment.center,
+                          child: Image(image: AssetImage('assets/image.png')),
+                        ),
                       ),
                     ),
                   ],

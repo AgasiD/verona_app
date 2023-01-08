@@ -16,6 +16,7 @@ import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/imagenes_gallery.dart';
 import 'package:verona_app/pages/inactividades.dart';
+import 'package:verona_app/pages/listas/documentos.dart';
 import 'package:verona_app/pages/listas/equipo.dart';
 import 'package:verona_app/pages/listas/etapas.dart';
 import 'package:verona_app/pages/listas/pedidos_obra.dart';
@@ -30,6 +31,7 @@ class ObraPage extends StatelessWidget {
 
   ObraPage({Key? key}) : super(key: key);
   late SocketService _socketService;
+  bool esPhone = true;
   @override
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
@@ -44,6 +46,8 @@ class ObraPage extends StatelessWidget {
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
         : Helper.imageNetwork(obra.imageURL);
 
+    MediaQuery.of(context).size.width > 1000 ? esPhone = false : true;
+
     return Scaffold(
         bottomNavigationBar: CustomNavigatorFooter(),
         body: Container(
@@ -56,7 +60,7 @@ class ObraPage extends StatelessWidget {
                   pinned: false,
                   snap: false,
                   floating: false,
-                  expandedHeight: 220.0,
+                  expandedHeight: esPhone ? 220.0 : 450.0,
                   flexibleSpace: FlexibleSpaceBar(
                     background: Hero(
                       tag: obra.id,
@@ -436,7 +440,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
             else
               openAlertDialog(context, 'No se puede visualizar el documento');
           } else {
-            Navigator.pushNamed(context, ImgGalleryPage.routeName,
+            Navigator.pushNamed(context, DocumentosPage.routeName,
                 arguments: {'driveId': obra.driveFolderId});
           }
         },
