@@ -5,28 +5,32 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/etapa.dart';
-import 'package:verona_app/pages/listas/asigna_etapas_extras.dart';
-import 'package:verona_app/pages/listas/subetapas.dart';
+import 'package:verona_app/models/subetapa.dart';
+import 'package:verona_app/pages/listas/asigna_subetapas_extras.dart';
 import 'package:verona_app/pages/listas/tareas.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
-class EtapasObra extends StatelessWidget {
-  EtapasObra({Key? key}) : super(key: key);
-  static final routeName = 'EtapasObra';
+class SubEtapasObra extends StatelessWidget {
+  SubEtapasObra({Key? key}) : super(key: key);
+  static final routeName = 'SubEtapasObra';
 
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context);
+    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    final index = arguments['index'];
     final _pref = new Preferences();
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
-      body: _Etapas(etapas: _obraService.obra.etapas),
+      body: _SubEtapas(
+          etapaId: _obraService.obra.etapas[index].id,
+          subetapas: _obraService.obra.etapas[index].subetapas),
       floatingActionButton: !(_pref == 1 || _pref == 2 || _pref == 7)
           ? FloatingActionButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, EtapasExtrasPage.routeName),
+              onPressed: () => Navigator.pushNamed(
+                  context, SubetapasExtrasPage.routeName,
+                  arguments: {'etapaId': _obraService.obra.etapas[index].id}),
               backgroundColor: Helper.brandColors[8],
               mini: true,
               child: Icon(Icons.add),
@@ -38,9 +42,11 @@ class EtapasObra extends StatelessWidget {
   }
 }
 
-class _Etapas extends StatelessWidget {
-  _Etapas({Key? key, required this.etapas}) : super(key: key);
-  List<Etapa> etapas;
+class _SubEtapas extends StatelessWidget {
+  _SubEtapas({Key? key, required this.etapaId, required this.subetapas})
+      : super(key: key);
+  List<Subetapa> subetapas;
+  String etapaId;
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +54,10 @@ class _Etapas extends StatelessWidget {
       child: Container(
         height: MediaQuery.of(context).size.height - 100,
         child: ListView.builder(
-          itemCount: etapas.length,
+          itemCount: subetapas.length,
           itemBuilder: (context, index) {
-            return _EtapaCard(etapa: etapas[index] as Etapa, index: index);
+            return _SubEtapaCard(
+                etapaId: etapaId, subetapa: subetapas[index] as Subetapa);
           },
         ),
       ),
@@ -58,13 +65,12 @@ class _Etapas extends StatelessWidget {
   }
 }
 
-class _EtapaCard extends StatelessWidget {
-  _EtapaCard({Key? key, required this.etapa, required this.index})
+class _SubEtapaCard extends StatelessWidget {
+  _SubEtapaCard({Key? key, required this.etapaId, required this.subetapa})
       : super(key: key);
 
-  Etapa etapa;
-  int index;
-
+  Subetapa subetapa;
+  String etapaId;
   late ObraService _obraService;
 
   @override
@@ -87,15 +93,15 @@ class _EtapaCard extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Center(
         child: ListTile(
-          onTap: () => Navigator.pushNamed(context, SubEtapasObra.routeName,
-              arguments: {"index": index}),
+          onTap: () => Navigator.pushNamed(context, TareasCheckList.routeName,
+              arguments: {"etapaId": etapaId, "subetapaId": subetapa.id}),
           leading: Container(
             width: 50,
             child: Center(
               child: Row(
                 children: [
                   Icon(
-                      etapa.porcentajeRealizado < 99
+                      subetapa.porcentajeRealizado < 99
                           ? Icons.check_box_outline_blank_outlined
                           : Icons.check_box,
                       color: Helper.brandColors[3]),
@@ -106,7 +112,7 @@ class _EtapaCard extends StatelessWidget {
           title: Padding(
             padding: const EdgeInsets.symmetric(vertical: 7.0),
             child: Text(
-              etapa.descripcion,
+              subetapa.descripcion,
               style: TextStyle(color: Helper.brandColors[4], fontSize: 18),
             ),
           ),
@@ -118,12 +124,12 @@ class _EtapaCard extends StatelessWidget {
                 width: 100,
                 child: LinearProgressIndicator(
                   minHeight: 6,
-                  value: etapa.porcentajeRealizado / 100,
+                  value: subetapa.porcentajeRealizado / 100,
                   color: Helper.brandColors[8],
                 ),
               ),
               Text(
-                '${etapa.porcentajeRealizado} %',
+                '${subetapa.porcentajeRealizado} %',
                 style: TextStyle(color: Helper.brandColors[4]),
               ),
             ],
@@ -137,13 +143,18 @@ class _EtapaCard extends StatelessWidget {
     if (_pref.role == 1)
       return Dismissible(
           confirmDismiss: (DismissDirection direction) async {
+            if (ultimaSubetapa(etapaId, subetapa.id)) {
+              openAlertDialog(context, 'No se puede dejar sin subetapas');
+
+              return false;
+            }
             return await showDialog(
               context: context,
               builder: (BuildContext context) {
                 if (Platform.isAndroid) {
                   return AlertDialog(
                     title: const Text("Confirm"),
-                    content: const Text("Confirmar eliminacion de etapa"),
+                    content: const Text("Confirmar eliminacion de subetapa"),
                     actions: <Widget>[
                       TextButton(
                           onPressed: () => Navigator.pop(context, true),
@@ -157,7 +168,7 @@ class _EtapaCard extends StatelessWidget {
                   );
                 } else {
                   return CupertinoAlertDialog(
-                    title: Text('Confirmar eliminacion de etapa'),
+                    title: Text('Confirmar eliminacion de subetapa'),
                     actions: [
                       CupertinoDialogAction(
                           child: Text('Confirmar'),
@@ -175,33 +186,51 @@ class _EtapaCard extends StatelessWidget {
           },
           direction: DismissDirection.endToStart,
           onDismissed: (direction) async {
-            await eliminarEtapa(context, _obraService.obra.id, etapa.id);
+            await eliminarSubetapa(
+                context, _obraService.obra.id, etapaId, subetapa.id);
           },
           background: Container(
             color: Colors.red,
             child: Container(
               alignment: Alignment.centerRight,
-              child: Text(
-                'Eliminar',
-                style: TextStyle(color: Helper.brandColors[4], fontSize: 20),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Eliminar',
+                  style: TextStyle(color: Helper.brandColors[4], fontSize: 20),
+                ),
               ),
             ),
           ),
-          key: ValueKey<int>(index),
+          key: ValueKey<String>(subetapa.id),
           child: tile);
+
     return tile;
   }
 
-  eliminarEtapa(context, obraId, etapaId) async {
+  eliminarSubetapa(context, obraId, etapaId, subetapaId) async {
     final index =
-        _obraService.obra.etapas.indexWhere((element) => element.id == etapaId);
-    _obraService.obra.quitarEtapa(etapaId);
-    openLoadingDialog(context, mensaje: 'Eliminando etapa...');
-    final response = await _obraService.quitarEtapa(etapaId, obraId);
+        _obraService.obra.etapas.indexWhere((etapa) => etapa.id == etapaId);
+    final indexSub = _obraService.obra.etapas[index].subetapas
+        .indexWhere((subetapa) => subetapa.id == subetapaId);
+
+    openLoadingDialog(context, mensaje: 'Eliminando subetapa...');
+    final response =
+        await _obraService.quitarSubetapa(etapaId, subetapaId, obraId);
     closeLoadingDialog(context);
     if (response.fallo) {
-      openAlertDialog(context, 'Error al eliminar etapa',
+      openAlertDialog(context, 'Error al eliminar subetapa',
           subMensaje: response.error);
+      return;
     }
+    _obraService.obra.etapas[index].subetapas.removeAt(indexSub);
+  }
+
+  bool ultimaSubetapa(etapaId, subetapaId) {
+    final index =
+        _obraService.obra.etapas.indexWhere((etapa) => etapa.id == etapaId);
+    final indexSub = _obraService.obra.etapas[index].subetapas
+        .indexWhere((subetapa) => subetapa.id == subetapaId);
+    return _obraService.obra.etapas[index].subetapas.length <= 1;
   }
 }

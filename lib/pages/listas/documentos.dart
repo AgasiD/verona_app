@@ -121,13 +121,13 @@ class _CustomListViewState extends State<_CustomListView> {
               bool esPar = false;
 
               i % 2 == 0 ? esPar = true : esPar = false;
-
               if (getType(widget.data[i]['mimeType']) == 'jpg') {
                 actionOnTap = () => Navigator.pushNamed(
                     (context), ImagenViewer.routeName,
                     arguments: {'imagenId': widget.data[i]['id']});
               } else if (getType(widget.data[i]['mimeType']).toLowerCase() ==
-                  'Carpeta'.toLowerCase()) {
+                      'Carpeta'.toLowerCase() ||
+                  widget.data[i]['mimeType'].toString().contains('shortcut')) {
                 actionOnTap = () => Navigator.pushNamed(
                     (context), DocumentosPage.routeName,
                     arguments: {'driveId': widget.data[i]['id']});
@@ -136,7 +136,7 @@ class _CustomListViewState extends State<_CustomListView> {
                   final Uri _url = Uri.parse(
                       'https://drive.google.com/file/d/${widget.data[i]['id']}/view?usp=sharing');
                   if (await canLaunchUrl(_url))
-                    await launchUrl(_url);
+                    await launchUrl(_url, mode: LaunchMode.externalApplication);
                   else
                     openAlertDialog(
                         context, 'No se puede visualizar el documento');
@@ -148,6 +148,7 @@ class _CustomListViewState extends State<_CustomListView> {
                 title: widget.data[i]['name'],
                 subtitle: getType(widget.data[i]['mimeType']).toUpperCase(),
                 actionOnTap: actionOnTap,
+                fontSize: 15,
               );
             }));
   }
@@ -198,6 +199,9 @@ class _CustomListViewState extends State<_CustomListView> {
 
       case 'application/vnd.google-apps.folder':
         icon = Icons.folder_open;
+        break;
+      case 'application/vnd.google-apps.shortcut':
+        icon = Icons.drive_folder_upload;
         break;
       default:
         icon = Icons.file_copy_outlined;

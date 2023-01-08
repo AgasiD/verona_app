@@ -1,10 +1,8 @@
 import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
-import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/services/http_service.dart';
 
 class ImageService extends ChangeNotifier {

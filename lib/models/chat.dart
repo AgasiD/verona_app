@@ -4,18 +4,20 @@ class Chat {
   String chatId;
   List<dynamic> members;
   bool individual;
-
+  String profileURL;
   Chat({
     required this.messages,
     required this.chatName,
     required this.members,
     required this.individual,
     required this.chatId,
+    this.profileURL = '',
   }) {
     this.messages = messages;
     this.chatName = chatName;
     this.members = members;
     this.individual = individual;
+    this.profileURL = profileURL;
   }
 
   factory Chat.fromMap(Map<String, dynamic> json) => new Chat(
@@ -24,5 +26,6 @@ class Chat {
         chatName: json['chatName'],
         members: json['members'],
         individual: json['individual'],
+        profileURL: json['profileURL'] ?? '',
       );
 }

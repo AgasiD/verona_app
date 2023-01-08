@@ -1,6 +1,7 @@
 import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/propietario.dart';
+import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/pages/listas/etapas.dart';
 
@@ -12,6 +13,7 @@ class Obra {
   List<dynamic> enabledFiles;
   List<dynamic> pedidos;
   List<Etapa> etapas;
+
   List<Miembro> equipo;
   List<Propietario> propietarios;
   String barrio;
@@ -24,6 +26,9 @@ class Obra {
   String imgFolderId;
   String lote;
   String nombre;
+  String folderImages;
+  String rootDriveCliente;
+  String folderImagesCliente;
   String placeHolderImage = 'https://via.placeholder.com/300x150';
   String? driveFolderId;
   String? ts;
@@ -49,6 +54,9 @@ class Obra {
     this.enabledFiles = const [],
     ts,
     this.imageURL = '',
+    this.folderImages = '',
+    this.rootDriveCliente = '',
+    this.folderImagesCliente = '',
   }) {
     this.nombre = nombre;
     this.id = id;
@@ -72,6 +80,9 @@ class Obra {
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
     this.imageURL = imageURL;
+    this.folderImages = folderImages;
+    this.rootDriveCliente = rootDriveCliente;
+    this.folderImagesCliente = folderImagesCliente;
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
@@ -99,6 +110,9 @@ class Obra {
           .toList(),
       pedidos: json["pedidos"] ?? [],
       enabledFiles: json["enabledFiles"] as List<dynamic>,
+      folderImages: json['folderImages'] ?? '',
+      rootDriveCliente: json['rootDriveCliente'] ?? '',
+      folderImagesCliente: json['folderImagesCliente'] ?? '',
       imageURL: json['imageURL'] ?? '');
 
   toMap() => {
@@ -127,12 +141,22 @@ class Obra {
   double get porcentajeRealizado {
     int cantTotalTareas = 0;
     int cantTotalTaresHechas = 0;
-    etapas.forEach((etapa) {
-      cantTotalTareas = cantTotalTareas + etapa.cantTareas;
-      cantTotalTaresHechas = cantTotalTaresHechas + etapa.cantTareasTerminadas;
-    });
-    return double.parse(
-        (cantTotalTaresHechas / cantTotalTareas * 100).toStringAsFixed(2));
+    if (etapas.length > 0) {
+      etapas.forEach((etapa) {
+        cantTotalTareas += etapa.totalTareas;
+        cantTotalTaresHechas += etapa.cantSubtareasTerminadas;
+      });
+    } else {
+      cantTotalTareas = 0;
+      cantTotalTaresHechas = 0;
+      return 0;
+    }
+
+    if (cantTotalTareas > 0)
+      return double.parse(
+          (cantTotalTaresHechas / cantTotalTareas * 100).toStringAsFixed(2));
+    else
+      return 0;
   }
 
   estaPropietario(usuarioId) {
@@ -165,22 +189,22 @@ class Obra {
 
   sumarTarea(String etapaId, Tarea tarea) {
     final indexEtapa = etapas.indexWhere((etapa) => etapa.id == etapaId);
-    etapas[indexEtapa].tareas.add(tarea);
+    final indexSubetapa = etapas[indexEtapa]
+        .subetapas
+        .indexWhere((subetapa) => subetapa.id == tarea.subetapa);
+    etapas[indexEtapa].subetapas[indexSubetapa].tareas.add(tarea);
   }
 
-  quitarTarea(String etapa, Tarea tarea) {
-    final indexEtapa = etapas.indexWhere((etapaAux) => etapaAux.id == etapa);
+  quitarTarea(String etapaId, Tarea tarea) {
+    final indexEtapa = etapas.indexWhere((etapa) => etapa.id == etapaId);
+    final indexSubetapa = etapas[indexEtapa]
+        .subetapas
+        .indexWhere((subetapa) => subetapa.id == tarea.subetapa);
     final indexTarea = etapas[indexEtapa]
+        .subetapas[indexSubetapa]
         .tareas
         .indexWhere((tareaAux) => tareaAux.id == tarea.id);
-    etapas[indexEtapa].tareas.removeAt(indexTarea);
-  }
-
-  void actualizaTarea(String idtapa, String id, bool value) {
-    final etapaIndex = etapas.indexWhere((etapa) => etapa.id == idtapa);
-    final tareaIndex =
-        etapas[etapaIndex].tareas.indexWhere((tarea) => tarea.id == id);
-    etapas[etapaIndex].tareas[tareaIndex].realizado = value;
+    etapas[indexEtapa].subetapas[indexSubetapa].tareas.removeAt(indexTarea);
   }
 
   sumarEtapa(Etapa etapa) {

@@ -1,12 +1,14 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'dart:io';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/pages/search_message.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -30,7 +32,8 @@ class _ChatPageState extends State<ChatPage>
   String chatName = 'Sin nombre';
   late ChatService _chatService =
       Provider.of<ChatService>(context, listen: false);
-
+  int fromTS = 0;
+  bool toTop = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -47,6 +50,8 @@ class _ChatPageState extends State<ChatPage>
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final chatId = arguments['chatId'];
+    final imageURL = arguments['profileURL'];
+    // final fromTS = arguments['fromTS'] ?? 0;
 
     final txtController = TextEditingController();
     final _socketService = Provider.of<SocketService>(context, listen: false);
@@ -54,9 +59,10 @@ class _ChatPageState extends State<ChatPage>
     return Container(
       color: Colors.white,
       child: FutureBuilder(
-          future: _chatService.loadChat(chatId: chatId, limit: 25, offset: 0),
+          future: _chatService.loadChat(
+              chatId: chatId, limit: 25, offset: 0, fromTS: fromTS),
           builder: (_, snapshot) {
-            if (snapshot.data == null) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
               return Loading(
                 mensaje: 'Recuperando mensajes...',
               );
@@ -66,14 +72,29 @@ class _ChatPageState extends State<ChatPage>
                   : chatName = _chatService.chat.chatName;
 
               return Scaffold(
-                  appBar: _CustomChatBar(chatName: chatName),
+                  appBar: _CustomChatBar(
+                      chatName: chatName,
+                      profileURL: imageURL ?? '',
+                      chatId: chatId,
+                      fromTS: fromTS,
+                      action: buscarMensaje),
                   body: ListMessageBox(
-                      members: _chatService.chat.members,
-                      txtController: txtController,
-                      chatId: chatId));
+                    members: _chatService.chat.members,
+                    txtController: txtController,
+                    chatId: chatId,
+                    esBusqueda: fromTS > 0,
+                    toTop: toTop,
+                  ));
             }
           }),
     );
+  }
+
+  void buscarMensaje(tsMensaje) {
+    fromTS = tsMensaje;
+    toTop = true;
+    print(fromTS);
+    setState(() {});
   }
 
   void quitarNovedad(String chatId, SocketService _socketService) {
@@ -90,9 +111,17 @@ class _CustomChatBar extends StatefulWidget implements PreferredSizeWidget {
   _CustomChatBar({
     Key? key,
     this.chatName = '',
+    required this.chatId,
+    required this.fromTS,
+    required this.action,
+    required this.profileURL,
   }) : super(key: key);
 
   String chatName;
+  String chatId;
+  String profileURL;
+  int fromTS;
+  void Function(int) action;
 
   @override
   State<_CustomChatBar> createState() => _CustomChatBarState();
@@ -123,29 +152,61 @@ class _CustomChatBarState extends State<_CustomChatBar> {
   @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
+    final profileImage = (widget.profileURL.isEmpty
+        ? AssetImage('assets/user.png')
+        : NetworkImage(widget.profileURL)) as ImageProvider;
+    final nombre = widget.chatName;
     return AppBar(
       backgroundColor: Helper.brandColors[0],
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Column(
-            children: [
-              Text('${widget.chatName}',
-                  style: TextStyle(color: Helper.brandColors[8]))
-            ],
+          CircleAvatar(
+            backgroundColor: Helper.brandColors[0],
+            backgroundImage: profileImage,
           ),
-          _socketService.socket.connected
-              ? CircleAvatar(
-                  maxRadius: 5,
-                  backgroundColor: Colors.green[400],
-                )
-              : CircleAvatar(
-                  maxRadius: 5,
-                  backgroundColor: Colors.red[400],
-                )
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text('${nombre}',
+                  style: TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                      color: Helper.brandColors[8])),
+            ),
+          ),
+          // _socketService.socket.connected
+          //     ? CircleAvatar(
+          //         maxRadius: 5,
+          //         backgroundColor: Colors.green[400],
+          //       )
+          //     : CircleAvatar(
+          //         maxRadius: 5,
+          //         backgroundColor: Colors.red[400],
+          //       ),
+          IconButton(
+              onPressed: () => _navigateAndDisplaySelection(context),
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              icon: Icon(Icons.search))
         ],
       ),
     );
+  }
+
+  Future<void> _navigateAndDisplaySelection(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      // Create the SelectionScreen in the next step.
+      MaterialPageRoute(
+          builder: (context) => Search_Message_Screen(),
+          settings: RouteSettings(
+            arguments: {"chatId": widget.chatId, "chatName": widget.chatName},
+          )),
+    );
+
+    print(result);
+
+    widget.action(result ?? 0);
   }
 
   void setChatName(String chatName) {
@@ -159,16 +220,20 @@ class _CustomChatBarState extends State<_CustomChatBar> {
 }
 
 class ListMessageBox extends StatefulWidget {
-  ListMessageBox({
-    Key? key,
-    required this.members,
-    required this.txtController,
-    required this.chatId,
-  }) : super(key: key);
+  ListMessageBox(
+      {Key? key,
+      required this.members,
+      required this.txtController,
+      required this.chatId,
+      required this.esBusqueda,
+      required this.toTop})
+      : super(key: key);
 
   List<dynamic> members;
   final TextEditingController txtController;
   final String chatId;
+  bool toTop;
+  bool esBusqueda;
 
   @override
   State<ListMessageBox> createState() => _ListMessageBoxState();
@@ -207,6 +272,8 @@ class _ListMessageBoxState extends State<ListMessageBox>
 
         _refreshController.loadComplete();
         setState(() {});
+      } else {
+        _refreshController.loadNoData();
       }
     }
   }
@@ -234,13 +301,12 @@ class _ListMessageBoxState extends State<ListMessageBox>
     });
 
     cargarHistorial();
-    leerUltimoMensaje(mensajes.first);
+    if (mensajes.isNotEmpty) leerUltimoMensaje(mensajes.first);
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
-    // _socketService.socket.off('nuevo-mensaje');
 
     super.dispose();
   }
@@ -309,73 +375,139 @@ class _ListMessageBoxState extends State<ListMessageBox>
   // @override
   // void dispose() {
   //   // TODO: implement dispose
-  //   // _socketService.socket.off('nuevo-mensaje');
   //   super.dispose();
 
   // }
+  final ScrollController _controller = ScrollController();
+  bool mostrarBoton = false;
+  void _scrollToTop() {
+    _controller.jumpTo(_controller.position.maxScrollExtent);
+    // _controller.animateTo(
+    //   _controller.position.maxScrollExtent - 1050,
+    //   duration: Duration(seconds: 1),
+    //   curve: Curves.fastOutSlowIn,
+    // );
+  }
+
+  void _scrollDown() {
+    _controller.animateTo(
+      _controller.position.minScrollExtent,
+      duration: Duration(seconds: 1),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
+  bool mostrar = false;
 
   @override
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context, listen: false);
     _socketService.connect(_pref.id);
-
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      margin: EdgeInsets.only(top: 0),
-      color: Helper.brandColors[1],
-      child: Column(
-        children: [
-          Flexible(
-              child: SmartRefresher(
-            enablePullDown: false,
-            enablePullUp: true,
-            controller: _refreshController,
-            onLoading: () {
-              offset = offset + 25;
-              _onLoad(_chatService, widget.chatId, offset, Helper.limit);
-            },
-            header: header,
-            footer: CustomFooter(
-              builder: (BuildContext context, LoadStatus? mode) {
-                Widget body = Text('');
-
-                if (mode == LoadStatus.loading) {
-                  body = CupertinoActivityIndicator();
-                } else if (mode == LoadStatus.failed) {
-                  body = Text("Load Failed!Click retry!");
-                } else if (mode == LoadStatus.canLoading) {
-                  body = Text("Cargar mas mensajes...");
-                }
-                ;
-                return Container(
-                  child: Center(child: body),
-                );
-              },
-            ),
-            child: ListView.builder(
-              reverse: true,
-              itemCount: mensajesBox.length,
-              itemBuilder: (_, i) => mensajesBox.toList()[i],
-              physics: BouncingScrollPhysics(),
-            ),
-          )),
-          Divider(
-            height: 1,
-            color: Colors.grey,
+    if (widget.toTop)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToTop();
+        widget.toTop = false;
+      });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      mostrar = isBotton();
+      setState(() {});
+    });
+    return Stack(
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          margin: EdgeInsets.only(top: 0),
+          color: Helper.brandColors[1],
+          child: Column(
+            children: [
+              Flexible(
+                  child: SmartRefresher(
+                enablePullDown: false,
+                enablePullUp: true,
+                controller: _refreshController,
+                onLoading: () {
+                  offset = offset + 25;
+                  if (widget.esBusqueda) {
+                    _onLoad(_chatService, widget.chatId, mensajesBox.length,
+                        Helper.limit);
+                  } else {
+                    _onLoad(_chatService, widget.chatId, offset, Helper.limit);
+                  }
+                },
+                header: header,
+                footer: CustomFooter(
+                  builder: (BuildContext context, LoadStatus? mode) {
+                    Widget body = Text('');
+                    if (mode == LoadStatus.loading) {
+                      body = CupertinoActivityIndicator(
+                        color: Helper.brandColors[3],
+                      );
+                    } else if (mode == LoadStatus.failed) {
+                      body = Text("Error al recuperar mensajes");
+                    } else if (mode == LoadStatus.canLoading) {
+                      body = Text(
+                        "Cargar mas mensajes...",
+                        style: TextStyle(color: Helper.brandColors[3]),
+                      );
+                    } else if (mode == LoadStatus.noMore) {
+                      body = Text(
+                        "Fin de la conversación",
+                        style: TextStyle(color: Helper.brandColors[3]),
+                      );
+                    }
+                    ;
+                    return Container(
+                      child: Center(child: body),
+                    );
+                  },
+                ),
+                child: ListView.builder(
+                  controller: _controller,
+                  reverse: true,
+                  itemCount: mensajesBox.length,
+                  itemBuilder: (_, i) => mensajesBox.toList()[i],
+                  physics: BouncingScrollPhysics(),
+                ),
+              )),
+              Divider(
+                height: 1,
+                color: Colors.grey,
+              ),
+              SafeArea(
+                  child: Container(
+                height: 50,
+                child: _InputChat(
+                  txtCtrl: widget.txtController,
+                  messageList: [], //widget.messages,
+                  agregarMensaje: agregarMensaje,
+                ),
+              ))
+            ],
           ),
-          SafeArea(
-              child: Container(
-            height: 50,
-            child: _InputChat(
-              txtCtrl: widget.txtController,
-              messageList: [], //widget.messages,
-
-              agregarMensaje: agregarMensaje,
+        ),
+        // widget.esBusqueda
+        //     ?
+        Visibility(
+          visible: mostrar,
+          child: Positioned(
+            right: 10,
+            bottom: 100,
+            child: ZoomIn(
+              child: CustomNavigatorButton(
+                  icono: Icons.arrow_downward_rounded,
+                  accion: () => _scrollDown(),
+                  showNotif: false),
             ),
-          ))
-        ],
-      ),
+          ),
+        )
+      ],
     );
+  }
+
+  isBotton() {
+    return _controller.position.minScrollExtent == _controller.position.pixels
+        ? false
+        : true;
   }
 }
 
@@ -412,6 +544,8 @@ class __InputChatState extends State<_InputChat> {
             textCapitalization: TextCapitalization.sentences,
             textInputAction: TextInputAction.send,
             focusNode: focusNode,
+            maxLines: 5,
+            minLines: 1,
             decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Escriba mensaje',
@@ -431,41 +565,41 @@ class __InputChatState extends State<_InputChat> {
               // setState(() {});
             },
           )),
-          Container(
-              child: Row(
-            children: [
-              IconButton(
-                  onPressed: () {}, icon: Icon(Icons.attach_file_outlined)),
-              Platform.isAndroid
-                  ? widget.txtCtrl.text == ''
-                      ? IconButton(
-                          onPressed: () {}, icon: Icon(Icons.mic_none_rounded))
-                      : IconButton(
-                          icon: Icon(Icons.send),
-                          onPressed: () {
-                            _socket.socket.connected
-                                ? enviarMensaje(_socket)
-                                : openAlertDialog(
-                                    context, 'No hay conexión con el servidor');
-                          },
-                        )
-                  : widget.txtCtrl.text == ''
-                      ? IconButton(
-                          onPressed: _socket.socket.connected ? () {} : null,
-                          icon: Icon(Icons.mic_none_rounded))
-                      : CupertinoButton(
-                          child: Text(
-                            'Enviar',
-                            style: TextStyle(fontSize: 15),
-                          ),
-                          onPressed: () {
-                            _socket.socket.connected
-                                ? enviarMensaje(_socket)
-                                : openAlertDialog(
-                                    context, 'No hay conexión con el servidor');
-                          })
-            ],
-          ))
+          Visibility(
+            visible: false,
+            child: Container(
+                child: Row(
+              children: [
+                IconButton(
+                    onPressed: () {}, icon: Icon(Icons.attach_file_outlined)),
+              ],
+            )),
+          ),
+          Platform.isAndroid
+              ? widget.txtCtrl.text == ''
+                  ? Container()
+                  : IconButton(
+                      icon: Icon(Icons.send),
+                      onPressed: () {
+                        _socket.socket.connected
+                            ? enviarMensaje(_socket)
+                            : openAlertDialog(
+                                context, 'No hay conexión con el servidor');
+                      },
+                    )
+              : widget.txtCtrl.text == ''
+                  ? Container()
+                  : CupertinoButton(
+                      child: Text(
+                        'Enviar',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      onPressed: () {
+                        _socket.socket.connected
+                            ? enviarMensaje(_socket)
+                            : openAlertDialog(
+                                context, 'No hay conexión con el servidor');
+                      })
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/anotacion.dart';
 import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
@@ -53,7 +54,7 @@ class UsuarioService extends ChangeNotifier {
   grabarUsuario(dynamic usuario) async {
     final data = await this._http.post(_endpoint, usuario.toJson());
     final response = MyResponse.fromJson(data['response']);
-    // notifyListeners();
+    notifyListeners();
     return response;
   }
 
@@ -106,6 +107,31 @@ class UsuarioService extends ChangeNotifier {
   Future<MyResponse> deleteUsuario(String id) async {
     final response =
         await this._http.delete('$_endpoint/desactivarUsuario/$id');
+    notifyListeners();
+    return MyResponse.fromJson(response['response']);
+  }
+
+  Future<MyResponse> eliminarAnotacion(String id, String anotacionId) async {
+    final body = {"id": anotacionId};
+    final response =
+        await this._http.post('$_endpoint/eliminarAnotacion/$id', body);
+    notifyListeners();
+    return MyResponse.fromJson(response['response']);
+  }
+
+  Future<MyResponse> modificarAnotacion(
+      String usuarioId, Anotacion anotacion) async {
+    final body = anotacion.toJson();
+    final response =
+        await this._http.put('$_endpoint/modificarAnotacion/$usuarioId', body);
+    notifyListeners();
+    return MyResponse.fromJson(response['response']);
+  }
+
+  Future<MyResponse> agregarAnotacion(String id, Anotacion anotacion) async {
+    final body = anotacion.toJson();
+    final response =
+        await this._http.post('$_endpoint/agregarAnotacion/$id', body);
     notifyListeners();
     return MyResponse.fromJson(response['response']);
   }

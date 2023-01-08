@@ -32,7 +32,6 @@ class _ChatListState extends State<ChatList> with RouteAware {
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final _pref = new Preferences();
     _socketService.connect(_pref.id);
-    print('reinicio chatlist');
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],

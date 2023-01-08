@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -26,7 +27,7 @@ class PersonalADM extends StatelessWidget {
               future: _usuarioService.obtenerPersonal(),
               builder: (context, snapshot) {
                 if (snapshot.data == null) {
-                  return Loading(mensaje: 'Cargando equipo asignado');
+                  return Loading(mensaje: 'Cargando personal...');
                 } else {
                   var personal = snapshot.data as List<Miembro>;
                   personal =
@@ -172,17 +173,20 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                         final arg = {
                           'usuarioId': widget.dataFiltrada[index]['id'],
                         };
-                        return CustomListTile(
-                          esPar: esPar,
-                          title: widget.dataFiltrada[index]['title'],
-                          subtitle: widget.dataFiltrada[index]['subtitle'],
-                          avatar:
-                              widget.dataFiltrada[index]['avatar'].toString(),
-                          fontSize: 18,
-                          onTap: true,
-                          actionOnTap: () => Navigator.pushNamed(
-                              context, PerfilPage.routeName,
-                              arguments: arg),
+                        return FadeInRight(
+                          delay: Duration(milliseconds: index * 50),
+                          child: CustomListTile(
+                            esPar: esPar,
+                            title: widget.dataFiltrada[index]['title'],
+                            subtitle: widget.dataFiltrada[index]['subtitle'],
+                            avatar:
+                                widget.dataFiltrada[index]['avatar'].toString(),
+                            fontSize: 18,
+                            onTap: true,
+                            actionOnTap: () => Navigator.pushNamed(
+                                context, PerfilPage.routeName,
+                                arguments: arg),
+                          ),
                         );
                       })),
                 )

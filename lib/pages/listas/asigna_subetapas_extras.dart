@@ -1,30 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/etapa.dart';
+import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
 import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/subetapa_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
-class EtapasExtrasPage extends StatelessWidget {
-  EtapasExtrasPage({Key? key}) : super(key: key);
-  static final routeName = 'etapas_extras';
+class SubetapasExtrasPage extends StatelessWidget {
+  SubetapasExtrasPage({Key? key}) : super(key: key);
+  static final routeName = 'subetapas_extras';
+  late List<Subetapa> subetapas;
   @override
   Widget build(BuildContext context) {
-    final _etapasService = Provider.of<EtapaService>(context);
-    final _obraService = Provider.of<ObraService>(context, listen: false);
+    final arguements = ModalRoute.of(context)!.settings.arguments as Map;
+    final etapaId = arguements['etapaId'];
+    final _subetapasService = Provider.of<SubetapaService>(context);
+    final _obraService = Provider.of<ObraService>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Etapas extras'),
+        title: Text('Subetapas extras'),
         backgroundColor: Helper.brandColors[1],
         automaticallyImplyLeading: false,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(
             context, Etapa_Sub_Tarea_Form.routeName,
-            arguments: {}),
+            arguments: {
+              'etapaId': etapaId,
+            }),
         backgroundColor: Helper.brandColors[8],
         mini: true,
         child: Icon(Icons.add),
@@ -34,22 +42,31 @@ class EtapasExtrasPage extends StatelessWidget {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-            future: _etapasService.obtenerEtapasExtras(),
+            future: _subetapasService.obtenerExtras(etapaId),
             builder: (context, snapshot) {
               if (snapshot.data == null) {
                 return Loading(
-                  mensaje: 'Cargando etapas...',
+                  mensaje: 'Cargando subetapas...',
                 );
               } else {
                 final response = snapshot.data as MyResponse;
                 final lista = response.data as List<dynamic>;
-                final etapas = lista.map((e) => Etapa.fromJson(e)).toList();
-                etapas.sort(((a, b) => a.descripcion.compareTo(b.descripcion)));
-                final etapasAsignadas =
-                    _obraService.obra.etapas.map((etapa) => etapa.id).toList();
+                subetapas = lista.map((e) => Subetapa.fromJson(e)).toList();
+                subetapas
+                    .sort(((a, b) => a.descripcion.compareTo(b.descripcion)));
+
+                final indexEtapa = _obraService.obra.etapas
+                    .indexWhere((element) => element.id == etapaId);
+                _obraService.obra.etapas[indexEtapa];
+                final subetapasAsignadas = _obraService
+                    .obra.etapas[indexEtapa].subetapas
+                    .map((etapa) => etapa.id)
+                    .toList();
 
                 return _SearchListGroupView(
-                    etapas: etapas, etapasAsignadas: etapasAsignadas);
+                    etapaId: etapaId,
+                    subetapas: subetapas,
+                    subetapasAsignadas: subetapasAsignadas);
               }
             },
           ),
@@ -63,12 +80,14 @@ class EtapasExtrasPage extends StatelessWidget {
 class _SearchListGroupView extends StatefulWidget {
   _SearchListGroupView({
     Key? key,
-    required this.etapas,
-    required this.etapasAsignadas,
+    required this.etapaId,
+    required this.subetapas,
+    required this.subetapasAsignadas,
   }) : super(key: key);
 
-  List<Etapa> etapas;
-  List<String> etapasAsignadas;
+  List<Subetapa> subetapas;
+  List<String> subetapasAsignadas;
+  String etapaId;
   @override
   State<_SearchListGroupView> createState() => __SearchListGroupViewState();
 }
@@ -77,10 +96,12 @@ TextEditingController _txtPersonalCtrl = TextEditingController();
 
 class __SearchListGroupViewState extends State<_SearchListGroupView> {
   List<String> asignados = [];
+  late ObraService _obraService;
   @override
   Widget build(BuildContext context) {
-    asignados = widget.etapasAsignadas;
-    return widget.etapas.length > 0
+    _obraService = Provider.of<ObraService>(context);
+    asignados = widget.subetapasAsignadas;
+    return widget.subetapas.length > 0
         ? Container(
             child: SingleChildScrollView(
                 child: Container(
@@ -89,19 +110,21 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                     height: MediaQuery.of(context).size.height - 200,
                     width: MediaQuery.of(context).size.width,
                     child: ListView.builder(
-                        itemCount: widget.etapas.length,
+                        itemCount: widget.subetapas.length,
                         itemBuilder: (context, index) {
                           final asignado =
-                              asignados.contains(widget.etapas[index].id);
+                              asignados.contains(widget.subetapas[index].id);
                           return Container(
                             child: Column(children: [
                               _CustomAddListTile(
-                                etapa: widget.etapas[index],
-                                asignado: asignado,
-                                eliminarEtapa: (etapaId, index) {
-                                  eliminarEtapa(widget.etapas[index].id, index);
-                                },
+                                etapaId: widget.etapaId,
+                                subetapas: widget.subetapas,
                                 index: index,
+                                asignado: asignado,
+                                eliminarSubetapa:
+                                    (obraId, etapaId, subetapaId, index) =>
+                                        eliminarSubetapa(
+                                            obraId, etapaId, subetapaId, index),
                               ),
                               Divider(
                                 color: Helper.brandColors[3],
@@ -117,20 +140,21 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
             height: MediaQuery.of(context).size.height - 200,
             width: MediaQuery.of(context).size.width,
             child: Center(
-                child: Text('No hay etapas para agregar',
+                child: Text('No hay subetapas para agregar',
                     style: TextStyle(fontSize: 20, color: Colors.grey[400]))));
   }
 
-  eliminarEtapa(etapaId, index) async {
-    final _etapasService = Provider.of<EtapaService>(context, listen: false);
+  eliminarSubetapa(obraId, etapaId, subetapaId, index) async {
+    final _subetapasService =
+        Provider.of<SubetapaService>(context, listen: false);
     openLoadingDialog(context, mensaje: 'Eliminando subetapa...');
-    final etapa = widget.etapas[index];
-    widget.etapas.removeAt(index);
+    final subetapa = widget.subetapas[index];
+    widget.subetapas.removeAt(index);
 
-    final response = await _etapasService.eliminarEtapa(etapaId);
+    final response = await _subetapasService.eliminarSubetapa(subetapaId);
     closeLoadingDialog(context);
     if (response.fallo) {
-      widget.etapas.insert(index, etapa);
+      widget.subetapas.insert(index, subetapa);
       openAlertDialog(context, 'Error al eliminar subetapa',
           subMensaje: response.error);
       return;
@@ -148,26 +172,32 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
 class _CustomAddListTile extends StatefulWidget {
   _CustomAddListTile(
       {Key? key,
-      required this.etapa,
-      this.asignado = false,
-      required this.eliminarEtapa,
-      required this.index})
+      required this.etapaId,
+      required this.subetapas,
+      required this.index,
+      required this.eliminarSubetapa,
+      this.asignado = false})
       : super(key: key);
 
-  final Etapa etapa;
+  List<Subetapa> subetapas;
   bool asignado;
-  Function eliminarEtapa;
   int index;
+  String etapaId;
+  Function eliminarSubetapa;
 
   @override
   State<_CustomAddListTile> createState() => _CustomAddListTileState();
 }
 
 class _CustomAddListTileState extends State<_CustomAddListTile> {
+  late ObraService _obraService;
+  late Subetapa subetapa;
+
   @override
   Widget build(BuildContext context) {
-    final _obraService = Provider.of<ObraService>(context);
-
+    _obraService = Provider.of<ObraService>(context);
+    final _pref = new Preferences();
+    subetapa = widget.subetapas[widget.index];
     String snackText = 'Se ha quitado la tarea';
     Icon icono = widget.asignado
         ? Icon(
@@ -178,13 +208,15 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
             Icons.add,
             color: Helper.brandColors[3],
           );
+
     var tile = ListTile(
         title: Text(
-          '${widget.etapa.descripcion}',
+          '${subetapa.descripcion}',
           style: TextStyle(color: Helper.brandColors[4]),
         ),
         trailing: icono,
-        onTap: () => asignar(_obraService, snackText));
+        onTap: () => asignar(snackText));
+
     return Dismissible(
         confirmDismiss: (direction) {
           return openDialogConfirmationReturn(context, 'Confirme para borrar',
@@ -200,27 +232,31 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
                 )),
             color: Colors.red[400]),
         onDismissed: (direction) async {
-          await widget.eliminarEtapa(widget.etapa.id, widget.index);
+          await widget.eliminarSubetapa(
+              _obraService.obra.id, widget.etapaId, subetapa.id, widget.index);
         },
-        key: Key(widget.etapa.id),
+        key: Key(subetapa.id),
         child: tile);
   }
 
-  asignar(ObraService _obraService, snackText) async {
+  asignar(snackText) async {
     if (!widget.asignado) {
       // Agregar tarea
-      openLoadingDialog(context, mensaje: 'Adjuntando etapa...');
-      final response = await _obraService.asignarEtapa(
-          widget.etapa.id, _obraService.obra.id);
+      openLoadingDialog(context, mensaje: 'Adjuntando subetapa...');
+      final response = await _obraService.asignarSubEtapa(
+          widget.etapaId, subetapa.id, _obraService.obra.id);
       if (response.fallo) {
         closeLoadingDialog(context);
-        openAlertDialog(context, 'Error al asignar etapa',
+        openAlertDialog(context, 'Error al asignar subetapa',
             subMensaje: response.error);
       } else {
-        _obraService.obra.sumarEtapa(Etapa.fromJson(response.data));
+        final indexEtapa = _obraService.obra.etapas
+            .indexWhere((element) => element.id == widget.etapaId);
+        _obraService.obra.etapas[indexEtapa]
+            .sumarSubetapa(Subetapa.fromJson(response.data));
         widget.asignado = true;
         closeLoadingDialog(context);
-        snackText = 'Tarea asignada';
+        snackText = 'Subetapa asignada';
         Helper.showSnackBar(
             context, snackText, null, Duration(milliseconds: 700), null);
       }
@@ -228,15 +264,17 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
       //Quitar tarea
       openLoadingDialog(context, mensaje: 'Quitando etapa...');
 
-      final response =
-          await _obraService.quitarEtapa(widget.etapa.id, _obraService.obra.id);
+      final response = await _obraService.quitarSubetapa(
+          widget.etapaId, subetapa.id, _obraService.obra.id);
 
       if (response.fallo) {
         closeLoadingDialog(context);
         openAlertDialog(context, 'Error al quitar etapa',
             subMensaje: response.error);
       } else {
-        _obraService.obra.quitarEtapa(widget.etapa.id);
+        final indexEtapa = _obraService.obra.etapas
+            .indexWhere((element) => element.id == widget.etapaId);
+        _obraService.obra.etapas[indexEtapa].quitarSubEtapa(subetapa.id);
         widget.asignado = false;
         closeLoadingDialog(context);
         Helper.showSnackBar(
@@ -244,9 +282,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
       }
     }
 
-    setState(
-      () {},
-    );
+    // setState(() {});
   }
 
   tareaAsingada(String id) {

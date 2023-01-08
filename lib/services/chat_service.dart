@@ -11,10 +11,13 @@ class ChatService extends ChangeNotifier {
   bool tieneMensaje = false;
 
   Future<MyResponse> loadChat(
-      {String chatId = '', int offset = 0, int limit = 20}) async {
+      {String chatId = '',
+      int offset = 0,
+      int limit = 20,
+      int fromTS = 0}) async {
     this.chatId = chatId;
-
-    final datos = await this._http.get('$_endpoint/$chatId/$offset/$limit');
+    final datos =
+        await this._http.get('$_endpoint/$chatId/$offset/$limit/$fromTS');
     final data = MyResponse.fromJson(datos['response']);
 
     chat = Chat.fromMap(data.data);
@@ -36,6 +39,14 @@ class ChatService extends ChangeNotifier {
   Future<MyResponse> obtenerChats(String usuarioId) async {
     final body = {"usuarioId": usuarioId};
     final data = await this._http.post('$_endpoint/chatsUsuario', body);
+    final response = MyResponse.fromJson(data['response']);
+    return response;
+  }
+
+  Future<MyResponse> buscarMensajes(String chatId, String text) async {
+    final body = {"text": text};
+    final data =
+        await this._http.post('$_endpoint/buscarMensajes/$chatId', body);
     final response = MyResponse.fromJson(data['response']);
     return response;
   }

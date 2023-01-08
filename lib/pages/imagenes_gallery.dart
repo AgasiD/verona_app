@@ -1,4 +1,3 @@
-import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -6,7 +5,6 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/forms/documento.dart';
-import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -74,6 +72,7 @@ class ImgGalleryPage extends StatelessWidget {
                               ),
                             ));
                       } else {
+                        files.sort((a, b) => a['name'].compareTo(b['name']));
                         final imagenes = files
                             .map(
                               (e) => GestureDetector(
@@ -95,7 +94,10 @@ class ImgGalleryPage extends StatelessWidget {
                                   //       arguments: {'imagenId': e['id']});
                                   // } else
                                   if (getType(e['mimeType']).toLowerCase() ==
-                                      'Carpeta'.toLowerCase()) {
+                                          'Carpeta'.toLowerCase() ||
+                                      e['mimeType']
+                                          .toString()
+                                          .contains('shortcut')) {
                                     Navigator.pushNamed(
                                         (context), ImgGalleryPage.routeName,
                                         arguments: {'driveId': e['id']});
@@ -131,7 +133,9 @@ class ImgGalleryPage extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     e['mimeType'] ==
-                                            'application/vnd.google-apps.folder'
+                                                'application/vnd.google-apps.folder' ||
+                                            e['mimeType'] ==
+                                                'application/vnd.google-apps.shortcut'
                                         ? Icon(
                                             Icons.folder,
                                             size: 130,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/obra.dart';
@@ -26,7 +27,8 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<Obra> obtenerObra(String obraId) async {
-    final datos = await this._http.get('$_endpoint/$obraId');
+    final body = {"propietario": new Preferences().role == 3};
+    final datos = await this._http.post('$_endpoint/obtenerObra/$obraId', body);
     final data = Obra.fromMap(datos["obra"]);
     this.obra = data;
     notifyListeners();
@@ -34,7 +36,7 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<Obra> obtenerEquipo(String obraId) async {
-    final datos = await this._http.get('$_endpoint/$obraId');
+    final datos = await this._http.post('$_endpoint/$obraId', {});
     final json = datos["obra"];
     final data = Obra.fromMap(json);
     this.obra = data;
@@ -64,7 +66,8 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<MyResponse> agregarUsuario(obraId, String dni) async {
-    final data = await this._http.put('$_endpoint/$obraId/$dni', {});
+    final data =
+        await this._http.put('$_endpoint/agregarUsuario/$obraId/$dni', {});
     final response = MyResponse.fromJson(data['response']);
 
     notifyListeners();
@@ -153,10 +156,17 @@ class ObraService extends ChangeNotifier {
     return resp;
   }
 
-  Future<MyResponse> actualizarTarea(String obraId, String etapaId,
-      String tareaId, bool realizada, String usuarioId, int ts) async {
+  Future<MyResponse> actualizarTarea(
+      String obraId,
+      String etapaId,
+      String subetapaId,
+      String tareaId,
+      bool realizada,
+      String usuarioId,
+      int ts) async {
     final body = {
       "etapaId": etapaId,
+      "subetapaId": subetapaId,
       "tareaId": tareaId,
       "valor": realizada,
       "usuarioId": usuarioId,
@@ -170,8 +180,13 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<MyResponse> asignarTarea(
-      String etapaId, String tareaId, String obraId) async {
-    final body = {"tareaId": tareaId, "etapaId": etapaId, "obraId": obraId};
+      String etapaId, String subetapaId, String tareaId, String obraId) async {
+    final body = {
+      "tareaId": tareaId,
+      "subetapaId": subetapaId,
+      "etapaId": etapaId,
+      "obraId": obraId
+    };
     final datos = await this._http.put('$_endpoint/asignarTarea', body);
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
@@ -181,8 +196,13 @@ class ObraService extends ChangeNotifier {
   }
 
   Future<MyResponse> quitarTarea(
-      String etapaId, String tareaId, String obraId) async {
-    final body = {"tareaId": tareaId, "etapaId": etapaId, "obraId": obraId};
+      String etapaId, String subetapa, String tareaId, String obraId) async {
+    final body = {
+      "subetapaId": subetapa,
+      "tareaId": tareaId,
+      "etapaId": etapaId,
+      "obraId": obraId
+    };
     final datos = await this._http.put('$_endpoint/quitarTarea', body);
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
@@ -210,4 +230,61 @@ class ObraService extends ChangeNotifier {
 
     return resp;
   }
+
+  Future<MyResponse> eliminarEtapa(obraId, etapaId) async {
+    final body = {"etapaId": etapaId, "obraId": obraId};
+    final datos =
+        await this._http.put('$_endpoint/eliminarEtapaFromObra', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  quitarSubetapa(etapaId, subetapaId, obraId) async {
+    final body = {
+      "etapaId": etapaId,
+      "subetapaId": subetapaId,
+      "obraId": obraId
+    };
+    final datos = await this._http.put('$_endpoint/quitarSubetapa', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  asignarSubEtapa(String etapaId, String subetapaId, String obraId) async {
+    final body = {
+      "etapaId": etapaId,
+      "subetapaId": subetapaId,
+      "obraId": obraId
+    };
+    final datos = await this._http.put('$_endpoint/asignarSubetapa', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  Future<MyResponse> actualizarOrdenTareas(
+      obraId, etapaId, subetapaId, tareas) async {
+    final body = {
+      "etapaId": etapaId,
+      "subetapaId": subetapaId,
+      "tareas": tareas,
+    };
+    final datos = await this
+        ._http
+        .put('$_endpoint/actualizarOrdenTareas/${obraId}', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
+    return resp;
+  }
+
+  eliminarSubetapa(subetapaId) {}
 }

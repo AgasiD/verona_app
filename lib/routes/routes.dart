@@ -1,9 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
+import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/forms/etapa.dart';
+import 'package:verona_app/pages/forms/subetapa.dart';
+import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
 import 'package:verona_app/pages/listas/asigna_etapas_extras.dart';
+import 'package:verona_app/pages/listas/asigna_subetapas_extras.dart';
 import 'package:verona_app/pages/listas/asigna_tareas_extras.dart';
 import 'package:verona_app/pages/listas/contactos.dart';
 import 'package:verona_app/pages/forms/documento.dart';
@@ -23,6 +28,7 @@ import 'package:verona_app/pages/listas/pedidos_obra.dart';
 import 'package:verona_app/pages/listas/pedidos_obra_archivados.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/listas/propietarios.dart';
+import 'package:verona_app/pages/listas/subetapas.dart';
 import 'package:verona_app/pages/listas/tareas.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
@@ -32,6 +38,7 @@ import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/pages/listas/pedidos.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/pages/prueba.dart';
+import 'package:verona_app/pages/search_message.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
@@ -64,9 +71,16 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   PersonalADM.routeName: (_) => PersonalADM(),
   PropietarioForm.routeName: (_) => PropietarioForm(),
   PropietariosList.routeName: (_) => PropietariosList(),
-  Prueba.routeName: (_) => Prueba(),
+  'prueba': (_) => ReorderableApp(),
   TareasCheckList.routeName: (_) => TareasCheckList(),
   TareasExtrasPage.routeName: (_) => TareasExtrasPage(),
-  EtapasExtrasPage.routeName: (_) => EtapasExtrasPage(),
+  SubEtapasObra.routeName: (_) => SubEtapasObra(),
   PedidosArchivadosList.routeName: (_) => PedidosArchivadosList(),
+  Search_Message_Screen.routeName: (_) => Search_Message_Screen(),
+  Etapa_Sub_Tarea_Form.routeName: (_) => Etapa_Sub_Tarea_Form(),
+  Subetapa_Form.routeName: (_) => Subetapa_Form(),
+  Etapa_Form.routeName: (_) => Etapa_Form(),
+  SubetapasExtrasPage.routeName: (_) => SubetapasExtrasPage(),
+  EtapasExtrasPage.routeName: (_) => EtapasExtrasPage(),
+  AnotacionesPage.routeName: (_) => AnotacionesPage(),
 };

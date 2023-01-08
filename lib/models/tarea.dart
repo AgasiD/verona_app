@@ -8,14 +8,14 @@ class Tarea {
   Tarea({
     this.id = '',
     required this.descripcion,
-    required this.etapa,
+    required this.subetapa,
     required this.isDefault,
     this.realizado = false,
     this.tsRealizado = 0,
   });
 
   String descripcion;
-  String etapa;
+  String subetapa;
   String id;
   bool isDefault;
   bool realizado;
@@ -23,7 +23,7 @@ class Tarea {
 
   factory Tarea.fromJson(Map<String, dynamic> json) => Tarea(
         descripcion: json["descripcion"],
-        etapa: json["etapa"],
+        subetapa: json["subetapa"],
         id: json["id"],
         isDefault: json["isDefault"],
         realizado: json["realizado"] ?? false,
@@ -32,7 +32,7 @@ class Tarea {
 
   Map<String, dynamic> toJson() => {
         "descripcion": descripcion,
-        "etapa": etapa,
+        "subetapa": subetapa,
         "id": id,
         "isDefault": isDefault,
         "realizado": realizado,

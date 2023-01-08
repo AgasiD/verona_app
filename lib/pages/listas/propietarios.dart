@@ -19,89 +19,76 @@ class PropietariosList extends StatelessWidget {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
     final _obraService = Provider.of<ObraService>(context, listen: false);
+    final obra = _obraService.obra as Obra;
+    final _pref = new Preferences();
+
+    final dataTile = obra.propietarios.map((e) => Helper.toCustomTile(
+        '${e.nombre + ' ' + e.apellido}',
+        e.dni,
+        '${e.nombre[0] + e.apellido[0]}'));
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
         child: SafeArea(
-          child: FutureBuilder(
-              future: _obraService.obtenerObra(obraId),
-              builder: (context, snapshot) {
-                if (snapshot.data == null) {
-                  return Loading(mensaje: 'Cargando propietarios');
-                } else {
-                  final obra = snapshot.data as Obra;
-                  final _pref = new Preferences();
-                  _obraService.obra = obra;
-                  if (obra.propietarios.length > 0) {
-                    final dataTile = obra.propietarios.map((e) =>
-                        Helper.toCustomTile('${e.nombre + ' ' + e.apellido}',
-                            e.dni, '${e.nombre[0] + e.apellido[0]}'));
-                    return Column(
-                      children: [
-                        Container(
-                          height: MediaQuery.of(context).size.height - 200,
-                          color: Helper.brandColors[1],
-                          child: CustomListView(
-                              padding: 15, data: dataTile.toList()),
-                        ),
-                        _pref.role == 1
-                            ? Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  MainButton(
-                                    width: 150,
-                                    height: 20,
-                                    color: Helper.brandColors[8],
-                                    onPressed: () {
-                                      Navigator.pushNamed(context,
-                                          AgregarPropietariosPage.routeName);
-                                    },
-                                    text: 'Agregar propietario',
-                                    fontSize: 15,
-                                  ),
-                                ],
-                              )
-                            : Container(),
-                      ],
-                    );
-                  } else {
-                    return Column(
-                      children: [
-                        Container(
-                            height: MediaQuery.of(context).size.height - 210,
-                            width: MediaQuery.of(context).size.width,
-                            child: Center(
-                              child: Text(
-                                'Aún no hay propietarios asignados',
-                                style: TextStyle(
-                                    fontSize: 18, color: Helper.brandColors[4]),
+          child: obra.propietarios.length > 0
+              ? Column(
+                  children: [
+                    Expanded(
+                      child:
+                          CustomListView(padding: 15, data: dataTile.toList()),
+                    ),
+                    _pref.role == 1
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              MainButton(
+                                width: 150,
+                                height: 20,
+                                color: Helper.brandColors[8],
+                                onPressed: () {
+                                  Navigator.pushNamed(context,
+                                      AgregarPropietariosPage.routeName);
+                                },
+                                text: 'Agregar propietario',
+                                fontSize: 15,
                               ),
-                            )),
-                        _pref.role == 1
-                            ? Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  MainButton(
-                                    width: 150,
-                                    height: 20,
-                                    color: Helper.brandColors[8],
-                                    onPressed: () {
-                                      Navigator.pushNamed(context,
-                                          AgregarPropietariosPage.routeName);
-                                    },
-                                    text: 'Agregar propietario',
-                                    fontSize: 15,
-                                  ),
-                                ],
-                              )
-                            : Container(),
-                      ],
-                    );
-                  }
-                }
-              }),
+                            ],
+                          )
+                        : Container(),
+                  ],
+                )
+              : Column(
+                  children: [
+                    Container(
+                        height: MediaQuery.of(context).size.height - 210,
+                        width: MediaQuery.of(context).size.width,
+                        child: Center(
+                          child: Text(
+                            'Aún no hay propietarios asignados',
+                            style: TextStyle(
+                                fontSize: 18, color: Helper.brandColors[4]),
+                          ),
+                        )),
+                    _pref.role == 1
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              MainButton(
+                                width: 150,
+                                height: 20,
+                                color: Helper.brandColors[8],
+                                onPressed: () {
+                                  Navigator.pushNamed(context,
+                                      AgregarPropietariosPage.routeName);
+                                },
+                                text: 'Agregar propietario',
+                                fontSize: 15,
+                              ),
+                            ],
+                          )
+                        : Container(),
+                  ],
+                ),
         ),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),

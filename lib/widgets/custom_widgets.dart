@@ -2,12 +2,12 @@
 
 import 'dart:io';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -156,44 +156,28 @@ class CustomDrawer extends StatelessWidget {
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _pref = new Preferences();
 
-    final menuVista = _pref.role == 1
-        ? menu
-            .map((e) => TextButton(
-                  child: Row(children: [
-                    Icon(e['icon'], color: Helper.brandColors[8]),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                      child: Text(
-                        '${e["name"]}',
-                        style: textStyle,
-                      ),
+    final menuVista = menu
+        .map((e) => Visibility(
+              visible: (e["roles"] as List<dynamic>).contains(_pref.role) ||
+                  (e['roles'] as List).isEmpty,
+              child: TextButton(
+                child: Row(children: [
+                  Icon(e['icon'], color: Helper.brandColors[8]),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Text(
+                      '${e["name"]}',
+                      style: textStyle,
                     ),
-                  ]),
-                  onPressed: () {
-                    Navigator.pushNamed(context, e["route"].toString(),
-                        arguments: e['args'] ?? null);
-                  },
-                ))
-            .toList()
-        : menu
-            .sublist(0, 1)
-            .map((e) => TextButton(
-                  child: Row(children: [
-                    Icon(e['icon'], color: Helper.brandColors[8]),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                      child: Text(
-                        '${e["name"]}',
-                        style: textStyle,
-                      ),
-                    ),
-                  ]),
-                  onPressed: () {
-                    Navigator.pushNamed(context, e["route"].toString(),
-                        arguments: e['args'] ?? null);
-                  },
-                ))
-            .toList();
+                  ),
+                ]),
+                onPressed: () {
+                  Navigator.pushNamed(context, e["route"].toString(),
+                      arguments: e['args'] ?? null);
+                },
+              ),
+            ))
+        .toList();
     return Drawer(
         child: Container(
       color: Helper.brandColors[2],
@@ -229,16 +213,12 @@ class CustomDrawer extends StatelessWidget {
                       Icon(Icons.logout, color: Helper.brandColors[8])
                     ]),
                 onPressed: () async {
-                  final response = await _usuarioService.deleteDevice(
-                      _pref.id, NotificationService.token!);
-                  if (response.fallo) {
-                    openAlertDialog(
-                        context, 'No se ha desasociado el dispositivo',
-                        subMensaje: response.error);
-                  }
-                  _pref.logged = false;
-                  _socketService.disconnect();
-                  Navigator.pushReplacementNamed(context, LoginPage.routeName);
+                  final confirma = await openDialogConfirmationReturn(
+                      context, 'Confirme para cerrar sesión');
+                  confirma
+                      ? await cerrarSesion(
+                          _usuarioService, _pref, context, _socketService)
+                      : false;
                 },
               ),
             ),
@@ -250,6 +230,19 @@ class CustomDrawer extends StatelessWidget {
         ),
       ),
     ));
+  }
+
+  Future<void> cerrarSesion(UsuarioService _usuarioService, Preferences _pref,
+      BuildContext context, SocketService _socketService) async {
+    final response = await _usuarioService.deleteDevice(
+        _pref.id, NotificationService.token!);
+    if (response.fallo) {
+      openAlertDialog(context, 'No se ha desasociado el dispositivo',
+          subMensaje: response.error);
+    }
+    _pref.logged = false;
+    _socketService.disconnect();
+    Navigator.pushReplacementNamed(context, LoginPage.routeName);
   }
 }
 
@@ -841,7 +834,7 @@ void openBottomSheet(
 }
 
 void openDialogConfirmation(
-    BuildContext context, Function onPressed, String mensaje) {
+    BuildContext context, Function onPressed, String mensaje) async {
   if (Platform.isAndroid) {
     showDialog(
         context: context,
@@ -884,6 +877,45 @@ void openDialogConfirmation(
   }
 }
 
+Future<bool> openDialogConfirmationReturn(BuildContext context, String mensaje,
+    {String? subMensaje = null}) async {
+  if (Platform.isAndroid) {
+    return await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(mensaje),
+              content: subMensaje == null ? null : Text(subMensaje),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
+                ),
+                TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text('Confirmar')),
+              ],
+            ));
+  } else {
+    return await showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(mensaje),
+        content: subMensaje == null ? null : Text(subMensaje),
+        actions: [
+          CupertinoDialogAction(
+              child: Text('Confirmar'),
+              onPressed: () async => Navigator.pop(context, true)),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text('Cancelar'),
+            onPressed: () => Navigator.pop(context, false),
+          )
+        ],
+      ),
+    );
+  }
+}
+
 openLoadingDialog(BuildContext context, {String mensaje = ''}) {
   if (Platform.isAndroid) {
     showDialog(
@@ -902,6 +934,46 @@ void closeLoadingDialog(BuildContext context) {
     Navigator.of(context, rootNavigator: true).pop();
   } else {
     Navigator.of(context, rootNavigator: true).pop();
+  }
+}
+
+Future<bool> openAlertDialogReturn(BuildContext context, String mensaje,
+    {String? subMensaje}) async {
+  if (Platform.isAndroid) {
+    return await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(mensaje),
+              content: subMensaje != null && subMensaje != ''
+                  ? Text(subMensaje!)
+                  : Container(
+                      height: 0,
+                    ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text('Cerrar'),
+                ),
+              ],
+            ));
+  } else {
+    return await showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(mensaje),
+        content: subMensaje != null && subMensaje != ''
+            ? Text(subMensaje!)
+            : Container(),
+        actions: [
+          CupertinoDialogAction(
+            child: Text('Cerrar'),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1151,17 +1223,20 @@ class _CustomListViewState extends State<CustomListView> {
               if (index % 2 == 0) {
                 esPar = true;
               }
-              return CustomListTile(
-                fontSize: widget.fontSize,
-                textAvatar: widget.textAvatar,
-                iconAvatar: widget.iconAvatar,
-                esPar: esPar,
-                title: widget.data[index]['title'],
-                subtitle: widget.data[index]['subtitle'],
-                avatar: widget.data[index]['avatar'],
-                onTap: widget.tapeable,
-                actionOnTap: widget.actionOnTap,
-                padding: widget.padding,
+              return FadeInRight(
+                delay: Duration(milliseconds: index * 50),
+                child: CustomListTile(
+                  fontSize: widget.fontSize,
+                  textAvatar: widget.textAvatar,
+                  iconAvatar: widget.iconAvatar,
+                  esPar: esPar,
+                  title: widget.data[index]['title'],
+                  subtitle: widget.data[index]['subtitle'],
+                  avatar: widget.data[index]['avatar'],
+                  onTap: widget.tapeable,
+                  actionOnTap: widget.actionOnTap,
+                  padding: widget.padding,
+                ),
               );
             }));
   }
@@ -1317,6 +1392,7 @@ class _ChatsListState extends State<ChatsList> {
   Widget build(BuildContext context) {
     dataFiltrada = widget.data;
 
+    _socketService = Provider.of<SocketService>(context);
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1376,6 +1452,7 @@ class _ChatsListState extends State<ChatsList> {
                         final arg = {
                           'chatId': dataFiltrada[index]['id'],
                           'chatName': dataFiltrada[index]['nombre'],
+                          'profileURL': dataFiltrada[index]['avatar']
                         };
                         String nombreMensaje = dataFiltrada[index]
                                     ['usuarioUltimoMensaje']['idUsuario'] ==
@@ -1383,33 +1460,41 @@ class _ChatsListState extends State<ChatsList> {
                             ? 'Yo'
                             : dataFiltrada[index]['usuarioUltimoMensaje']
                                 ['nombreUsuario'];
-                        return CustomListTileMessage(
-                          badgeData: dataFiltrada[index]['cantMsgSinLeer'],
-                          esPar: esPar,
-                          title:
-                              '${dataFiltrada[index]['nombre'].toString().trim()}',
-                          subtitle: (dataFiltrada[index]['ultimoMensaje'] == ''
-                              ? ''
-                              : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} '),
-                          avatar: (dataFiltrada[index]['nombre'][0] +
-                                  dataFiltrada[index]['nombre'][1])
-                              .toString()
-                              .toUpperCase(),
-                          fontSize: 18,
-                          onTap: true,
-                          bold:
-                              (dataFiltrada[index]['cantMsgSinLeer'] as int) > 0
-                                  ? true
-                                  : false,
-                          actionOnTap: () => Navigator.pushNamed(
-                              context, ChatPage.routeName,
-                              arguments: arg),
+                        return FadeInRight(
+                          delay: Duration(milliseconds: index * 50),
+                          child: CustomListTileMessage(
+                            badgeData: dataFiltrada[index]['cantMsgSinLeer'],
+                            esPar: esPar,
+                            title:
+                                '${dataFiltrada[index]['nombre'].toString().trim()}',
+                            subtitle: (dataFiltrada[index]['ultimoMensaje'] ==
+                                    ''
+                                ? ''
+                                : '${Helper.getFechaHoraFromTS(dataFiltrada[index]['tsUltimoMensaje'])} | ${nombreMensaje}: ${dataFiltrada[index]['ultimoMensaje']} '),
+                            avatar: (dataFiltrada[index]['avatar']),
+                            fontSize: 18,
+                            isConnected: usuarioConectado(
+                                dataFiltrada[index]['contacto']),
+                            onTap: true,
+                            bold:
+                                (dataFiltrada[index]['cantMsgSinLeer'] as int) >
+                                        0
+                                    ? true
+                                    : false,
+                            actionOnTap: () => Navigator.pushNamed(
+                                context, ChatPage.routeName,
+                                arguments: arg),
+                          ),
                         );
                       })),
                 )
         ],
       ),
     );
+  }
+
+  bool usuarioConectado(String id) {
+    return _socketService.usuariosOnline.contains(id) ? true : false;
   }
 
   setUltimoMensaje(Message msg) {
@@ -1445,13 +1530,18 @@ class CustomListTileMessage extends StatelessWidget {
       this.onTap = false,
       this.fontSize = 10,
       this.bold = false,
+      required this.isConnected,
       required this.badgeData,
       this.actionOnTap = null})
       : super(key: key);
+  bool isConnected = false;
 
   @override
   Widget build(BuildContext context) {
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
+    final profileImage = (avatar.isEmpty
+        ? AssetImage('assets/user.png')
+        : NetworkImage(avatar)) as ImageProvider;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: this.padding),
@@ -1469,15 +1559,17 @@ class CustomListTileMessage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100)),
                 child: CircleAvatar(
                   backgroundColor: Helper.brandColors[0],
-                  child: textAvatar
-                      ? Text(
-                          avatar,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Helper.brandColors[5],
-                          ),
-                        )
-                      : Icon(iconAvatar),
+                  backgroundImage: profileImage,
+
+                  //   child: textAvatar
+                  //       ? Text(
+                  //           avatar,
+                  //           textAlign: TextAlign.center,
+                  //           style: TextStyle(
+                  //             color: Helper.brandColors[5],
+                  //           ),
+                  //         )
+                  //       : Icon(iconAvatar),
                 ),
               ),
               title: Padding(
@@ -1514,6 +1606,11 @@ class CustomListTileMessage extends StatelessWidget {
                             ),
                           )
                         : Container(),
+                    Badge(
+                      badgeColor: isConnected
+                          ? Color.fromARGB(255, 163, 255, 167)!
+                          : Color.fromARGB(255, 182, 43, 57)!,
+                    ),
                     Icon(
                       Icons.arrow_forward_ios_rounded,
                       color: Helper.brandColors[3],
@@ -1529,6 +1626,9 @@ class CustomListTileMessage extends StatelessWidget {
     );
     ;
   }
+  //   bool usuarioConectado(String id) {
+  //   return _socketService.usuariosOnline.contains(id) ? true : false;
+  // }
 }
 
 class CustomListTile extends StatelessWidget {
@@ -1558,6 +1658,7 @@ class CustomListTile extends StatelessWidget {
       this.actionOnTap = null})
       : super(key: key);
 
+//HOLA2
   @override
   Widget build(BuildContext context) {
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
@@ -1621,3 +1722,43 @@ class CustomListTile extends StatelessWidget {
     ;
   }
 }
+
+// class Custom_Flip_Counter extends StatefulWidget {
+//   Custom_Flip_Counter(
+//       {Key? key,
+//       required this.textStyle,
+//       required this.duration,
+//       this.from = 0,
+//       required this.to})
+//       : super(key: key);
+
+//   TextStyle textStyle;
+//   Duration? duration;
+//   int from;
+//   int to;
+//   int current = 0;
+//   @override
+//   State<Custom_Flip_Counter> createState() => _Custom_Flip_CounterState();
+// }
+
+// class _Custom_Flip_CounterState extends State<Custom_Flip_Counter> {
+//   late Text textWidget;
+//   @override
+//   Widget build(BuildContext context) {
+//     if (widget.current > widget.to) {
+//       Future.delayed(Duration(milliseconds: 50), () {
+//         widget.current = widget.current + 1;
+//         textWidget = Text(
+//           widget.current.toString(),
+//           style: widget.textStyle,
+//         );
+//       });
+//       return textWidget;
+//     } else {
+//       return Text(
+//         widget.to.toString(),
+//         style: widget.textStyle,
+//       );
+//     }
+//   }
+// }

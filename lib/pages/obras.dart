@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:image_fade/image_fade.dart';
@@ -14,6 +15,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
@@ -115,6 +117,7 @@ class _ObrasPageState extends State<ObrasPage> {
   List<Obra> obras = [];
   List<Obra> obrasFiltradas = [];
   int cant = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -131,23 +134,31 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.person_pin_rounded,
         'name': 'Mi perfil',
         'route': PerfilPage.routeName,
-        'args': {'usuarioId': _pref.id}
+        'args': {'usuarioId': _pref.id},
+        'roles': []
       },
       {
         'icon': Icons.person_add_alt_sharp,
         'name': 'Nuevo propietario',
-        'route': PropietarioForm.routeName
+        'route': PropietarioForm.routeName,
+        'roles': [1]
       },
       {
         'icon': Icons.group_sharp,
         'name': 'Personal',
-        'route': PersonalADM.routeName
+        'route': PersonalADM.routeName,
+        'roles': [1]
       },
+      {
+        'icon': Icons.edit_note_rounded,
+        'name': 'Mis anotaciones',
+        'route': AnotacionesPage.routeName,
+        'roles': [1, 2, 7]
+      }
     ];
-    final GlobalKey<ScaffoldState> _scaffoldKey =
-        new GlobalKey<ScaffoldState>();
 
     return Scaffold(
+      key: _scaffoldKey,
       drawer: CustomDrawer(textStyle: textStyle, menu: menu),
       body: Container(
         color: Helper.brandColors[1],
@@ -158,16 +169,22 @@ class _ObrasPageState extends State<ObrasPage> {
                 controller: _refreshController,
                 onRefresh: () => _onRefresh(_obras),
                 header: header,
-                child: _SearchListView(obras: obras))),
+                child: _SearchListView(obras: obras, openDrawer: openDrawer))),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
+
+  openDrawer() {
+    _scaffoldKey.currentState!.openDrawer();
+  }
 }
 
 class _SearchListView extends StatefulWidget {
-  _SearchListView({Key? key, required this.obras}) : super(key: key);
+  _SearchListView({Key? key, required this.obras, required this.openDrawer})
+      : super(key: key);
   List<Obra> obras;
+  Function openDrawer;
 
   @override
   State<_SearchListView> createState() => __SearchListViewState();
@@ -201,6 +218,7 @@ class __SearchListViewState extends State<_SearchListView> {
                   return _CustomObras(
                     obras: obras,
                     obrasFiltradas: obras,
+                    openDrawer: widget.openDrawer,
                   );
                 } else {
                   return Container(
@@ -218,7 +236,12 @@ class __SearchListViewState extends State<_SearchListView> {
 class _CustomObras extends StatefulWidget {
   List<Obra> obras;
   List<Obra> obrasFiltradas;
-  _CustomObras({Key? key, required this.obras, required this.obrasFiltradas})
+  Function openDrawer;
+  _CustomObras(
+      {Key? key,
+      required this.obras,
+      required this.obrasFiltradas,
+      required this.openDrawer})
       : super(key: key);
 
   @override
@@ -227,54 +250,67 @@ class _CustomObras extends StatefulWidget {
 
 class _CustomObrasState extends State<_CustomObras> {
   final _pref = new Preferences();
-  @override
+  late ObraService _obraService;
   @override
   Widget build(BuildContext context) {
+    _obraService = Provider.of<ObraService>(context, listen: false);
     return Column(children: [
       Container(
         margin: EdgeInsets.only(top: 20),
         width: MediaQuery.of(context).size.width * .95,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            CustomInput(
-              width: MediaQuery.of(context).size.width * .95,
-              hintText: 'Nombre de proyecto',
-              icono: Icons.search,
-              textInputAction: TextInputAction.search,
-              validaError: false,
-              iconButton: obrasTxtController.text != ''
-                  ? IconButton(
-                      splashColor: null,
-                      icon: Icon(
-                        Icons.cancel_outlined,
-                        color: Colors.red.withAlpha(200),
+            IconButton(
+                onPressed: () => widget.openDrawer(),
+                icon: Icon(
+                  Icons.menu,
+                  size: 35,
+                  color: Helper.brandColors[8],
+                )),
+            Expanded(
+              child: CustomInput(
+                width: MediaQuery.of(context).size.width * .87,
+                hintText: 'Nombre de proyecto',
+                icono: Icons.search,
+                textInputAction: TextInputAction.search,
+                validaError: false,
+                iconButton: obrasTxtController.text != ''
+                    ? IconButton(
+                        splashColor: null,
+                        icon: Icon(
+                          Icons.cancel_outlined,
+                          color: Colors.red.withAlpha(200),
+                        ),
+                        onPressed: () {
+                          obrasTxtController.text = '';
+                          widget.obrasFiltradas = widget.obras;
+                          setState(() {});
+                        },
+                      )
+                    : IconButton(
+                        color: Helper.brandColors[4],
+                        icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
+                        onPressed: _pref.role == 1
+                            ? () {
+                                Navigator.pushNamed(context, ObraForm.routeName,
+                                    arguments: {
+                                      'formName': ObraForm.routeName
+                                    });
+                              }
+                            : null,
                       ),
-                      onPressed: () {
-                        obrasTxtController.text = '';
-                        widget.obrasFiltradas = widget.obras;
-                        setState(() {});
-                      },
-                    )
-                  : IconButton(
-                      color: Helper.brandColors[4],
-                      icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
-                      onPressed: _pref.role == 1
-                          ? () {
-                              Navigator.pushNamed(context, ObraForm.routeName,
-                                  arguments: {'formName': ObraForm.routeName});
-                            }
-                          : null,
-                    ),
-              textController: obrasTxtController,
-              onChange: (text) {
-                widget.obrasFiltradas = widget.obras
-                    .where((obra) =>
-                        obra.nombre.toLowerCase().contains(text.toLowerCase()))
-                    .toList();
-                setState(() {});
-              },
+                textController: obrasTxtController,
+                onChange: (text) {
+                  widget.obrasFiltradas = widget.obras
+                      .where((obra) => obra.nombre
+                          .toLowerCase()
+                          .contains(text.toLowerCase()))
+                      .toList();
+                  setState(() {});
+                },
+              ),
             ),
           ],
         ),
@@ -303,7 +339,7 @@ class _CustomObrasState extends State<_CustomObras> {
               shrinkWrap: true,
               itemCount: widget.obrasFiltradas.length,
               itemBuilder: (BuildContext ctx, index) {
-                return _obraCard(context, widget.obrasFiltradas[index]);
+                return _obraCard(context, widget.obrasFiltradas[index], index);
               })
           : Center(
               child: Text(
@@ -313,132 +349,143 @@ class _CustomObrasState extends State<_CustomObras> {
             ),
     ]);
   }
-}
 
-Container _obraCard(BuildContext context, Obra obra) {
-  var imagen = obra.imageURL == ''
-      ? Helper.imageNetwork(
-          'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-      : Helper.imageNetwork(obra.imageURL
-          // 'https://drive.google.com/uc?export=view&id=${obra.imageId}',
-          );
-  final _socketService = Provider.of<SocketService>(context);
+  ZoomIn _obraCard(BuildContext context, Obra obra, int index) {
+    final heightCard = MediaQuery.of(context).size.height * .2;
+    var imagen = obra.imageURL == ''
+        ? Helper.imageNetwork(
+            'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
+        : Helper.imageNetwork(obra.imageURL
+            // 'https://drive.google.com/uc?export=view&id=${obra.imageId}',
+            );
+    final _socketService = Provider.of<SocketService>(context);
 
-  return Container(
-    margin: EdgeInsets.symmetric(horizontal: 15),
-    child: GestureDetector(
-        onTap: (() => Navigator.pushNamed(context, ObraPage.routeName,
-            arguments: {'obraId': obra.id})),
-        child: Container(
-          child: Card(
-            elevation: 10,
-            color: Helper.brandColors[2],
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  width: MediaQuery.of(context).size.width * .47,
-                  child: Stack(children: [
-                    tieneNovedad(obra.id, _socketService)
-                        ? Positioned(
-                            top: 10,
-                            left: 10,
-                            child: Badge(
-                              badgeColor: Helper.brandColors[8],
-                              badgeContent: Padding(
-                                padding: const EdgeInsets.all(0),
-                                // child: Text(badgeData.toString()),
-                              ),
-                            ))
-                        : Container(),
-                    Column(
-                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(obra.nombre,
-                                  style: TextStyle(
-                                      color: Helper.brandColors[3],
-                                      fontSize: 21,
-                                      fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(obra.lote,
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Helper.brandColors[8],
-                                  fontWeight: FontWeight.bold)),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Container(
-                            // alignment: Alignment.topRight,
-                            margin: EdgeInsets.only(bottom: 10),
-                            child: Column(
-                              children: [
-                                Text(
-                                    '${(obra.porcentajeRealizado).toString()}%',
-                                    style: TextStyle(
-                                        color: Helper.brandColors[3],
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold)),
-                                Container(
-                                  margin: EdgeInsets.symmetric(vertical: 3),
-                                  padding: EdgeInsets.symmetric(horizontal: 30),
-                                  child: LinearProgressIndicator(
-                                    value: obra.porcentajeRealizado / 100,
-                                    semanticsLabel: 'HoLA',
-                                    backgroundColor: Helper.brandColors[3],
-                                    color: Helper.brandColors[8],
+    return ZoomIn(
+      delay: Duration(milliseconds: (index + 1) * 100),
+      child: Container(
+        height: heightCard,
+        margin: EdgeInsets.symmetric(horizontal: 15),
+        child: GestureDetector(
+            onTap: (() {
+              _obraService.obra = obra;
+              Navigator.pushNamed(context, ObraPage.routeName,
+                  arguments: {'obraId': obra.id});
+            }),
+            child: Container(
+              child: Card(
+                elevation: 10,
+                color: Helper.brandColors[2],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      width: MediaQuery.of(context).size.width * .47,
+                      child: Stack(children: [
+                        tieneNovedad(obra.id, _socketService)
+                            ? Positioned(
+                                top: 10,
+                                left: 10,
+                                child: Badge(
+                                  badgeColor: Helper.brandColors[8],
+                                  badgeContent: Padding(
+                                    padding: const EdgeInsets.all(0),
+                                    // child: Text(badgeData.toString()),
                                   ),
+                                ))
+                            : Container(),
+                        Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(obra.nombre,
+                                      style: TextStyle(
+                                          color: Helper.brandColors[3],
+                                          fontSize: 21,
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(obra.lote,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Helper.brandColors[8],
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Container(
+                                // alignment: Alignment.topRight,
+                                margin: EdgeInsets.only(bottom: 10),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                        '${(obra.porcentajeRealizado).toString()}%',
+                                        style: TextStyle(
+                                            color: Helper.brandColors[3],
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold)),
+                                    Container(
+                                      margin: EdgeInsets.symmetric(vertical: 3),
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 30),
+                                      child: LinearProgressIndicator(
+                                        value: obra.porcentajeRealizado / 100,
+                                        semanticsLabel: 'HoLA',
+                                        backgroundColor: Helper.brandColors[3],
+                                        color: Helper.brandColors[8],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          // Text('', style: TextStyle(color: Helper.brandColors[3])),
-                        ]),
-                  ]),
+                              ),
+                              // Text('', style: TextStyle(color: Helper.brandColors[3])),
+                            ]),
+                      ]),
+                    ),
+                    // Hero(
+                    //   tag: obra.id,
+                    //   child:
+                    // Image(image: image, loadingBuilder: ),
+                    Expanded(
+                      child: ImageFade(
+                        // width: MediaQuery.of(context).size.width * .43,
+                        image: NetworkImage(obra.imageURL),
+                        loadingBuilder: (context, progress, chunkEvent) =>
+                            Center(
+                                child: CircularProgressIndicator(
+                          value: progress,
+                          color: Helper.brandColors[8],
+                        )),
+
+                        // displayed when an error occurs:
+                        errorBuilder: (context, error) => Container(
+                          color: Helper.brandColors[8],
+                          alignment: Alignment.center,
+                          child: Image(image: AssetImage('assets/image.png')),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                // Hero(
-                //   tag: obra.id,
-                //   child:
-                // Image(image: image, loadingBuilder: ),
-                ImageFade(
-                  width: MediaQuery.of(context).size.width * .43,
-                  height: 120,
-                  image: NetworkImage(obra.imageURL),
-                  loadingBuilder: (context, progress, chunkEvent) => Center(
-                      child: CircularProgressIndicator(
-                    value: progress,
-                    color: Helper.brandColors[8],
-                  )),
+              ),
+            )),
+      ),
+    );
+  }
 
-                  // displayed when an error occurs:
-                  errorBuilder: (context, error) => Container(
-                    color: Helper.brandColors[8],
-                    alignment: Alignment.center,
-                    child: Image(image: AssetImage('assets/image.png')),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )),
-  );
-}
+  tieneNovedad(String obraId, SocketService _socketService) {
+    final dato = _socketService.novedades.indexWhere(
+        (novedad) => novedad['tipo'] == 1 && novedad['obraId'] == obraId);
+    return dato >= 0;
+  }
 
-tieneNovedad(String obraId, SocketService _socketService) {
-  final dato = _socketService.novedades.indexWhere(
-      (novedad) => novedad['tipo'] == 1 && novedad['obraId'] == obraId);
-  return dato >= 0;
-}
-
-NetworkImage _CustomNetworkImage(String url) {
-  return NetworkImage(url);
+  NetworkImage _CustomNetworkImage(String url) {
+    return NetworkImage(url);
+  }
 }

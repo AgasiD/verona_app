@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/models/tarea.dart';
 
 Etapa etapaFromJson(String str) => Etapa.fromJson(json.decode(str));
@@ -11,28 +12,51 @@ class Etapa {
     required this.id,
     required this.isDefault,
     required this.orden,
-    required this.tareas,
+    required this.subetapas,
   });
 
-  int get cantTareas => tareas.length;
-  int get cantTareasTerminadas =>
-      tareas.where((element) => element.realizado).length;
-  double get porcentajeRealizado => double.parse(
-      (cantTareasTerminadas / tareas.length * 100).toStringAsFixed(2));
+  int get cantSubEtapas => subetapas.length;
+  int get cantSubtareasTerminadas {
+    int terminadas = 0;
+    if (subetapas.length > 0) {
+      subetapas.forEach((sub) {
+        terminadas += sub.cantTareasTerminadas;
+      });
+    }
+    return terminadas;
+  }
+
+  int get totalTareas {
+    int total = 0;
+    if (subetapas.length > 0) {
+      subetapas.forEach((sub) {
+        total += sub.cantTareas;
+      });
+      return total;
+    } else {
+      return 0;
+    }
+  }
+
+  double get porcentajeRealizado => totalTareas > 0
+      ? double.parse(
+          (cantSubtareasTerminadas / totalTareas * 100).toStringAsFixed(2))
+      : 0;
 
   String descripcion;
   String id;
   bool isDefault;
   int orden;
-  List<Tarea> tareas;
+  List<Subetapa> subetapas;
 
   factory Etapa.fromJson(Map<String, dynamic> json) => Etapa(
         descripcion: json["descripcion"],
-        id: json["id"],
+        id: json["id"] ?? '',
         isDefault: json["isDefault"],
         orden: json["orden"],
-        tareas: json['tareas'] != null
-            ? List<Tarea>.from(json["tareas"].map((x) => Tarea.fromJson(x)))
+        subetapas: json['subetapas'] != null
+            ? List<Subetapa>.from(
+                json["subetapas"].map((x) => Subetapa.fromJson(x)))
             : [],
       );
 
@@ -41,6 +65,15 @@ class Etapa {
         "id": id,
         "isDefault": isDefault,
         "orden": orden,
-        "tareas": List<dynamic>.from(tareas.map((x) => x.toJson())),
+        "subetapas": List<dynamic>.from(subetapas.map((x) => x.toJson())),
       };
+
+  sumarSubetapa(Subetapa subetapa) {
+    subetapas.add(subetapa);
+  }
+
+  quitarSubEtapa(String subetapa) {
+    final indexSubetapa = subetapas.indexWhere((sube) => sube.id == subetapa);
+    subetapas.removeAt(indexSubetapa);
+  }
 }

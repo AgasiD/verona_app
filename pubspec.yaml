@@ -56,7 +56,7 @@ dependencies:
   flutter_datetime_picker: ^1.5.1
   # flutter_local_notifications: ^9.6.0
   file_picker: ^4.6.1
-  dropdown_button2: ^1.6.2
+  dropdown_button2: ^1.6.2 
   photo_view: ^0.14.0
   url_launcher: ^6.1.4
   image_gallery_saver: '^1.7.1'
@@ -69,6 +69,10 @@ dependencies:
   image_fade: ^0.6.1
   calendar_date_picker2: ^0.2.5
   external_app_launcher: ^3.1.0
+  animate_do: ^3.0.2
+  animated_flip_counter: ^0.2.5
+  uuid: ^3.0.7
+
 
   
 dev_dependencies:
