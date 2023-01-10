@@ -269,7 +269,13 @@ class _DiasViewState extends State<_DiasView> {
       Future.delayed(Duration(milliseconds: 1500), () {
         diasEstimados = widget.obra.diasEstimados;
         diasInactivos = widget.obra.diasInactivos.length;
-        diasTranscurridos = widget.obra.diasTranscurridos;
+        diasTranscurridos = widget.obra.diaInicio > 0
+            ? DateTime.fromMillisecondsSinceEpoch(
+                    DateTime.now().millisecondsSinceEpoch)
+                .difference(
+                    DateTime.fromMillisecondsSinceEpoch(widget.obra.diaInicio))
+                .inDays
+            : 0;
         if (activeST) setState(() {});
       });
     }
@@ -306,30 +312,26 @@ class _DiasViewState extends State<_DiasView> {
             indent: 15,
             endIndent: 15,
           ),
-          // Column(
-          //   children: [
-          //     AnimatedFlipCounter(
-          //       wholeDigits: widget.obra.diasTranscurridos < 10
-          //           ? 1
-          //           : widget.obra.diasTranscurridos < 100
-          //               ? 2
-          //               : 3,
-          //       duration: Duration(seconds: 1),
-          //       value: diasTranscurridos, // pass in a value like 2014
-          //       textStyle: TextStyle(
-          //           fontSize: 23,
-          //           fontWeight: FontWeight.bold,
-          //           color: Helper.brandColors[8]),
-          //     ),
-          //     Text(
-          //       'Días transcurridos',
-          //       style: TextStyle(
-          //           fontSize: 13,
-          //           fontWeight: FontWeight.w400,
-          //           color: Helper.brandColors[5]),
-          //     )
-          //   ],
-          // ),
+          Column(
+            children: [
+              AnimatedFlipCounter(
+                wholeDigits: widget.obra.diasEstimados < 100 ? 2 : 3,
+                duration: Duration(seconds: 1),
+                value: diasTranscurridos, // pass in a value like 2014
+                textStyle: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                    color: Helper.brandColors[8]),
+              ),
+              Text(
+                'Días transcurridos',
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: Helper.brandColors[5]),
+              )
+            ],
+          ),
           VerticalDivider(
             width: 25,
             color: Colors.black45,

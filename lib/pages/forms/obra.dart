@@ -5,10 +5,12 @@ import 'dart:io';
 import 'dart:isolate';
 
 //import 'package:file_picker/file_picker.dart';
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form.dart';
@@ -34,6 +36,7 @@ class ObraForm extends StatelessWidget {
   final TextEditingController txtLoteCtrl = TextEditingController();
   final TextEditingController txtDuracionCtrl = TextEditingController();
   final TextEditingController txtDescripCtrl = TextEditingController();
+  final TextEditingController txtDiaInicio = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +59,8 @@ class ObraForm extends StatelessWidget {
                           txtBarrio: txtBarrioCtrl,
                           txtLote: txtLoteCtrl,
                           txtDescrip: txtDescripCtrl,
-                          txtDuracion: txtDuracionCtrl)
+                          txtDuracion: txtDuracionCtrl,
+                          txtDiaInicio: txtDiaInicio)
                       : FutureBuilder(
                           future: _obraService.obtenerObra(obraId),
                           builder: (context, snapshot) {
@@ -73,7 +77,8 @@ class ObraForm extends StatelessWidget {
                                   txtBarrio: txtBarrioCtrl,
                                   txtLote: txtLoteCtrl,
                                   txtDescrip: txtDescripCtrl,
-                                  txtDuracion: txtDuracionCtrl);
+                                  txtDuracion: txtDuracionCtrl,
+                                  txtDiaInicio: txtDiaInicio);
                             }
                           }))),
         ),
@@ -85,7 +90,12 @@ class ObraForm extends StatelessWidget {
 
 class _Form extends StatefulWidget {
   @override
-  TextEditingController txtNombre, txtBarrio, txtLote, txtDescrip, txtDuracion;
+  TextEditingController txtNombre,
+      txtBarrio,
+      txtLote,
+      txtDescrip,
+      txtDuracion,
+      txtDiaInicio;
   Obra? obra;
   _Form(
       {Key? key,
@@ -94,7 +104,8 @@ class _Form extends StatefulWidget {
       required this.txtBarrio,
       required this.txtLote,
       required this.txtDescrip,
-      required this.txtDuracion})
+      required this.txtDuracion,
+      required this.txtDiaInicio})
       : super(key: key);
 
   @override
@@ -107,6 +118,7 @@ class _FormState extends State<_Form> {
   bool edit = false;
 
   String imgButtonText = '';
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -121,6 +133,14 @@ class _FormState extends State<_Form> {
       widget.txtDuracion.text = widget.obra!.diasEstimados == 0
           ? ''
           : widget.obra!.diasEstimados.toString();
+      final f = new DateFormat('dd/MM/yyyy');
+      widget.txtDiaInicio.text = f
+          .format(
+              new DateTime.fromMillisecondsSinceEpoch(widget.obra!.diaInicio))
+          .toString();
+    } else {
+      final f = new DateFormat('dd/MM/yyyy');
+      widget.txtDiaInicio.text = f.format(DateTime.now()).toString();
     }
   }
 
@@ -180,6 +200,26 @@ class _FormState extends State<_Form> {
                   textController: widget.txtLote,
                   validaError: true,
                   validarInput: (value) => Helper.campoObligatorio(value)),
+              CustomInput(
+                icono: Icons.calendar_month,
+                hintText: 'Fecha inicio (dd/mm/aaaa)',
+                readOnly: true,
+                enable: true,
+                // width: 200,
+                textController: widget.txtDiaInicio,
+                iconButton: IconButton(
+                    icon: Icon(
+                      Icons.calendar_today,
+                      color: Helper.brandColors[3],
+                    ),
+                    onPressed: () {
+                      selectDateDeseada(
+                        context,
+                        widget.txtDiaInicio,
+                        selectedDate,
+                      );
+                    }),
+              ),
               CustomInput(
                 hintText: 'Duración estimada (días)',
                 icono: Icons.hourglass_bottom,
@@ -269,6 +309,34 @@ class _FormState extends State<_Form> {
         ));
   }
 
+  void selectDateDeseada(context, txtCtrlDate, selectedDate) async {
+    double width = MediaQuery.of(context).size.width * .8;
+
+    double height = MediaQuery.of(context).size.height * .5;
+    var results = await showCalendarDatePicker2Dialog(
+      context: context,
+      config: CalendarDatePicker2WithActionButtonsConfig(
+        selectedDayHighlightColor: Helper.brandColors[8],
+        calendarType: CalendarDatePicker2Type.single,
+        shouldCloseDialogAfterCancelTapped: true,
+      ),
+      dialogSize: Size(width, height),
+      initialValue: [selectedDate],
+      borderRadius: BorderRadius.circular(5),
+    );
+
+    if (results != null) {
+      final date = results![0];
+      print(date);
+      String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
+
+      txtCtrlDate.text = formattedDate.toString();
+      widget.txtDiaInicio.text = formattedDate.toString();
+
+      selectedDate = date;
+    }
+  }
+
   void dispose() {
     super.dispose();
 
@@ -352,6 +420,9 @@ class _FormState extends State<_Form> {
       widget.obra!.descripcion = widget.txtDescrip.text;
       widget.obra!.diasEstimados = int.parse(widget.txtDuracion.text);
       widget.obra!.id = obraId;
+      widget.obra!.diaInicio = new DateFormat("dd/MM/yyyy")
+          .parse(widget.txtDiaInicio.text)
+          .millisecondsSinceEpoch;
 
       if (_imageService.imagenValida()) {
         openLoadingDialog(context, mensaje: 'Subiendo imagen');
