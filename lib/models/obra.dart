@@ -219,4 +219,22 @@ class Obra {
     final indexEtapa = etapas.indexWhere((etapaAux) => etapaAux.id == etapa);
     etapas.removeAt(indexEtapa);
   }
+
+  getDiasTranscurridos({bool countSaturday = false, bool countSunday = false}) {
+    //sin fines de semana
+    DateTime diaAnalizado, diaInicial, diaFin;
+    diasTranscurridos = 0;
+    diaFin = DateTime.now();
+    diaAnalizado = DateTime.fromMillisecondsSinceEpoch(diaInicio);
+    while (diaAnalizado.millisecondsSinceEpoch >= diaInicio &&
+        diaAnalizado.isBefore(diaFin)) {
+      if ((countSaturday ? true : diaAnalizado.weekday != DateTime.saturday) &&
+          (countSunday ? true : diaAnalizado.weekday != DateTime.sunday)) {
+        diasTranscurridos++;
+      }
+      diaAnalizado = diaAnalizado.add(Duration(days: 1));
+    }
+
+    return diasTranscurridos;
+  }
 }

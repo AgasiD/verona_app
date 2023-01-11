@@ -316,6 +316,7 @@ class _CustomObrasState extends State<_CustomObras> {
         ),
       ),
       Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             margin: EdgeInsets.only(left: 17, top: 10, bottom: 10),
@@ -328,6 +329,98 @@ class _CustomObrasState extends State<_CustomObras> {
               textAlign: TextAlign.start,
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(right: 15.0),
+            child: DropdownButton(
+              onChanged: (value) {
+                ordenarObras(value as int);
+              },
+              dropdownColor: Helper.brandColors[2],
+              icon: Icon(
+                Icons.filter_list,
+                color: Helper.brandColors[8],
+              ),
+              value: 1,
+              enableFeedback: false,
+              selectedItemBuilder: (context) => [
+                Container(
+                  width: 200,
+                )
+              ],
+              underline: Text(''),
+              items: [
+                DropdownMenuItem<int>(
+                  value: 1,
+                  alignment: Alignment.center,
+                  enabled: false,
+                  child: Text(
+                    'Ordenar por',
+                    style: TextStyle(
+                        color: Helper.brandColors[8],
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+                DropdownMenuItem<int>(
+                  value: 2,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.sort_by_alpha,
+                        color: Helper.brandColors[8],
+                      ),
+                      Text(
+                        'Nombre',
+                        style: TextStyle(
+                          color: Helper.brandColors[5],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem<int>(
+                  value: 3,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_month,
+                        color: Helper.brandColors[8],
+                      ),
+                      Text('Fecha de inicio (asc)',
+                          style: TextStyle(color: Helper.brandColors[5]))
+                    ],
+                  ),
+                ),
+                DropdownMenuItem<int>(
+                  value: 4,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_month,
+                        color: Helper.brandColors[8],
+                      ),
+                      Text('Fecha de inicio (desc)',
+                          style: TextStyle(color: Helper.brandColors[5]))
+                    ],
+                  ),
+                ),
+                DropdownMenuItem<int>(
+                  value: 5,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.percent,
+                        color: Helper.brandColors[8],
+                      ),
+                      Text('Porcentaje realizado',
+                          style: TextStyle(
+                            color: Helper.brandColors[5],
+                          )),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
         ],
       ),
       widget.obras.length > 0
@@ -487,5 +580,28 @@ class _CustomObrasState extends State<_CustomObras> {
 
   NetworkImage _CustomNetworkImage(String url) {
     return NetworkImage(url);
+  }
+
+  void ordenarObras(int value) {
+    switch (value) {
+      case 2:
+        //Nombre
+        widget.obras.sort((a, b) => a.nombre.compareTo(b.nombre));
+        break;
+      case 3:
+        // Fecha inicio asc
+        widget.obras.sort((a, b) => a.diaInicio.compareTo(b.diaInicio));
+        break;
+      case 4:
+        // Fecha inicio desc
+        widget.obras.sort((a, b) => b.diaInicio.compareTo(a.diaInicio));
+        break;
+      case 5:
+        // Porcentaje realizado
+        widget.obras.sort(
+            (a, b) => b.porcentajeRealizado.compareTo(a.porcentajeRealizado));
+        break;
+    }
+    setState(() {});
   }
 }

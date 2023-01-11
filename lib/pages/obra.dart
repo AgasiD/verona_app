@@ -263,19 +263,16 @@ class _DiasViewState extends State<_DiasView> {
   @override
   Widget build(BuildContext context) {
     final _service = Provider.of<ObraService>(context);
+    final diasTrans = widget.obra.getDiasTranscurridos();
     if (ok) {
       ok = false;
 
       Future.delayed(Duration(milliseconds: 1500), () {
         diasEstimados = widget.obra.diasEstimados;
         diasInactivos = widget.obra.diasInactivos.length;
-        diasTranscurridos = widget.obra.diaInicio > 0
-            ? DateTime.fromMillisecondsSinceEpoch(
-                    DateTime.now().millisecondsSinceEpoch)
-                .difference(
-                    DateTime.fromMillisecondsSinceEpoch(widget.obra.diaInicio))
-                .inDays
-            : 0;
+        diasTranscurridos =
+            widget.obra.getDiasTranscurridos(countSaturday: true);
+        ;
         if (activeST) setState(() {});
       });
     }
@@ -289,7 +286,7 @@ class _DiasViewState extends State<_DiasView> {
           Column(
             children: [
               AnimatedFlipCounter(
-                wholeDigits: widget.obra.diasEstimados < 100 ? 2 : 3,
+                wholeDigits: widget.obra.diasEstimados.toString().length,
                 duration: Duration(seconds: 1),
                 value: diasEstimados, // pass in a value like 2014
                 textStyle: TextStyle(
@@ -315,8 +312,9 @@ class _DiasViewState extends State<_DiasView> {
           Column(
             children: [
               AnimatedFlipCounter(
-                wholeDigits: widget.obra.diasEstimados < 100 ? 2 : 3,
+                wholeDigits: diasTrans.toString().length,
                 duration: Duration(seconds: 1),
+
                 value: diasTranscurridos, // pass in a value like 2014
                 textStyle: TextStyle(
                     fontSize: 23,
