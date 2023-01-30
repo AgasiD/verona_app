@@ -966,11 +966,8 @@ Future<bool> openAlertDialogReturn(BuildContext context, String mensaje,
             : Container(),
         actions: [
           CupertinoDialogAction(
-            child: Text('Cerrar'),
-            onPressed: () {
-              Navigator.pop(context, true);
-            },
-          ),
+              child: Text('Cerrar'),
+              onPressed: () => Navigator.pop(context, true)),
         ],
       ),
     );
@@ -1232,7 +1229,7 @@ class _CustomListViewState extends State<CustomListView> {
                   esPar: esPar,
                   title: widget.data[index]['title'],
                   subtitle: widget.data[index]['subtitle'],
-                  avatar: widget.data[index]['avatar'],
+                  avatar: widget.data[index]['avatar'] ?? '',
                   onTap: widget.tapeable,
                   actionOnTap: widget.actionOnTap,
                   padding: widget.padding,

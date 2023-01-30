@@ -21,6 +21,7 @@ import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
+import 'package:verona_app/pages/listas/propietarios_adm.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/notifications_service.dart';
@@ -150,6 +151,12 @@ class _ObrasPageState extends State<ObrasPage> {
         'roles': [1]
       },
       {
+        'icon': Icons.holiday_village,
+        'name': 'Propietarios',
+        'route': PropietariosADM.routeName,
+        'roles': [1]
+      },
+      {
         'icon': Icons.edit_note_rounded,
         'name': 'Mis anotaciones',
         'route': AnotacionesPage.routeName,
@@ -249,10 +256,64 @@ class _CustomObras extends StatefulWidget {
 }
 
 class _CustomObrasState extends State<_CustomObras> {
+  List opciones = [
+    {
+      "value": 2,
+      "icon": Icons.sort_by_alpha,
+      "nombre": 'Nombre',
+    },
+    {
+      "value": 3,
+      "icon": Icons.calendar_month,
+      "nombre": 'Fecha de inicio (asc)',
+    },
+    {
+      "value": 4,
+      "icon": Icons.calendar_month,
+      "nombre": 'Fecha de inicio (desc)',
+    },
+    {
+      "value": 5,
+      "icon": Icons.percent,
+      "nombre": 'Porcentaje realizado',
+    }
+  ];
+
   final _pref = new Preferences();
   late ObraService _obraService;
   @override
   Widget build(BuildContext context) {
+    List<PopupMenuItem<int>> opcionesButton = opciones
+        .map((opt) => PopupMenuItem<int>(
+              value: opt['value'] as int,
+              child: Row(
+                children: [
+                  Icon(
+                    opt['icon'] as IconData,
+                    color: Helper.brandColors[8],
+                  ),
+                  Text(
+                    opt['nombre'] as String,
+                    style: TextStyle(
+                      color: Helper.brandColors[5],
+                    ),
+                  ),
+                ],
+              ),
+            ))
+        .toList();
+    opcionesButton.insert(
+        0,
+        PopupMenuItem<int>(
+          value: 1,
+          // alignment: Alignment.center,
+          enabled: false,
+          child: Text(
+            'Ordenar por',
+            style: TextStyle(
+                color: Helper.brandColors[8], fontWeight: FontWeight.bold),
+          ),
+        ));
     _obraService = Provider.of<ObraService>(context, listen: false);
     return Column(children: [
       Container(
@@ -329,96 +390,17 @@ class _CustomObrasState extends State<_CustomObras> {
               textAlign: TextAlign.start,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 15.0),
-            child: DropdownButton(
-              onChanged: (value) {
-                ordenarObras(value as int);
-              },
-              dropdownColor: Helper.brandColors[2],
+          Container(
+            child: PopupMenuButton(
               icon: Icon(
                 Icons.filter_list,
                 color: Helper.brandColors[8],
               ),
-              value: 1,
-              enableFeedback: false,
-              selectedItemBuilder: (context) => [
-                Container(
-                  width: 200,
-                )
-              ],
-              underline: Text(''),
-              items: [
-                DropdownMenuItem<int>(
-                  value: 1,
-                  alignment: Alignment.center,
-                  enabled: false,
-                  child: Text(
-                    'Ordenar por',
-                    style: TextStyle(
-                        color: Helper.brandColors[8],
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-                DropdownMenuItem<int>(
-                  value: 2,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.sort_by_alpha,
-                        color: Helper.brandColors[8],
-                      ),
-                      Text(
-                        'Nombre',
-                        style: TextStyle(
-                          color: Helper.brandColors[5],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DropdownMenuItem<int>(
-                  value: 3,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_month,
-                        color: Helper.brandColors[8],
-                      ),
-                      Text('Fecha de inicio (asc)',
-                          style: TextStyle(color: Helper.brandColors[5]))
-                    ],
-                  ),
-                ),
-                DropdownMenuItem<int>(
-                  value: 4,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_month,
-                        color: Helper.brandColors[8],
-                      ),
-                      Text('Fecha de inicio (desc)',
-                          style: TextStyle(color: Helper.brandColors[5]))
-                    ],
-                  ),
-                ),
-                DropdownMenuItem<int>(
-                  value: 5,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.percent,
-                        color: Helper.brandColors[8],
-                      ),
-                      Text('Porcentaje realizado',
-                          style: TextStyle(
-                            color: Helper.brandColors[5],
-                          )),
-                    ],
-                  ),
-                ),
-              ],
+              itemBuilder: (context) => opcionesButton,
+              onSelected: (value) {
+                ordenarObras(value as int);
+              },
+              color: Helper.brandColors[2],
             ),
           )
         ],

@@ -22,10 +22,8 @@ class PropietariosList extends StatelessWidget {
     final obra = _obraService.obra as Obra;
     final _pref = new Preferences();
 
-    final dataTile = obra.propietarios.map((e) => Helper.toCustomTile(
-        '${e.nombre + ' ' + e.apellido}',
-        e.dni,
-        '${e.nombre[0] + e.apellido[0]}'));
+    final dataTile = obra.propietarios.map((e) =>
+        Helper.toCustomTile('${e.nombre + ' ' + e.apellido}', e.dni, null));
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],

@@ -28,6 +28,7 @@ import 'package:verona_app/pages/listas/pedidos_obra.dart';
 import 'package:verona_app/pages/listas/pedidos_obra_archivados.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/listas/propietarios.dart';
+import 'package:verona_app/pages/listas/propietarios_adm.dart';
 import 'package:verona_app/pages/listas/subetapas.dart';
 import 'package:verona_app/pages/listas/tareas.dart';
 import 'package:verona_app/pages/login.dart';
@@ -72,6 +73,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   PropietarioForm.routeName: (_) => PropietarioForm(),
   PropietariosList.routeName: (_) => PropietariosList(),
   'prueba': (_) => ReorderableApp(),
+  PropietariosADM.routeName: (_) => PropietariosADM(),
   TareasCheckList.routeName: (_) => TareasCheckList(),
   TareasExtrasPage.routeName: (_) => TareasExtrasPage(),
   SubEtapasObra.routeName: (_) => SubEtapasObra(),

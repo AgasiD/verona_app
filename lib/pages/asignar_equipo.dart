@@ -314,7 +314,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
             openLoadingDialog(context, mensaje: 'Asignando usuario...');
 
             final response = await _obraService.agregarUsuario(
-                _obraService.obra.id, widget.personal.dni);
+                _obraService.obra.id, widget.personal.id);
             if (response.fallo) {
               closeLoadingDialog(context);
               openAlertDialog(context, 'Error al agregar personal',
