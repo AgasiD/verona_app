@@ -160,7 +160,7 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.edit_note_rounded,
         'name': 'Mis anotaciones',
         'route': AnotacionesPage.routeName,
-        'roles': [1, 2, 7]
+        'roles': [1, 2, 3, 7]
       }
     ];
 
@@ -323,13 +323,16 @@ class _CustomObrasState extends State<_CustomObras> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            IconButton(
-                onPressed: () => widget.openDrawer(),
-                icon: Icon(
-                  Icons.menu,
-                  size: 35,
-                  color: Helper.brandColors[8],
-                )),
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+                  onPressed: () => widget.openDrawer(),
+                  icon: Icon(
+                    Icons.menu,
+                    size: 35,
+                    color: Helper.brandColors[8],
+                  )),
+            ),
             Expanded(
               child: CustomInput(
                 width: MediaQuery.of(context).size.width * .87,

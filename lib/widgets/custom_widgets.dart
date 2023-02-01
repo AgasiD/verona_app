@@ -1053,6 +1053,7 @@ class Item {
       {required this.titulo,
       required this.accion,
       required this.icon,
+      this.rolesAcceso = const [1, 2, 3, 4, 5, 6, 7],
       this.values = const [],
       this.addButton = true,
       this.isExpanded = false,
@@ -1063,6 +1064,7 @@ class Item {
   Function() accion;
   bool addButton;
   List<dynamic> values;
+  List<int> rolesAcceso;
   String titulo;
   String route;
   Map<String, dynamic> params;
@@ -1083,7 +1085,6 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context);
     final _socketService = Provider.of<SocketService>(context);
-
     return Container(
       decoration: BoxDecoration(color: Helper.brandColors[1]),
       padding: EdgeInsets.only(top: 20),

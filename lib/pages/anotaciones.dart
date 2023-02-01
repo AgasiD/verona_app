@@ -18,6 +18,8 @@ class AnotacionesPage extends StatelessWidget {
 
   late Miembro usuario;
 
+
+
   @override
   Widget build(BuildContext context) {
     final _pref = new Preferences();
@@ -25,14 +27,15 @@ class AnotacionesPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
       body: SafeArea(
+
         child: Container(
+          
           child: FutureBuilder(
             future: _usuarioService.obtenerUsuario(_pref.id),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting)
                 return Loading(mensaje: 'Cargando...');
-              final response =
-                  MyResponse.fromJson(snapshot.data as Map<String, dynamic>);
+              final response = snapshot.data as MyResponse;
               if (response.fallo)
                 return Center(
                   child: Text('Error al cargar datos'),

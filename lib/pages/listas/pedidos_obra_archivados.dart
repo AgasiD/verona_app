@@ -104,6 +104,8 @@ class _PedidosByEstado extends StatelessWidget {
                   return Column(
                     children: [
                       _CustomListTile(
+                            esNovedad: _tieneNovedad(_obraService.obra.id,
+                            pedidos[index]['id'], _socketService),
                         esPar: false,
                         title:
                             "${pedidos[index]['titulo'].toString().toUpperCase()}",
@@ -148,6 +150,13 @@ class _PedidosByEstado extends StatelessWidget {
               )
       ],
     );
+  }
+  _tieneNovedad(String obraId, String pedidoId, SocketService _socketService) {
+    final dato = (_socketService.novedades ?? []).indexWhere((novedad) =>
+        novedad['tipo'] == 1 &&
+        novedad['obraId'] == obraId &&
+        novedad['pedidoId'] == pedidoId);
+    return dato >= 0;
   }
 }
 

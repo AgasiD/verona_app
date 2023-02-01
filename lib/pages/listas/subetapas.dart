@@ -26,7 +26,9 @@ class SubEtapasObra extends StatelessWidget {
       body: _SubEtapas(
           etapaId: _obraService.obra.etapas[index].id,
           subetapas: _obraService.obra.etapas[index].subetapas),
-      floatingActionButton: !(_pref == 1 || _pref == 2 || _pref == 7)
+      floatingActionButton: (_pref.role == 1 ||
+              _pref.role == 2 ||
+              _pref.role == 7)
           ? FloatingActionButton(
               onPressed: () => Navigator.pushNamed(
                   context, SubetapasExtrasPage.routeName,
@@ -93,7 +95,7 @@ class _SubEtapaCard extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Center(
         child: ListTile(
-          onTap: () => Navigator.pushNamed(context, TareasCheckList.routeName,
+          onTap: _pref.role == 3 ? null : () => Navigator.pushNamed(context, TareasCheckList.routeName,
               arguments: {"etapaId": etapaId, "subetapaId": subetapa.id}),
           leading: Container(
             width: 50,
@@ -134,7 +136,7 @@ class _SubEtapaCard extends StatelessWidget {
               ),
             ],
           ),
-          trailing: Icon(Icons.arrow_forward_ios_rounded,
+          trailing: _pref.role == 3 ? null : Icon(Icons.arrow_forward_ios_rounded,
               color: Helper.brandColors[8]),
         ),
       ),

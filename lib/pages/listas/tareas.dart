@@ -72,7 +72,9 @@ class _TareasCheckListState extends State<TareasCheckList> {
               ),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
-      floatingActionButton: !(_pref == 1 || _pref == 2 || _pref == 7)
+      floatingActionButton: (_pref.role == 1 ||
+              _pref.role == 2 ||
+              _pref.role == 7)
           ? FloatingActionButton(
               onPressed: () => Navigator.pushNamed(
                   context, TareasExtrasPage.routeName,
@@ -203,6 +205,7 @@ class _TareaTileState extends State<_TareaTile> {
                     ),
                   )
                 : CheckboxListTile(
+                    enabled: [1, 2, 7].contains(_pref.role),
                     tileColor: Helper.brandColors[2],
                     checkColor: Helper.brandColors[5],
                     activeColor: Helper.brandColors[8],

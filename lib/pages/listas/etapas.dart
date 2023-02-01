@@ -23,16 +23,17 @@ class EtapasObra extends StatelessWidget {
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
       body: _Etapas(etapas: _obraService.obra.etapas),
-      floatingActionButton: !(_pref == 1 || _pref == 2 || _pref == 7)
-          ? FloatingActionButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, EtapasExtrasPage.routeName),
-              backgroundColor: Helper.brandColors[8],
-              mini: true,
-              child: Icon(Icons.add),
-              splashColor: null,
-            )
-          : null,
+      floatingActionButton:
+          (_pref.role == 1 || _pref.role == 2 || _pref.role == 7)
+              ? FloatingActionButton(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, EtapasExtrasPage.routeName),
+                  backgroundColor: Helper.brandColors[8],
+                  mini: true,
+                  child: Icon(Icons.add),
+                  splashColor: null,
+                )
+              : null,
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }

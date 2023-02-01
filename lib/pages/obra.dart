@@ -108,7 +108,7 @@ class ObraPage extends StatelessWidget {
                                         vertical: 25.0),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
+                                                                                  _pref.role == 3 ? MainAxisAlignment.center : MainAxisAlignment.spaceEvenly,
                                       children: [
                                         _pref.role != 3
                                             ? CustomNavigatorButton(
@@ -123,7 +123,7 @@ class ObraPage extends StatelessWidget {
                                                 showNotif: tieneMensajeSinLeer(
                                                     obra.nombre, obra.chatI),
                                               )
-                                            : Container(width: 60),
+                                            : Container(width: 0),
                                         CustomNavigatorButton(
                                           icono: Icons.chat,
                                           accion: () {
@@ -400,6 +400,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
     //Desplegable de propietarios
     if (_pref.role != 6) {
       final propietarios = Item(
+          rolesAcceso: [1, 2, 3, 7],
           icon: Icons.key,
           titulo: 'Propietarios',
           route: PropietariosList.routeName,
@@ -472,6 +473,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         icon: Icons.account_tree_outlined,
         list: 5,
         titulo: 'Control de obra',
+
         values: [].toList(),
         accion: () => Navigator.pushNamed(context, EtapasObra.routeName),
       );
@@ -479,6 +481,8 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
       final certificados = Item(
         icon: Icons.library_add_check_outlined,
+                rolesAcceso: [1, 2, 7],
+
         list: 5,
         titulo: 'Certificados de obra',
         values: [].toList(),
@@ -487,6 +491,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       items.add(certificados);
 
       final pedidos = Item(
+        rolesAcceso: [1, 2, 4, 5, 6, 7],
         icon: Icons.request_page_outlined,
         list: 6,
         titulo: 'Pedidos',
@@ -501,6 +506,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       items.add(pedidos);
     } else {
       final pedidos = Item(
+        rolesAcceso: [1, 2, 7],
         icon: Icons.request_page_outlined,
         list: 6,
         titulo: 'Pedidos',
@@ -532,7 +538,11 @@ class _CustomExpansionState extends State<_CustomExpansion> {
     List<Widget> children = List.from(widget.data.map((e) => FadeInLeft(
           delay: Duration(milliseconds: e.list * 75),
           child: CaracteristicaButton(
-              action: e.accion, text: e.titulo, icon: e.icon, listItem: e.list),
+              roles: e.rolesAcceso,
+              action: e.accion,
+              text: e.titulo,
+              icon: e.icon,
+              listItem: e.list),
         )));
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -544,12 +554,14 @@ class _CustomExpansionState extends State<_CustomExpansion> {
 class CaracteristicaButton extends StatelessWidget {
   CaracteristicaButton(
       {Key? key,
+      this.roles = const [1, 2, 3, 4, 5, 6, 7],
       required this.action,
       required this.text,
       required this.icon,
       required this.listItem})
       : super(key: key);
 
+  List<int> roles;
   String text;
   IconData icon;
   int listItem;
@@ -559,6 +571,7 @@ class CaracteristicaButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketService>(context);
     final _obraService = Provider.of<ObraService>(context, listen: false);
+    if (!tieneAcceso()) return Container();
 
     return Container(
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -618,11 +631,20 @@ class CaracteristicaButton extends StatelessWidget {
   }
 
   tieneNovedad(String obraId, int listItem, SocketService _socketService) {
+    if(listItem == 6){
+     var a = 1; 
+    }
     final dato = _socketService.novedades.indexWhere((novedad) =>
         novedad['tipo'] == 1 &&
         novedad['obraId'] == obraId &&
-        novedad['menu'] == listItem);
+        novedad['menu'] == listItem
+        );
     return dato >= 0;
+  }
+
+  bool tieneAcceso() {
+    final _pref = new Preferences();
+    return roles.contains(_pref.role);
   }
 }
 
