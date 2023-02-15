@@ -56,8 +56,8 @@ class _MiembroFormState extends State<MiembroForm> {
                         mensaje: 'Recuperando información',
                       );
                     } else {
-                      final response = MyResponse.fromJson(
-                          snapshot.data as Map<String, dynamic>);
+                      final response =
+                          snapshot.data as MyResponse;
                       if (!response.fallo) {
                         final usuario = Miembro.fromJson(response.data);
                         _txtNombreCtrl.text = usuario.nombre;

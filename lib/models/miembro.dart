@@ -42,7 +42,7 @@ class Miembro {
           ? (json['anotaciones'] as List)
               .map((e) => Anotacion.fromJson(e))
               .toList()
-          : null);
+          : []);
 
   Map<String, dynamic> toJson() => {
         "nombre": this.nombre,

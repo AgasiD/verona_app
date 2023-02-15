@@ -34,7 +34,7 @@ class _ContactsPageState extends State<ContactsPage> {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-            future: _usuarios.obtenerPersonal(),
+            future: _pref.role == 1 ? _usuarios.obtenerTodosUsuarios() : _usuarios.obtenerPersonal(),
             builder: (_, snapshot) {
               if (snapshot.data == null) {
                 return Loading(mensaje: 'Cargando contactos');

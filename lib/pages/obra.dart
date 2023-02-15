@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/pages/anotaciones.dart';
 
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -271,8 +272,7 @@ class _DiasViewState extends State<_DiasView> {
         diasEstimados = widget.obra.diasEstimados;
         diasInactivos = widget.obra.diasInactivos.length;
         diasTranscurridos =
-            widget.obra.getDiasTranscurridos(countSaturday: true);
-        ;
+            widget.obra.getDiasTranscurridos();
         if (activeST) setState(() {});
       });
     }
@@ -385,7 +385,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-    final _service = Provider.of<ObraService>(context, listen: false);
+    final _service = Provider.of<ObraService>(context);
 
     final obra = _service.obra as Obra;
     final _data = _generarItems(obra);
@@ -503,7 +503,23 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
           );
         },
       );
-      items.add(pedidos);
+            items.add(pedidos);
+
+final anotaciones = Item(
+        rolesAcceso: [1, 2, 4, 5, 6, 7],
+        icon: Icons.edit_note_rounded,
+        list: 7,
+        titulo: 'Anotaciones',
+        values: [].toList(),
+        accion: () {
+          Navigator.pushNamed(
+            context,
+            AnotacionesPage.routeName,
+            arguments: {"obraId": obra.id}
+          );
+        },
+      );
+      items.add(anotaciones);
     } else {
       final pedidos = Item(
         rolesAcceso: [1, 2, 7],

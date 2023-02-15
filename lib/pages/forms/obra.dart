@@ -9,10 +9,12 @@ import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
@@ -37,6 +39,7 @@ class ObraForm extends StatelessWidget {
   final TextEditingController txtDuracionCtrl = TextEditingController();
   final TextEditingController txtDescripCtrl = TextEditingController();
   final TextEditingController txtDiaInicio = TextEditingController();
+  final TextEditingController txtIdDrive = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +63,8 @@ class ObraForm extends StatelessWidget {
                           txtLote: txtLoteCtrl,
                           txtDescrip: txtDescripCtrl,
                           txtDuracion: txtDuracionCtrl,
-                          txtDiaInicio: txtDiaInicio)
+                          txtDiaInicio: txtDiaInicio,
+                          txtIdDrive: txtIdDrive)
                       : FutureBuilder(
                           future: _obraService.obtenerObra(obraId),
                           builder: (context, snapshot) {
@@ -78,7 +82,8 @@ class ObraForm extends StatelessWidget {
                                   txtLote: txtLoteCtrl,
                                   txtDescrip: txtDescripCtrl,
                                   txtDuracion: txtDuracionCtrl,
-                                  txtDiaInicio: txtDiaInicio);
+                                  txtDiaInicio: txtDiaInicio,
+                                  txtIdDrive: txtIdDrive);
                             }
                           }))),
         ),
@@ -95,6 +100,7 @@ class _Form extends StatefulWidget {
       txtLote,
       txtDescrip,
       txtDuracion,
+      txtIdDrive,
       txtDiaInicio;
   Obra? obra;
   _Form(
@@ -105,7 +111,8 @@ class _Form extends StatefulWidget {
       required this.txtLote,
       required this.txtDescrip,
       required this.txtDuracion,
-      required this.txtDiaInicio})
+      required this.txtDiaInicio,
+      required this.txtIdDrive})
       : super(key: key);
 
   @override
@@ -115,10 +122,11 @@ class _Form extends StatefulWidget {
 class _FormState extends State<_Form> {
   bool imageSelected = false;
 
-  bool edit = false;
+  bool edit = false, crearDrive = true;
 
   String imgButtonText = '';
   DateTime selectedDate = DateTime.now();
+
 
   @override
   void initState() {
@@ -130,6 +138,7 @@ class _FormState extends State<_Form> {
       widget.txtBarrio.text = widget.obra!.barrio;
       widget.txtLote.text = widget.obra!.lote;
       widget.txtDescrip.text = widget.obra!.descripcion;
+      widget.txtIdDrive.text = widget.obra!.driveFolderId ?? "";
       widget.txtDuracion.text = widget.obra!.diasEstimados == 0
           ? ''
           : widget.obra!.diasEstimados.toString();
@@ -200,7 +209,9 @@ class _FormState extends State<_Form> {
                   textController: widget.txtLote,
                   validaError: true,
                   validarInput: (value) => Helper.campoObligatorio(value)),
-              CustomInput(
+              Container(
+                  margin: EdgeInsets.only(bottom: 20),
+                  child: CustomInput(
                 icono: Icons.calendar_month,
                 hintText: 'Fecha inicio (dd/mm/aaaa)',
                 readOnly: true,
@@ -219,7 +230,7 @@ class _FormState extends State<_Form> {
                         selectedDate,
                       );
                     }),
-              ),
+              )),
               CustomInput(
                 hintText: 'Duración estimada (días)',
                 icono: Icons.hourglass_bottom,
@@ -236,6 +247,14 @@ class _FormState extends State<_Form> {
                 icono: Icons.description_outlined,
                 textController: widget.txtDescrip,
                 lines: 3,
+              ),
+               Visibility(
+                visible: edit,
+                child: Container(
+                  margin: EdgeInsets.symmetric(vertical: 10),
+                  child: CustomInput(hintText: "Id de carpeta drive", icono: FontAwesomeIcons.googleDrive, textController: widget.txtIdDrive, 
+                  iconButton: IconButton(onPressed: () => refreshDriveId(), icon: Icon(Icons.refresh, color: Helper.brandColors[4],))),
+                ),
               ),
               Container(
                 alignment: Alignment.centerLeft,
@@ -274,6 +293,23 @@ class _FormState extends State<_Form> {
                       }
                     }),
               ),
+              Visibility(
+                visible: !edit,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Crear carpeta en Drive', style: TextStyle(fontSize: 18, color: Helper.brandColors[4]),),
+                    Checkbox(
+                      activeColor: Helper.brandColors[8],
+                      value: crearDrive, onChanged: (a){
+                      setState(() {
+                        crearDrive = a!;
+                      });
+                    })
+                  ],
+                ),
+              ),
+             
               SizedBox(height: 40),
               Container(
                 margin: EdgeInsets.only(bottom: 40),
@@ -365,7 +401,12 @@ class _FormState extends State<_Form> {
             lote: widget.txtLote.text,
             propietarios: [],
             descripcion: widget.txtDescrip.text,
-            diasEstimados: int.parse(widget.txtDuracion.text));
+            diasEstimados: int.parse(widget.txtDuracion.text),
+            diaInicio: new DateFormat("dd/MM/yyyy")
+          .parse(widget.txtDiaInicio.text)
+          .millisecondsSinceEpoch
+            );
+            
         if (_imageService.imagenValida()) {
           openLoadingDialog(context, mensaje: 'Subiendo imagen');
           final dataImage = await _imageService.grabarImagen(obra.nombre);
@@ -380,14 +421,20 @@ class _FormState extends State<_Form> {
           closeLoadingDialog(context);
         }
         openLoadingDialog(context, mensaje: 'Grabando obra...');
-        Map<String, dynamic> response = await _service.grabarObra(obra);
-        final obraResponse = Obra.fromMap(response["obra"]);
+        MyResponse response = await _service.grabarObra(obra, crearDrive);
+        if(response.fallo)
+          throw new Exception(response.error);
+        final obraResponse = Obra.fromMap(response.data);
         widget.txtNombre.text = '';
         widget.txtBarrio.text = '';
         widget.txtLote.text = '';
         widget.txtDuracion.text = '';
         widget.txtDescrip.text = '';
+        _imageService.descartarImagen();
+
         closeLoadingDialog(context);
+
+        _service.obra = obraResponse;
 
         await openAlertDialogReturn(context, 'Obra creada con éxito');
         Navigator.pushReplacementNamed(context, ObraPage.routeName,
@@ -441,16 +488,41 @@ class _FormState extends State<_Form> {
       Map<String, dynamic> response =
           await _service.actualizarObra(widget.obra!);
       final obraResponse = Obra.fromMap(response["obra"]);
+      _imageService.descartarImagen();
       closeLoadingDialog(context);
-      openLoadingDialog(context, mensaje: 'Obra modificada');
-      Timer(Duration(milliseconds: 750), () {
-        closeLoadingDialog(context);
-      });
-      Timer(Duration(milliseconds: 750), () {
-        Navigator.of(context).popAndPushNamed('obras');
-      });
+      await openAlertDialogReturn(context, 'Obra modificada con éxito');
+      
+    Navigator.pushReplacementNamed(context, ObraPage.routeName,
+            arguments: {"obraId": obraResponse.id});    
+  
     } else {
       openAlertDialog(context, 'Formulario invalido');
     }
+  }
+  
+  refreshDriveId() async{
+    if(widget.txtIdDrive.text.isEmpty)
+    {
+      openAlertDialog(context, 'Ingrese ID de carpeta para actualizar');
+      return;
+    }
+    openLoadingDialog(context,mensaje: "Actualizando carpetas de obra...");
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+    final response = await _obraService.actualizarIdDrive(widget.txtIdDrive.text);
+    closeLoadingDialog(context);
+    if(response.fallo){
+      openAlertDialog(context, "Error al actualizar carpetas", subMensaje: response.error);
+      return;
+    }
+
+      await openAlertDialogReturn (context, "Carpetas actualizadas con éxito");
+      widget.obra!.driveFolderId = response.data["driveFolderId"];
+      widget.obra!.folderImages = response.data["folderImages"];
+      widget.obra!.rootDriveCliente = response.data["rootDriveCliente"];
+      widget.obra!.folderImagesCliente = response.data["folderImagesCliente"];
+      _obraService.notifyListeners();
+
+
+
   }
 }

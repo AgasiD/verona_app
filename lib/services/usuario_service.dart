@@ -37,6 +37,14 @@ class UsuarioService extends ChangeNotifier {
     return list;
   }
 
+   obtenerTodosUsuarios() async {
+    final datos = await this._http.get('$_endpoint/usuariosAll');
+     final lista = datos["usuarios"];
+    final list =
+        (lista as List<dynamic>).map((json) => Miembro.fromJson(json)).toList();
+    return list;
+  }
+
   Future<MyResponse> obtenerUsuario(id) async {
     final datos = await this._http.get('$_endpoint/obtenerUsuario/$id');
     final response = MyResponse.fromJson(datos["response"]);

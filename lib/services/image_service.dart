@@ -61,4 +61,8 @@ class ImageService extends ChangeNotifier {
   imagenValida() {
     return this._img != null;
   }
+
+  void descartarImagen() {
+    this._img = null;
+  }
 }

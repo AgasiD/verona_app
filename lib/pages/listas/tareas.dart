@@ -42,7 +42,7 @@ class _TareasCheckListState extends State<TareasCheckList> {
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Helper.brandColors[2],
           title: Text('Tareas'),
           automaticallyImplyLeading: false,
           actions: [
@@ -57,7 +57,7 @@ class _TareasCheckListState extends State<TareasCheckList> {
           ]),
       backgroundColor: Helper.brandColors[1],
       body: Container(
-        height: MediaQuery.of(context).size.height - 100,
+        //height: MediaQuery.of(context).size.height - 100,
         child: tareas.length > 0
             ? ListaTarea(
                 tareas: tareas,
@@ -112,7 +112,7 @@ class _ListaTareaState extends State<ListaTarea> {
 
     return ReorderableListView(
       // itemCount: tareas.length,
-      // padding: const EdgeInsets.symmetric(horizontal: 40),
+       padding: const EdgeInsets.only(bottom: 50),
 
       children: [
         for (int index = 0; index < widget.tareas.length; index += 1)

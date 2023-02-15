@@ -160,7 +160,9 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.edit_note_rounded,
         'name': 'Mis anotaciones',
         'route': AnotacionesPage.routeName,
-        'roles': [1, 2, 3, 7]
+        'roles': [1, 2, 3, 7],
+                'args': {'obraId': null},
+
       }
     ];
 

@@ -118,7 +118,7 @@ class Obra {
       folderImagesCliente: json['folderImagesCliente'] ?? '',
       imageURL: json['imageURL'] ?? '');
 
-  toMap() => {
+  Map<String,dynamic> toMap() => {
         'nombre': this.nombre,
         'id': this.id,
         'barrio': this.barrio,
