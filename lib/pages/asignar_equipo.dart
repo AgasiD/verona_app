@@ -30,27 +30,27 @@ class AsignarEquipoPage extends StatelessWidget {
 
                 final arq = profesionales.where((e) => e.role == 2).toList();
                 final obreros =
-                    profesionales.where((e) => e.role == 4).toList();
+                    profesionales.where((e) => e.role == 4 && !e.externo).toList();
                 final comp = profesionales.where((e) => e.role == 5).toList();
                 final delivery =
                     profesionales.where((e) => e.role == 6).toList();
                 profesiones = {
                   'Arquitectos': arq,
-                  'Obreros': obreros,
+                  'Contratistas': obreros,
                   'Compradores': comp,
                   'Repartidor': delivery
-                };
+                }; //Contratistas
 
                 final grupos = [
                   'Arquitectos',
-                  'Obreros',
+                  'Contratistas',
                   'Compradores',
                   'Repartidor'
                 ];
 
                 final icons = {
                   'Arquitectos': Icons.architecture_rounded,
-                  'Obreros': Icons.construction_outlined,
+                  'Contratistas': Icons.construction_outlined,
                   'Compradores': Icons.card_travel,
                   'Repartidor': Icons.delivery_dining_rounded,
                 };

@@ -222,6 +222,9 @@ class Obra {
 
   getDiasTranscurridos({bool countSaturday = false, bool countSunday = false}) {
     //sin fines de semana
+    if(diaInicio == 0 || diaInicio < 0){
+      return 0;
+    }
     DateTime diaAnalizado, diaInicial, diaFin;
     diasTranscurridos = 0;
     diaFin = DateTime.now();

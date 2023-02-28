@@ -100,16 +100,17 @@ class ObraPage extends StatelessWidget {
                               obraId: obraId,
                             ),
                             CaracteristicaObra(),
-                            !esDelivery
+                            !esDelivery && _pref.role !=4 
                                 ? _DiasView(obra: obra, obraId: obraId)
                                 : Container(),
-                            !esDelivery
+                            !esDelivery && _pref.role !=4 
                                 ? Container(
                                     margin: const EdgeInsets.symmetric(
                                         vertical: 25.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                                                                  _pref.role == 3 ? MainAxisAlignment.center : MainAxisAlignment.spaceEvenly,
+                                      mainAxisAlignment: _pref.role == 3
+                                          ? MainAxisAlignment.center
+                                          : MainAxisAlignment.spaceEvenly,
                                       children: [
                                         _pref.role != 3
                                             ? CustomNavigatorButton(
@@ -271,8 +272,7 @@ class _DiasViewState extends State<_DiasView> {
       Future.delayed(Duration(milliseconds: 1500), () {
         diasEstimados = widget.obra.diasEstimados;
         diasInactivos = widget.obra.diasInactivos.length;
-        diasTranscurridos =
-            widget.obra.getDiasTranscurridos();
+        diasTranscurridos = widget.obra.getDiasTranscurridos();
         if (activeST) setState(() {});
       });
     }
@@ -428,6 +428,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
       //Desplegable de docs
       final doc = Item(
+        rolesAcceso: [1, 2, 3, 7],
         icon: Icons.file_copy_outlined,
         list: 3,
         titulo: 'Documentos',
@@ -450,6 +451,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
       final imgs = Item(
         icon: Icons.image_outlined,
+        rolesAcceso: [1, 2, 3, 7],
         list: 4,
         titulo: 'Galeria de imagenes',
         values: [].toList(),
@@ -473,7 +475,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         icon: Icons.account_tree_outlined,
         list: 5,
         titulo: 'Control de obra',
-
+        rolesAcceso: [1, 2, 3, 7],
         values: [].toList(),
         accion: () => Navigator.pushNamed(context, EtapasObra.routeName),
       );
@@ -481,8 +483,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
 
       final certificados = Item(
         icon: Icons.library_add_check_outlined,
-                rolesAcceso: [1, 2, 7],
-
+        rolesAcceso: [1, 2, 7],
         list: 5,
         titulo: 'Certificados de obra',
         values: [].toList(),
@@ -503,20 +504,17 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
           );
         },
       );
-            items.add(pedidos);
+      items.add(pedidos);
 
-final anotaciones = Item(
+      final anotaciones = Item(
         rolesAcceso: [1, 2, 4, 5, 6, 7],
         icon: Icons.edit_note_rounded,
-        list: 7,
+        list: 8,
         titulo: 'Anotaciones',
         values: [].toList(),
         accion: () {
-          Navigator.pushNamed(
-            context,
-            AnotacionesPage.routeName,
-            arguments: {"obraId": obra.id}
-          );
+          Navigator.pushNamed(context, AnotacionesPage.routeName,
+              arguments: {"obraId": obra.id});
         },
       );
       items.add(anotaciones);
@@ -647,14 +645,14 @@ class CaracteristicaButton extends StatelessWidget {
   }
 
   tieneNovedad(String obraId, int listItem, SocketService _socketService) {
-    if(listItem == 6){
-     var a = 1; 
+    if (listItem == 6) {
+      var a = 1;
     }
     final dato = _socketService.novedades.indexWhere((novedad) =>
         novedad['tipo'] == 1 &&
         novedad['obraId'] == obraId &&
-        novedad['menu'] == listItem
-        );
+        novedad['menu'] == listItem);
+
     return dato >= 0;
   }
 

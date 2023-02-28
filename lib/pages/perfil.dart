@@ -247,7 +247,7 @@ class PerfilPage extends StatelessWidget {
                             ),
                           ]),
                         ),
-                        TextButton(
+                        _pref.role == 1 ? TextButton(
                             onPressed: () {
                               Navigator.pushNamed(
                                   context,
@@ -259,7 +259,8 @@ class PerfilPage extends StatelessWidget {
                             child: Text('Editar usuario',
                                 style: TextStyle(
                                     fontSize: 17,
-                                    color: Helper.brandColors[8]))),
+                                    color: Helper.brandColors[8])))
+                                    : Container(),
                         TextButton(
                             onPressed: () {
                               Navigator.pushNamed(

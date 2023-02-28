@@ -850,7 +850,8 @@ class _FormState extends State<_Form> {
                             : MainAxisAlignment.spaceAround
                         : MainAxisAlignment.spaceAround,
                     children: [
-                      !permiteVerByEstado([5])
+permiteVerByEstado([0,1]) &&  permiteVerByRole([4])|| 
+                      !permiteVerByEstado([5]) && !permiteVerByRole([4]) 
                           ? MainButton(
                               width: 120,
                               fontSize: 18,

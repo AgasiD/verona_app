@@ -38,6 +38,7 @@ class Miembro {
       chats: json.containsKey('chats') ? json["chats"] : [],
       username: json['username'] ?? '',
       profileURL: json['profileURL'] ?? '',
+      externo: json['externo'] ?? false,
       anotaciones: json['anotaciones'] != null
           ? (json['anotaciones'] as List)
               .map((e) => Anotacion.fromJson(e))
@@ -53,7 +54,10 @@ class Miembro {
         "role": this.role,
         "username": this.username,
         "profileURL": this.profileURL,
-        "anotaciones": this.anotaciones
+        "anotaciones": this.anotaciones,
+        "id": this.id ?? '',
+        "externo": this.externo
+        
       };
 
   agregarAnotacion(Anotacion anota) {

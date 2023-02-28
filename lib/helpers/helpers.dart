@@ -152,7 +152,7 @@ class Helper {
       case 3:
         return 'Propietario';
       case 4:
-        return 'Obrero';
+        return 'Contratista';
       case 5:
         return 'Encargado de compras';
       case 6:

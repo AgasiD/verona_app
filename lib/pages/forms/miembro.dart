@@ -121,7 +121,7 @@ class _Form extends StatelessWidget {
     ),
     DropdownMenuItem<String>(
       value: '4',
-      child: Text('Obrero'),
+      child: Text('Contratista'),
     ),
     DropdownMenuItem<String>(
       value: '5',
