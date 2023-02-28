@@ -966,11 +966,8 @@ Future<bool> openAlertDialogReturn(BuildContext context, String mensaje,
             : Container(),
         actions: [
           CupertinoDialogAction(
-            child: Text('Cerrar'),
-            onPressed: () {
-              Navigator.pop(context, true);
-            },
-          ),
+              child: Text('Cerrar'),
+              onPressed: () => Navigator.pop(context, true)),
         ],
       ),
     );
@@ -1056,6 +1053,7 @@ class Item {
       {required this.titulo,
       required this.accion,
       required this.icon,
+      this.rolesAcceso = const [1, 2, 3, 4, 5, 6, 7],
       this.values = const [],
       this.addButton = true,
       this.isExpanded = false,
@@ -1066,6 +1064,7 @@ class Item {
   Function() accion;
   bool addButton;
   List<dynamic> values;
+  List<int> rolesAcceso;
   String titulo;
   String route;
   Map<String, dynamic> params;
@@ -1086,7 +1085,6 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context);
     final _socketService = Provider.of<SocketService>(context);
-
     return Container(
       decoration: BoxDecoration(color: Helper.brandColors[1]),
       padding: EdgeInsets.only(top: 20),
@@ -1232,7 +1230,7 @@ class _CustomListViewState extends State<CustomListView> {
                   esPar: esPar,
                   title: widget.data[index]['title'],
                   subtitle: widget.data[index]['subtitle'],
-                  avatar: widget.data[index]['avatar'],
+                  avatar: widget.data[index]['avatar'] ?? '',
                   onTap: widget.tapeable,
                   actionOnTap: widget.actionOnTap,
                   padding: widget.padding,

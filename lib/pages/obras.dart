@@ -21,6 +21,7 @@ import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
+import 'package:verona_app/pages/listas/propietarios_adm.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/notifications_service.dart';
@@ -150,10 +151,18 @@ class _ObrasPageState extends State<ObrasPage> {
         'roles': [1]
       },
       {
+        'icon': Icons.holiday_village,
+        'name': 'Propietarios',
+        'route': PropietariosADM.routeName,
+        'roles': [1]
+      },
+      {
         'icon': Icons.edit_note_rounded,
         'name': 'Mis anotaciones',
         'route': AnotacionesPage.routeName,
-        'roles': [1, 2, 7]
+        'roles': [1, 2, 3, 7],
+                'args': {'obraId': null},
+
       }
     ];
 
@@ -249,10 +258,64 @@ class _CustomObras extends StatefulWidget {
 }
 
 class _CustomObrasState extends State<_CustomObras> {
+  List opciones = [
+    {
+      "value": 2,
+      "icon": Icons.sort_by_alpha,
+      "nombre": 'Nombre',
+    },
+    {
+      "value": 3,
+      "icon": Icons.calendar_month,
+      "nombre": 'Fecha de inicio (asc)',
+    },
+    {
+      "value": 4,
+      "icon": Icons.calendar_month,
+      "nombre": 'Fecha de inicio (desc)',
+    },
+    {
+      "value": 5,
+      "icon": Icons.percent,
+      "nombre": 'Porcentaje realizado',
+    }
+  ];
+
   final _pref = new Preferences();
   late ObraService _obraService;
   @override
   Widget build(BuildContext context) {
+    List<PopupMenuItem<int>> opcionesButton = opciones
+        .map((opt) => PopupMenuItem<int>(
+              value: opt['value'] as int,
+              child: Row(
+                children: [
+                  Icon(
+                    opt['icon'] as IconData,
+                    color: Helper.brandColors[8],
+                  ),
+                  Text(
+                    opt['nombre'] as String,
+                    style: TextStyle(
+                      color: Helper.brandColors[5],
+                    ),
+                  ),
+                ],
+              ),
+            ))
+        .toList();
+    opcionesButton.insert(
+        0,
+        PopupMenuItem<int>(
+          value: 1,
+          // alignment: Alignment.center,
+          enabled: false,
+          child: Text(
+            'Ordenar por',
+            style: TextStyle(
+                color: Helper.brandColors[8], fontWeight: FontWeight.bold),
+          ),
+        ));
     _obraService = Provider.of<ObraService>(context, listen: false);
     return Column(children: [
       Container(
@@ -262,13 +325,16 @@ class _CustomObrasState extends State<_CustomObras> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            IconButton(
-                onPressed: () => widget.openDrawer(),
-                icon: Icon(
-                  Icons.menu,
-                  size: 35,
-                  color: Helper.brandColors[8],
-                )),
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+                  onPressed: () => widget.openDrawer(),
+                  icon: Icon(
+                    Icons.menu,
+                    size: 35,
+                    color: Helper.brandColors[8],
+                  )),
+            ),
             Expanded(
               child: CustomInput(
                 width: MediaQuery.of(context).size.width * .87,
@@ -316,6 +382,7 @@ class _CustomObrasState extends State<_CustomObras> {
         ),
       ),
       Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             margin: EdgeInsets.only(left: 17, top: 10, bottom: 10),
@@ -328,6 +395,19 @@ class _CustomObrasState extends State<_CustomObras> {
               textAlign: TextAlign.start,
             ),
           ),
+          Container(
+            child: PopupMenuButton(
+              icon: Icon(
+                Icons.filter_list,
+                color: Helper.brandColors[8],
+              ),
+              itemBuilder: (context) => opcionesButton,
+              onSelected: (value) {
+                ordenarObras(value as int);
+              },
+              color: Helper.brandColors[2],
+            ),
+          )
         ],
       ),
       widget.obras.length > 0
@@ -487,5 +567,28 @@ class _CustomObrasState extends State<_CustomObras> {
 
   NetworkImage _CustomNetworkImage(String url) {
     return NetworkImage(url);
+  }
+
+  void ordenarObras(int value) {
+    switch (value) {
+      case 2:
+        //Nombre
+        widget.obras.sort((a, b) => a.nombre.compareTo(b.nombre));
+        break;
+      case 3:
+        // Fecha inicio asc
+        widget.obras.sort((a, b) => a.diaInicio.compareTo(b.diaInicio));
+        break;
+      case 4:
+        // Fecha inicio desc
+        widget.obras.sort((a, b) => b.diaInicio.compareTo(a.diaInicio));
+        break;
+      case 5:
+        // Porcentaje realizado
+        widget.obras.sort(
+            (a, b) => b.porcentajeRealizado.compareTo(a.porcentajeRealizado));
+        break;
+    }
+    setState(() {});
   }
 }

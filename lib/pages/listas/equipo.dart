@@ -16,7 +16,7 @@ class EquipoList extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-    final _obraService = Provider.of<ObraService>(context, listen: false);
+    final _obraService = Provider.of<ObraService>(context);
 
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final obra = _obraService.obra;
@@ -65,16 +65,17 @@ class EquipoList extends StatelessWidget {
                 )
               : Column(
                   children: [
-                    Container(
-                        height: MediaQuery.of(context).size.height - 210,
-                        width: MediaQuery.of(context).size.width,
-                        child: Center(
-                          child: Text(
-                            'Aún no hay integrantes en el equipo',
-                            style: TextStyle(
-                                fontSize: 18, color: Helper.brandColors[4]),
-                          ),
-                        )),
+                    Expanded(
+                      child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          child: Center(
+                            child: Text(
+                              'Aún no hay integrantes en el equipo',
+                              style: TextStyle(
+                                  fontSize: 18, color: Helper.brandColors[4]),
+                            ),
+                          )),
+                    ),
                     SizedBox(
                       height: 10,
                     ),

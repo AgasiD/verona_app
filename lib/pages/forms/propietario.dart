@@ -3,12 +3,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/form.dart';
+import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
+import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -28,8 +29,16 @@ final TextEditingController txtTelefonoCtrl = TextEditingController();
 final TextEditingController txtMailCtrl = TextEditingController();
 
 class _PropietarioFormState extends State<PropietarioForm> {
+  bool edit = false;
   @override
   Widget build(BuildContext context) {
+    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
+    String? _usuarioId;
+    if (ModalRoute.of(context)!.settings.arguments != null) {
+      final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+      _usuarioId = arguments['usuarioId'] ?? null;
+    }
+    if (_usuarioId != null) edit = true;
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -59,74 +68,29 @@ class _PropietarioFormState extends State<PropietarioForm> {
                   SizedBox(
                     height: 15,
                   ),
-                  Form(
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    child: Column(
-                      children: [
-                        CustomInput(
-                          hintText: 'Nombre',
-                          icono: Icons.person,
-                          textController: txtNombreCtrl,
-                          teclado: TextInputType.text,
-                          validaError: true,
-                          validarInput: (value) =>
-                              Helper.campoObligatorio(value),
-                        ),
-                        CustomInput(
-                            hintText: 'Apellido ',
-                            icono: Icons.person,
-                            textController: txtApellidoCtrl,
-                            validaError: true,
-                            validarInput: (value) =>
-                                Helper.campoObligatorio(value),
-                            teclado: TextInputType.text),
-                        CustomInput(
-                          hintText: 'DNI',
-                          icono: Icons.assignment_ind_outlined,
-                          textController: txtDNICtrl,
-                          teclado: TextInputType.number,
-                          validaError: true,
-                          validarInput: (value) => Helper.validNumeros(value),
-                        ),
-                        CustomInput(
-                          hintText: 'Numero de telefono',
-                          icono: Icons.phone_android,
-                          textController: txtTelefonoCtrl,
-                          teclado: TextInputType.phone,
-                          validaError: true,
-                          validarInput: (value) => Helper.validNumeros(value),
-                        ),
-                        CustomInput(
-                          hintText: 'Correo electronico',
-                          icono: Icons.alternate_email,
-                          textController: txtMailCtrl,
-                          teclado: TextInputType.emailAddress,
-                          validaError: true,
-                          validarInput: (value) => Helper.validEmail(value),
-                          textInputAction: TextInputAction.done,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            MainButton(
-                                width: 100,
-                                color: Helper.brandColors[7],
-                                onPressed: () {
-                                  grabarPropietario(context);
-                                },
-                                text: 'Grabar'),
-                            SecondaryButton(
-                                width: 100,
-                                color: Helper.brandColors[0],
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                text: 'Cancelar'),
-                          ],
+                  edit
+                      ? FutureBuilder(
+                          future: _usuarioService.obtenerUsuario(_usuarioId),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting)
+                              return Loading(
+                                mensaje: 'Cargando propietario',
+                              );
+
+                            final response = snapshot.data as MyResponse;
+                            if (response.fallo)
+                              return Center(
+                                child: Text(
+                                    'Error al cargar datos ' + response.error),
+                              );
+
+                            final propietario = Miembro.fromJson(response.data);
+
+                            return _Form(propietario: propietario);
+                          },
                         )
-                      ],
-                    ),
-                  ),
+                      : _Form(),
                 ],
               ),
             ),
@@ -136,8 +100,105 @@ class _PropietarioFormState extends State<PropietarioForm> {
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
+}
 
-  grabarPropietario(BuildContext context) {
+class _Form extends StatefulWidget {
+  _Form({Key? key, this.propietario = null}) : super(key: key);
+
+  Miembro? propietario;
+
+  @override
+  State<_Form> createState() => _FormState();
+}
+
+class _FormState extends State<_Form> {
+  @override
+  void dispose() {
+    super.dispose();
+    resetForm();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.propietario != null) {
+      txtNombreCtrl.text = widget.propietario!.nombre;
+      txtApellidoCtrl.text = widget.propietario!.apellido;
+      txtDNICtrl.text = widget.propietario!.dni;
+      txtTelefonoCtrl.text = widget.propietario!.telefono;
+      txtMailCtrl.text = widget.propietario!.email;
+    }
+    return Form(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        children: [
+          CustomInput(
+            hintText: 'Nombre',
+            icono: Icons.person,
+            textController: txtNombreCtrl,
+            teclado: TextInputType.text,
+            validaError: true,
+            validarInput: (value) => Helper.campoObligatorio(value),
+          ),
+          CustomInput(
+              hintText: 'Apellido ',
+              icono: Icons.person,
+              textController: txtApellidoCtrl,
+              validaError: true,
+              validarInput: (value) => Helper.campoObligatorio(value),
+              teclado: TextInputType.text),
+          CustomInput(
+            hintText: 'DNI',
+            icono: Icons.assignment_ind_outlined,
+            textController: txtDNICtrl,
+            teclado: TextInputType.number,
+            validaError: true,
+            validarInput: (value) => Helper.validNumeros(value),
+          ),
+          CustomInput(
+            hintText: 'Numero de telefono',
+            icono: Icons.phone_android,
+            textController: txtTelefonoCtrl,
+            teclado: TextInputType.phone,
+            validaError: true,
+            validarInput: (value) => Helper.validNumeros(value),
+          ),
+          CustomInput(
+            hintText: 'Correo electronico',
+            icono: Icons.alternate_email,
+            textController: txtMailCtrl,
+            teclado: TextInputType.emailAddress,
+            validaError: true,
+            validarInput: (value) => Helper.validEmail(value),
+            textInputAction: TextInputAction.done,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              MainButton(
+                  width: 100,
+                  color: Helper.brandColors[7],
+                  onPressed: () {
+                    widget.propietario == null
+                        ? grabarPropietario(context)
+                        : editarPropietario(context);
+                    ;
+                  },
+                  text: 'Grabar'),
+              SecondaryButton(
+                  width: 100,
+                  color: Helper.brandColors[0],
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  text: 'Cancelar'),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  grabarPropietario(BuildContext context) async {
     bool isValid = true;
     final _service = Provider.of<UsuarioService>(context, listen: false);
 
@@ -160,10 +221,45 @@ class _PropietarioFormState extends State<PropietarioForm> {
       resetForm();
       closeLoadingDialog(context);
       openAlertDialog(context, 'Propietario creado');
-      Timer(
-          Duration(milliseconds: 750),
-          () => Navigator.of(context)
-              .popAndPushNamed(AgregarPropietariosPage.routeName));
+      await openAlertDialogReturn(context, 'Propietario creado');
+      Navigator.of(context).popAndPushNamed(AgregarPropietariosPage.routeName);
+    } else {
+      openAlertDialog(context, 'Formulario invalido');
+    }
+  }
+
+  editarPropietario(BuildContext context) async {
+    bool isValid = true;
+    final _service = Provider.of<UsuarioService>(context, listen: false);
+
+    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+    txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
+    txtDNICtrl.text == '' ? isValid = false : true;
+    txtTelefonoCtrl.text == '' ? isValid = false : true;
+    txtMailCtrl.text == '' ? isValid = false : true;
+
+    if (isValid) {
+      openLoadingDialog(context, mensaje: 'Actualizando propietario...');
+
+      final prop = Miembro(
+          role: 3,
+          id: widget.propietario!.id,
+          nombre: txtNombreCtrl.text,
+          apellido: txtApellidoCtrl.text,
+          dni: txtDNICtrl.text,
+          telefono: txtTelefonoCtrl.text,
+          email: txtMailCtrl.text);
+      final response = await _service.modificarUsuario(prop) as MyResponse;
+      closeLoadingDialog(context);
+
+      if (response.fallo) {
+        await openAlertDialogReturn(context, 'Error al actualizar propietario',
+            subMensaje: response.error);
+        return;
+      }
+      await openAlertDialogReturn(context, 'Propietario actualizado')
+          .then((value) => Navigator.pop(context));
+      resetForm();
     } else {
       openAlertDialog(context, 'Formulario invalido');
     }

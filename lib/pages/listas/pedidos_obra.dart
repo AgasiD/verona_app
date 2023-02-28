@@ -23,8 +23,11 @@ class PedidoList extends StatelessWidget {
     final _obraService = Provider.of<ObraService>(context);
     Future future;
 
-    if (_pref.role == 6) {
+    if (_pref.role == 6 ){
       future = _obraService.obtenerPedidosAsignadosDelivery(
+          _obraService.obra.id, _pref.id);
+    }else if( _pref.role == 4) {
+      future = _obraService.obtenerPedidosById(
           _obraService.obra.id, _pref.id);
     } else {
       future = _obraService.obtenerPedidos(_obraService.obra.id);

@@ -18,28 +18,33 @@ class AnotacionesPage extends StatelessWidget {
 
   late Miembro usuario;
 
+
+
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    String? obraId = args['obraId'] ;
     final _pref = new Preferences();
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
       body: SafeArea(
+
         child: Container(
+          
           child: FutureBuilder(
             future: _usuarioService.obtenerUsuario(_pref.id),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting)
                 return Loading(mensaje: 'Cargando...');
-              final response =
-                  MyResponse.fromJson(snapshot.data as Map<String, dynamic>);
+              final response = snapshot.data as MyResponse;
               if (response.fallo)
                 return Center(
                   child: Text('Error al cargar datos'),
                 );
               usuario = Miembro.fromJson(response.data);
 
-              return Action_Form(usuario: usuario, txtTarea: txtTarea);
+              return Action_Form(usuario: usuario, txtTarea: txtTarea, obraId: obraId);
             },
           ),
         ),
@@ -50,14 +55,16 @@ class AnotacionesPage extends StatelessWidget {
 }
 
 class Action_Form extends StatefulWidget {
-  const Action_Form({
+  Action_Form({
     Key? key,
     required this.usuario,
     required this.txtTarea,
+    required this.obraId,
   }) : super(key: key);
 
   final Miembro usuario;
   final TextEditingController txtTarea;
+  String? obraId;
 
   @override
   State<Action_Form> createState() => _Action_FormState();
@@ -71,26 +78,32 @@ class _Action_FormState extends State<Action_Form> {
   @override
   Widget build(BuildContext context) {
     _usuarioService = Provider.of<UsuarioService>(context);
-
+    List<Anotacion> anotaciones;
+    if((widget.obraId == '' || widget.obraId == null)){
+      anotaciones = widget.usuario.anotaciones!.where((anotacion) => anotacion.obraId == null).toList();
+    }else{
+      anotaciones = widget.usuario.anotaciones!.where((anotacion) => anotacion.obraId == widget.obraId).toList();
+    }
     return Column(children: [
       Expanded(
-        child: widget.usuario.anotaciones == null ||
-                widget.usuario.anotaciones!.isEmpty
+        child: anotaciones == null ||
+               anotaciones.isEmpty
             ? Center(
                 child: Text('¡Escribí tu primer anotación!',
                     style:
                         TextStyle(fontSize: 20, color: Helper.brandColors[4])))
             : ListView.builder(
                 controller: listScrollController,
-                itemCount: widget.usuario.anotaciones == null
+                itemCount: anotaciones == null
                     ? 0
-                    : widget.usuario.anotaciones!.length,
+                    : anotaciones!.length,
                 itemBuilder: (context, index) => AnotacionTile(
-                    anota: widget.usuario.anotaciones![index],
+                    anota: anotaciones![index],
                     action: eliminarAnotacion),
               ),
       ),
       InputTarea(
+        
           focus: focus, action: agregarAnotacion, txtTarea: widget.txtTarea)
     ]);
   }
@@ -98,7 +111,7 @@ class _Action_FormState extends State<Action_Form> {
   agregarAnotacion() {
     final _pref = new Preferences();
     if (widget.txtTarea.text.isNotEmpty) {
-      final anotacion = Anotacion(widget.txtTarea.text, id: Uuid().v4());
+      final anotacion = Anotacion(widget.txtTarea.text, id: Uuid().v4(), obraId: widget.obraId);
       _usuarioService.agregarAnotacion(_pref.id, anotacion).then((response) {
         if (response.fallo) {
           openAlertDialog(context, 'Error al crear anotacion',
@@ -179,11 +192,13 @@ class _InputTareaState extends State<InputTarea> {
     return Container(
       color: Helper.brandColors[2],
       child: TextFormField(
+        
         autofocus: true,
+        minLines: 1,
         focusNode: widget.focus,
         textCapitalization: TextCapitalization.sentences,
         controller: widget.txtTarea,
-        maxLines: 1,
+        maxLines: 5,
         autocorrect: false,
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.send,
@@ -244,7 +259,7 @@ class _AnotacionTileState extends State<AnotacionTile> {
                 selectedTileColor: Helper.brandColors[8],
                 title: Text(
                   widget.anota.descripcion,
-                  overflow: TextOverflow.ellipsis,
+                  // overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: Helper.brandColors[3]),
                 ),
                 onChanged: (value) => cambiarEstado(value!),

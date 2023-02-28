@@ -42,7 +42,7 @@ class _TareasCheckListState extends State<TareasCheckList> {
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Helper.brandColors[2],
           title: Text('Tareas'),
           automaticallyImplyLeading: false,
           actions: [
@@ -57,7 +57,7 @@ class _TareasCheckListState extends State<TareasCheckList> {
           ]),
       backgroundColor: Helper.brandColors[1],
       body: Container(
-        height: MediaQuery.of(context).size.height - 100,
+        //height: MediaQuery.of(context).size.height - 100,
         child: tareas.length > 0
             ? ListaTarea(
                 tareas: tareas,
@@ -72,7 +72,9 @@ class _TareasCheckListState extends State<TareasCheckList> {
               ),
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
-      floatingActionButton: !(_pref == 1 || _pref == 2 || _pref == 7)
+      floatingActionButton: (_pref.role == 1 ||
+              _pref.role == 2 ||
+              _pref.role == 7)
           ? FloatingActionButton(
               onPressed: () => Navigator.pushNamed(
                   context, TareasExtrasPage.routeName,
@@ -110,7 +112,7 @@ class _ListaTareaState extends State<ListaTarea> {
 
     return ReorderableListView(
       // itemCount: tareas.length,
-      // padding: const EdgeInsets.symmetric(horizontal: 40),
+       padding: const EdgeInsets.only(bottom: 50),
 
       children: [
         for (int index = 0; index < widget.tareas.length; index += 1)
@@ -203,6 +205,7 @@ class _TareaTileState extends State<_TareaTile> {
                     ),
                   )
                 : CheckboxListTile(
+                    enabled: [1, 2, 7].contains(_pref.role),
                     tileColor: Helper.brandColors[2],
                     checkColor: Helper.brandColors[5],
                     activeColor: Helper.brandColors[8],

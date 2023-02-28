@@ -9,6 +9,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
+import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -51,8 +52,7 @@ class PerfilPage extends StatelessWidget {
                   mensaje: 'Cargando datos...',
                 );
               } else {
-                MyResponse response =
-                    MyResponse.fromJson(snapshot.data as Map<String, dynamic>);
+                MyResponse response = snapshot.data as MyResponse;
                 if (response.fallo) {
                   print('Error al cargar datos');
                   return Container();
@@ -218,7 +218,7 @@ class PerfilPage extends StatelessWidget {
                                     '${usuario.email.toUpperCase()}',
                                     style: TextStyle(
                                       color: Helper.brandColors[5],
-                                      fontSize: 18,
+                                      fontSize: 15,
                                     ),
                                   ),
                                 ),
@@ -247,16 +247,20 @@ class PerfilPage extends StatelessWidget {
                             ),
                           ]),
                         ),
-                        TextButton(
+                        _pref.role == 1 ? TextButton(
                             onPressed: () {
                               Navigator.pushNamed(
-                                  context, MiembroForm.routeName,
+                                  context,
+                                  usuario.role == 3
+                                      ? PropietarioForm.routeName
+                                      : MiembroForm.routeName,
                                   arguments: {"usuarioId": usuario.id});
                             },
                             child: Text('Editar usuario',
                                 style: TextStyle(
                                     fontSize: 17,
-                                    color: Helper.brandColors[8]))),
+                                    color: Helper.brandColors[8])))
+                                    : Container(),
                         TextButton(
                             onPressed: () {
                               Navigator.pushNamed(

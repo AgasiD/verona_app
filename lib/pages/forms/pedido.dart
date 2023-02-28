@@ -5,7 +5,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_file_safe/open_file_safe.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -850,7 +850,8 @@ class _FormState extends State<_Form> {
                             : MainAxisAlignment.spaceAround
                         : MainAxisAlignment.spaceAround,
                     children: [
-                      !permiteVerByEstado([5])
+permiteVerByEstado([0,1]) &&  permiteVerByRole([4])|| 
+                      !permiteVerByEstado([5]) && !permiteVerByRole([4]) 
                           ? MainButton(
                               width: 120,
                               fontSize: 18,

@@ -1,15 +1,12 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
-import 'package:verona_app/models/pedido.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
-import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
-import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class PedidosArchivadosList extends StatelessWidget {
@@ -18,9 +15,6 @@ class PedidosArchivadosList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _pref = new Preferences();
-    final _obraService = Provider.of<ObraService>(context);
-    Future future;
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final pedidos = arguments['archivados'];
 
@@ -67,11 +61,13 @@ class _PedidosByEstado extends StatelessWidget {
 
   List<dynamic> pedidos;
   String estado;
+  late SocketService _socketService;
+  late ObraService _obraService;
 
   @override
   Widget build(BuildContext context) {
-    final _obraService = Provider.of<ObraService>(context, listen: false);
-    final _socketService = Provider.of<SocketService>(context);
+    _obraService = Provider.of<ObraService>(context, listen: false);
+    _socketService = Provider.of<SocketService>(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -85,6 +81,11 @@ class _PedidosByEstado extends StatelessWidget {
           child: ListTile(
             title: Text(estado.toUpperCase()),
             textColor: Helper.brandColors[5],
+            trailing: IconButton(
+              icon: Icon(Icons.notifications_off_outlined),
+              onPressed: (() => leerNovedad(context)),
+              color: Helper.brandColors[4],
+            ),
           ),
         ),
         pedidos.length > 0
@@ -104,6 +105,8 @@ class _PedidosByEstado extends StatelessWidget {
                   return Column(
                     children: [
                       _CustomListTile(
+                        esNovedad: _tieneNovedad(_obraService.obra.id,
+                            pedidos[index]['id'], _socketService),
                         esPar: false,
                         title:
                             "${pedidos[index]['titulo'].toString().toUpperCase()}",
@@ -148,6 +151,30 @@ class _PedidosByEstado extends StatelessWidget {
               )
       ],
     );
+  }
+
+  _tieneNovedad(String obraId, String pedidoId, SocketService _socketService) {
+    final dato = (_socketService.novedades ?? []).indexWhere((novedad) =>
+        novedad['tipo'] == 1 &&
+        novedad['obraId'] == obraId &&
+        novedad['pedidoId'] == pedidoId);
+    return dato >= 0;
+  }
+
+  leerNovedad(context) {
+    final _pref = Preferences();
+ 
+    var dato = [];
+    pedidos.forEach((pedido) => {
+          dato.addAll((_socketService.novedades ?? []).where((novedad) =>
+              novedad['tipo'] == 1 &&
+              novedad['obraId'] == _obraService.obra.id &&
+              novedad['pedidoId'] == pedido["id"]))
+        });
+    if (dato.length == 0) return;
+    _socketService.quitarNovedad(_pref.id, dato.map((e) => e['id']).toList());
+
+    openAlertDialog(context, "Pedidos revisados");
   }
 }
 

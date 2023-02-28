@@ -7,7 +7,7 @@ import 'package:verona_app/services/http_service.dart';
 
 class ImageService extends ChangeNotifier {
   HttpService _http = new HttpService();
-  late XFile _img;
+  XFile? _img = null;
   late List<XFile> _imgs;
   String _apiKey = Environment.IMGBB_KEY;
 
@@ -16,7 +16,7 @@ class ImageService extends ChangeNotifier {
       _img = imagen;
     }
     if (_img != null) {
-      final response = await this._http.cargarImagen(_img, "api.imgbb.com",
+      final response = await this._http.cargarImagen(_img!, "api.imgbb.com",
           "/1/upload", {"key": _apiKey, "name": fileName}); //name=${fileName}&
       final data = json.decode(response);
       return data;
@@ -60,5 +60,9 @@ class ImageService extends ChangeNotifier {
 
   imagenValida() {
     return this._img != null;
+  }
+
+  void descartarImagen() {
+    this._img = null;
   }
 }

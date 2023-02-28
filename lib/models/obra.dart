@@ -8,6 +8,7 @@ import 'package:verona_app/pages/listas/etapas.dart';
 class Obra {
   int diasEstimados;
   int diasTranscurridos;
+  int diaInicio;
   List<dynamic> diasInactivos;
   List<dynamic> docs;
   List<dynamic> enabledFiles;
@@ -41,6 +42,7 @@ class Obra {
     required this.diasEstimados,
     this.diasInactivos = const [],
     this.diasTranscurridos = 0,
+    this.diaInicio = 0,
     this.docs = const [],
     this.equipo = const [],
     this.etapas = const [],
@@ -66,6 +68,7 @@ class Obra {
     this.diasEstimados = diasEstimados;
     this.diasInactivos = diasInactivos;
     this.diasTranscurridos = diasTranscurridos;
+    this.diaInicio = diaInicio;
     this.docs = docs;
     this.equipo = equipo;
     this.etapas = etapas;
@@ -93,7 +96,7 @@ class Obra {
       chatI: json["chatI"],
       diasEstimados: json["diasEstimados"],
       diasInactivos: json["diasInactivos"],
-      diasTranscurridos: 0,
+      diaInicio: json["diaInicio"] ?? 0,
       docs: [],
       driveFolderId: json["driveFolderId"] ?? '',
       imgFolderId: json["imgFolderId"] ?? '',
@@ -115,7 +118,7 @@ class Obra {
       folderImagesCliente: json['folderImagesCliente'] ?? '',
       imageURL: json['imageURL'] ?? '');
 
-  toMap() => {
+  Map<String,dynamic> toMap() => {
         'nombre': this.nombre,
         'id': this.id,
         'barrio': this.barrio,
@@ -123,6 +126,7 @@ class Obra {
         'chatI': this.chatI,
         'diasEstimados': this.diasEstimados,
         'diasInactivos': this.diasInactivos,
+        'diaInicio': this.diaInicio,
         'diasTranscurridos': this.diasTranscurridos,
         'docs': this.docs,
         'equipo': this.equipo,
@@ -214,5 +218,26 @@ class Obra {
   quitarEtapa(String etapa) {
     final indexEtapa = etapas.indexWhere((etapaAux) => etapaAux.id == etapa);
     etapas.removeAt(indexEtapa);
+  }
+
+  getDiasTranscurridos({bool countSaturday = false, bool countSunday = false}) {
+    //sin fines de semana
+    if(diaInicio == 0 || diaInicio < 0){
+      return 0;
+    }
+    DateTime diaAnalizado, diaInicial, diaFin;
+    diasTranscurridos = 0;
+    diaFin = DateTime.now();
+    diaAnalizado = DateTime.fromMillisecondsSinceEpoch(diaInicio);
+    while (diaAnalizado.millisecondsSinceEpoch >= diaInicio &&
+        diaAnalizado.isBefore(diaFin)) {
+      if ((countSaturday ? true : diaAnalizado.weekday != DateTime.saturday) &&
+          (countSunday ? true : diaAnalizado.weekday != DateTime.sunday)) {
+        diasTranscurridos++;
+      }
+      diaAnalizado = diaAnalizado.add(Duration(days: 1));
+    }
+
+    return diasTranscurridos;
   }
 }
