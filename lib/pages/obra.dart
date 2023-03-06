@@ -667,8 +667,12 @@ class _ObraBigrafy extends StatelessWidget {
     required this.obra,
   }) : super(key: key);
 
+  late ObraService _obraService;
+
   @override
   Widget build(BuildContext context) {
+         _obraService = Provider.of<ObraService>(context);
+
     final _pref = new Preferences();
     return Container(
       margin: EdgeInsets.symmetric(vertical: 15),
@@ -750,12 +754,12 @@ class _ObraBigrafy extends StatelessWidget {
     print(
         availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
 
-    if(obra.longitud == null){
+    if(_obraService.obra.longitud == null){
       return;
     }
 
     await availableMaps.first.showMarker(
-      coords: Coords(obra.latitud!, obra.longitud!),
+      coords: Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
       title: obra.nombre,
     );
   }

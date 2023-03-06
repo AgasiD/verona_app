@@ -475,8 +475,7 @@ class _FormState extends State<_Form> {
       closeLoadingDialog(context);
       await openAlertDialogReturn(context, 'Obra modificada con éxito');
       
-    Navigator.pushReplacementNamed(context, ObraPage.routeName,
-            arguments: {"obraId": obraResponse.id});    
+    Navigator.pop(context);    
   
     } else {
       openAlertDialog(context, 'Formulario invalido');
