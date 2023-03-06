@@ -750,8 +750,12 @@ class _ObraBigrafy extends StatelessWidget {
     print(
         availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
 
+    if(obra.longitud == null){
+      return;
+    }
+
     await availableMaps.first.showMarker(
-      coords: Coords(37.759392, -122.5107336),
+      coords: Coords(obra.latitud!, obra.longitud!),
       title: obra.nombre,
     );
   }

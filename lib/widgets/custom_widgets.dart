@@ -1111,7 +1111,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
-                    ObrasPage.routeName,
+                    ObrasPage.routeName, 
                     (Route<dynamic> route) => route.isFirst);
                 // Navigator.pushNamed(context, ObrasPage.routeName);
               }

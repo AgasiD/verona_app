@@ -7,6 +7,9 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:location/location.dart';
+
+import 'custom_widgets.dart';
 
 class MapCoordenates extends StatelessWidget {
   const MapCoordenates({Key? key}) : super(key: key);
@@ -14,84 +17,170 @@ class MapCoordenates extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    print(width);
-    final height = MediaQuery.of(context).size.height;
-    print(height);
-    return Scaffold(
-      appBar: AppBar(
-          iconTheme: IconThemeData(
-            color: Colors.black, //change your color here
-          ),
-          actions: [],
-          title: Text('Seleccionar ubicación', style: TextStyle(color: Helper.brandColors[3]),),
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent),
-      extendBodyBehindAppBar: true,
-      body: CustomMap(),
+    double? latitud = null, longitud = null;
+
+    final arguments = ModalRoute.of(context)?.settings.arguments as Map;
+    if (arguments != null) {
+      latitud = arguments['latitud'];
+      longitud = arguments['longitud'];
+    }
+
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+            automaticallyImplyLeading: false,
+            actions: [],
+            title: Text(
+              'Seleccionar ubicación',
+              style: TextStyle(color: Helper.brandColors[8]),
+            ),
+            backgroundColor: Helper.brandColors[2],
+            shadowColor: Colors.transparent),
+        extendBodyBehindAppBar: true,
+        body: CustomMap(latitud: latitud, longitud: longitud),
+      ),
     );
   }
 }
 
-class CustomMap extends StatelessWidget {
-   CustomMap({Key? key}) : super(key: key);
+class CustomMap extends StatefulWidget {
+  CustomMap({Key? key, this.latitud, this.longitud}) : super(key: key);
+  double? latitud = null, longitud = null;
+
+  @override
+  State<CustomMap> createState() => _CustomMapState();
+}
+
+class _CustomMapState extends State<CustomMap> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
+  late CameraPosition posicionInicial;
 
+  var markers = <Marker>[];
+  bool repitio = false;
   @override
   Widget build(BuildContext context) {
-
-//  final map = GoogleMap(
-//   myLocationButtonEnabled: true,
-  
-//   onLongPress: (a) => print('longrrees'),
-//               // myLocationEnabled: true,
-//               // myLocationButtonEnabled: true,
-//                       mapType: MapType.hybrid,
-
-//               initialCameraPosition: CameraPosition(
-//                 target: LatLng(-34.605940,58.486935),
-//                 zoom: 15.0,
-//               ),
-              
-//               key: ValueKey('uniqueey'),
-//               onMapCreated: (GoogleMapController controller) {
-//               _controller.complete(controller);
-//         },
-//               markers: {
-//                 Marker(
-//                     markerId: MarkerId('anyUniqueId'),
-//                     position: LatLng(-34.605940,58.486935),
-//                     infoWindow: InfoWindow(title: ''))
-//               },
-//             );
-
-
-
-    final width = MediaQuery.of(context).size.width;
-    print(width);
-    final height = MediaQuery.of(context).size.height;
-    print(height);
-    return Container(
-      
-      // child: map
-      // Stack(children: [
-      //   ,
-      //   Center(
-      //       child: Icon(FontAwesomeIcons.houseChimney, color: Helper.brandColors[8]),
-      //   )
-      // ]),
-    );
-
-    
+    return FutureBuilder(
+        future: setInitialPosition(widget.latitud, widget.longitud),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Container();
+          }
+          posicionInicial = CameraPosition(
+            target: snapshot.data as LatLng,
+            zoom: 15.0,
+          );
+          if (widget.latitud != null && !repitio) {
+            markers = [
+              Marker(
+                  markerId: MarkerId('anyUniqueId'),
+                  position: snapshot.data as LatLng,
+                  infoWindow: InfoWindow(title: ''))
+            ];
+          }
+          repitio = true;
+          return Container(
+            child: Stack(children: [
+              Custom_Map(
+                  setMarker: setMarker,
+                  markers: markers,
+                  posicionInicial: posicionInicial,
+                  controller: _controller),
+              Positioned(
+                left: MediaQuery.of(context).size.width * .5 - 100,
+                bottom: 25,
+                child: MainButton(
+                  width: 150,
+                  height: 20,
+                  color: Helper.brandColors[8],
+                  onPressed: () => Navigator.pop(
+                      context, markers.length > 0 ? markers[0] : null),
+                  text: 'Guardar ubicación',
+                  fontSize: 15,
+                ),
+              )
+            ]),
+          );
+        });
   }
 
-  Future<void> _goToTheLake() async {
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-                target: LatLng(-34.605940,58.486935),
-                zoom: 15.0,
-              ),));
+  setMarker(LatLng latlang) {
+    markers = [
+      Marker(
+          markerId: MarkerId('anyUniqueId'),
+          position: latlang,
+          infoWindow: InfoWindow(title: ''))
+    ];
+    setState(() {});
+  }
+}
+
+setInitialPosition(double? latitud, double? longitud) async {
+  if (longitud != null) {
+    return LatLng(latitud!, longitud!);
+  }
+  Location location = new Location();
+
+  bool _serviceEnabled;
+  PermissionStatus _permissionGranted;
+  LocationData _locationData;
+
+  _serviceEnabled = await location.serviceEnabled();
+  if (!_serviceEnabled) {
+    _serviceEnabled = await location.requestService();
+    if (!_serviceEnabled) {
+      return LatLng(0, 0);
+      ;
+    }
+  }
+
+  _permissionGranted = await location.hasPermission();
+  if (_permissionGranted == PermissionStatus.denied) {
+    _permissionGranted = await location.requestPermission();
+    if (_permissionGranted != PermissionStatus.granted) {
+      return LatLng(0, 0);
+    }
+  }
+
+  _locationData = await location.getLocation();
+  return LatLng(_locationData.latitude!, _locationData.longitude!);
+}
+
+class Custom_Map extends StatefulWidget {
+  Custom_Map({
+    Key? key,
+    required this.setMarker,
+    required this.markers,
+    required this.posicionInicial,
+    required Completer<GoogleMapController> controller,
+  })  : _controller = controller,
+        super(key: key);
+  Function(LatLng) setMarker;
+  final List<Marker> markers;
+  final CameraPosition posicionInicial;
+  final Completer<GoogleMapController> _controller;
+
+  @override
+  State<Custom_Map> createState() => _Custom_MapState();
+}
+
+class _Custom_MapState extends State<Custom_Map> {
+  @override
+  Widget build(BuildContext context) {
+    return GoogleMap(
+      myLocationButtonEnabled: true,
+      markers: widget.markers.toSet(),
+      onLongPress: (a) {
+        widget.setMarker(a);
+      },
+      myLocationEnabled: true,
+      mapType: MapType.hybrid,
+      initialCameraPosition: widget.posicionInicial,
+      key: ValueKey('uniqueey'),
+      onMapCreated: (GoogleMapController controller) {
+        widget._controller.complete(controller);
+      },
+    );
   }
 }

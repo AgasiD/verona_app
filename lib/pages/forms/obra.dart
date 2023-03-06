@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -114,14 +115,16 @@ class _FormState extends State<_Form> {
       widget.txtLoteCtrl.text = widget.obra!.lote;
       widget.txtDescripCtrl.text = widget.obra!.descripcion;
       widget.txtDiaInicio.text = widget.obra!.driveFolderId ?? "";
-      widget.txtIdDrive.text = widget.obra!.diasEstimados == 0
+      widget.txtDuracionCtrl.text = widget.obra!.diasEstimados == 0
           ? ''
           : widget.obra!.diasEstimados.toString();
+      widget.txtIdDrive.text = widget.obra!.driveFolderId!;
       final f = new DateFormat('dd/MM/yyyy');
       widget.txtDiaInicio.text = f
           .format(
               new DateTime.fromMillisecondsSinceEpoch(widget.obra!.diaInicio))
           .toString();
+      widget.txtCoordenadas.text = widget.obra!.ubicToText();
     } else {
       final f = new DateFormat('dd/MM/yyyy');
       widget.txtDiaInicio.text = f.format(DateTime.now()).toString();
@@ -223,8 +226,8 @@ class _FormState extends State<_Form> {
                 textController: widget.txtDescripCtrl,
                 lines: 3,
               ),
-              CustomInput(hintText: 'Coordenadas', 
-              iconButton: IconButton(icon: Icon(Icons.search), onPressed: ()async=>openMap(),),
+              CustomInput(hintText: 'Ubicación', 
+              iconButton: IconButton(icon: Icon(Icons.search, color: Helper.brandColors[4],), onPressed: ()async=>openMap(),),
                icono: Icons.location_on_outlined, textController: widget.txtCoordenadas)
               ,
                Visibility(
@@ -508,8 +511,16 @@ class _FormState extends State<_Form> {
   
   openMap() async {
     
+    dynamic arguments = null;
+    if(edit)  arguments = {'latitud': widget.obra!.latitud, 'longitud': widget.obra!.longitud};
+    Marker? coordenadas = await Navigator.pushNamed(context, MapCoordenates.routeName, arguments: arguments) as Marker?;
 
-    final coordenadas = await Navigator.pushNamed(context, MapCoordenates.routeName);
+    if( coordenadas != null ) {
+      widget.obra!.latitud = coordenadas.position.latitude;
+      widget.obra!.longitud = coordenadas.position.longitude;
+      widget.txtCoordenadas.text = widget.obra!.ubicToText();      
+    }
+    
 
   }
 }
