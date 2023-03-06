@@ -6,6 +6,7 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:image_fade/image_fade.dart';
+import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -93,17 +94,13 @@ class ObraPage extends StatelessWidget {
                         child: SingleChildScrollView(
                           child: Column(children: [
                             _ObraBigrafy(
-                              nombre: obra.nombre,
-                              barrio: obra.barrio,
-                              descripcion: obra.descripcion,
-                              lote: obra.lote.toString(),
-                              obraId: obraId,
+                              obra: obra
                             ),
                             CaracteristicaObra(),
-                            !esDelivery && _pref.role !=4 
+                            !esDelivery && _pref.role != 4
                                 ? _DiasView(obra: obra, obraId: obraId)
                                 : Container(),
-                            !esDelivery && _pref.role !=4 
+                            !esDelivery && _pref.role != 4
                                 ? Container(
                                     margin: const EdgeInsets.symmetric(
                                         vertical: 25.0),
@@ -663,19 +660,11 @@ class CaracteristicaButton extends StatelessWidget {
 }
 
 class _ObraBigrafy extends StatelessWidget {
-  String nombre;
-  String barrio;
-  String lote;
-  String descripcion;
-  String obraId;
+  Obra obra;
 
   _ObraBigrafy({
     Key? key,
-    required this.nombre,
-    required this.barrio,
-    required this.descripcion,
-    required this.lote,
-    required this.obraId,
+    required this.obra,
   }) : super(key: key);
 
   @override
@@ -690,12 +679,15 @@ class _ObraBigrafy extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  color: Helper.brandColors[8],
-                  size: 40,
+                IconButton(
+                  onPressed: () => abrirMap(),
+                  icon: Icon(
+                    Icons.location_on_outlined,
+                    color: Helper.brandColors[8],
+                    size: 40,
+                  ),
                 ),
-                Text(this.barrio,
+                Text(this.obra.barrio,
                     style: TextStyle(
                         color: Helper.brandColors[5],
                         fontSize: 20,
@@ -706,7 +698,7 @@ class _ObraBigrafy extends StatelessWidget {
                 ? IconButton(
                     onPressed: () {
                       Navigator.pushNamed(context, ObraForm.routeName,
-                          arguments: {'obraId': obraId});
+                          arguments: {'obraId': obra.id});
                     },
                     icon: Icon(
                       Icons.edit_outlined,
@@ -725,7 +717,7 @@ class _ObraBigrafy extends StatelessWidget {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Helper.textGradient(
-                [Helper.brandColors[8], Helper.brandColors[9]], this.nombre,
+                [Helper.brandColors[8], Helper.brandColors[9]], this.obra.nombre,
                 fontsize: 42.0),
             // Text(
             //   this.nombre,
@@ -733,7 +725,7 @@ class _ObraBigrafy extends StatelessWidget {
             // ), // Nombre del proyecto
             Container(
               margin: EdgeInsets.only(left: 20),
-              child: Text(this.lote,
+              child: Text(this.obra.lote,
                   style: TextStyle(color: Helper.brandColors[5], fontSize: 17)),
             ) // Lote del proyecto
           ],
@@ -743,13 +735,24 @@ class _ObraBigrafy extends StatelessWidget {
           thickness: 1,
         ),
         Text(
-          this.descripcion == '' ? 'Sin descripción de obra' : this.descripcion,
+          this.obra.descripcion == '' ? 'Sin descripción de obra' : this.obra.descripcion,
           style: TextStyle(color: Helper.brandColors[3], fontSize: 16),
         ),
         SizedBox(
           height: 25,
         )
       ]),
+    );
+  }
+
+  abrirMap() async {
+    final availableMaps = await MapLauncher.installedMaps;
+    print(
+        availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
+
+    await availableMaps.first.showMarker(
+      coords: Coords(37.759392, -122.5107336),
+      title: obra.nombre,
     );
   }
 }

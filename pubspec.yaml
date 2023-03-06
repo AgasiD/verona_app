@@ -72,6 +72,8 @@ dependencies:
   animated_flip_counter: ^0.2.5
   uuid: ^3.0.7
   open_file_safe: ^3.2.3
+  map_launcher: ^2.5.0+1
+  google_maps_flutter: ^2.2.5
 
   
 

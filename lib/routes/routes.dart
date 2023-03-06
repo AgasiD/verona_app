@@ -41,6 +41,7 @@ import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/pages/prueba.dart';
 import 'package:verona_app/pages/search_message.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
+import 'package:verona_app/widgets/map_coordinates.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   AgregarPropietariosPage.routeName: (_) => AgregarPropietariosPage(),
@@ -85,4 +86,5 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   SubetapasExtrasPage.routeName: (_) => SubetapasExtrasPage(),
   EtapasExtrasPage.routeName: (_) => EtapasExtrasPage(),
   AnotacionesPage.routeName: (_) => AnotacionesPage(),
-};
+  MapCoordenates .routeName: (_) =>MapCoordenates(),
+  };
