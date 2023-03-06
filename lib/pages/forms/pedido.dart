@@ -1032,7 +1032,7 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
       config: CalendarDatePicker2WithActionButtonsConfig(
         selectedDayHighlightColor: Helper.brandColors[8],
         calendarType: CalendarDatePicker2Type.single,
-        shouldCloseDialogAfterCancelTapped: true,
+        // shouldCloseDialogAfterCancelTapped: true,
       ),
       dialogSize: Size(width, height),
       initialValue: [selectedDate],
@@ -1070,7 +1070,7 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
       config: CalendarDatePicker2WithActionButtonsConfig(
         selectedDayHighlightColor: Helper.brandColors[8],
         calendarType: CalendarDatePicker2Type.single,
-        shouldCloseDialogAfterCancelTapped: true,
+        // shouldCloseDialogAfterCancelTapped: true,
       ),
       dialogSize: Size(width, height),
       initialValue: [selectedDate],
