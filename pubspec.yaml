@@ -49,11 +49,10 @@ dependencies:
   shared_preferences: ^2.0.8
   vibration: ^1.7.4-nullsafety.0
   floating_action_bubble: ^1.1.4
-  intl: ^0.17.0
+  intl: ^0.18.0
   firebase_core: ^1.16.0
   firebase_messaging: ^11.3.0
   flutter_app_badger: ^1.4.0
-  flutter_datetime_picker: ^1.5.1
   # flutter_local_notifications: ^9.6.0
   file_picker: ^4.6.1
   dropdown_button2: ^1.6.2 
@@ -75,8 +74,11 @@ dependencies:
   map_launcher: ^2.5.0+1
   location: ^4.4.0
   google_maps_flutter: ^2.1.1
-
+  cached_network_image: ^3.2.3
   
+dependency_overrides:
+  firebase_core_platform_interface: 4.5.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

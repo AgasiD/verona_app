@@ -1,4 +1,3 @@
-import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -8,6 +7,7 @@ import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:badges/badges.dart' as badges;
 
 class PedidosArchivadosList extends StatelessWidget {
   const PedidosArchivadosList({Key? key}) : super(key: key);
@@ -242,7 +242,7 @@ class _CustomListTile extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           esNovedad
-                              ? Badge(
+                              ? badges.Badge(
                                   badgeColor: Helper.brandColors[8],
                                   badgeContent: Padding(
                                     padding: const EdgeInsets.all(0),

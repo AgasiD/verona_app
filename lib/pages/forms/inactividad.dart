@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -188,14 +187,14 @@ class _FormState extends State<_Form> {
 }
 
 void selectDate(context, txtCtrlDate, selectedDate) {
-  DatePicker.showDatePicker(context,
-      showTitleActions: true, minTime: DateTime(2022, 1, 1),
-      // maxTime: DateTime(2025, 12, 31),
-      onConfirm: (date) {
-    String formattedDate = DateFormat('dd/MM/yyyy').format(date);
-    txtCtrlDate.text = formattedDate.toString();
-    selectedDate = date;
-  }, onChanged: (date) {}, currentTime: selectedDate, locale: LocaleType.es);
+  // DatePicker.showDatePicker(context,
+  //     showTitleActions: true, minTime: DateTime(2022, 1, 1),
+  //     // maxTime: DateTime(2025, 12, 31),
+  //     onConfirm: (date) {
+  //   String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+  //   txtCtrlDate.text = formattedDate.toString();
+  //   selectedDate = date;
+  // }, onChanged: (date) {}, currentTime: selectedDate, locale: LocaleType.es);
 }
 
 

@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:badges/badges.dart' as badges;
 
-import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:image_fade/image_fade.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -66,23 +67,26 @@ class ObraPage extends StatelessWidget {
                   flexibleSpace: FlexibleSpaceBar(
                     background: Hero(
                       tag: obra.id,
-                      child: ImageFade(
-                        width: MediaQuery.of(context).size.width * .43,
-                        image: NetworkImage(obra.imageURL),
-                        loadingBuilder: (context, progress, chunkEvent) =>
-                            Center(
-                                child: CircularProgressIndicator(
-                          value: progress,
-                          color: Helper.brandColors[8],
-                        )),
-
-                        // displayed when an error occurs:
-                        errorBuilder: (context, error) => Container(
-                          color: Helper.brandColors[8],
-                          alignment: Alignment.center,
-                          child: Image(image: AssetImage('assets/image.png')),
+                      child:   CachedNetworkImage(
+                      imageUrl: obra.imageURL,
+                      imageBuilder: (context, imageProvider) => Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.fill
+                          ),
                         ),
                       ),
+                      placeholder: (context, url) => Center(
+                          child: CircularProgressIndicator(
+                        color: Helper.brandColors[8],
+                      )),
+                      errorWidget: (context, url, error) => Container(
+                        color: Helper.brandColors[8],
+                        alignment: Alignment.center,
+                        child: Image(image: AssetImage('assets/image.png')),
+                    
+                    )),
                     ),
                   ),
                 ),
@@ -615,9 +619,10 @@ class CaracteristicaButton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 tieneNovedad(_obraService.obra.id, listItem, _socketService)
-                    ? Badge(
+                    ? badges.Badge(
+
                         badgeColor: Helper.brandColors[8],
-                        badgeContent: Padding(
+                        child: Padding(
                           padding: const EdgeInsets.all(0),
                           // child: Text(badgeData.toString()),
                         ),
