@@ -35,6 +35,12 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>La aplicación necesita acceder a la locación para obtener la posición inicial del mapa</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>La aplicación necesita acceder a la locación para obtener la posición inicial del mapa</string>
+
+
 	<key>NSCameraUsageDescription</key>
 	<string>Permiso de acceso</string>
 	<key>NSMicrophoneUsageDescription</key>
@@ -50,6 +56,12 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+		<string>iosamap</string>
+		<string>waze</string>
+	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

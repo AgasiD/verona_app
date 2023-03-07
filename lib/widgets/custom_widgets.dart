@@ -366,6 +366,7 @@ class CustomInput extends StatefulWidget {
   final bool validaError;
   final bool enable;
   final bool readOnly;
+  final bool autocorrect;
   String? Function(String?) validarInput;
   Function(String) onChange;
   static void _passedOnChange(String? input) {}
@@ -387,6 +388,7 @@ class CustomInput extends StatefulWidget {
     this.enable = true,
     this.readOnly = false,
     this.iconButton = null,
+    this.autocorrect = true,
     required this.textController,
     this.validarInput = _passedFunction,
     this.onChange = _passedOnChange,
@@ -423,12 +425,13 @@ class _CustomInputState extends State<CustomInput> {
           padding: EdgeInsets.only(right: 15),
           margin: EdgeInsets.only(bottom: 10),
           child: TextFormField(
+            
             textCapitalization: TextCapitalization.sentences,
             enabled: widget.enable,
             readOnly: widget.readOnly,
             controller: widget.textController,
             maxLines: widget.lines ?? 1,
-            autocorrect: false,
+            autocorrect: widget.autocorrect,
             keyboardType: widget.teclado,
             keyboardAppearance: Brightness.dark,
             obscureText: widget.isPassword,
@@ -1108,7 +1111,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
-                    ObrasPage.routeName,
+                    ObrasPage.routeName, 
                     (Route<dynamic> route) => route.isFirst);
                 // Navigator.pushNamed(context, ObrasPage.routeName);
               }

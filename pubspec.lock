@@ -63,7 +63,7 @@ packages:
       name: calendar_date_picker2
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.5"
+    version: "0.4.1"
   characters:
     dependency: transitive
     description:
@@ -287,6 +287,34 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "10.2.1"
+  google_maps_flutter:
+    dependency: "direct main"
+    description:
+      name: google_maps_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.5"
+  google_maps_flutter_android:
+    dependency: transitive
+    description:
+      name: google_maps_flutter_android
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.4.8"
+  google_maps_flutter_ios:
+    dependency: transitive
+    description:
+      name: google_maps_flutter_ios
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.14"
+  google_maps_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: google_maps_flutter_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.6"
   http:
     dependency: "direct main"
     description:
@@ -371,6 +399,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.4"
+  location:
+    dependency: "direct main"
+    description:
+      name: location
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.4.0"
+  location_platform_interface:
+    dependency: transitive
+    description:
+      name: location_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.3.0"
+  location_web:
+    dependency: transitive
+    description:
+      name: location_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.1.1"
   logging:
     dependency: transitive
     description:
@@ -378,6 +427,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
+  map_launcher:
+    dependency: "direct main"
+    description:
+      name: map_launcher
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.5.0+1"
   matcher:
     dependency: transitive
     description:
@@ -660,6 +716,13 @@ packages:
     dependency: transitive
     description:
       name: stream_channel
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.0"
+  stream_transform:
+    dependency: transitive
+    description:
+      name: stream_transform
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"

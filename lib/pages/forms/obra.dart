@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -27,19 +28,14 @@ import 'package:verona_app/services/image_service.dart';
 import 'package:verona_app/services/loading_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:verona_app/widgets/map_coordinates.dart';
 
 class ObraForm extends StatelessWidget {
   ObraForm({Key? key}) : super(key: key);
   static const String routeName = 'obraForm';
   static String nameForm = 'Nueva obra';
   static String alertMessage = 'Confirmar nueva obra';
-  final TextEditingController txtNombreCtrl = TextEditingController();
-  final TextEditingController txtBarrioCtrl = TextEditingController();
-  final TextEditingController txtLoteCtrl = TextEditingController();
-  final TextEditingController txtDuracionCtrl = TextEditingController();
-  final TextEditingController txtDescripCtrl = TextEditingController();
-  final TextEditingController txtDiaInicio = TextEditingController();
-  final TextEditingController txtIdDrive = TextEditingController();
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -57,14 +53,7 @@ class ObraForm extends StatelessWidget {
               child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 40),
                   child: obraId == null
-                      ? _Form(
-                          txtNombre: txtNombreCtrl,
-                          txtBarrio: txtBarrioCtrl,
-                          txtLote: txtLoteCtrl,
-                          txtDescrip: txtDescripCtrl,
-                          txtDuracion: txtDuracionCtrl,
-                          txtDiaInicio: txtDiaInicio,
-                          txtIdDrive: txtIdDrive)
+                      ? _Form()
                       : FutureBuilder(
                           future: _obraService.obtenerObra(obraId),
                           builder: (context, snapshot) {
@@ -76,14 +65,7 @@ class ObraForm extends StatelessWidget {
                               final obra = snapshot.data as Obra;
 
                               return _Form(
-                                  obra: snapshot.data as Obra,
-                                  txtNombre: txtNombreCtrl,
-                                  txtBarrio: txtBarrioCtrl,
-                                  txtLote: txtLoteCtrl,
-                                  txtDescrip: txtDescripCtrl,
-                                  txtDuracion: txtDuracionCtrl,
-                                  txtDiaInicio: txtDiaInicio,
-                                  txtIdDrive: txtIdDrive);
+                                  obra: snapshot.data as Obra,);
                             }
                           }))),
         ),
@@ -95,24 +77,10 @@ class ObraForm extends StatelessWidget {
 
 class _Form extends StatefulWidget {
   @override
-  TextEditingController txtNombre,
-      txtBarrio,
-      txtLote,
-      txtDescrip,
-      txtDuracion,
-      txtIdDrive,
-      txtDiaInicio;
   Obra? obra;
   _Form(
       {Key? key,
-      this.obra,
-      required this.txtNombre,
-      required this.txtBarrio,
-      required this.txtLote,
-      required this.txtDescrip,
-      required this.txtDuracion,
-      required this.txtDiaInicio,
-      required this.txtIdDrive})
+      this.obra,})
       : super(key: key);
 
   @override
@@ -128,30 +96,39 @@ class _FormState extends State<_Form> {
   DateTime selectedDate = DateTime.now();
 
 
+ final TextEditingController  txtNombreCtrl = TextEditingController();
+  final TextEditingController txtBarrioCtrl = TextEditingController();
+  final TextEditingController txtLoteCtrl = TextEditingController();
+  final TextEditingController txtDescripCtrl = TextEditingController();
+  final TextEditingController txtDiaInicio = TextEditingController();
+  final TextEditingController txtIdDrive = TextEditingController();
+  final TextEditingController txtDuracionCtrl = TextEditingController();
+  final TextEditingController txtCoordenadas = TextEditingController();
   @override
   void initState() {
     super.initState();
 
     if (widget.obra != null) {
       // edit = true;
-      widget.txtNombre.text = widget.obra!.nombre;
-      widget.txtBarrio.text = widget.obra!.barrio;
-      widget.txtLote.text = widget.obra!.lote;
-      widget.txtDescrip.text = widget.obra!.descripcion;
-      widget.txtIdDrive.text = widget.obra!.driveFolderId ?? "";
-      widget.txtDuracion.text = widget.obra!.diasEstimados == 0
+      txtNombreCtrl.text = widget.obra!.nombre;
+      txtBarrioCtrl.text = widget.obra!.barrio;
+      txtLoteCtrl.text = widget.obra!.lote;
+      txtDescripCtrl.text = widget.obra!.descripcion;
+      txtDiaInicio.text = widget.obra!.driveFolderId ?? "";
+      txtDuracionCtrl.text = widget.obra!.diasEstimados == 0
           ? ''
           : widget.obra!.diasEstimados.toString();
+      txtIdDrive.text = widget.obra!.driveFolderId!;
       final f = new DateFormat('dd/MM/yyyy');
-      widget.txtDiaInicio.text = f
+      txtDiaInicio.text = f
           .format(
               new DateTime.fromMillisecondsSinceEpoch(widget.obra!.diaInicio))
           .toString();
+      txtCoordenadas.text = widget.obra!.ubicToText();
     } else {
       final f = new DateFormat('dd/MM/yyyy');
-      widget.txtDiaInicio.text = f.format(DateTime.now()).toString();
-    }
-  }
+      txtDiaInicio.text = f.format(DateTime.now()).toString();
+    } }
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +169,7 @@ class _FormState extends State<_Form> {
               CustomInput(
                 hintText: 'Nombre del proyecto',
                 icono: Icons.house,
-                textController: widget.txtNombre,
+                textController: txtNombreCtrl,
                 validaError: true,
                 validarInput: (value) => Helper.campoObligatorio(value),
               ),
@@ -201,12 +178,12 @@ class _FormState extends State<_Form> {
                 icono: Icons.holiday_village_outlined,
                 validaError: true,
                 validarInput: (value) => Helper.campoObligatorio(value),
-                textController: widget.txtBarrio,
+                textController: txtBarrioCtrl,
               ),
               CustomInput(
                   hintText: 'Lote',
                   icono: Icons.format_list_numbered,
-                  textController: widget.txtLote,
+                  textController: txtLoteCtrl,
                   validaError: true,
                   validarInput: (value) => Helper.campoObligatorio(value)),
               Container(
@@ -217,7 +194,7 @@ class _FormState extends State<_Form> {
                 readOnly: true,
                 enable: true,
                 // width: 200,
-                textController: widget.txtDiaInicio,
+                textController: txtDiaInicio,
                 iconButton: IconButton(
                     icon: Icon(
                       Icons.calendar_today,
@@ -226,7 +203,7 @@ class _FormState extends State<_Form> {
                     onPressed: () {
                       selectDateDeseada(
                         context,
-                        widget.txtDiaInicio,
+                        txtDiaInicio,
                         selectedDate,
                       );
                     }),
@@ -234,7 +211,7 @@ class _FormState extends State<_Form> {
               CustomInput(
                 hintText: 'Duración estimada (días)',
                 icono: Icons.hourglass_bottom,
-                textController: widget.txtDuracion,
+                textController: txtDuracionCtrl,
                 teclado: TextInputType.numberWithOptions(signed: true),
                 validaError: true,
                 validarInput: (value) {
@@ -245,17 +222,22 @@ class _FormState extends State<_Form> {
               CustomInput(
                 hintText: 'Descripción',
                 icono: Icons.description_outlined,
-                textController: widget.txtDescrip,
+                textController: txtDescripCtrl,
                 lines: 3,
               ),
+              CustomInput(hintText: 'Ubicación', 
+              iconButton: IconButton(icon: Icon(Icons.search, color: Helper.brandColors[4],), onPressed: ()async=>openMap(),),
+               icono: Icons.location_on_outlined, textController: txtCoordenadas)
+              ,
                Visibility(
                 visible: edit,
                 child: Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
-                  child: CustomInput(hintText: "Id de carpeta drive", icono: FontAwesomeIcons.googleDrive, textController: widget.txtIdDrive, 
+                  child: CustomInput(hintText: "Id de carpeta drive", icono: FontAwesomeIcons.googleDrive, textController: txtIdDrive, 
                   iconButton: IconButton(onPressed: () => refreshDriveId(), icon: Icon(Icons.refresh, color: Helper.brandColors[4],))),
                 ),
               ),
+
               Container(
                 alignment: Alignment.centerLeft,
                 child: MaterialButton(
@@ -354,7 +336,7 @@ class _FormState extends State<_Form> {
       config: CalendarDatePicker2WithActionButtonsConfig(
         selectedDayHighlightColor: Helper.brandColors[8],
         calendarType: CalendarDatePicker2Type.single,
-        shouldCloseDialogAfterCancelTapped: true,
+        //shouldCloseDialogAfterCancelTapped: true,
       ),
       dialogSize: Size(width, height),
       initialValue: [selectedDate],
@@ -367,7 +349,7 @@ class _FormState extends State<_Form> {
       String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
 
       txtCtrlDate.text = formattedDate.toString();
-      widget.txtDiaInicio.text = formattedDate.toString();
+      txtDiaInicio.text = formattedDate.toString();
 
       selectedDate = date;
     }
@@ -376,11 +358,11 @@ class _FormState extends State<_Form> {
   void dispose() {
     super.dispose();
 
-    widget.txtNombre.text = '';
-    widget.txtBarrio.text = '';
-    widget.txtLote.text = '';
-    widget.txtDuracion.text = '';
-    widget.txtDescrip.text = '';
+    txtNombreCtrl.text = '';
+    txtBarrioCtrl.text = '';
+    txtLoteCtrl.text = '';
+    txtDuracionCtrl.text = '';
+    txtDescripCtrl.text = '';
   }
 
   grabarObra(BuildContext context) async {
@@ -389,21 +371,21 @@ class _FormState extends State<_Form> {
       final _service = Provider.of<ObraService>(context, listen: false);
       final _imageService = Provider.of<ImageService>(context, listen: false);
 
-      widget.txtNombre.text.trim() == '' ? isValid = false : true;
-      widget.txtBarrio.text.trim() == '' ? isValid = false : true;
-      widget.txtLote.text.trim() == '' ? isValid = false : true;
-      int.tryParse(widget.txtDuracion.text) == null ? isValid = false : true;
+      txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+      txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
+      txtLoteCtrl.text.trim() == '' ? isValid = false : true;
+      int.tryParse(txtDuracionCtrl.text) == null ? isValid = false : true;
 
       if (isValid) {
         final obra = Obra(
-            nombre: widget.txtNombre.text,
-            barrio: widget.txtBarrio.text,
-            lote: widget.txtLote.text,
+            nombre: txtNombreCtrl.text,
+            barrio: txtBarrioCtrl.text,
+            lote: txtLoteCtrl.text,
             propietarios: [],
-            descripcion: widget.txtDescrip.text,
-            diasEstimados: int.parse(widget.txtDuracion.text),
+            descripcion: txtDescripCtrl.text,
+            diasEstimados: int.parse(txtDuracionCtrl.text),
             diaInicio: new DateFormat("dd/MM/yyyy")
-          .parse(widget.txtDiaInicio.text)
+          .parse(txtDiaInicio.text)
           .millisecondsSinceEpoch
             );
             
@@ -425,11 +407,11 @@ class _FormState extends State<_Form> {
         if(response.fallo)
           throw new Exception(response.error);
         final obraResponse = Obra.fromMap(response.data);
-        widget.txtNombre.text = '';
-        widget.txtBarrio.text = '';
-        widget.txtLote.text = '';
-        widget.txtDuracion.text = '';
-        widget.txtDescrip.text = '';
+        txtNombreCtrl.text = '';
+        txtBarrioCtrl.text = '';
+        txtLoteCtrl.text = '';
+        txtDuracionCtrl.text = '';
+        txtDescripCtrl.text = '';
         _imageService.descartarImagen();
 
         closeLoadingDialog(context);
@@ -455,20 +437,20 @@ class _FormState extends State<_Form> {
     final _service = Provider.of<ObraService>(context, listen: false);
     final _imageService = Provider.of<ImageService>(context, listen: false);
 
-    widget.txtNombre.text.trim() == '' ? isValid = false : true;
-    widget.txtBarrio.text.trim() == '' ? isValid = false : true;
-    widget.txtLote.text.trim() == '' ? isValid = false : true;
-    int.tryParse(widget.txtDuracion.text) == null ? isValid = false : true;
+    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+    txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
+    txtLoteCtrl.text.trim() == '' ? isValid = false : true;
+    int.tryParse(txtDuracionCtrl.text) == null ? isValid = false : true;
 
     if (isValid) {
-      widget.obra!.nombre = widget.txtNombre.text;
-      widget.obra!.barrio = widget.txtBarrio.text;
-      widget.obra!.lote = widget.txtLote.text;
-      widget.obra!.descripcion = widget.txtDescrip.text;
-      widget.obra!.diasEstimados = int.parse(widget.txtDuracion.text);
+      widget.obra!.nombre = txtNombreCtrl.text;
+      widget.obra!.barrio = txtBarrioCtrl.text;
+      widget.obra!.lote =   txtLoteCtrl.text;
+      widget.obra!.descripcion = txtDescripCtrl.text;
+      widget.obra!.diasEstimados = int.parse(txtDuracionCtrl.text);
       widget.obra!.id = obraId;
       widget.obra!.diaInicio = new DateFormat("dd/MM/yyyy")
-          .parse(widget.txtDiaInicio.text)
+          .parse(txtDiaInicio.text)
           .millisecondsSinceEpoch;
 
       if (_imageService.imagenValida()) {
@@ -492,8 +474,7 @@ class _FormState extends State<_Form> {
       closeLoadingDialog(context);
       await openAlertDialogReturn(context, 'Obra modificada con éxito');
       
-    Navigator.pushReplacementNamed(context, ObraPage.routeName,
-            arguments: {"obraId": obraResponse.id});    
+    Navigator.pop(context);    
   
     } else {
       openAlertDialog(context, 'Formulario invalido');
@@ -501,14 +482,14 @@ class _FormState extends State<_Form> {
   }
   
   refreshDriveId() async{
-    if(widget.txtIdDrive.text.isEmpty)
+    if(txtIdDrive.text.isEmpty)
     {
       openAlertDialog(context, 'Ingrese ID de carpeta para actualizar');
       return;
     }
     openLoadingDialog(context,mensaje: "Actualizando carpetas de obra...");
     final _obraService = Provider.of<ObraService>(context, listen: false);
-    final response = await _obraService.actualizarIdDrive(widget.txtIdDrive.text);
+    final response = await _obraService.actualizarIdDrive(txtIdDrive.text);
     closeLoadingDialog(context);
     if(response.fallo){
       openAlertDialog(context, "Error al actualizar carpetas", subMensaje: response.error);
@@ -523,6 +504,21 @@ class _FormState extends State<_Form> {
       _obraService.notifyListeners();
 
 
+
+  }
+  
+  openMap() async {
+    
+    dynamic arguments = null;
+    if(edit)  arguments = {'latitud': widget.obra!.latitud, 'longitud': widget.obra!.longitud};
+    Marker? coordenadas = await Navigator.pushNamed(context, MapCoordenates.routeName, arguments: arguments) as Marker?;
+
+    if( coordenadas != null ) {
+      widget.obra!.latitud = coordenadas.position.latitude;
+      widget.obra!.longitud = coordenadas.position.longitude;
+      txtCoordenadas.text = widget.obra!.ubicToText();      
+    }
+    
 
   }
 }

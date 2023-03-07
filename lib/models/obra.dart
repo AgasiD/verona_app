@@ -33,6 +33,8 @@ class Obra {
   String placeHolderImage = 'https://via.placeholder.com/300x150';
   String? driveFolderId;
   String? ts;
+  double? latitud;
+  double? longitud;
   Obra({
     required this.nombre,
     this.id = '',
@@ -59,6 +61,8 @@ class Obra {
     this.folderImages = '',
     this.rootDriveCliente = '',
     this.folderImagesCliente = '',
+    this.latitud,
+    this.longitud,
   }) {
     this.nombre = nombre;
     this.id = id;
@@ -86,6 +90,8 @@ class Obra {
     this.folderImages = folderImages;
     this.rootDriveCliente = rootDriveCliente;
     this.folderImagesCliente = folderImagesCliente;
+    this.latitud = latitud;
+    this.longitud = longitud;
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
@@ -116,6 +122,8 @@ class Obra {
       folderImages: json['folderImages'] ?? '',
       rootDriveCliente: json['rootDriveCliente'] ?? '',
       folderImagesCliente: json['folderImagesCliente'] ?? '',
+      latitud: json['latitud'],
+      longitud: json['longitud'],
       imageURL: json['imageURL'] ?? '');
 
   Map<String,dynamic> toMap() => {
@@ -139,7 +147,9 @@ class Obra {
         'pedidos': this.pedidos,
         'driveFolderId': this.driveFolderId,
         'enabledFiles': this.enabledFiles,
-        'imageURL': this.imageURL
+        'imageURL': this.imageURL,
+        'longitud': this.longitud,
+        'latitud':this.latitud,
       };
 
   double get porcentajeRealizado {
@@ -239,5 +249,10 @@ class Obra {
     }
 
     return diasTranscurridos;
+  }
+
+  String ubicToText() {
+    if(this.latitud == null) return '';
+     return '${this.latitud} ${this.longitud} ';
   }
 }

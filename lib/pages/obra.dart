@@ -6,6 +6,7 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:image_fade/image_fade.dart';
+import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -37,7 +38,7 @@ class ObraPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-    final _service = Provider.of<ObraService>(context, listen: false);
+    final _service = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     final esDelivery = _pref.role == 6;
     _socketService = Provider.of<SocketService>(context);
@@ -92,18 +93,12 @@ class ObraPage extends StatelessWidget {
                         width: MediaQuery.of(context).size.width,
                         child: SingleChildScrollView(
                           child: Column(children: [
-                            _ObraBigrafy(
-                              nombre: obra.nombre,
-                              barrio: obra.barrio,
-                              descripcion: obra.descripcion,
-                              lote: obra.lote.toString(),
-                              obraId: obraId,
-                            ),
+                            _ObraBigrafy(obra: obra),
                             CaracteristicaObra(),
-                            !esDelivery && _pref.role !=4 
+                            !esDelivery && _pref.role != 4
                                 ? _DiasView(obra: obra, obraId: obraId)
                                 : Container(),
-                            !esDelivery && _pref.role !=4 
+                            !esDelivery && _pref.role != 4
                                 ? Container(
                                     margin: const EdgeInsets.symmetric(
                                         vertical: 25.0),
@@ -264,7 +259,6 @@ class _DiasViewState extends State<_DiasView> {
 
   @override
   Widget build(BuildContext context) {
-    final _service = Provider.of<ObraService>(context);
     final diasTrans = widget.obra.getDiasTranscurridos();
     if (ok) {
       ok = false;
@@ -663,50 +657,52 @@ class CaracteristicaButton extends StatelessWidget {
 }
 
 class _ObraBigrafy extends StatelessWidget {
-  String nombre;
-  String barrio;
-  String lote;
-  String descripcion;
-  String obraId;
+  Obra obra;
 
   _ObraBigrafy({
     Key? key,
-    required this.nombre,
-    required this.barrio,
-    required this.descripcion,
-    required this.lote,
-    required this.obraId,
+    required this.obra,
   }) : super(key: key);
+
+  late ObraService _obraService;
 
   @override
   Widget build(BuildContext context) {
+    _obraService = Provider.of<ObraService>(context);
+
     final _pref = new Preferences();
     return Container(
       margin: EdgeInsets.symmetric(vertical: 15),
       padding: EdgeInsets.symmetric(horizontal: 21),
       child: Column(children: [
         Row(
+          
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  color: Helper.brandColors[8],
-                  size: 40,
+            
+                IconButton(
+                  padding: EdgeInsets.all(0),
+                  iconSize: 40,
+                  alignment: Alignment.centerLeft,
+                  onPressed: () => abrirMap(context),
+                  icon: Icon(
+
+                    Icons.location_on_outlined,
+                    color: Helper.brandColors[8],
+                    
+                  ),
                 ),
-                Text(this.barrio,
+                Text(this.obra.barrio,
                     style: TextStyle(
                         color: Helper.brandColors[5],
                         fontSize: 20,
                         fontWeight: FontWeight.w100)),
-              ],
-            ), // Barrio del proyecto
+            
             _pref.role == 1
                 ? IconButton(
                     onPressed: () {
                       Navigator.pushNamed(context, ObraForm.routeName,
-                          arguments: {'obraId': obraId});
+                          arguments: {'obraId': obra.id});
                     },
                     icon: Icon(
                       Icons.edit_outlined,
@@ -724,16 +720,17 @@ class _ObraBigrafy extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            Helper.textGradient(
-                [Helper.brandColors[8], Helper.brandColors[9]], this.nombre,
-                fontsize: 42.0),
+            Helper.textGradient([
+              Helper.brandColors[8],
+              Helper.brandColors[9]
+            ], this.obra.nombre, fontsize: 42.0),
             // Text(
             //   this.nombre,
             //   style: TextStyle(color: Helper.brandColors[8], fontSize: 42),
             // ), // Nombre del proyecto
             Container(
               margin: EdgeInsets.only(left: 20),
-              child: Text(this.lote,
+              child: Text(this.obra.lote,
                   style: TextStyle(color: Helper.brandColors[5], fontSize: 17)),
             ) // Lote del proyecto
           ],
@@ -743,7 +740,9 @@ class _ObraBigrafy extends StatelessWidget {
           thickness: 1,
         ),
         Text(
-          this.descripcion == '' ? 'Sin descripción de obra' : this.descripcion,
+          this.obra.descripcion == ''
+              ? 'Sin descripción de obra'
+              : this.obra.descripcion,
           style: TextStyle(color: Helper.brandColors[3], fontSize: 16),
         ),
         SizedBox(
@@ -751,5 +750,39 @@ class _ObraBigrafy extends StatelessWidget {
         )
       ]),
     );
+  }
+
+  abrirMap(context) async {
+    final availableMaps = await MapLauncher.installedMaps;
+    print(
+        availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
+
+    if (_obraService.obra.longitud == null) {
+      return;
+    }
+
+  if(availableMaps.length > 1){
+
+    var acciones = availableMaps.map((e) {
+      return {
+        "text": e.mapName,
+        "default": true,
+        "accion": () async {
+          await e.showMarker(
+            coords:
+                Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
+            title: obra.nombre,
+          );
+        }
+      };
+    }).toList();
+
+    openBottomSheet(context, 'Abrir mapa', 'Seleccionar aplicacion', acciones);
+  }else{
+    await availableMaps.first.showMarker(
+      coords: Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
+      title: obra.nombre,
+    );
+  }
   }
 }
