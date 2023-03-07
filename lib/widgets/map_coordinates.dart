@@ -52,8 +52,7 @@ class CustomMap extends StatefulWidget {
 }
 
 class _CustomMapState extends State<CustomMap> {
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+
 
   late CameraPosition posicionInicial;
 
@@ -86,7 +85,7 @@ class _CustomMapState extends State<CustomMap> {
                   setMarker: setMarker,
                   markers: markers,
                   posicionInicial: posicionInicial,
-                  controller: _controller),
+                  ),
               Positioned(
                 left: MediaQuery.of(context).size.width * .5 - 100,
                 bottom: 25,
@@ -153,34 +152,48 @@ class Custom_Map extends StatefulWidget {
     required this.setMarker,
     required this.markers,
     required this.posicionInicial,
-    required Completer<GoogleMapController> controller,
-  })  : _controller = controller,
-        super(key: key);
+  })  :super(key: key);
   Function(LatLng) setMarker;
   final List<Marker> markers;
   final CameraPosition posicionInicial;
-  final Completer<GoogleMapController> _controller;
 
   @override
   State<Custom_Map> createState() => _Custom_MapState();
 }
 
 class _Custom_MapState extends State<Custom_Map> {
+
+    Completer<GoogleMapController> _controller = Completer();
+
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(
-      myLocationButtonEnabled: true,
-      markers: widget.markers.toSet(),
-      onLongPress: (a) {
-        widget.setMarker(a);
+
+
+return GoogleMap(
+  myLocationButtonEnabled: true,
+  markers: widget.markers.toSet(),
+  onLongPress: (a) {
+    widget.setMarker(a);
+  },
+  myLocationEnabled: true,
+  mapType: MapType.hybrid,
+  initialCameraPosition: widget.posicionInicial,
+  key: ValueKey('uniqueey'),
+onMapCreated: (GoogleMapController controller) {
+        // _controller.complete(controller);
       },
-      myLocationEnabled: true,
-      mapType: MapType.hybrid,
-      initialCameraPosition: widget.posicionInicial,
-      key: ValueKey('uniqueey'),
-      onMapCreated: (GoogleMapController controller) {
-        widget._controller.complete(controller);
-      },
-    );
+);
+
+
   }
+  @override
+void dispose() {
+  _disposeController();
+  super.dispose();
+}
+
+  Future<void> _disposeController() async {
+  final GoogleMapController controller = await _controller.future;
+  controller.dispose();
+}
 }

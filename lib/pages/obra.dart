@@ -38,7 +38,7 @@ class ObraPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-    final _service = Provider.of<ObraService>(context, listen: false);
+    final _service = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     final esDelivery = _pref.role == 6;
     _socketService = Provider.of<SocketService>(context);
@@ -93,9 +93,7 @@ class ObraPage extends StatelessWidget {
                         width: MediaQuery.of(context).size.width,
                         child: SingleChildScrollView(
                           child: Column(children: [
-                            _ObraBigrafy(
-                              obra: obra
-                            ),
+                            _ObraBigrafy(obra: obra),
                             CaracteristicaObra(),
                             !esDelivery && _pref.role != 4
                                 ? _DiasView(obra: obra, obraId: obraId)
@@ -261,7 +259,6 @@ class _DiasViewState extends State<_DiasView> {
 
   @override
   Widget build(BuildContext context) {
-    final _service = Provider.of<ObraService>(context);
     final diasTrans = widget.obra.getDiasTranscurridos();
     if (ok) {
       ok = false;
@@ -671,7 +668,7 @@ class _ObraBigrafy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-         _obraService = Provider.of<ObraService>(context);
+    _obraService = Provider.of<ObraService>(context);
 
     final _pref = new Preferences();
     return Container(
@@ -679,16 +676,20 @@ class _ObraBigrafy extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 21),
       child: Column(children: [
         Row(
+          
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
+            
                 IconButton(
-                  onPressed: () => abrirMap(),
+                  padding: EdgeInsets.all(0),
+                  iconSize: 40,
+                  alignment: Alignment.centerLeft,
+                  onPressed: () => abrirMap(context),
                   icon: Icon(
+
                     Icons.location_on_outlined,
                     color: Helper.brandColors[8],
-                    size: 40,
+                    
                   ),
                 ),
                 Text(this.obra.barrio,
@@ -696,8 +697,7 @@ class _ObraBigrafy extends StatelessWidget {
                         color: Helper.brandColors[5],
                         fontSize: 20,
                         fontWeight: FontWeight.w100)),
-              ],
-            ), // Barrio del proyecto
+            
             _pref.role == 1
                 ? IconButton(
                     onPressed: () {
@@ -720,9 +720,10 @@ class _ObraBigrafy extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            Helper.textGradient(
-                [Helper.brandColors[8], Helper.brandColors[9]], this.obra.nombre,
-                fontsize: 42.0),
+            Helper.textGradient([
+              Helper.brandColors[8],
+              Helper.brandColors[9]
+            ], this.obra.nombre, fontsize: 42.0),
             // Text(
             //   this.nombre,
             //   style: TextStyle(color: Helper.brandColors[8], fontSize: 42),
@@ -739,7 +740,9 @@ class _ObraBigrafy extends StatelessWidget {
           thickness: 1,
         ),
         Text(
-          this.obra.descripcion == '' ? 'Sin descripción de obra' : this.obra.descripcion,
+          this.obra.descripcion == ''
+              ? 'Sin descripción de obra'
+              : this.obra.descripcion,
           style: TextStyle(color: Helper.brandColors[3], fontSize: 16),
         ),
         SizedBox(
@@ -749,18 +752,37 @@ class _ObraBigrafy extends StatelessWidget {
     );
   }
 
-  abrirMap() async {
+  abrirMap(context) async {
     final availableMaps = await MapLauncher.installedMaps;
     print(
         availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
 
-    if(_obraService.obra.longitud == null){
+    if (_obraService.obra.longitud == null) {
       return;
     }
 
+  if(availableMaps.length > 1){
+
+    var acciones = availableMaps.map((e) {
+      return {
+        "text": e.mapName,
+        "default": true,
+        "accion": () async {
+          await e.showMarker(
+            coords:
+                Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
+            title: obra.nombre,
+          );
+        }
+      };
+    }).toList();
+
+    openBottomSheet(context, 'Abrir mapa', 'Seleccionar aplicacion', acciones);
+  }else{
     await availableMaps.first.showMarker(
       coords: Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
       title: obra.nombre,
     );
+  }
   }
 }
