@@ -226,6 +226,7 @@ class _FormState extends State<_Form> {
                 lines: 3,
               ),
               CustomInput(hintText: 'Ubicación', 
+              readOnly: true,
               iconButton: IconButton(icon: Icon(Icons.search, color: Helper.brandColors[4],), onPressed: ()async=>openMap(),),
                icono: Icons.location_on_outlined, textController: txtCoordenadas)
               ,
