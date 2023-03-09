@@ -1,10 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:location/location.dart';
@@ -19,8 +16,8 @@ class MapCoordenates extends StatelessWidget {
   Widget build(BuildContext context) {
     double? latitud = null, longitud = null;
 
+    if (ModalRoute.of(context)?.settings.arguments != null) {
     final arguments = ModalRoute.of(context)?.settings.arguments as Map;
-    if (arguments != null) {
       latitud = arguments['latitud'];
       longitud = arguments['longitud'];
     }
@@ -45,7 +42,7 @@ class MapCoordenates extends StatelessWidget {
 
 class CustomMap extends StatefulWidget {
   CustomMap({Key? key, this.latitud, this.longitud}) : super(key: key);
-  double? latitud = null, longitud = null;
+  double? latitud, longitud;
 
   @override
   State<CustomMap> createState() => _CustomMapState();
@@ -61,7 +58,7 @@ class _CustomMapState extends State<CustomMap> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: setInitialPosition(widget.latitud, widget.longitud),
+        future: setInitialPosition(context,widget.latitud, widget.longitud),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Container();
@@ -115,7 +112,7 @@ class _CustomMapState extends State<CustomMap> {
   }
 }
 
-setInitialPosition(double? latitud, double? longitud) async {
+setInitialPosition(context, double? latitud, double? longitud) async {
   if (longitud != null) {
     return LatLng(latitud!, longitud!);
   }
@@ -127,15 +124,17 @@ setInitialPosition(double? latitud, double? longitud) async {
 
   _serviceEnabled = await location.serviceEnabled();
   if (!_serviceEnabled) {
+    Platform.isAndroid ? await openAlertDialogReturn(context, 'Se require utilzar la ubicación para inicilizar la camara del mapa') : false;
     _serviceEnabled = await location.requestService();
     if (!_serviceEnabled) {
       return LatLng(0, 0);
-      ;
     }
   }
 
   _permissionGranted = await location.hasPermission();
   if (_permissionGranted == PermissionStatus.denied) {
+        Platform.isAndroid ? await openAlertDialogReturn(context, 'Se require utilzar la ubicación para inicilizar la camara del mapa') : false;
+
     _permissionGranted = await location.requestPermission();
     if (_permissionGranted != PermissionStatus.granted) {
       return LatLng(0, 0);

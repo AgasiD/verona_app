@@ -1050,16 +1050,6 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
       selectedDate = date;
     }
 
-    // DatePicker.showDatePicker(context,
-    //     showTitleActions: true, minTime: DateTime(2022, 1, 1),
-    //     // maxTime: DateTime(2025, 12, 31),
-    //     onConfirm: (date) {
-    //   String formattedDate = DateFormat('dd/MM/yyyy').format(date);
-
-    //   txtCtrlDate.text = formattedDate.toString();
-    //   widget.pedido!.fechaEstimada = formattedDate.toString();
-    //   selectedDate = date;
-    // }, onChanged: (date) {}, currentTime: selectedDate, locale: LocaleType.es);
   }
 
   void selectDateDeseada(context, txtCtrlDate, selectedDate) async {

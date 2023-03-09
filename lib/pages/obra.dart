@@ -685,23 +685,28 @@ class _ObraBigrafy extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             
-                IconButton(
-                  padding: EdgeInsets.all(0),
-                  iconSize: 40,
-                  alignment: Alignment.centerLeft,
-                  onPressed: () => abrirMap(context),
-                  icon: Icon(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      padding: EdgeInsets.all(0),
+                      iconSize: 40,
+                      alignment: Alignment.centerLeft,
+                      onPressed: () => abrirMap(context),
+                      icon: Icon(
 
-                    Icons.location_on_outlined,
-                    color: Helper.brandColors[8],
-                    
-                  ),
+                        Icons.location_on_outlined,
+                        color: Helper.brandColors[8],
+                        
+                      ),
+                    ),
+                    Text(this.obra.barrio,
+                        style: TextStyle(
+                            color: Helper.brandColors[5],
+                            fontSize: 20,
+                            fontWeight: FontWeight.w100)),
+                  ],
                 ),
-                Text(this.obra.barrio,
-                    style: TextStyle(
-                        color: Helper.brandColors[5],
-                        fontSize: 20,
-                        fontWeight: FontWeight.w100)),
             
             _pref.role == 1
                 ? IconButton(

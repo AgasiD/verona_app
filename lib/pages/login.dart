@@ -95,7 +95,7 @@ class __FormState extends State<_Form> {
           ),
           SizedBox(height: 50),
           MainButton(
-            color: Helper.brandColors[7],
+            color: Helper.brandColors[8],
             text: text,
             onPressed: () async {
               text = 'Cargando...';

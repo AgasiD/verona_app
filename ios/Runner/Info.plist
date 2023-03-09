@@ -44,9 +44,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Permiso de acceso</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Permite utilizar las fotografias en su dispositivo</string>
+	<string>Permitir utilizar las fotografias en su dispositivo para cargar imagenes o documentos necesarios de la obra</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Permite utilizar las fotografias en su dispositivo</string>
+	<string>Permitir utilizar las fotografias en su dispositivo para cargar imagenes o documentos necesarios de la obra</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

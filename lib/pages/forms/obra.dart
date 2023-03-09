@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 
 //import 'package:file_picker/file_picker.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
@@ -30,11 +31,14 @@ import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 import 'package:verona_app/widgets/map_coordinates.dart';
 
+import '../../helpers/Enviroment.dart';
+
 class ObraForm extends StatelessWidget {
   ObraForm({Key? key}) : super(key: key);
   static const String routeName = 'obraForm';
   static String nameForm = 'Nueva obra';
   static String alertMessage = 'Confirmar nueva obra';
+
  
 
   @override
@@ -94,7 +98,8 @@ class _FormState extends State<_Form> {
 
   String imgButtonText = '';
   DateTime selectedDate = DateTime.now();
-
+  late double latitud;
+  late double longitud;
 
  final TextEditingController  txtNombreCtrl = TextEditingController();
   final TextEditingController txtBarrioCtrl = TextEditingController();
@@ -106,6 +111,8 @@ class _FormState extends State<_Form> {
   final TextEditingController txtCoordenadas = TextEditingController();
   @override
   void initState() {
+
+    if(!Environment.isProduction) crearDrive = false;
     super.initState();
 
     if (widget.obra != null) {
@@ -376,6 +383,7 @@ class _FormState extends State<_Form> {
       txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
       txtLoteCtrl.text.trim() == '' ? isValid = false : true;
       int.tryParse(txtDuracionCtrl.text) == null ? isValid = false : true;
+      
 
       if (isValid) {
         final obra = Obra(
@@ -383,6 +391,8 @@ class _FormState extends State<_Form> {
             barrio: txtBarrioCtrl.text,
             lote: txtLoteCtrl.text,
             propietarios: [],
+            latitud: latitud,
+            longitud: longitud,
             descripcion: txtDescripCtrl.text,
             diasEstimados: int.parse(txtDuracionCtrl.text),
             diaInicio: new DateFormat("dd/MM/yyyy")
@@ -408,11 +418,12 @@ class _FormState extends State<_Form> {
         if(response.fallo)
           throw new Exception(response.error);
         final obraResponse = Obra.fromMap(response.data);
-        txtNombreCtrl.text = '';
-        txtBarrioCtrl.text = '';
-        txtLoteCtrl.text = '';
-        txtDuracionCtrl.text = '';
-        txtDescripCtrl.text = '';
+        txtNombreCtrl.clear();
+        txtBarrioCtrl.clear();
+        txtLoteCtrl.clear();
+        txtDuracionCtrl.clear();
+        txtDescripCtrl.clear();
+        txtCoordenadas.clear();
         _imageService.descartarImagen();
 
         closeLoadingDialog(context);
@@ -514,10 +525,20 @@ class _FormState extends State<_Form> {
     if(edit)  arguments = {'latitud': widget.obra!.latitud, 'longitud': widget.obra!.longitud};
     Marker? coordenadas = await Navigator.pushNamed(context, MapCoordenates.routeName, arguments: arguments) as Marker?;
 
+    
     if( coordenadas != null ) {
+      if(edit){
+
       widget.obra!.latitud = coordenadas.position.latitude;
       widget.obra!.longitud = coordenadas.position.longitude;
-      txtCoordenadas.text = widget.obra!.ubicToText();      
+            txtCoordenadas.text = widget.obra!.ubicToText();      
+
+      }else{
+       latitud = coordenadas.position.latitude;
+       longitud = coordenadas.position.longitude;
+             txtCoordenadas.text = '${latitud} ${longitud}';      
+
+      }
     }
     
 

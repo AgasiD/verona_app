@@ -144,7 +144,7 @@ class _Action_FormState extends State<Action_Form> {
     final _pref = new Preferences();
     _usuarioService.eliminarAnotacion(_pref.id, id).then((value) {
       if (value.fallo) {
-        openAlertDialog(context, 'Error al eliminar tarea',
+        openAlertDialog(context, 'Error al eliminar anotacion',
             subMensaje: value.error);
         return;
       }
