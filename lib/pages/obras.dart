@@ -16,6 +16,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/pages/ABMs/ControlObra.dart';
 import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -155,6 +156,12 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.holiday_village,
         'name': 'Propietarios',
         'route': PropietariosADM.routeName,
+        'roles': [1]
+      }, 
+      {
+        'icon': Icons.account_tree_outlined,
+        'name': 'Control de obras',
+        'route': ControlObraABM.routeName,
         'roles': [1]
       },
       {
