@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
@@ -245,8 +246,10 @@ class PerfilPage extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            
                           ]),
                         ),
+                         
                         _pref.role == 1 ? TextButton(
                             onPressed: () {
                               Navigator.pushNamed(
@@ -271,6 +274,7 @@ class PerfilPage extends StatelessWidget {
                                 style: TextStyle(
                                     fontSize: 17,
                                     color: Helper.brandColors[8]))),
+                                    
                         perfilPropio
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -375,7 +379,19 @@ class PerfilPage extends StatelessWidget {
                                     Navigator.pop(context);
                                   }
                                 })
-                            : Container()
+                            : Container(),
+                            Visibility(
+                              visible: perfilPropio,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CustomNavigatorButton(icono: Icons.mobile_screen_share_sharp, accion: ()=>compartirUsuario(usuario), showNotif: false),
+                                    ],
+                                  ),
+                              ),
+                            ),
                       ],
                     ),
                   );
@@ -387,5 +403,25 @@ class PerfilPage extends StatelessWidget {
       ),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
+  }
+
+  compartirUsuario(Miembro usuario) async{
+    final _msg = '¡Bienvenido a Verona, ${usuario.nombre}! \n'+
+    'Tu usuario es: ${usuario.username} \n'+
+    'Si es tu primera vez, la contraseña irá vacía \n'+
+    //'Contraseña: ${usuario.} |'+
+    'Una vez que ingreses recordá asignarte una contraseña desde tu perfil. \n'+
+    'Descargá la app para tu dispositivo \n'+
+    'iOS: https://apps.apple.com/ar/app/verona/id1620027565?l=en \n'+
+    'Android: https://play.google.com/apps/internaltest/4700948842295010098';
+
+    String url = "wa.me";
+    var encoded = Uri.https(url,'', {"text": _msg, "phone": usuario.telefono});
+    if (await canLaunchUrl(encoded))
+              await launchUrl(encoded, mode: LaunchMode.externalApplication);
+    else{
+        // openAlertDialog(context, 'No se puede visualizar el documento');
+    }
+
   }
 }

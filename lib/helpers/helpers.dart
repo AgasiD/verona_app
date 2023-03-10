@@ -133,6 +133,22 @@ class Helper {
     return diaSemana;
   }
 
+  static String toTextPrioridad(int prioridad) {
+    String text = '';
+    switch (prioridad) {
+      case 1:
+        text = 'baja';
+        break;
+      case 2:
+        text = 'media';
+        break;
+      case 3:
+        text = 'Alta';
+        break;
+    }
+    return text;
+  }
+
   static ImageProvider imageNetwork(String url,
       {double height = 100, double width = 100}) {
     try {

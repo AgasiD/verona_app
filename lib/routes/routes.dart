@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:verona_app/pages/ABMs/ControlObra.dart';
+import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
 import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/anotaciones.dart';
@@ -89,4 +90,5 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   AnotacionesPage.routeName: (_) => AnotacionesPage(),
   MapCoordenates .routeName: (_) =>MapCoordenates(),
   ControlObraABM.routeName: (_) =>ControlObraABM(),
+  PedidosPanelControl.routeName: (_) =>PedidosPanelControl(),
   };

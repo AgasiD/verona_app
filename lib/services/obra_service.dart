@@ -313,4 +313,14 @@ class ObraService extends ChangeNotifier {
 
     return resp;
   }
+
+ Future<MyResponse> obtenerPedidosPorObra(String id) async{
+       
+    final datos = await this._http.get('$_endpoint/obtenerPedidosObras/$id');
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
+
+    return resp;
+  }
 }
