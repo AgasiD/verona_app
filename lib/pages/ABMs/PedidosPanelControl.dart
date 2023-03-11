@@ -1,4 +1,3 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -6,7 +5,9 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/services/obra_service.dart';
+import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:badges/badges.dart' as badges;
 
 class PedidosPanelControl extends StatefulWidget {
   PedidosPanelControl({Key? key}) : super(key: key);
@@ -27,13 +28,13 @@ class _PedidosPanelControlState extends State<PedidosPanelControl>
     _tabCtrl = TabController(length: 3, vsync: this);
     _tabCtrl.index = index;
     final _pref = new Preferences();
-    final _obraService = Provider.of<ObraService>(context, listen: false);
+    final _obraService = Provider.of<ObraService>(context);
     return DefaultTabController(
         length: 3,
         child: Scaffold(
           backgroundColor: Helper.brandColors[1],
           appBar: AppBar(
-            title: Text('Control pedidos'),
+            title: Text('Control de pedidos'),
             backgroundColor: Helper.brandColors[2],
             bottom: TabBar(
               // controller: _tabCtrl,
@@ -126,6 +127,8 @@ class _PendientesViewState extends State<_PendientesView> {
   @override
   Widget build(BuildContext context) {
    final _obraService = Provider.of<ObraService>(context, listen: false);
+      final _socketService = Provider.of<SocketService>(context, listen: false);
+
     return widget.pendientes.length > 0 
     ? ListView.builder(
       itemCount: widget.pendientes.length,
@@ -164,8 +167,8 @@ class _PendientesViewState extends State<_PendientesView> {
                   return Column(
                     children: [
                       _CustomListTile(
-                        // esNovedad: _tieneNovedad(_obraService.obra.id,
-                        //     obra['pedidos'][index]['id'], _socketService),
+                        esNovedad: _tieneNovedad(_obraService.obra.id,
+                            obra['pedidos'][index]['id'], _socketService),
                         esPar: false,
                         title:
                             "${obra['pedidos'][index]['titulo'].toString().toUpperCase()}",
@@ -177,9 +180,9 @@ class _PendientesViewState extends State<_PendientesView> {
                               style: TextStyle(
                                   color: Helper.brandColors[8].withOpacity(.8)),
                             ),
-                            Text(''
-                              // ('Por: ${obra['pedidos'][index]['usuario']['nombre']} ${obra['pedidos'][index]['usuario']['apellido']}')
-                                  .toUpperCase(),
+                            Text(
+                              ('Por: ${obra['pedidos'][index]['usuario']['nombre']} ${obra['pedidos'][index]['usuario']['apellido']}')
+                                 .toUpperCase(),
                               style: TextStyle(
                                   color: Helper.brandColors[8].withOpacity(.8)),
                             ),
@@ -218,8 +221,17 @@ class _PendientesViewState extends State<_PendientesView> {
                   ),
                 ),
             );
+            
 
-}}
+}
+ _tieneNovedad(String obraId, String pedidoId, SocketService _socketService) {
+    final dato = (_socketService.novedades ?? []).indexWhere((novedad) =>
+        novedad['tipo'] == 1 &&
+        novedad['obraId'] == obraId &&
+        novedad['pedidoId'] == pedidoId);
+    return dato >= 0;
+  }
+}
 
 
 
@@ -287,15 +299,15 @@ class _CustomListTile extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // esNovedad
-                          //     ? Badge(
-                          //         badgeColor: Helper.brandColors[8],
-                          //         badgeContent: Padding(
-                          //           padding: const EdgeInsets.all(0),
-                          //           // child: Text(badgeData.toString()),
-                          //         ),
-                          //       )
-                          //     : Container(),
+                           esNovedad
+                              ? badges.Badge(
+                                  badgeColor: Helper.brandColors[8],
+                                  badgeContent: Padding(
+                                    padding: const EdgeInsets.all(0),
+                                    // child: Text(badgeData.toString()),
+                                  ),
+                                )
+                              : Container(),
                           Icon(
                             Icons.arrow_forward_ios_rounded,
                             color: Helper.brandColors[3],

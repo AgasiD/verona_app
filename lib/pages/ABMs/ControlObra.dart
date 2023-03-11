@@ -1,6 +1,13 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/etapa.dart';
+import 'package:verona_app/models/subetapa.dart';
+import 'package:verona_app/models/tarea.dart';
+import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
+import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ControlObraABM extends StatefulWidget {
@@ -11,79 +18,20 @@ class ControlObraABM extends StatefulWidget {
   State<ControlObraABM> createState() => _ControlObraABMState();
 }
 
-class _ControlObraABMState extends State<ControlObraABM> with TickerProviderStateMixin{
-  final etapas = [
-    { "descripcion": "Etapa 1", "isDefault": false, "orden": 1 },
-    { "descripcion": "Etapa 2", "isDefault": true,  "orden": 2 },
-    { "descripcion": "Etapa 3", "isDefault": false, "orden": 3 },
-    { "descripcion": "Etapa 4", "isDefault": true,  "orden": 4 }
-  ];
-
-    final subetapas = [
-    {
-      "etapa": "Etapa 1",
-      "descripcion": "Subetapa 1",
-      "isDefault": false,
-      "orden": 1
-    },
-    {
-      "etapa": "Etapa 2",
-      "descripcion": "Subetapa 2",
-      "isDefault": true,
-      "orden": 2
-    },
-    {
-      "etapa": "Etapa 3",
-      "descripcion": "Subetapa 3",
-      "isDefault": false,
-      "orden": 3
-    },
-    {
-      "etapa": "Etapa 4",
-      "descripcion": "Subetapa 4",
-      "isDefault": true,
-      "orden": 4
-    }
-  ];
-
-    final tareas = [
-    {
-      "subetapa": "Subetapa 1",
-      "descripcion": "Tarea 1",
-      "isDefault": false,
-      "orden": 1
-    },
-    {
-      "subetapa": "Subetapa 2",
-      "descripcion": "Tarea 2",
-      "isDefault": true,
-      "orden": 2
-    },
-    {
-      "subetapa": "Subetapa 3",
-      "descripcion": "Tarea 3",
-      "isDefault": false,
-      "orden": 3
-    },
-    {
-      "subetapa": "Subetapa 4",
-      "descripcion": "Tarea 4",
-      "isDefault": true,
-      "orden": 4
-    }
-  ];
-
+class _ControlObraABMState extends State<ControlObraABM>
+    with TickerProviderStateMixin {
   late TabController _tabCtrl;
-
+  late List<Etapa> etapas;
+  late List<Subetapa> subetapas;
+  late List<Tarea> tareas;
   int index = 0;
 
-  
   @override
   Widget build(BuildContext context) {
     _tabCtrl = TabController(length: 3, vsync: this);
     _tabCtrl.index = index;
+    final _obraService = Provider.of<ObraService>(context, listen: false);
     return DefaultTabController(
-      
         length: 3,
         child: Scaffold(
           backgroundColor: Helper.brandColors[1],
@@ -95,7 +43,6 @@ class _ControlObraABMState extends State<ControlObraABM> with TickerProviderStat
               splashFactory: NoSplash.splashFactory,
               dividerColor: Helper.brandColors[8],
               indicatorColor: Helper.brandColors[8],
-              
               tabs: [
                 Tab(
                     child: Text(
@@ -115,66 +62,97 @@ class _ControlObraABMState extends State<ControlObraABM> with TickerProviderStat
               ],
             ),
           ),
-          body: TabBarView(
-            controller: _tabCtrl,
-            children: [
-              _EtapasView(etapas: etapas),
-              _SubetapasView(etapas: etapas, subetapas: subetapas,),
-              _TareasView(subetapas: subetapas, tareas: tareas),
-            ],
-          ),
+          body: FutureBuilder(
+              future: _obraService.obtenerControlObra(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return Loading(
+                    mensaje: 'Cargando etapas...',
+                  );
+                final response = snapshot.data as MyResponse;
+                if (response.fallo)
+                  return Center(
+                    child: Text(
+                      response.error,
+                      style: TextStyle(color: Helper.brandColors[3]),
+                    ),
+                  );
+
+                etapas = (response.data['etapas'] as List)
+                    .map((e) => Etapa.fromJson(e))
+                    .toList() as List<Etapa>;
+
+                subetapas = (response.data['subetapas'] as List)
+                    .map((e) => Subetapa.fromJson(e))
+                    .toList() as List<Subetapa>;
+
+                tareas = (response.data['tareas'] as List)
+                    .map((e) => Tarea.fromJson(e))
+                    .toList() as List<Tarea>;
+
+                return TabBarView(
+                  controller: _tabCtrl,
+                  children: [
+                    _EtapasView(etapas: etapas),
+                    _SubetapasView(
+                      etapas: etapas,
+                      subetapas: subetapas,
+                    ),
+                    _TareasView(subetapas: subetapas, tareas: tareas),
+                  ],
+                );
+              }),
           floatingActionButton: CustomNavigatorButton(
-              accion: () => agregarItem(_tabCtrl.index),
-              icono: Icons.add,
-              showNotif: false,
-              
-            ),
+            accion: () => agregarItem(_tabCtrl.index),
+            icono: Icons.add,
+            showNotif: false,
+          ),
         ));
   }
 
-  agregarItem(int i){
+  agregarItem(int i) async {
     index = i;
-    switch(i){
-      case 0: etapas.add({
-      "descripcion": "Nueva etapa ",
-      "isDefault": true,
-      "orden": etapas.length + 1
-    });
-    break;
-    case 1: subetapas.add({
-      "etapa": etapas.first['descripcion'].toString(),
-      "descripcion": "Nueva nueva subetapa ",
-      "isDefault": true,
-      "orden": subetapas.length + 1
-    });
-    break;
-    case 2: tareas.add({
-            "subetapa": subetapas.first['descripcion'].toString(),
 
-      "descripcion": "Nueva etapa ",
-      "isDefault": true,
-      "orden": tareas.length + 1
-    });
-    break;
+    switch (i) {
+      case 0:
+        final data = await Navigator.pushNamed(
+            context, Etapa_Sub_Tarea_Form.routeName,
+            arguments: {
+              "sinObra": true,
+            });
+        // if (data != null) etapas.add(data as Etapa);
+
+        break;
+      case 1:
+        final data = await Navigator.pushNamed(
+            context, Etapa_Sub_Tarea_Form.routeName, arguments: {
+          "sinObra": true,
+          "etapaId": etapas.first.descripcion.toString()
+        });
+        // if (data != null) subetapas.add(data as Map<String, Object>);
+        break;
+      case 2:
+        final data = await Navigator.pushNamed(
+            context, Etapa_Sub_Tarea_Form.routeName, arguments: {
+          "sinObra": true,
+          "subetapaId": subetapas.first.descripcion.toString()
+        });
+        // if (data != null) tareas.add(data as Map<String, Object>);
+        break;
     }
-    setState(() {
-      
-    });
+    setState(() {});
   }
 }
 
 class _EtapasView extends StatefulWidget {
-  _EtapasView({Key? key, required this.etapas})
-      : super(key: key);
+  _EtapasView({Key? key, required this.etapas}) : super(key: key);
 
-List<Map<String, Object>> etapas;
+  List<Etapa> etapas;
   @override
   State<_EtapasView> createState() => _EtapasViewState();
 }
 
 class _EtapasViewState extends State<_EtapasView> {
-
-
   @override
   Widget build(BuildContext context) {
     Map<int, FlexColumnWidth> columnWidths = {
@@ -227,8 +205,9 @@ class _EtapasViewState extends State<_EtapasView> {
     var controllers = [];
     for (int i = 0; i < widget.etapas.length; i++) {
       var txtDescri =
-          TextEditingController(text: widget.etapas[i]['descripcion'].toString());
-      var txtOrden = TextEditingController(text: widget.etapas[i]['orden'].toString());
+          TextEditingController(text: widget.etapas[i].descripcion.toString());
+      var txtOrden =
+          TextEditingController(text: widget.etapas[i].orden.toString());
 
       var row = TableRow(
           decoration: BoxDecoration(color: Helper.brandColors[2]),
@@ -239,7 +218,7 @@ class _EtapasViewState extends State<_EtapasView> {
                 controller: txtDescri,
                 style: TextStyle(color: Helper.brandColors[3]),
                 onEditingComplete: () => print('lostFocus'),
-                onChanged: (text) => widget.etapas[i]['descripcion'] = text,
+                onChanged: (text) => widget.etapas[i].descripcion = text,
                 decoration: InputDecoration(border: InputBorder.none),
               ),
             ),
@@ -249,16 +228,16 @@ class _EtapasViewState extends State<_EtapasView> {
               controller: txtOrden,
               style: TextStyle(color: Helper.brandColors[3]),
               onEditingComplete: () => print('lostFocus'),
-              onChanged: (text) => widget.etapas[i]['descripcion'] = text,
+              onChanged: (text) => widget.etapas[i].descripcion = text,
               decoration: InputDecoration(border: InputBorder.none),
             ),
             Switch(
-              value: widget.etapas[i]['isDefault'] as bool,
+              value: widget.etapas[i].isDefault as bool,
               activeColor: Helper.brandColors[3],
               activeTrackColor: Helper.brandColors[8],
               inactiveTrackColor: Helper.brandColors[3],
               onChanged: (value) {
-                widget.etapas[i]['isDefault'] = value;
+                widget.etapas[i].isDefault = value;
                 setState(() {});
               },
             ),
@@ -303,10 +282,11 @@ class __EtapasTableRowState extends State<_EtapasTableRow> {
 }
 
 class _SubetapasView extends StatefulWidget {
-  _SubetapasView({Key? key, required this.etapas, required this.subetapas}) : super(key: key);
-  List<Map<String, Object>> etapas;
+  _SubetapasView({Key? key, required this.etapas, required this.subetapas})
+      : super(key: key);
+  List<Etapa> etapas;
 
-  List<Map<String, Object>> subetapas;
+  List<Subetapa> subetapas;
 
   @override
   State<_SubetapasView> createState() => _SubetapasViewState();
@@ -314,14 +294,12 @@ class _SubetapasView extends StatefulWidget {
 
 class _SubetapasViewState extends State<_SubetapasView> {
   @override
-
-
   @override
   Widget build(BuildContext context) {
     var etapas = widget.etapas
         .map((e) => DropdownMenuItem(
-            value: e['descripcion'].toString(),
-            child: Container(child: Text(e['descripcion'].toString()))))
+            value: e.id.toString(),
+            child: Container(child: Text(e.descripcion.toString()))))
         .toList();
 
     Map<int, FlexColumnWidth> columnWidths = {
@@ -373,10 +351,10 @@ class _SubetapasViewState extends State<_SubetapasView> {
     ];
     var controllers = [];
     for (int i = 0; i < widget.subetapas.length; i++) {
-      var txtDescri =
-          TextEditingController(text: widget.subetapas[i]['descripcion'].toString());
+      var txtDescri = TextEditingController(
+          text: widget.subetapas[i].descripcion.toString());
       var txtOrden =
-          TextEditingController(text: widget.subetapas[i]['orden'].toString());
+          TextEditingController(text: widget.subetapas[i].orden.toString());
 
       var row = TableRow(
           decoration: BoxDecoration(color: Helper.brandColors[2]),
@@ -387,7 +365,7 @@ class _SubetapasViewState extends State<_SubetapasView> {
                   dropdownWidth: 200,
                   isExpanded: false,
                   onChanged: (a) {},
-                  value: widget.subetapas[i]['etapa'].toString(),
+                  value: widget.subetapas[i].etapa.toString(),
                   items: etapas,
                   style: TextStyle(color: Helper.brandColors[5], fontSize: 14),
                   icon: Icon(
@@ -406,7 +384,7 @@ class _SubetapasViewState extends State<_SubetapasView> {
                 controller: txtDescri,
                 style: TextStyle(color: Helper.brandColors[3]),
                 onEditingComplete: () => print('lostFocus'),
-                onChanged: (text) => widget.subetapas[i]['descripcion'] = text,
+                onChanged: (text) => widget.subetapas[i].descripcion = text,
                 decoration: InputDecoration(border: InputBorder.none),
               ),
             ),
@@ -416,16 +394,16 @@ class _SubetapasViewState extends State<_SubetapasView> {
               controller: txtOrden,
               style: TextStyle(color: Helper.brandColors[3]),
               onEditingComplete: () => print('lostFocus'),
-              onChanged: (text) => widget.subetapas[i]['descripcion'] = text,
+              onChanged: (text) => widget.subetapas[i].descripcion = text,
               decoration: InputDecoration(border: InputBorder.none),
             ),
             Switch(
-              value: widget.subetapas[i]['isDefault'] as bool,
+              value: widget.subetapas[i].isDefault as bool,
               activeColor: Helper.brandColors[3],
               activeTrackColor: Helper.brandColors[8],
               inactiveTrackColor: Helper.brandColors[3],
               onChanged: (value) {
-                widget.subetapas[i]['isDefault'] = value;
+                widget.subetapas[i].isDefault = value;
                 setState(() {});
               },
             )
@@ -436,7 +414,8 @@ class _SubetapasViewState extends State<_SubetapasView> {
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 10),
         margin: EdgeInsets.only(top: 15),
-        child: Table(columnWidths: columnWidths, children: datos));
+        child: SingleChildScrollView(
+            child: Table(columnWidths: columnWidths, children: datos)));
   }
 
   borrarSubetapa(int index) async {
@@ -450,30 +429,34 @@ class _SubetapasViewState extends State<_SubetapasView> {
 }
 
 class _TareasView extends StatefulWidget {
-   _TareasView({Key? key, required this.subetapas, required this.tareas}) : super(key: key);
-  List<Map<String, Object>> subetapas;
-  List<Map<String, Object>> tareas;
-
+  _TareasView({Key? key, required this.subetapas, required this.tareas})
+      : super(key: key);
+  List<Subetapa> subetapas;
+  List<Tarea> tareas;
 
   @override
   State<_TareasView> createState() => _TareasViewState();
 }
 
 class _TareasViewState extends State<_TareasView> {
+  int valueSelect = 1;
+  int cantRegistros = 10;
   @override
   Widget build(BuildContext context) {
- var subetapas = widget.subetapas
+    var subetapas = widget.subetapas
         .map((e) => DropdownMenuItem(
-            value: e['descripcion'].toString(),
-            child: Container(child: Text(e['descripcion'].toString()))))
+            value: e.id.toString(),
+            child: FittedBox(
+        fit: BoxFit.fitWidth, 
+        
+              child: Text(e.descripcion.toString()))))
         .toList();
 
-print(widget.tareas);
     Map<int, FlexColumnWidth> columnWidths = {
       0: FlexColumnWidth(2),
       1: FlexColumnWidth(2),
-      2: FlexColumnWidth(1),
-      3: FlexColumnWidth(1.5),
+      2: FlexColumnWidth(.7),
+      3: FlexColumnWidth(1),
     };
 
     var textTitleStyle = TextStyle(
@@ -489,7 +472,7 @@ print(widget.tareas);
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                'Etapa',
+                'Subetapa',
                 style: textTitleStyle,
               ),
             ),
@@ -517,32 +500,36 @@ print(widget.tareas);
           ])
     ];
     var controllers = [];
-    for (int i = 0; i < widget.tareas.length; i++) {
+        print(valueSelect);
+    for (int i = valueSelect; i < cantRegistros+valueSelect; i++) {
       var txtDescri =
-          TextEditingController(text: widget.tareas[i]['descripcion'].toString());
-      var txtOrden =
-          TextEditingController(text: widget.tareas[i]['orden'].toString());
+          TextEditingController(text: widget.tareas[i].descripcion.toString());
+      var txtOrden = TextEditingController(text: 0.toString());
 
       var row = TableRow(
           decoration: BoxDecoration(color: Helper.brandColors[2]),
           children: [
             Padding(
                 padding: const EdgeInsets.only(left: 0),
-                child: DropdownButtonFormField2(
-                  dropdownWidth: 200,
-                  isExpanded: false,
-                  onChanged: (a) {},
-                  value: widget.tareas[i]['subetapa'].toString(),
-                  items: subetapas,
-                  style: TextStyle(color: Helper.brandColors[5], fontSize: 14),
-                  icon: Icon(
-                    Icons.arrow_drop_down,
-                    color: Helper.brandColors[3],
-                  ),
-                  dropdownDecoration: BoxDecoration(
-                    // borderRadius: BorderRadius.circular(15),
-                    border: null,
-                    color: Helper.brandColors[2],
+                child: Container(
+                  child: DropdownButtonFormField2(
+                    isExpanded: true,
+                    onChanged: (a) {},
+                    value: widget.tareas[i].subetapa.toString(),
+                    items: subetapas,
+                    style: TextStyle(
+                        color: Helper.brandColors[5],
+                        fontSize: 14,
+                        overflow: TextOverflow.ellipsis),
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: Helper.brandColors[3],
+                    ),
+                    dropdownDecoration: BoxDecoration(
+                      // borderRadius: BorderRadius.circular(15),
+                      border: null,
+                      color: Helper.brandColors[2],
+                    ),
                   ),
                 )),
             Padding(
@@ -551,7 +538,7 @@ print(widget.tareas);
                 controller: txtDescri,
                 style: TextStyle(color: Helper.brandColors[3]),
                 onEditingComplete: () => print('lostFocus'),
-                onChanged: (text) => widget.tareas[i]['descripcion'] = text,
+                onChanged: (text) => widget.tareas[i].descripcion = text,
                 decoration: InputDecoration(border: InputBorder.none),
               ),
             ),
@@ -561,16 +548,16 @@ print(widget.tareas);
               controller: txtOrden,
               style: TextStyle(color: Helper.brandColors[3]),
               onEditingComplete: () => print('lostFocus'),
-              onChanged: (text) => widget.tareas[i]['descripcion'] = text,
+              onChanged: (text) => widget.tareas[i].descripcion = text,
               decoration: InputDecoration(border: InputBorder.none),
             ),
             Switch(
-              value: widget.tareas[i]['isDefault'] as bool,
+              value: widget.tareas[i].isDefault as bool,
               activeColor: Helper.brandColors[3],
               activeTrackColor: Helper.brandColors[8],
               inactiveTrackColor: Helper.brandColors[3],
               onChanged: (value) {
-                widget.tareas[i]['isDefault'] = value;
+                widget.tareas[i].isDefault = value;
                 setState(() {});
               },
             )
@@ -581,7 +568,41 @@ print(widget.tareas);
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 10),
         margin: EdgeInsets.only(top: 15),
-        child: Table(columnWidths: columnWidths, children: datos));
+        child: SingleChildScrollView(
+            child: Column(
+          children: [
+            Row(
+              children: [Text('Cantidad de registros visibles',style:TextStyle(color: Helper.brandColors[3], fontSize: 18)),
+              DropdownButton(
+                alignment: Alignment.center,
+                value: cantRegistros, items: [10,25,50,100].map((cant) => DropdownMenuItem<int>(child: Text(cant.toString(),textAlign: TextAlign.center, style:TextStyle(color: Helper.brandColors[3], fontSize: 18)), value: cant ,)).toList()
+              , onChanged: (a){
+                refreshCantRegistros(int.parse(a.toString()));
+              })
+              ],
+
+            ),
+            Table(
+              columnWidths: columnWidths, children: datos),
+            Container(margin: EdgeInsets.symmetric(vertical: 45), child: _Paginator(total: datos.length, valueSelect: valueSelect, refreshTable: refreshTable, cantRegistros: cantRegistros))
+          ],
+        )));
+
+  }
+
+  refreshTable(int value){
+    setState(() {
+    valueSelect = value;
+
+
+      });
+  }
+
+   refreshCantRegistros(int value){
+    setState(() {
+    cantRegistros = value;
+valueSelect = 1;
+      });
   }
 
   borrarSubetapa(int index) async {
@@ -594,3 +615,118 @@ print(widget.tareas);
   }
 }
 
+class _Paginator extends StatefulWidget {
+  _Paginator({required this.total,required this.cantRegistros, required this.valueSelect, required this.refreshTable});
+  int total, cantRegistros;
+  int valueSelect;
+  Function(int) refreshTable;
+  @override
+  State<_Paginator> createState() => __PaginatorState();
+}
+
+class __PaginatorState extends State<_Paginator> {
+  @override
+  Widget build(BuildContext context) {
+    final cantItems = (widget.total / widget.cantRegistros).round();
+    int maxItems = 1;
+    maxItems = cantItems < maxItems ? cantItems : maxItems;
+
+    List<Widget> items = [];
+    items.addAll([
+      _ItemPaginator(move: setValueSelect, value: 1, first: true), // <<
+      _ItemPaginator(
+        move: setValueSelect,
+        value: widget.valueSelect > 0 ? widget.valueSelect - 1 : 1,
+        back: true,
+      )
+    ]); // <
+
+    for (int i = (widget.valueSelect > 1 ? widget.valueSelect - 1 : widget.valueSelect); i <= ((widget.valueSelect < cantItems) ? widget.valueSelect == widget.valueSelect + maxItems ? widget.valueSelect + maxItems-1 :widget.valueSelect + maxItems : maxItems); i++) {
+      items.add(_ItemPaginator(
+        move: setValueSelect,
+        value: i,
+        number: i,
+        isSelect: i == widget.valueSelect,
+      ));
+    }
+    widget.valueSelect < cantItems - 2 ? items.add(_ItemPaginator(
+      move: setValueSelect,
+      value: -1,
+      ellipsis: true,
+    )) : false;
+    widget.valueSelect < cantItems - 1 ? items.add(_ItemPaginator(
+        move: setValueSelect,
+        value: cantItems,
+        number: cantItems,
+        isSelect: cantItems == widget.valueSelect)) : false;
+   widget.valueSelect < cantItems  ? items.add(
+      _ItemPaginator(
+          move: setValueSelect, value: widget.valueSelect + 1, next: true)
+   ) : false; // >
+    widget.valueSelect < cantItems - 1 ? items.add(  _ItemPaginator(
+        move: setValueSelect,
+        value: cantItems,
+        last: true,
+      )  // >>
+    ): false;
+
+    return Container(
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: items),
+    );
+  }
+
+  setValueSelect(int value) {
+    
+    widget.valueSelect = value < 1 ? widget.valueSelect = 1 : value;
+    widget.refreshTable(value);
+    setState(() {});
+  }
+}
+
+class _ItemPaginator extends StatelessWidget {
+  _ItemPaginator(
+      {required this.move,
+      required this.value,
+      this.isSelect = false,
+      this.back = false,
+      this.next = false,
+      this.first = false,
+      this.last = false,
+      this.ellipsis = false,
+      this.number = 1});
+  Function(int) move;
+  bool back, ellipsis, next, first, last;
+  int number;
+  int value;
+  bool isSelect;
+  @override
+  Widget build(BuildContext context) {
+    String text = first
+        ? '<<'
+        : back
+            ? '<'
+            : next
+                ? '>'
+                : last
+                    ? '>>'
+                    : ellipsis
+                        ? '...'
+                        : number.toString();
+
+    return GestureDetector(
+      onTap: () => move(value),
+      child: Center(
+          child: Container(
+              color: isSelect ? Helper.brandColors[8] : Helper.brandColors[2],
+              padding: EdgeInsets.all(10),
+              child: Text(
+                text,
+                style: TextStyle(
+                    color: isSelect
+                        ? Helper.brandColors[2]
+                        : Helper.brandColors[3],
+                    fontWeight: isSelect ? FontWeight.bold : FontWeight.normal),
+              ))),
+    );
+  }
+}

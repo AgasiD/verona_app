@@ -20,13 +20,14 @@ class Etapa_Sub_Tarea_Form extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    bool sinObra = arguments['sinObra'] ?? false;
     String? etapaId = arguments['etapaId'];
     String? subetapaId = arguments['subetapaId'];
 
     return Scaffold(
       bottomNavigationBar: CustomNavigatorFooter(),
       backgroundColor: Helper.brandColors[1],
-      body: _Form(etapaId: etapaId, subetapaId: subetapaId),
+      body: _Form(etapaId: etapaId, subetapaId: subetapaId, sinObra: sinObra,),
     );
   }
 }
@@ -34,12 +35,14 @@ class Etapa_Sub_Tarea_Form extends StatelessWidget {
 class _Form extends StatefulWidget {
   _Form({
     Key? key,
+    this.sinObra = false,
     this.subetapaId = null,
     this.etapaId = null,
   }) : super(key: key);
 
   String? etapaId;
   String? subetapaId;
+  bool sinObra = false;
   @override
   State<_Form> createState() => _FormState();
 }
@@ -87,25 +90,28 @@ class _FormState extends State<_Form> {
               hintText: 'Descripción',
               icono: Icons.description,
               textController: txtTarea),
-          Row(
+          Visibility(
+                visible: widget.sinObra,
+                                child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Guardar para próximos proyectos',
                 style: TextStyle(color: Helper.brandColors[8], fontSize: 16),
               ),
-              Switch(
-                  value: proximos,
-                  activeColor: Helper.brandColors[3],
-                  activeTrackColor: Helper.brandColors[8],
-                  inactiveTrackColor: Helper.brandColors[3],
-                  onChanged: (value) {
-                    proximos = value;
-                    !proximos ? isDefault = false : false;
-                    setState(() {});
-                  }),
+            Switch(
+                    value: proximos,
+                    activeColor: Helper.brandColors[3],
+                    activeTrackColor: Helper.brandColors[8],
+                    inactiveTrackColor: Helper.brandColors[3],
+                    onChanged: (value) {
+                      proximos = value;
+                      !proximos ? isDefault = false : false;
+                      setState(() {});
+                    }),
+              
             ],
-          ),
+          )),
           Visibility(
             visible: proximos,
             child: Row(
@@ -138,7 +144,7 @@ class _FormState extends State<_Form> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SecondaryButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(context, null),
                   text: 'Cancelar',
                   color: Helper.brandColors[3],
                   width: 120,
@@ -168,6 +174,7 @@ class _FormState extends State<_Form> {
   }
 
   grabarElemento(context) async {
+    final toReturn;
     openLoadingDialog(context, mensaje: 'Grabando $tipo');
     final _obraService = Provider.of<ObraService>(context, listen: false);
     try {
@@ -189,6 +196,7 @@ class _FormState extends State<_Form> {
           return;
         }
         final etapa = Etapa.fromJson(datos.data);
+        toReturn = etapa;
         _obraService.obra.etapas.add(etapa);
         _obraService.notifyListeners();
       } else if (esSubEtapa) {
@@ -204,6 +212,8 @@ class _FormState extends State<_Form> {
           return;
         }
         final subetapa = Subetapa.fromJson(datos.data);
+                toReturn = subetapa;
+
         _obraService.obra.etapas
             .singleWhere((etapa) => etapa.id == widget.etapaId)
             .subetapas
@@ -224,6 +234,7 @@ class _FormState extends State<_Form> {
           return;
         }
         final tarea = Tarea.fromJson(datos.data);
+        toReturn = tarea;
         _obraService.obra.etapas
             .singleWhere((etapa) => etapa.id == widget.etapaId)
             .subetapas
@@ -232,7 +243,7 @@ class _FormState extends State<_Form> {
             .add(tarea);
         _obraService.notifyListeners();
       }
-      Navigator.pop(context);
+      Navigator.pop(context, toReturn);
     } catch (err) {
       closeLoadingDialog(context);
       openAlertDialog(

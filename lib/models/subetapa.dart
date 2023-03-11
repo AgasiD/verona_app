@@ -7,6 +7,7 @@ String subetapaToJson(Subetapa data) => json.encode(data.toJson());
 
 class Subetapa {
   Subetapa({
+    this.etapa = '',
     required this.descripcion,
     required this.id,
     required this.isDefault,
@@ -28,8 +29,10 @@ class Subetapa {
   bool isDefault;
   int orden;
   List<Tarea> tareas;
+  String etapa;
 
   factory Subetapa.fromJson(Map<String, dynamic> json) => Subetapa(
+    etapa: json["etapa"] ?? '',
         descripcion: json["descripcion"],
         id: json["id"] ?? '',
         isDefault: json["isDefault"],
@@ -40,6 +43,7 @@ class Subetapa {
       );
 
   Map<String, dynamic> toJson() => {
+    "etapa": etapa,
         "descripcion": descripcion,
         "id": id,
         "isDefault": isDefault,

@@ -323,4 +323,15 @@ class ObraService extends ChangeNotifier {
 
     return resp;
   }
+
+  
+ Future<MyResponse> obtenerControlObra() async{
+       
+    final datos = await this._http.get('$_endpoint/obtenerControlObra');
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
+
+    return resp;
+  }
 }

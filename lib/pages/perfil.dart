@@ -380,9 +380,8 @@ class PerfilPage extends StatelessWidget {
                                   }
                                 })
                             : Container(),
-                            Visibility(
-                              visible: perfilPropio,
-                              child: Padding(
+                            
+                             Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -390,7 +389,6 @@ class PerfilPage extends StatelessWidget {
                                       CustomNavigatorButton(icono: Icons.mobile_screen_share_sharp, accion: ()=>compartirUsuario(usuario), showNotif: false),
                                     ],
                                   ),
-                              ),
                             ),
                       ],
                     ),
