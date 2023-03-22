@@ -1,5 +1,7 @@
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:multiselect/multiselect.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -46,7 +48,7 @@ class _FormState extends State<_Form> {
   late InactividadService _inactividadService;
   late ObraService _obraService;
   late String obraId;
-  late Function(List<String>, String) submitAction;
+  late Function(List<String>, String, String) submitAction;
   late Inactividad inactividad;
   late String selectedInactividad;
   late int index;
@@ -68,24 +70,28 @@ class _FormState extends State<_Form> {
     Color colorHint = Helper.brandColors[3];
     final arg = ModalRoute.of(context)!.settings.arguments as Map;
     final obras = arg['obras'];
-    
-    submitAction = (idsObras, idInactividad) async {
+
+    submitAction = (idsObras, idInactividad, selectedFecha) async {
       final confirm = await openDialogConfirmationReturn(
           context, '¿Seguro que desea generar la inactividad?');
-          
+
       if (!confirm) return;
 
-      openLoadingDialog(context, mensaje: 'Guardando inactividad... Esta acción puede demorar');
+      openLoadingDialog(context,
+          mensaje: 'Guardando inactividad... Esta acción puede demorar');
 
       final inactividad = new Inactividad(
-          nombre: idInactividad == '0000000' ? txtCtrlName.text: inactividades.firstWhere((i) => i.id == idInactividad).nombre,
-          diasInactivos: int.parse(txtCtrlDias.text),
-          fecha: Helper.getFechaFromTS(DateTime.now().millisecondsSinceEpoch),
-          usuarioId: _pref.id,
-          );
+        nombre: idInactividad == '0000000'
+            ? txtCtrlName.text
+            : inactividades.firstWhere((i) => i.id == idInactividad).nombre,
+        diasInactivos: int.parse(txtCtrlDias.text),
+        fecha: selectedFecha,
+        usuarioId: _pref.id,
+      );
 
       MyResponse response;
-      response = await _obraService.grabarInactividades(idsObras, inactividad.toMap());
+      response =
+          await _obraService.grabarInactividades(idsObras, inactividad.toMap());
       closeLoadingDialog(context);
 
       if (response.fallo) {
@@ -149,7 +155,6 @@ class _FormState extends State<_Form> {
     final inactividad = inactividades.firstWhere((i) => i.id == idInatividad);
     selectedInactividad = idInatividad;
     txtCtrlDias.text = inactividad.diasInactivos.toString();
-
   }
 }
 
@@ -177,7 +182,7 @@ class _Formulario extends StatefulWidget {
   final TextEditingController txtCtrlName;
   final TextEditingController txtCtrlDias;
   final Preferences _pref;
-  final Function(List<String>, String) submitAction;
+  final Function(List<String>, String, String) submitAction;
   final List<Map<String, dynamic>> obras;
   @override
   State<_Formulario> createState() => _FormularioState();
@@ -186,18 +191,26 @@ class _Formulario extends StatefulWidget {
 class _FormularioState extends State<_Formulario> {
   List<String> selected = [];
   List<String> values = ['a'];
+  TextEditingController txtCtrlDate = new TextEditingController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     values = widget.obras.map((e) => e['nombre'] as String).toList();
-    selected = widget.obras.map((e) => e['nombre'] as String).toList();;
+    selected = widget.obras.map((e) => e['nombre'] as String).toList();
+    ;
+     DateTime now = DateTime.now();
 
+    String formattedDate = DateFormat('dd/MM/yyyy').format(now);
+    txtCtrlDate.text = formattedDate.toString();
   }
+DateTime selectedDate = DateTime.now();
+  
 
   @override
   Widget build(BuildContext context) {
+   
     return Column(
       children: [
         Logo(),
@@ -242,10 +255,8 @@ class _FormularioState extends State<_Formulario> {
                   ),
                   onChanged: (value) {
                     setState(() {
-                      
-                    setInactividad(value as String);
+                      setInactividad(value as String);
                     });
-
                   })),
         ),
         Visibility(
@@ -261,6 +272,21 @@ class _FormularioState extends State<_Formulario> {
             teclado: TextInputType.number,
             readOnly: widget.selectedInactividad != '0000000',
             textController: widget.txtCtrlDias),
+        CustomFormInput(
+          // enable: edit,
+          hintText: ('Fecha').toUpperCase(),
+          icono: Icons.abc,
+          textController: txtCtrlDate,
+          iconButton: IconButton(
+              icon: Icon(Icons.calendar_today),
+              onPressed: () {
+                selectDate(
+                  context,
+                  txtCtrlDate,
+                  selectedDate,
+                );
+              }),
+        ),
         DropDownMultiSelect(
           decoration: getDecoration(),
           childBuilder: (option) => Container(
@@ -268,9 +294,7 @@ class _FormularioState extends State<_Formulario> {
               child: Text(
                 'Obras seleccionadas: ${selected.length}/${values.length}',
                 textAlign: TextAlign.right,
-                style: TextStyle(color: Helper.brandColors[5],
-                fontSize: 17
-                ),
+                style: TextStyle(color: Helper.brandColors[5], fontSize: 17),
               )),
           selected_values_style: TextStyle(color: Colors.white),
           options: values,
@@ -278,7 +302,11 @@ class _FormularioState extends State<_Formulario> {
           whenEmpty: 'Sin obras seleccionadas',
           icon: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Icon(Icons.arrow_drop_down_outlined, size:35, color: Helper.brandColors[3],),
+            child: Icon(
+              Icons.arrow_drop_down_outlined,
+              size: 35,
+              color: Helper.brandColors[3],
+            ),
           ),
           onChanged: (List<String> x) {
             setState(() {
@@ -296,10 +324,10 @@ class _FormularioState extends State<_Formulario> {
               visible: widget._pref.role == 1 || widget._pref.role == 2,
               child: MainButton(
                 color: Helper.brandColors[8],
-                onPressed: (){
-                  
-                  widget.submitAction(convertNombreToId( selected), widget.selectedInactividad);
-                  },
+                onPressed: () {
+                  widget.submitAction(
+                      convertNombreToId(selected), widget.selectedInactividad, txtCtrlDate.text);
+                },
                 text: 'Guardar',
                 width: 100,
               ),
@@ -317,6 +345,32 @@ class _FormularioState extends State<_Formulario> {
     );
   }
 
+  void selectDate(context, txtCtrlDate, selectedDate) async {
+    double width = MediaQuery.of(context).size.width * .8;
+    double height = MediaQuery.of(context).size.height * .5;
+
+    var results = await showCalendarDatePicker2Dialog(
+      context: context,
+      config: CalendarDatePicker2WithActionButtonsConfig(
+        selectedDayHighlightColor: Helper.brandColors[8],
+        calendarType: CalendarDatePicker2Type.single,
+        closeDialogOnCancelTapped: true,
+      ),
+      dialogSize: Size(width, height),
+      initialValue: [selectedDate],
+      borderRadius: BorderRadius.circular(5),
+    );
+
+    if (results != null) {
+      final date = results![0];
+      String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
+
+      txtCtrlDate.text = formattedDate.toString();
+      selectedDate = date;
+    
+    }
+  }
+
   void setInactividad(String idInatividad) {
     final inactividad =
         widget.inactividades.firstWhere((i) => i.id == idInatividad);
@@ -324,11 +378,13 @@ class _FormularioState extends State<_Formulario> {
     widget.txtCtrlDias.text = inactividad.diasInactivos.toString();
   }
 
-
-List<String> convertNombreToId(List<String> selecciondas){
-  final data =  widget.obras.where((obra)=> selecciondas.contains(obra['nombre'])).map((e) => e['id'] as String).toList();
-  return data;
-}
+  List<String> convertNombreToId(List<String> selecciondas) {
+    final data = widget.obras
+        .where((obra) => selecciondas.contains(obra['nombre']))
+        .map((e) => e['id'] as String)
+        .toList();
+    return data;
+  }
 }
 
 getDecoration() {
@@ -348,7 +404,5 @@ getDecoration() {
         borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
       ),
       fillColor: Helper.brandColors[1],
-    
       filled: true);
 }
-
