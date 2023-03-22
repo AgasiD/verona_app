@@ -28,24 +28,28 @@ class AnotacionesPage extends StatelessWidget {
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
-      body: SafeArea(
+      body: GestureDetector(
+                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
 
-        child: Container(
-          
-          child: FutureBuilder(
-            future: _usuarioService.obtenerUsuario(_pref.id),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting)
-                return Loading(mensaje: 'Cargando...');
-              final response = snapshot.data as MyResponse;
-              if (response.fallo)
-                return Center(
-                  child: Text('Error al cargar datos'),
-                );
-              usuario = Miembro.fromJson(response.data);
-
-              return Action_Form(usuario: usuario, txtTarea: txtTarea, obraId: obraId);
-            },
+        child: SafeArea(
+      
+          child: Container(
+            
+            child: FutureBuilder(
+              future: _usuarioService.obtenerUsuario(_pref.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  return Loading(mensaje: 'Cargando...');
+                final response = snapshot.data as MyResponse;
+                if (response.fallo)
+                  return Center(
+                    child: Text('Error al cargar datos'),
+                  );
+                usuario = Miembro.fromJson(response.data);
+      
+                return Action_Form(usuario: usuario, txtTarea: txtTarea, obraId: obraId);
+              },
+            ),
           ),
         ),
       ),
@@ -140,7 +144,7 @@ class _Action_FormState extends State<Action_Form> {
     final _pref = new Preferences();
     _usuarioService.eliminarAnotacion(_pref.id, id).then((value) {
       if (value.fallo) {
-        openAlertDialog(context, 'Error al eliminar tarea',
+        openAlertDialog(context, 'Error al eliminar anotacion',
             subMensaje: value.error);
         return;
       }

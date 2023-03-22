@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class Inactividad {
   String id;
   String nombre;
@@ -8,20 +6,23 @@ class Inactividad {
   String usuarioId;
   String fileId;
   bool privado;
+  late int diasInactivos;
   Inactividad({
     this.id = '',
     required this.nombre,
     required this.fecha,
-    required this.fileName,
+    this.fileName = '',
     this.fileId = '',
     required this.usuarioId,
-    required this.privado,
+    this.privado = true,
+    diasInactivos = 1,
   }) {
     this.nombre = nombre;
     this.fecha = fecha;
     this.fileName = fileName;
     this.usuarioId = usuarioId;
     this.privado = privado;
+    this.diasInactivos = diasInactivos;
   }
 
   factory Inactividad.fromMap(Map<String, dynamic> json) => Inactividad(
@@ -33,6 +34,7 @@ class Inactividad {
         usuarioId:
             json.containsKey('usuarioId') ? json["usuarioId"] : json["usuario"],
         privado: json.containsKey('privado') ? json["privado"] : 1,
+        diasInactivos: json.containsKey('diasInactivos') ? json["diasInactivos"] : 1,
       );
 
   toMap() => {
@@ -43,5 +45,6 @@ class Inactividad {
         'fileId': this.fileId,
         'usuarioId': this.usuarioId,
         'privado': this.privado,
+        'diasInactivos': this.diasInactivos
       };
 }

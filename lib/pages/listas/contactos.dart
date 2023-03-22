@@ -1,5 +1,4 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -11,6 +10,7 @@ import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:badges/badges.dart' as badges;
 
 class ContactsPage extends StatefulWidget {
   ContactsPage({Key? key}) : super(key: key);
@@ -217,8 +217,8 @@ class __ContactTileState extends State<_ContactTile> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 30,
                 children: [
-                  Badge(
-                    badgeColor: isConnected
+                  badges.Badge(
+                   badgeColor:  isConnected
                         ? Color.fromARGB(255, 163, 255, 167)!
                         : Color.fromARGB(255, 182, 43, 57)!,
                   ),

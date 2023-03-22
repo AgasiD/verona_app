@@ -3,7 +3,7 @@
 import 'dart:io';
 
 import 'package:animate_do/animate_do.dart';
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,7 +122,7 @@ class _NotificationButtonState extends State<_NotificationButton> {
 
     return Padding(
         padding: EdgeInsets.only(right: 15, top: 5),
-        child: Badge(
+        child: badges.Badge(
           showBadge: false, // _socketService.unreadNotifications > 0,
           badgeContent: Text(_socketService.unreadNotifications.toString()),
           badgeColor: Colors.red.shade100,
@@ -366,6 +366,7 @@ class CustomInput extends StatefulWidget {
   final bool validaError;
   final bool enable;
   final bool readOnly;
+  final bool autocorrect;
   String? Function(String?) validarInput;
   Function(String) onChange;
   static void _passedOnChange(String? input) {}
@@ -387,6 +388,7 @@ class CustomInput extends StatefulWidget {
     this.enable = true,
     this.readOnly = false,
     this.iconButton = null,
+    this.autocorrect = true,
     required this.textController,
     this.validarInput = _passedFunction,
     this.onChange = _passedOnChange,
@@ -423,12 +425,13 @@ class _CustomInputState extends State<CustomInput> {
           padding: EdgeInsets.only(right: 15),
           margin: EdgeInsets.only(bottom: 10),
           child: TextFormField(
+            
             textCapitalization: TextCapitalization.sentences,
             enabled: widget.enable,
             readOnly: widget.readOnly,
             controller: widget.textController,
             maxLines: widget.lines ?? 1,
-            autocorrect: false,
+            autocorrect: widget.autocorrect,
             keyboardType: widget.teclado,
             keyboardAppearance: Brightness.dark,
             obscureText: widget.isPassword,
@@ -919,7 +922,7 @@ Future<bool> openDialogConfirmationReturn(BuildContext context, String mensaje,
 openLoadingDialog(BuildContext context, {String mensaje = ''}) {
   if (Platform.isAndroid) {
     showDialog(
-        context: context, builder: (context) => Loading(mensaje: mensaje));
+        context: context, builder: (context) => LoadingDialog(mensaje: mensaje));
   } else {
     showCupertinoDialog(
       context: context,
@@ -1010,6 +1013,35 @@ void openAlertDialog(BuildContext context, String mensaje,
           ),
         ],
       ),
+    );
+  }
+}
+
+
+class LoadingDialog extends StatelessWidget {
+  LoadingDialog({Key? key, this.mensaje = ''}) : super(key: key);
+  String mensaje;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SpinKitDualRing(color: Helper.brandColors[8]),
+            SizedBox(
+              height: 15,
+            ),
+            mensaje != ''
+                ? Text(
+                    mensaje,
+                    style: TextStyle(
+                        color: Helper.brandColors[3],
+                        fontSize: 15,
+                        decoration: TextDecoration.none,
+                        fontWeight: FontWeight.bold),
+                  )
+                : Container()
+          ],
     );
   }
 }
@@ -1108,7 +1140,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
-                    ObrasPage.routeName,
+                    ObrasPage.routeName, 
                     (Route<dynamic> route) => route.isFirst);
                 // Navigator.pushNamed(context, ObrasPage.routeName);
               }
@@ -1172,7 +1204,7 @@ class CustomNavigatorButton extends StatelessWidget {
                   color: Colors.black54, blurRadius: 5, offset: Offset(12, 8))
             ],
             borderRadius: BorderRadius.all(Radius.circular(size / 2))),
-        child: Badge(
+        child: badges.Badge(
           showBadge: showNotif,
           badgeColor: Helper.brandColors[8],
           child: IconButton(
@@ -1596,7 +1628,7 @@ class CustomListTileMessage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     badgeData > 0
-                        ? Badge(
+                        ? badges.Badge(
                             badgeColor: Helper.brandColors[8],
                             badgeContent: Padding(
                               padding: const EdgeInsets.all(2.0),
@@ -1604,7 +1636,7 @@ class CustomListTileMessage extends StatelessWidget {
                             ),
                           )
                         : Container(),
-                    Badge(
+                    badges.Badge(
                       badgeColor: isConnected
                           ? Color.fromARGB(255, 163, 255, 167)!
                           : Color.fromARGB(255, 182, 43, 57)!,

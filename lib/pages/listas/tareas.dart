@@ -240,7 +240,7 @@ class _TareaTileState extends State<_TareaTile> {
                     value: widget.tarea.realizado,
                   )));
 
-    if (_pref.role == 1)
+    if (_pref.role == 1 && !widget.tarea.realizado)
       return Dismissible(
           confirmDismiss: (DismissDirection direction) async {
             if (ultimaTarea(

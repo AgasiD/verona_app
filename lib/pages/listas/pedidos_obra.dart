@@ -1,4 +1,3 @@
-import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -12,7 +11,7 @@ import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
-
+import 'package:badges/badges.dart' as badges;
 class PedidoList extends StatelessWidget {
   const PedidoList({Key? key}) : super(key: key);
   static final routeName = 'pedido_list';
@@ -213,6 +212,7 @@ class _PedidosByEstado extends StatelessWidget {
                     'pedidoId': pedidos[index]['id'],
                     'obraId': _obraService.obra.id
                   };
+                  final txtFecha = 'Fecha. Pedido ${Helper.getFechaFromTS(pedidos[index]['ts'])}';
                   final textSubtitle = pedidos[index]['fechaEstimada'] == ''
                       ? "${("Fecha deseada").toUpperCase()} ${pedidos[index]['fechaDeseada']}"
                       : "${("Fecha de entrega").toUpperCase()} ${pedidos[index]['fechaEstimada']}";
@@ -227,6 +227,9 @@ class _PedidosByEstado extends StatelessWidget {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(  txtFecha.toUpperCase(),
+                              style: TextStyle(
+                                  color: Helper.brandColors[8].withOpacity(.8)),),
                             Text(
                               textSubtitle.toUpperCase(),
                               style: TextStyle(
@@ -361,7 +364,7 @@ class _CustomListTile extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           esNovedad
-                              ? Badge(
+                              ? badges.Badge(
                                   badgeColor: Helper.brandColors[8],
                                   badgeContent: Padding(
                                     padding: const EdgeInsets.all(0),

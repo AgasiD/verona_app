@@ -313,4 +313,57 @@ class ObraService extends ChangeNotifier {
 
     return resp;
   }
+
+ Future<MyResponse> obtenerPedidosPorObra(String id) async{
+       
+    final datos = await this._http.get('$_endpoint/obtenerPedidosObras/$id');
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
+
+    return resp;
+  }
+
+  
+ Future<MyResponse> obtenerControlObra() async{
+       
+    final datos = await this._http.get('$_endpoint/obtenerControlObra');
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
+
+    return resp;
+  }
+
+
+ Future<MyResponse> obtenerControlInactividades() async{
+       
+    final datos = await this._http.get('$_endpoint/obtenerInactividadesPorObras');
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
+
+    return resp;
+  }
+
+  Future<MyResponse> grabarInactividades(List<String> idsObras,Map map) async{
+    final body = {
+      "ids": idsObras,
+      "inactividad": map,
+    };
+    final datos = await this._http.post('$_endpoint/inactividadMasiva', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+
+    return resp;
+  }
+
+  Future<MyResponse> eliminarInactividad(String obraId, String id) async{
+     final datos = await this._http.delete('$_endpoint/inactividad/$obraId/$id',);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    notifyListeners();
+    return resp;
+  }
 }

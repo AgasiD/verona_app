@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/inactividad.dart';
-import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/forms/inactividad.dart';
 import 'package:verona_app/services/obra_service.dart';
-import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
-class InactividadesPage extends StatelessWidget {
+class InactividadesPage extends StatefulWidget {
   static final routeName = 'inactividades';
-  const InactividadesPage({Key? key}) : super(key: key);
+   InactividadesPage({Key? key}) : super(key: key);
+
+  @override
+  State<InactividadesPage> createState() => _InactividadesPageState();
+}
+
+class _InactividadesPageState extends State<InactividadesPage> {
+late ObraService  _obraService;
 
   @override
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-    final _obraService = Provider.of<ObraService>(context);
+     _obraService = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
 
     return Scaffold(
@@ -32,17 +37,9 @@ class InactividadesPage extends StatelessWidget {
             )
           : Container(),
       body: Container(
-        color: Helper.brandColors[1],
-        child: FutureBuilder(
-          future: _obraService.obtenerObra(obraId),
-          builder: (_, snapshot) {
-            if (snapshot.data == null) {
-              return Loading(mensaje: 'Cargando Inactividados');
-            } else {
-              final obra = (snapshot.data as Obra);
-
-              if (obra.diasInactivos.length == 0) {
-                return Container(
+          color: Helper.brandColors[1],
+          child: _obraService.obra.diasInactivos.length == 0
+              ? Container(
                   child: Center(
                     child: Text(
                       'Aún no se registraron dias inactivos ',
@@ -50,25 +47,35 @@ class InactividadesPage extends StatelessWidget {
                       maxLines: 3,
                     ),
                   ),
-                );
-              }
-              obra.diasInactivos = ordenaInactividad(obra.diasInactivos);
-              return ListView.builder(
-                  itemCount: obra.diasInactivos.length,
+                )
+              : ListView.builder(
+                  itemCount: _obraService.obra.diasInactivos.length,
                   itemBuilder: (_, index) {
                     return _InactividadTile(
                         index: index,
                         obraId: obraId,
-                        inactividad:
-                            Inactividad.fromMap(obra.diasInactivos[index]));
-                  });
-            }
-          },
-        ),
-      ),
+                        inactividad: Inactividad.fromMap(
+                            _obraService.obra.diasInactivos[index]),
+                            deleteFunction: eliminarInactividad 
+                            );
+                  })),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
+
+eliminarInactividad(int index, String id, String obraId) async {
+
+    _obraService.obra.diasInactivos.removeAt(index);
+    final response = await _obraService.eliminarInactividad(obraId,id) as MyResponse;
+    if(response.fallo){
+      Helper.showSnackBar(context, "Error al eliminar inactividad", TextStyle(color: Colors.red
+      [100]), null, null);
+      return;
+    }
+      Helper.showSnackBar(context, "Inactividad eliminada", TextStyle(color: Helper.brandColors[8]), null, null);
+
+ 
+}
 }
 
 ordenaInactividad(diasInactivos) {
@@ -91,11 +98,14 @@ class _InactividadTile extends StatefulWidget {
       {Key? key,
       required this.inactividad,
       required this.obraId,
-      required this.index})
+      required this.index,
+      required this.deleteFunction
+      })
       : super(key: key);
   Inactividad inactividad;
   String obraId;
   int index;
+  Function(int, String, String) deleteFunction;
 
   @override
   State<_InactividadTile> createState() => __InactividadTileState();
@@ -117,47 +127,68 @@ class __InactividadTileState extends State<_InactividadTile> {
   Widget build(BuildContext context) {
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
-      child: Column(
-        children: [
-          Container(
-              decoration: BoxDecoration(
-                  color: _color, borderRadius: BorderRadius.circular(10)),
-              child: ListTile(
-                leading: Container(
-                  padding: EdgeInsets.all(1),
-                  decoration: BoxDecoration(
-                      color: !esPar ? Helper.brandColors[9] : null,
-                      borderRadius: BorderRadius.circular(100)),
-                  child: CircleAvatar(
-                    backgroundColor: Helper.brandColors[0],
-                    child: Icon(Icons.work_off_outlined),
+    return Dismissible(
+      direction: DismissDirection.endToStart,
+      background: Container(
+        padding: EdgeInsets.only(right: 15),
+        alignment: Alignment.centerRight,
+        child: Text(
+          'Eliminar',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        color: Colors.red,
+      ),
+      key: ValueKey<int>(widget.index),
+      confirmDismiss: (direction) async =>  await openDialogConfirmationReturn(context, 'Confirme para eliminar inactividad'),
+      onDismissed: (direction) async => widget.deleteFunction(widget.index, widget.inactividad.id, widget.obraId),
+      
+
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: Column(
+          children: [
+            Container(
+                decoration: BoxDecoration(
+                    color: _color, borderRadius: BorderRadius.circular(10)),
+                child: ListTile(
+                  leading: Container(
+                    padding: EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                        color: !esPar ? Helper.brandColors[9] : null,
+                        borderRadius: BorderRadius.circular(100)),
+                    child: CircleAvatar(
+                      backgroundColor: Helper.brandColors[0],
+                      child: Icon(Icons.work_off_outlined),
+                    ),
                   ),
-                ),
-                title: Text('${widget.inactividad.nombre}',
+                  title: Text('${widget.inactividad.nombre}',
+                      style: TextStyle(
+                        color: Helper.brandColors[5],
+                      )),
+                  subtitle: Text(
+                    widget.inactividad.fecha,
                     style: TextStyle(
-                      color: Helper.brandColors[5],
-                    )),
-                subtitle: Text(
-                  widget.inactividad.fecha,
-                  style:
-                      TextStyle(color: Helper.brandColors[9].withOpacity(.99)),
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: Helper.brandColors[3],
-                ),
-                onTap: () {
-                  Navigator.pushNamed(context, InactividadesForm.routeName,
-                      arguments: {
-                        'obraId': widget.obraId,
-                        'id': widget.inactividad.id
-                      });
-                },
-              )),
-        ],
+                        color: Helper.brandColors[9].withOpacity(.99)),
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Helper.brandColors[3],
+                  ),
+                  onTap: () {
+                    Navigator.pushNamed(context, InactividadesForm.routeName,
+                        arguments: {
+                          'obraId': widget.obraId,
+                          'id': widget.inactividad.id
+                        });
+                  },
+                )),
+          ],
+        ),
       ),
     );
+  }
+  
+  eliminarInactividad(Inactividad inactividad, int index, String obraId) async{
+    
   }
 }

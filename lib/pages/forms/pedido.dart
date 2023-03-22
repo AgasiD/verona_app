@@ -34,8 +34,9 @@ class PedidoForm extends StatelessWidget implements MyForm {
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final pedidoId = arguments['pedidoId'] ?? '';
+    final obraId = arguments['obraId'] ?? _obraService.obra.id;
     bool edit = pedidoId != '';
-    quitarNovedad(pedidoId, _socketService, _obraService);
+    quitarNovedad(pedidoId, _socketService, obraId);
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -72,10 +73,10 @@ class PedidoForm extends StatelessWidget implements MyForm {
   }
 
   void quitarNovedad(
-      String pedidoId, SocketService _socketService, ObraService _obraService) {
+      String pedidoId, SocketService _socketService, String obraId) {
     final dato = (_socketService.novedades ?? []).where((novedad) =>
         novedad['tipo'] == 1 &&
-        novedad['obraId'] == _obraService.obra.id &&
+        novedad['obraId'] == obraId &&
         novedad['pedidoId'] == pedidoId);
 
     if (dato.length == 0) return;
@@ -214,7 +215,6 @@ class _FormState extends State<_Form> {
     final _driveService =
         Provider.of<GoogleDriveService>(context, listen: false);
 
-    print('reincio');
 
     return Container(
         color: Helper.brandColors[1],
@@ -1032,7 +1032,8 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
       config: CalendarDatePicker2WithActionButtonsConfig(
         selectedDayHighlightColor: Helper.brandColors[8],
         calendarType: CalendarDatePicker2Type.single,
-        // shouldCloseDialogAfterCancelTapped: true,
+        closeDialogOnCancelTapped: true,
+        
       ),
       dialogSize: Size(width, height),
       initialValue: [selectedDate],
@@ -1041,7 +1042,6 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
 
     if (results != null) {
       final date = results![0];
-      print(date);
       String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
 
       txtCtrlDate.text = formattedDate.toString();
@@ -1049,16 +1049,6 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
       selectedDate = date;
     }
 
-    // DatePicker.showDatePicker(context,
-    //     showTitleActions: true, minTime: DateTime(2022, 1, 1),
-    //     // maxTime: DateTime(2025, 12, 31),
-    //     onConfirm: (date) {
-    //   String formattedDate = DateFormat('dd/MM/yyyy').format(date);
-
-    //   txtCtrlDate.text = formattedDate.toString();
-    //   widget.pedido!.fechaEstimada = formattedDate.toString();
-    //   selectedDate = date;
-    // }, onChanged: (date) {}, currentTime: selectedDate, locale: LocaleType.es);
   }
 
   void selectDateDeseada(context, txtCtrlDate, selectedDate) async {
@@ -1070,8 +1060,7 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
       config: CalendarDatePicker2WithActionButtonsConfig(
         selectedDayHighlightColor: Helper.brandColors[8],
         calendarType: CalendarDatePicker2Type.single,
-        // shouldCloseDialogAfterCancelTapped: true,
-      ),
+        closeDialogOnCancelTapped: true,      ),
       dialogSize: Size(width, height),
       initialValue: [selectedDate],
       borderRadius: BorderRadius.circular(5),
@@ -1079,7 +1068,6 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
 
     if (results != null) {
       final date = results![0];
-      print(date);
       String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
 
       txtCtrlDate.text = formattedDate.toString();

@@ -5,16 +5,21 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:animate_do/animate_do.dart';
-import 'package:badges/badges.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_fade/image_fade.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:badges/badges.dart' as badges;
+import 'package:verona_app/helpers/Enviroment.dart';
 
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/pages/ABMs/ControlObra.dart';
+import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
+import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
 import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -155,15 +160,33 @@ class _ObrasPageState extends State<ObrasPage> {
         'name': 'Propietarios',
         'route': PropietariosADM.routeName,
         'roles': [1]
+      }, 
+      {
+        'icon': Icons.account_tree,
+        'name': 'Control de obras',
+        'route': ControlObraABM.routeName,
+        'roles': !Environment.isProduction ? [1] : [999]
+      } ,
+      {
+        'icon': Icons.request_page,
+        'name': 'Pedidos',
+        'route': PedidosPanelControl.routeName,
+        'roles': [1,5],
       },
       {
         'icon': Icons.edit_note_rounded,
         'name': 'Mis anotaciones',
         'route': AnotacionesPage.routeName,
         'roles': [1, 2, 3, 7],
-                'args': {'obraId': null},
-
-      }
+        'args': {'obraId': null},
+      },
+       {
+        'icon': Icons.work_off_outlined,
+        'name': 'Control inactividades',
+        'route': InactividadesABM.routeName,
+        'roles': [1, 2, 7],
+      },
+      
     ];
 
     return Scaffold(
@@ -466,7 +489,7 @@ class _CustomObrasState extends State<_CustomObras> {
                             ? Positioned(
                                 top: 10,
                                 left: 10,
-                                child: Badge(
+                                child: badges.Badge(
                                   badgeColor: Helper.brandColors[8],
                                   badgeContent: Padding(
                                     padding: const EdgeInsets.all(0),
@@ -528,29 +551,30 @@ class _CustomObrasState extends State<_CustomObras> {
                             ]),
                       ]),
                     ),
-                    // Hero(
-                    //   tag: obra.id,
-                    //   child:
-                    // Image(image: image, loadingBuilder: ),
-                    Expanded(
-                      child: ImageFade(
-                        // width: MediaQuery.of(context).size.width * .43,
-                        image: NetworkImage(obra.imageURL),
-                        loadingBuilder: (context, progress, chunkEvent) =>
-                            Center(
-                                child: CircularProgressIndicator(
-                          value: progress,
-                          color: Helper.brandColors[8],
-                        )),
 
-                        // displayed when an error occurs:
-                        errorBuilder: (context, error) => Container(
-                          color: Helper.brandColors[8],
-                          alignment: Alignment.center,
-                          child: Image(image: AssetImage('assets/image.png')),
+                    Expanded(
+                        child: CachedNetworkImage(
+                      imageUrl: obra.imageURL,
+                      imageBuilder: (context, imageProvider) => Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: imageProvider,
+
+                          ),
                         ),
                       ),
-                    ),
+                      placeholder: (context, url) => Center(
+                          child: CircularProgressIndicator(
+                        color: Helper.brandColors[8],
+                      )),
+                      errorWidget: (context, url, error) => Container(
+                        color: Helper.brandColors[8],
+                        alignment: Alignment.center,
+                        child: Image(image: AssetImage('assets/image.png')),
+                      ),
+                    )),
+
+                 
                   ],
                 ),
               ),
