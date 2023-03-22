@@ -212,6 +212,7 @@ class _PedidosByEstado extends StatelessWidget {
                     'pedidoId': pedidos[index]['id'],
                     'obraId': _obraService.obra.id
                   };
+                  final txtFecha = 'Fecha. Pedido ${Helper.getFechaFromTS(pedidos[index]['ts'])}';
                   final textSubtitle = pedidos[index]['fechaEstimada'] == ''
                       ? "${("Fecha deseada").toUpperCase()} ${pedidos[index]['fechaDeseada']}"
                       : "${("Fecha de entrega").toUpperCase()} ${pedidos[index]['fechaEstimada']}";
@@ -226,6 +227,9 @@ class _PedidosByEstado extends StatelessWidget {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(  txtFecha.toUpperCase(),
+                              style: TextStyle(
+                                  color: Helper.brandColors[8].withOpacity(.8)),),
                             Text(
                               textSubtitle.toUpperCase(),
                               style: TextStyle(

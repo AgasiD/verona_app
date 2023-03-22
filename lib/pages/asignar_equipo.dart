@@ -88,7 +88,6 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
   List<Miembro> miembrosFiltrados = [];
   @override
   Widget build(BuildContext context) {
-    print('build searchlist ');
     final _obraService = Provider.of<ObraService>(context, listen: false);
 
     var miembros = miembrosFiltrados!.map((e) {

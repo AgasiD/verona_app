@@ -39,6 +39,7 @@ class ObraPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
+    
     final _service = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     final esDelivery = _pref.role == 6;
@@ -263,6 +264,7 @@ class _DiasViewState extends State<_DiasView> {
 
   @override
   Widget build(BuildContext context) {
+    final _obraService = Provider.of<ObraService>(context);
     final diasTrans = widget.obra.getDiasTranscurridos();
     if (ok) {
       ok = false;
@@ -273,6 +275,10 @@ class _DiasViewState extends State<_DiasView> {
         diasTranscurridos = widget.obra.getDiasTranscurridos();
         if (activeST) setState(() {});
       });
+    }else{
+       diasEstimados = widget.obra.diasEstimados;
+        diasInactivos = widget.obra.cantDiasInactivos;
+        diasTranscurridos = widget.obra.getDiasTranscurridos();
     }
     return Container(
       margin: EdgeInsets.only(top: 25),
@@ -764,9 +770,6 @@ class _ObraBigrafy extends StatelessWidget {
 
   abrirMap(context) async {
     final availableMaps = await MapLauncher.installedMaps;
-    print(
-        availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
-
     if (_obraService.obra.longitud == null) {
       return;
     }

@@ -72,7 +72,6 @@ class NotificationService extends ChangeNotifier {
     Preferences pref = new Preferences();
     pref.type = message.data['type'];
 
-    print(pref.type);
     pref.type = '_onBackgroud';
     message.data.addAll({"navega": true});
 

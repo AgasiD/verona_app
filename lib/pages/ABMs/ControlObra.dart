@@ -45,6 +45,7 @@ class _ControlObraABMState extends State<ControlObraABM>
               indicatorColor: Helper.brandColors[8],
               tabs: [
                 Tab(
+
                     child: Text(
                   'Etapas',
                   style: TextStyle(color: Helper.brandColors[8]),
@@ -91,6 +92,7 @@ class _ControlObraABMState extends State<ControlObraABM>
                     .toList() as List<Tarea>;
 
                 return TabBarView(
+                  
                   controller: _tabCtrl,
                   children: [
                     _EtapasView(etapas: etapas),
@@ -433,6 +435,7 @@ class _TareasView extends StatefulWidget {
       : super(key: key);
   List<Subetapa> subetapas;
   List<Tarea> tareas;
+  List<Tarea> tareasFiltradas = [];
 
   @override
   State<_TareasView> createState() => _TareasViewState();
@@ -441,19 +444,21 @@ class _TareasView extends StatefulWidget {
 class _TareasViewState extends State<_TareasView> {
   int valueSelect = 1;
   int cantRegistros = 10;
+  List<Tarea> tareasAux = [];
+  TextEditingController searchCtrl = TextEditingController();
+  bool busquedaActiva = false;
   @override
   Widget build(BuildContext context) {
+    busquedaActiva ? false : tareasAux = widget.tareas;
     var subetapas = widget.subetapas
         .map((e) => DropdownMenuItem(
             value: e.id.toString(),
             child: FittedBox(
-        fit: BoxFit.fitWidth, 
-        
-              child: Text(e.descripcion.toString()))))
+                fit: BoxFit.fitWidth, child: Text(e.descripcion.toString()))))
         .toList();
 
     Map<int, FlexColumnWidth> columnWidths = {
-      0: FlexColumnWidth(2),
+      0: FlexColumnWidth(1.5),
       1: FlexColumnWidth(2),
       2: FlexColumnWidth(.7),
       3: FlexColumnWidth(1),
@@ -487,6 +492,7 @@ class _TareasViewState extends State<_TareasView> {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 '#',
+                textAlign: TextAlign.center,
                 style: textTitleStyle,
               ),
             ),
@@ -494,14 +500,19 @@ class _TareasViewState extends State<_TareasView> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
                 'Por defecto',
+                textAlign: TextAlign.center,
                 style: textTitleStyle,
               ),
             ),
           ])
     ];
     var controllers = [];
-        print(valueSelect);
-    for (int i = valueSelect; i < cantRegistros+valueSelect; i++) {
+
+    int veces = widget.tareas.length < cantRegistros ? widget.tareas.length - 1 : valueSelect * cantRegistros + cantRegistros - 1;
+    print(valueSelect);
+    for (int i = valueSelect * cantRegistros;
+        i < veces;
+        i++) {
       var txtDescri =
           TextEditingController(text: widget.tareas[i].descripcion.toString());
       var txtOrden = TextEditingController(text: 0.toString());
@@ -571,38 +582,88 @@ class _TareasViewState extends State<_TareasView> {
         child: SingleChildScrollView(
             child: Column(
           children: [
-            Row(
-              children: [Text('Cantidad de registros visibles',style:TextStyle(color: Helper.brandColors[3], fontSize: 18)),
-              DropdownButton(
-                alignment: Alignment.center,
-                value: cantRegistros, items: [10,25,50,100].map((cant) => DropdownMenuItem<int>(child: Text(cant.toString(),textAlign: TextAlign.center, style:TextStyle(color: Helper.brandColors[3], fontSize: 18)), value: cant ,)).toList()
-              , onChanged: (a){
-                refreshCantRegistros(int.parse(a.toString()));
-              })
-              ],
-
+            Container(
+              width: MediaQuery.of(context).size.width,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Cantidad de registros visibles',
+                          style: TextStyle(
+                              color: Helper.brandColors[3], fontSize: 18)),
+                      DropdownButton(
+                          alignment: Alignment.center,
+                          value: cantRegistros,
+                          items: [10, 25, 50, 100]
+                              .map((cant) => DropdownMenuItem<int>(
+                                    child: Text(cant.toString(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Helper.brandColors[3],
+                                            fontSize: 18)),
+                                    value: cant,
+                                  ))
+                              .toList(),
+                          onChanged: (a) {
+                            refreshCantRegistros(int.parse(a.toString()));
+                          }),
+                    ],
+                  ),
+                  SizedBox(
+                    width: 300,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: TextField(
+                          style: TextStyle(color: Helper.brandColors[5]),
+                          controller: searchCtrl,
+                          decoration: InputDecoration(
+                            suffixIcon: Icon(
+                              Icons.search,
+                              color: Helper.brandColors[3],
+                            ),
+                            hintText: 'Buscar tarea...',
+                            hintStyle: TextStyle(color: Helper.brandColors[3]),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Helper.brandColors[8], width: 2.0)),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Helper.brandColors[3], width: 2.0),
+                            ),
+                          ),
+                          onChanged: (value) => filtrarDatos(value)
+                          ,),
+                    ),
+                  )
+                ],
+              ),
             ),
-            Table(
-              columnWidths: columnWidths, children: datos),
-            Container(margin: EdgeInsets.symmetric(vertical: 45), child: _Paginator(total: datos.length, valueSelect: valueSelect, refreshTable: refreshTable, cantRegistros: cantRegistros))
+            Table(columnWidths: columnWidths, children: datos),
+            Container(
+                margin: EdgeInsets.symmetric(vertical: 45),
+                child: _Paginator(
+                    total: widget.tareas.length,
+                    valueSelect: valueSelect,
+                    refreshTable: refreshTable,
+                    cantRegistros: cantRegistros))
           ],
         )));
-
   }
 
-  refreshTable(int value){
+  refreshTable(int value) {
     setState(() {
-    valueSelect = value;
-
-
-      });
+      valueSelect = value;
+    });
   }
 
-   refreshCantRegistros(int value){
+  refreshCantRegistros(int value) {
     setState(() {
-    cantRegistros = value;
-valueSelect = 1;
-      });
+      cantRegistros = value;
+      valueSelect = 1;
+    });
   }
 
   borrarSubetapa(int index) async {
@@ -613,10 +674,28 @@ valueSelect = 1;
     widget.tareas.removeAt(index);
     setState(() {});
   }
+  
+  filtrarDatos(String value) {
+    if(value.isEmpty) {
+      widget.tareas = tareasAux;
+      busquedaActiva = false;
+    }
+    else{
+    widget.tareas = widget.tareas.where((tarea) => tarea.descripcion.toLowerCase().contains(value.toLowerCase())).toList();
+    busquedaActiva = true;
+    ;}
+    setState(() {
+      
+    });
+  }
 }
 
 class _Paginator extends StatefulWidget {
-  _Paginator({required this.total,required this.cantRegistros, required this.valueSelect, required this.refreshTable});
+  _Paginator(
+      {required this.total,
+      required this.cantRegistros,
+      required this.valueSelect,
+      required this.refreshTable});
   int total, cantRegistros;
   int valueSelect;
   Function(int) refreshTable;
@@ -641,7 +720,17 @@ class __PaginatorState extends State<_Paginator> {
       )
     ]); // <
 
-    for (int i = (widget.valueSelect > 1 ? widget.valueSelect - 1 : widget.valueSelect); i <= ((widget.valueSelect < cantItems) ? widget.valueSelect == widget.valueSelect + maxItems ? widget.valueSelect + maxItems-1 :widget.valueSelect + maxItems : maxItems); i++) {
+    int cant = ((widget.valueSelect < cantItems)
+        ? widget.valueSelect == widget.valueSelect + maxItems
+            ? widget.valueSelect + maxItems - 1
+            : widget.valueSelect + maxItems
+        : maxItems);
+
+    for (int i = (widget.valueSelect > 1
+            ? widget.valueSelect - 1
+            : widget.valueSelect);
+        i <= cant;
+        i++) {
       items.add(_ItemPaginator(
         move: setValueSelect,
         value: i,
@@ -649,26 +738,32 @@ class __PaginatorState extends State<_Paginator> {
         isSelect: i == widget.valueSelect,
       ));
     }
-    widget.valueSelect < cantItems - 2 ? items.add(_ItemPaginator(
-      move: setValueSelect,
-      value: -1,
-      ellipsis: true,
-    )) : false;
-    widget.valueSelect < cantItems - 1 ? items.add(_ItemPaginator(
-        move: setValueSelect,
-        value: cantItems,
-        number: cantItems,
-        isSelect: cantItems == widget.valueSelect)) : false;
-   widget.valueSelect < cantItems  ? items.add(
-      _ItemPaginator(
-          move: setValueSelect, value: widget.valueSelect + 1, next: true)
-   ) : false; // >
-    widget.valueSelect < cantItems - 1 ? items.add(  _ItemPaginator(
-        move: setValueSelect,
-        value: cantItems,
-        last: true,
-      )  // >>
-    ): false;
+    widget.valueSelect < cantItems - 2
+        ? items.add(_ItemPaginator(
+            move: setValueSelect,
+            value: -1,
+            ellipsis: true,
+          ))
+        : false;
+    widget.valueSelect < cantItems - 1
+        ? items.add(_ItemPaginator(
+            move: setValueSelect,
+            value: cantItems,
+            number: cantItems,
+            isSelect: cantItems == widget.valueSelect))
+        : false;
+    widget.valueSelect < cantItems
+        ? items.add(_ItemPaginator(
+            move: setValueSelect, value: widget.valueSelect + 1, next: true))
+        : false; // >
+    widget.valueSelect < cantItems - 1
+        ? items.add(_ItemPaginator(
+            move: setValueSelect,
+            value: cantItems,
+            last: true,
+          ) // >>
+            )
+        : false;
 
     return Container(
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: items),
@@ -676,7 +771,6 @@ class __PaginatorState extends State<_Paginator> {
   }
 
   setValueSelect(int value) {
-    
     widget.valueSelect = value < 1 ? widget.valueSelect = 1 : value;
     widget.refreshTable(value);
     setState(() {});
@@ -714,7 +808,7 @@ class _ItemPaginator extends StatelessWidget {
                         : number.toString();
 
     return GestureDetector(
-      onTap: () => move(value),
+      onTap: () => ellipsis ? null : move(value),
       child: Center(
           child: Container(
               color: isSelect ? Helper.brandColors[8] : Helper.brandColors[2],

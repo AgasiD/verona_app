@@ -58,6 +58,7 @@ class _SubEtapas extends StatelessWidget {
         child: ListView.builder(
           itemCount: subetapas.length,
           itemBuilder: (context, index) {
+            subetapas.sort( (a, b) => a.orden.compareTo(b.orden));
             return _SubEtapaCard(
                 etapaId: etapaId, subetapa: subetapas[index] as Subetapa);
           },

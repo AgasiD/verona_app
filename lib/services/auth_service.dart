@@ -7,7 +7,6 @@ class AuthService extends ChangeNotifier {
   final _endpoint = 'api/auth';
 
   Future<MyResponse> validarToken(String token) async {
-    print('validar token');
     final body = {'token': token};
 
     final datos = await this._http.post('$_endpoint/checkToken', body);

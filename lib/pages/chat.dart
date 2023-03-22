@@ -93,7 +93,6 @@ class _ChatPageState extends State<ChatPage>
   void buscarMensaje(tsMensaje) {
     fromTS = tsMensaje;
     toTop = true;
-    print(fromTS);
     setState(() {});
   }
 
@@ -204,7 +203,6 @@ class _CustomChatBarState extends State<_CustomChatBar> {
           )),
     );
 
-    print(result);
 
     widget.action(result ?? 0);
   }
@@ -262,7 +260,6 @@ class _ListMessageBoxState extends State<ListMessageBox>
     } else {
       final mensajesNuevos = (response.data['message'] as List<dynamic>);
       if (mensajesNuevos.length > 0) {
-        // print(mensajes);
         mensajesNuevos.forEach((element) {
           //inserto al principio del chat (mensaje viejo)
           mensajes.add(Message.fromMap(element));
@@ -313,7 +310,6 @@ class _ListMessageBoxState extends State<ListMessageBox>
 
   void leerUltimoMensaje(mensaje) async {
     if (mensajes.length > 0) {
-      // print(mensajes.first.ts);
       await _usuarioService.ultimoMensajeLeido(
           _pref.id, widget.chatId, mensaje.ts ?? 0);
       _chatService.notifyListeners();
@@ -328,13 +324,10 @@ class _ListMessageBoxState extends State<ListMessageBox>
 
         if (mensaje.from != _pref.id) {
           agregarMensaje(mensaje, false);
-          // print(mensaje.ts);
           ModalRoute.of(context)!.settings.name == ChatPage.routeName
               ? leerUltimoMensaje(mensaje)
               : false;
-          // print(mensajes.last.ts);
 
-          //Vibration.vibrate(duration: 75, amplitude: 128);
         } else {
           //si es mensaje propio
 
@@ -700,12 +693,10 @@ class _ChatMessageState extends State<_ChatMessage> {
 
     return GestureDetector(
         onLongPress: () {
-          print('reenviar');
           shade = 200;
           setState(() {});
         },
         onLongPressEnd: (long) {
-          print('reenviar');
           shade = 100;
           setState(() {});
         },

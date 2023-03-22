@@ -353,7 +353,6 @@ class _FormState extends State<_Form> {
 
     if (results != null) {
       final date = results![0];
-      print(date);
       String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
 
       txtCtrlDate.text = formattedDate.toString();

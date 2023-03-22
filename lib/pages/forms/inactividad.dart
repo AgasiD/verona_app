@@ -60,7 +60,7 @@ class _FormState extends State<_Form> {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     obraId = arguments['obraId'];
     if (arguments.containsKey('id')) {
-      //NUEVA INACTIVIDAD
+      //Edita INACTIVIDAD
       inactividadId = arguments['id'];
       edit = true;
       textAction = 'Editar inactividad';
@@ -210,7 +210,6 @@ class _FormState extends State<_Form> {
 
     if (results != null) {
       final date = results![0];
-      print(date);
       String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
 
       txtCtrlDate.text = formattedDate.toString();

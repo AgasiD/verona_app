@@ -15,6 +15,7 @@ import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/image_service.dart';
+import 'package:verona_app/services/inactividad_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -53,6 +54,9 @@ class _AppStateState extends State<AppState> {
       providers: [
         ChangeNotifierProvider(
           create: (_) => ObraService(),
+          lazy: false,
+        ),  ChangeNotifierProvider(
+          create: (_) => InactividadService(),
           lazy: false,
         ),
 
@@ -147,9 +151,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _notService.resetNotificationBadge();
 
       //renovar token
-
-      // print(_pref.token == null);
-      // print(_pref.token == '');
       // if (_pref.token != null && _pref.token != '') {
       //   final response = await _authService.validarToken(_pref.token);
       //   if (!response.fallo) {

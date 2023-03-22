@@ -53,7 +53,6 @@ class ImagenViewer extends StatelessWidget {
   }
 
   guardarArchivo() async {
-    print(url);
     try {
       var response = await Dio()
           .get(url, options: Options(responseType: ResponseType.bytes));

@@ -126,6 +126,12 @@ class Obra {
       longitud: json['longitud'],
       imageURL: json['imageURL'] ?? '');
 
+  int get cantDiasInactivos {
+    int dias = 0;
+    this.diasInactivos.forEach((element) { dias += element['diasInactivos'] == null ? 1 : element['diasInactivos'] as int ??1 ;});
+    return dias;
+  }
+
   Map<String,dynamic> toMap() => {
         'nombre': this.nombre,
         'id': this.id,

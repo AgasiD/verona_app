@@ -18,6 +18,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/ABMs/ControlObra.dart';
+import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
 import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
 import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/chat.dart';
@@ -178,6 +179,12 @@ class _ObrasPageState extends State<ObrasPage> {
         'route': AnotacionesPage.routeName,
         'roles': [1, 2, 3, 7],
         'args': {'obraId': null},
+      },
+       {
+        'icon': Icons.work_off_outlined,
+        'name': 'Control inactividades',
+        'route': InactividadesABM.routeName,
+        'roles': [1, 2, 7],
       },
       
     ];

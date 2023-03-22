@@ -123,11 +123,13 @@ class _PendientesView extends StatefulWidget {
   State<_PendientesView> createState() => _PendientesViewState();
 }
 
+late SocketService  _socketService;
+
 class _PendientesViewState extends State<_PendientesView> {
   @override
   Widget build(BuildContext context) {
    final _obraService = Provider.of<ObraService>(context, listen: false);
-      final _socketService = Provider.of<SocketService>(context, listen: false);
+   _socketService = Provider.of<SocketService>(context);
 
     return widget.pendientes.length > 0 
     ? ListView.builder(
@@ -159,22 +161,27 @@ class _PendientesViewState extends State<_PendientesView> {
                   final esPar = index % 2 == 0;
                   final arg = {
                     'pedidoId': obra['pedidos'][index]['id'],
-                    'obraId': _obraService.obra.id
+                    'obraId': obra['obraId']
                   };
+                                    final txtFecha = 'Fecha Pedido ${Helper.getFechaFromTS(obra['pedidos'][index]['ts'])}';
                   final textSubtitle = obra['pedidos'][index]['fechaEstimada'] == ''
                       ? "${("Fecha deseada").toUpperCase()} ${obra['pedidos'][index]['fechaDeseada']}"
                       : "${("Fecha de entrega").toUpperCase()} ${obra['pedidos'][index]['fechaEstimada']}";
                   return Column(
                     children: [
                       _CustomListTile(
-                        esNovedad: _tieneNovedad(_obraService.obra.id,
-                            obra['pedidos'][index]['id'], _socketService),
+                        esNovedad: _tieneNovedad(obra['obraId'],
+                            obra['pedidos'][index]['id']),
                         esPar: false,
                         title:
                             "${obra['pedidos'][index]['titulo'].toString().toUpperCase()}",
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+
+                             Text(  txtFecha.toUpperCase(),
+                              style: TextStyle(
+                                  color: Helper.brandColors[8].withOpacity(.8)),),
                             Text(
                               textSubtitle.toUpperCase(),
                               style: TextStyle(
@@ -224,11 +231,12 @@ class _PendientesViewState extends State<_PendientesView> {
             
 
 }
- _tieneNovedad(String obraId, String pedidoId, SocketService _socketService) {
-    final dato = (_socketService.novedades ?? []).indexWhere((novedad) =>
+ _tieneNovedad(String obraId, String pedidoId) {
+    final dato = (_socketService.novedades??[]).indexWhere((novedad) =>
         novedad['tipo'] == 1 &&
         novedad['obraId'] == obraId &&
         novedad['pedidoId'] == pedidoId);
+
     return dato >= 0;
   }
 }

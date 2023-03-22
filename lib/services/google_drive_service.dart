@@ -104,7 +104,6 @@ class GoogleDriveService extends ChangeNotifier {
     }
     ;
     notifyListeners();
-    print('3');
     return ids;
   }
 
