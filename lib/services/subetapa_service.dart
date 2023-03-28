@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/services/http_service.dart';
 
 class SubetapaService extends ChangeNotifier {
@@ -36,6 +37,13 @@ class SubetapaService extends ChangeNotifier {
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
     // notifyListeners();
+    return resp;
+  }
+
+   Future<MyResponse> actualizarSubetapa(Subetapa subetapa) async{
+      final datos = await this._http.put('$_endpoint', subetapa.toJson());
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
     return resp;
   }
 }

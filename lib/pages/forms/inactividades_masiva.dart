@@ -12,6 +12,7 @@ import 'package:verona_app/models/inactividadBD.dart';
 import 'package:verona_app/services/inactividad_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:video_player/video_player.dart';
 
 class InactividadesMasivaForm extends StatelessWidget {
   static final routeName = 'InactividadesMasivaForm';
@@ -37,11 +38,14 @@ class _Form extends StatefulWidget {
 }
 
 class _FormState extends State<_Form> {
+
+ 
+
   TextEditingController txtCtrlName = new TextEditingController();
   TextEditingController txtCtrlDias = new TextEditingController();
   Preferences _pref = new Preferences();
   String inactividadId = '';
-  String textAction = 'Nueva masiva';
+  String textAction = 'Nueva inactividad masiva';
   bool edit = false;
   bool esPrivado = false;
 
@@ -65,6 +69,9 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+
+
+    
     //NUEVA INACTIVIDAD
     _obraService = Provider.of<ObraService>(context);
     Color colorHint = Helper.brandColors[3];

@@ -173,18 +173,19 @@ class _ObrasPageState extends State<ObrasPage> {
         'route': PedidosPanelControl.routeName,
         'roles': [1,5],
       },
+      
+       {
+        'icon': Icons.work_off_outlined,
+        'name': 'Control inactividades',
+        'route': InactividadesABM.routeName,
+        'roles': [1, 2, 7],
+      },
       {
         'icon': Icons.edit_note_rounded,
         'name': 'Mis anotaciones',
         'route': AnotacionesPage.routeName,
         'roles': [1, 2, 3, 7],
         'args': {'obraId': null},
-      },
-       {
-        'icon': Icons.work_off_outlined,
-        'name': 'Control inactividades',
-        'route': InactividadesABM.routeName,
-        'roles': [1, 2, 7],
       },
       
     ];

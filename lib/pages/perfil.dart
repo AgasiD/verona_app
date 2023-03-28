@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -100,6 +98,7 @@ class PerfilPage extends StatelessWidget {
                               final ImagePicker _picker = ImagePicker();
                               final image = await _picker.pickImage(
                                   source: ImageSource.gallery);
+                                  
                               if (image != null) {
                                 openLoadingDialog(context,
                                     mensaje: 'Subiendo imagen...');
@@ -411,7 +410,7 @@ class PerfilPage extends StatelessWidget {
     'Una vez que ingreses recordá asignarte una contraseña desde tu perfil. \n'+
     'Descargá la app para tu dispositivo \n'+
     'iOS: https://apps.apple.com/ar/app/verona/id1620027565?l=en \n'+
-    'Android: https://play.google.com/apps/internaltest/4700948842295010098';
+    'Android: https://play.google.com/store/apps/details?id=com.edrex.veronaapp';
 
     String url = "wa.me";
     var encoded = Uri.https(url,'', {"text": _msg, "phone": usuario.telefono});
