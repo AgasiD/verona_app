@@ -11,6 +11,7 @@ import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/password.dart';
 import 'package:verona_app/services/notifications_service.dart';
+import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -28,6 +29,7 @@ class PerfilPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _imageService = Provider.of<ImageService>(context);
+    final _obraService = Provider.of<ObraService>(context, listen: false);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final _pref = new Preferences();
     _usuarioId = arguments['usuarioId'];
@@ -83,13 +85,15 @@ class PerfilPage extends StatelessWidget {
                                     ? null
                                     : NetworkImage(usuario.profileURL),
                                 child: sinImg
-                                    ? Text(
-                                        '${usuario.nombre[0].toUpperCase()} ${usuario.apellido[0].toUpperCase()}',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Helper.brandColors[5],
+                                    ? FittedBox(
+                                      child: Text(
+                                          '${usuario.nombre[0].toUpperCase()} ${usuario.apellido[0].toUpperCase()}',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: Helper.brandColors[5],
+                                          ),
                                         ),
-                                      )
+                                    )
                                     : Container()),
                           ),
                         ),
@@ -212,13 +216,17 @@ class PerfilPage extends StatelessWidget {
                                   child: Icon(FontAwesomeIcons.at,
                                       color: Helper.brandColors[8], size: 25),
                                 ),
+                                 FittedBox(
+                                  fit: BoxFit.none,
+                                    child:
                                 Padding(
                                   padding: EdgeInsets.only(left: 20),
                                   child: Text(
-                                    '${usuario.email.toUpperCase()}',
-                                    style: TextStyle(
-                                      color: Helper.brandColors[5],
-                                      fontSize: 15,
+                                      '${usuario.email.toUpperCase()}',
+                                      style: TextStyle(
+                                        color: Helper.brandColors[5],
+                                        // fontSize: 10,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -367,6 +375,7 @@ class PerfilPage extends StatelessWidget {
                                       mensaje: 'Eliminando personal...');
                                   final response = await _usuarioService
                                       .deleteUsuario(_usuarioId);
+
                                   closeLoadingDialog(context);
                                   if (response.fallo) {
                                     openAlertDialog(
@@ -375,6 +384,7 @@ class PerfilPage extends StatelessWidget {
                                   } else {
                                     await openAlertDialogReturn(context,
                                         'Usuario desactivado con éxito');
+                                        _obraService.notifyListeners();
                                     Navigator.pop(context);
                                   }
                                 })

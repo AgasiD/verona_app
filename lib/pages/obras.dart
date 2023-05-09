@@ -27,6 +27,7 @@ import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/listas/propietarios_adm.dart';
+import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/notifications_service.dart';
@@ -160,21 +161,20 @@ class _ObrasPageState extends State<ObrasPage> {
         'name': 'Propietarios',
         'route': PropietariosADM.routeName,
         'roles': [1]
-      }, 
+      },
       {
         'icon': Icons.account_tree,
         'name': 'Control de obras',
         'route': ControlObraABM.routeName,
         'roles': !Environment.isProduction ? [1] : [999]
-      } ,
+      },
       {
         'icon': Icons.request_page,
         'name': 'Pedidos',
         'route': PedidosPanelControl.routeName,
-        'roles': [1,5],
+        'roles': [1, 5],
       },
-      
-       {
+      {
         'icon': Icons.work_off_outlined,
         'name': 'Control inactividades',
         'route': InactividadesABM.routeName,
@@ -187,7 +187,6 @@ class _ObrasPageState extends State<ObrasPage> {
         'roles': [1, 2, 3, 7],
         'args': {'obraId': null},
       },
-      
     ];
 
     return Scaffold(
@@ -230,6 +229,12 @@ class __SearchListViewState extends State<_SearchListView> {
   late List<Obra> obrasFiltradas;
 
   @override
+  void initState() {
+    super.initState();
+    final _pref = new Preferences();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final _obras = Provider.of<ObraService>(context);
     final _pref = new Preferences();
@@ -238,7 +243,7 @@ class __SearchListViewState extends State<_SearchListView> {
         child: FutureBuilder(
             future: _obras.obtenerObrasByUser(_pref.id),
             builder: ((context, snapshot) {
-              if (snapshot.data == null) {
+              if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(mensaje: 'Recuperando obras');
               } else {
                 final response = snapshot.data as MyResponse;
@@ -254,6 +259,14 @@ class __SearchListViewState extends State<_SearchListView> {
                     openDrawer: widget.openDrawer,
                   );
                 } else {
+                  if (response.error == 'Usuario inactivo') {
+                    _pref.deletePreferences();
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.pushReplacementNamed(
+                          context, LoginPage.routeName);
+                    });
+                     return Container();
+                  }
                   return Container(
                     child: Text(
                       response.error,
@@ -552,7 +565,6 @@ class _CustomObrasState extends State<_CustomObras> {
                             ]),
                       ]),
                     ),
-
                     Expanded(
                         child: CachedNetworkImage(
                       imageUrl: obra.imageURL,
@@ -560,7 +572,6 @@ class _CustomObrasState extends State<_CustomObras> {
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             image: imageProvider,
-
                           ),
                         ),
                       ),
@@ -574,8 +585,6 @@ class _CustomObrasState extends State<_CustomObras> {
                         child: Image(image: AssetImage('assets/image.png')),
                       ),
                     )),
-
-                 
                   ],
                 ),
               ),

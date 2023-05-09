@@ -98,8 +98,8 @@ class _FormState extends State<_Form> {
 
   String imgButtonText = '';
   DateTime selectedDate = DateTime.now();
-  late double latitud;
-  late double longitud;
+  double? latitud =  null;
+  double? longitud = null;
 
  final TextEditingController  txtNombreCtrl = TextEditingController();
   final TextEditingController txtBarrioCtrl = TextEditingController();
@@ -390,8 +390,8 @@ class _FormState extends State<_Form> {
             barrio: txtBarrioCtrl.text,
             lote: txtLoteCtrl.text,
             propietarios: [],
-            latitud: latitud,
-            longitud: longitud,
+            latitud: latitud ?? null,
+            longitud: longitud ?? null,
             descripcion: txtDescripCtrl.text,
             diasEstimados: int.parse(txtDuracionCtrl.text),
             diaInicio: new DateFormat("dd/MM/yyyy")
