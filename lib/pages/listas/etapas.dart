@@ -9,6 +9,7 @@ import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/pages/listas/asigna_etapas_extras.dart';
 import 'package:verona_app/pages/listas/subetapas.dart';
 import 'package:verona_app/pages/listas/tareas.dart';
+import 'package:verona_app/pages/listas/tareas_semanaria.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -20,6 +21,7 @@ class EtapasObra extends StatelessWidget {
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context);
     final _pref = new Preferences();
+    _obraService.obra.obtenerTareasRealizadasByDias(dias: 50);
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
       body: _Etapas(etapas: _obraService.obra.etapas),
@@ -27,7 +29,7 @@ class EtapasObra extends StatelessWidget {
           (_pref.role == 1 || _pref.role == 2 || _pref.role == 7)
               ? FloatingActionButton(
                   onPressed: () =>
-                      Navigator.pushNamed(context, EtapasExtrasPage.routeName),
+                      Navigator.pushNamed(context, TareasSemanarias.routeName),
                   backgroundColor: Helper.brandColors[8],
                   mini: true,
                   child: Icon(Icons.add),

@@ -39,7 +39,6 @@ class ObraPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-    
     final _service = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     final esDelivery = _pref.role == 6;
@@ -48,7 +47,7 @@ class ObraPage extends StatelessWidget {
     var imagen = obra.imageURL == ''
         ? Helper.imageNetwork(
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-        : Helper.imageNetwork(obra.imageURL);
+    : Helper.imageNetwork(obra.imageURL);
 
     MediaQuery.of(context).size.width > 1000 ? esPhone = false : true;
 
@@ -687,7 +686,6 @@ class _ObraBigrafy extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 21),
       child: Column(children: [
         Row(
-          
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             
@@ -733,6 +731,7 @@ class _ObraBigrafy extends StatelessWidget {
           height: 10,
         ),
         Row(
+          
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
@@ -740,10 +739,7 @@ class _ObraBigrafy extends StatelessWidget {
               Helper.brandColors[8],
               Helper.brandColors[9]
             ], this.obra.nombre, fontsize: 42.0),
-            // Text(
-            //   this.nombre,
-            //   style: TextStyle(color: Helper.brandColors[8], fontSize: 42),
-            // ), // Nombre del proyecto
+           
             Container(
               margin: EdgeInsets.only(left: 20),
               child: Text(this.obra.lote,

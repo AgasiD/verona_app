@@ -225,9 +225,11 @@ class Helper {
     return Text(
       text,
       style: new TextStyle(
+          // foreground: Paint()..shader = linearGradient,
+          color: colors[0],
           fontSize: fontsize,
           fontWeight: FontWeight.bold,
-          foreground: Paint()..shader = linearGradient),
+          ),
     );
   }
 

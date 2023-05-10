@@ -257,6 +257,44 @@ class Obra {
     return diasTranscurridos;
   }
 
+  List<dynamic> obtenerTareasRealizadasByDias({int dias = 5}){
+
+    int hoy = DateTime.now().millisecondsSinceEpoch;
+
+    int desde = DateTime.now().subtract(Duration(days: dias)).millisecondsSinceEpoch;
+
+    List<dynamic> tareasRealizadas = [];
+    List<dynamic> etapa_sub_tareasRealizadas = [];
+    this.etapas.forEach((etapa) {
+      
+      etapa.subetapas.forEach((subetapa) {
+
+        List<Subetapa> subetapasRealizadas = [];
+        etapa_sub_tareasRealizadas.add({
+          "subetapa": subetapa.descripcion,
+          "tareas": []
+        });
+          List<Tarea> tareasRealizadas = [];
+
+        subetapa.tareas.forEach((tarea) {
+          
+          if(tarea.tsRealizado >= desde && tarea.tsRealizado <= hoy){
+             tareasRealizadas.add(tarea);
+             print('add');
+          }
+        });
+          etapa_sub_tareasRealizadas.last['tareas'] = tareasRealizadas;
+        
+       });
+
+     });
+     etapa_sub_tareasRealizadas = etapa_sub_tareasRealizadas.where((e) => e['tareas'].length > 0 ).toList();
+     print('tareasRealizadas: ${etapa_sub_tareasRealizadas.length} ');
+
+     print(etapa_sub_tareasRealizadas);
+    return etapa_sub_tareasRealizadas;
+  }
+
   String ubicToText() {
     if(this.latitud == null) return '';
      return '${this.latitud} ${this.longitud} ';

@@ -9,6 +9,7 @@ import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/etapa.dart';
 import 'package:verona_app/pages/forms/inactividades_masiva.dart';
+import 'package:verona_app/pages/forms/semanario_message.dart';
 import 'package:verona_app/pages/forms/subetapa.dart';
 import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
 import 'package:verona_app/pages/listas/asigna_etapas_extras.dart';
@@ -35,6 +36,7 @@ import 'package:verona_app/pages/listas/propietarios.dart';
 import 'package:verona_app/pages/listas/propietarios_adm.dart';
 import 'package:verona_app/pages/listas/subetapas.dart';
 import 'package:verona_app/pages/listas/tareas.dart';
+import 'package:verona_app/pages/listas/tareas_semanaria.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obra.dart';
@@ -98,4 +100,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   SubEtapasObra.routeName: (_) => SubEtapasObra(),
   TareasCheckList.routeName: (_) => TareasCheckList(),
   TareasExtrasPage.routeName: (_) => TareasExtrasPage(),
+  TareasSemanarias.routeName: (_) => TareasSemanarias(),
+  SemanarioMessageForm.routeName: (_) => SemanarioMessageForm(),
   };

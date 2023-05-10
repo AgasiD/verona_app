@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:animate_do/animate_do.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +14,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/models/message.dart';
+import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/pages/chat.dart';
 
 import 'package:verona_app/pages/listas/chats.dart';
@@ -21,6 +23,7 @@ import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
+import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 
@@ -425,7 +428,6 @@ class _CustomInputState extends State<CustomInput> {
           padding: EdgeInsets.only(right: 15),
           margin: EdgeInsets.only(bottom: 10),
           child: TextFormField(
-            
             textCapitalization: TextCapitalization.sentences,
             enabled: widget.enable,
             readOnly: widget.readOnly,
@@ -922,7 +924,8 @@ Future<bool> openDialogConfirmationReturn(BuildContext context, String mensaje,
 openLoadingDialog(BuildContext context, {String mensaje = ''}) {
   if (Platform.isAndroid) {
     showDialog(
-        context: context, builder: (context) => LoadingDialog(mensaje: mensaje));
+        context: context,
+        builder: (context) => LoadingDialog(mensaje: mensaje));
   } else {
     showCupertinoDialog(
       context: context,
@@ -1017,31 +1020,30 @@ void openAlertDialog(BuildContext context, String mensaje,
   }
 }
 
-
 class LoadingDialog extends StatelessWidget {
   LoadingDialog({Key? key, this.mensaje = ''}) : super(key: key);
   String mensaje;
   @override
   Widget build(BuildContext context) {
     return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SpinKitDualRing(color: Helper.brandColors[8]),
-            SizedBox(
-              height: 15,
-            ),
-            mensaje != ''
-                ? Text(
-                    mensaje,
-                    style: TextStyle(
-                        color: Helper.brandColors[3],
-                        fontSize: 15,
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.bold),
-                  )
-                : Container()
-          ],
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SpinKitDualRing(color: Helper.brandColors[8]),
+        SizedBox(
+          height: 15,
+        ),
+        mensaje != ''
+            ? Text(
+                mensaje,
+                style: TextStyle(
+                    color: Helper.brandColors[3],
+                    fontSize: 15,
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.bold),
+              )
+            : Container()
+      ],
     );
   }
 }
@@ -1140,7 +1142,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
-                    ObrasPage.routeName, 
+                    ObrasPage.routeName,
                     (Route<dynamic> route) => route.isFirst);
                 // Navigator.pushNamed(context, ObrasPage.routeName);
               }
@@ -1752,6 +1754,338 @@ class CustomListTile extends StatelessWidget {
     ;
   }
 }
+
+class ListaTarea extends StatefulWidget {
+  ListaTarea(
+      {Key? key,
+      required this.tareas,
+      required this.etapaId,
+      this.edit = false,
+      this.tareasSemanales = false})
+      : super(key: key);
+
+  final List<Tarea> tareas;
+  final String etapaId;
+  bool edit, tareasSemanales;
+  @override
+  State<ListaTarea> createState() => _ListaTareaState();
+}
+
+class _ListaTareaState extends State<ListaTarea> {
+  late ObraService _obraService;
+  @override
+  Widget build(BuildContext context) {
+    _obraService = Provider.of<ObraService>(context, listen: false);
+
+    return ReorderableListView(
+
+      // itemCount: tareas.length,
+      padding: const EdgeInsets.only(bottom: 50),
+
+      children: [
+        for (int index = 0; index < widget.tareas.length; index += 1)
+          Container(
+            key: Key(widget.tareas[index].id),
+            color: Helper.brandColors[2],
+            child: _TareaTile(
+              etapaId: widget.etapaId,
+              tarea: widget.tareas[index],
+              index: index,
+              edit: widget.edit,
+            ),
+          )
+      ],
+      onReorder: (oldIndex, newIndex) async {
+        if (oldIndex < newIndex) {
+          newIndex -= 1;
+        }
+        final Tarea item = widget.tareas.removeAt(oldIndex);
+        widget.tareas.insert(newIndex, item);
+        setState(() {});
+        final response = await _obraService.actualizarOrdenTareas(
+            _obraService.obra.id,
+            widget.etapaId,
+            widget.tareas[newIndex].subetapa,
+            widget.tareas);
+
+        if (response.fallo) {
+          openAlertDialog(context, 'Error al ordenar',
+              subMensaje: response.error);
+          return;
+        }
+      },
+    );
+  }
+}
+
+class _TareaTile extends StatefulWidget {
+  _TareaTile(
+      {Key? key,
+      required this.tarea,
+      required this.index,
+      required this.etapaId,
+      this.edit = true,
+      this.tareasSemanales = false})
+      : super(key: key);
+
+  Tarea tarea;
+  int index;
+  String etapaId;
+  bool edit, tareasSemanales;
+
+  @override
+  State<_TareaTile> createState() => _TareaTileState();
+}
+
+class _TareaTileState extends State<_TareaTile> {
+  late ObraService _obraService;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _obraService = Provider.of<ObraService>(context, listen: false);
+    final _pref = new Preferences();
+
+    final checkboxTile = Container(
+        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+        child: GestureDetector(
+            onLongPress: () {
+              openAlertDialog(context, 'Descripción',
+                  subMensaje: widget.tarea.descripcion);
+            },
+            child: widget.edit
+                ? ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    tileColor: Helper.brandColors[2],
+                    trailing: ReorderableDragStartListener(
+                        index: widget.index,
+                        child: Icon(
+                          Icons.drag_indicator_outlined,
+                          color: Helper.brandColors[8],
+                        )),
+                    title: Text(
+                      '${widget.index + 1} - ${widget.tarea.descripcion}',
+                      // overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(color: Helper.brandColors[3], fontSize: 15),
+                    ),
+                  )
+                : CheckboxListTile(
+                    enabled: [1, 2, 7].contains(_pref.role),
+                    tileColor: Helper.brandColors[2],
+                    checkColor: Helper.brandColors[5],
+                    activeColor: Helper.brandColors[8],
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      '${widget.index + 1} - ${widget.tarea.descripcion}',
+                      // overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(color: Helper.brandColors[3], fontSize: 15),
+                    ),
+                    onChanged: (value) async {
+                      final tareasSemanales = true;
+                      if (tareasSemanales) {
+                        return;
+                      }
+                      await actualizaTareaBD(context, value);
+                    },
+                    value: widget.tarea.realizado,
+                  )));
+
+    if (_pref.role == 1 && !widget.tarea.realizado)
+      return Dismissible(
+          confirmDismiss: (DismissDirection direction) async {
+            if (ultimaTarea(
+                widget.etapaId, widget.tarea.subetapa, widget.tarea.id)) {
+              openAlertDialog(context, 'No se puede dejar sin tareas');
+
+              return false;
+            }
+            return await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                if (Platform.isAndroid) {
+                  return AlertDialog(
+                    title: const Text("Confirmar"),
+                    content: const Text("Confirmar eliminacion de tarea"),
+                    actions: <Widget>[
+                      TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text('Confirmar')),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text('Cancelar',
+                            style: TextStyle(color: Colors.grey)),
+                      ),
+                    ],
+                  );
+                } else {
+                  return CupertinoAlertDialog(
+                    title: Text('Confirmar eliminacion de tarea'),
+                    actions: [
+                      CupertinoDialogAction(
+                          child: Text('Confirmar'),
+                          onPressed: () async => Navigator.pop(context, true)),
+                      CupertinoDialogAction(
+                        isDestructiveAction: true,
+                        child: Text('Cancelar'),
+                        onPressed: () => Navigator.pop(context, false),
+                      )
+                    ],
+                  );
+                }
+              },
+            );
+          },
+          direction: DismissDirection.endToStart,
+          onDismissed: (direction) async {
+            await eliminarTarea(context, _obraService.obra.id, widget.etapaId,
+                widget.tarea.subetapa, widget.tarea.id);
+          },
+          background: Container(
+            color: Colors.red,
+            child: Container(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Eliminar',
+                  style: TextStyle(color: Helper.brandColors[4], fontSize: 20),
+                ),
+              ),
+            ),
+          ),
+          key: ValueKey<String>(widget.tarea.id),
+          child: checkboxTile);
+
+    return checkboxTile;
+  }
+
+  Future<void> actualizaTareaBD(BuildContext context, bool? value) async {
+    openLoadingDialog(context, mensaje: 'Actualizando...');
+    final response = await _obraService.actualizarTarea(
+        _obraService.obra.id,
+        widget.etapaId,
+        widget.tarea.subetapa,
+        widget.tarea.id,
+        value!,
+        new Preferences().id,
+        DateTime.now().millisecondsSinceEpoch);
+    closeLoadingDialog(context);
+    widget.tarea.realizado = value!;
+    _obraService.notifyListeners();
+
+    if (response.fallo) {
+      openAlertDialog(context, 'Error al actualizar tarea',
+          subMensaje: response.error);
+    }
+
+    setState(() {});
+  }
+
+  eliminarTarea(context, obraId, etapaId, subetapaId, tareaId) async {
+    final index =
+        _obraService.obra.etapas.indexWhere((etapa) => etapa.id == etapaId);
+    final indexSub = _obraService.obra.etapas[index].subetapas
+        .indexWhere((subetapa) => subetapa.id == subetapaId);
+
+    final indexTarea = _obraService
+        .obra.etapas[index].subetapas[indexSub].tareas
+        .indexWhere((tarea) => tarea.id == tareaId);
+
+    if (_obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
+        1) {
+      openAlertDialog(context, 'No se puede dejar sin tareas');
+      return;
+    }
+
+    _obraService.obra.etapas[index].subetapas[indexSub].tareas
+        .removeAt(indexTarea);
+    openLoadingDialog(context, mensaje: 'Eliminando tarea...');
+    final response =
+        await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
+    closeLoadingDialog(context);
+    if (response.fallo) {
+      openAlertDialog(context, 'Error al eliminar tarea',
+          subMensaje: response.error);
+    }
+  }
+
+  bool ultimaTarea(etapaId, subetapaId, tareaId) {
+    final index =
+        _obraService.obra.etapas.indexWhere((etapa) => etapa.id == etapaId);
+    final indexSub = _obraService.obra.etapas[index].subetapas
+        .indexWhere((subetapa) => subetapa.id == subetapaId);
+
+    final indexTarea = _obraService
+        .obra.etapas[index].subetapas[indexSub].tareas
+        .indexWhere((tarea) => tarea.id == tareaId);
+
+    return _obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
+        1;
+  }
+}
+
+
+
+
+class CalendarInput extends StatelessWidget {
+   CalendarInput({
+    Key? key,
+    required this.habilitaEdicion,
+    required this.txtCtrlFecha,
+    required this.selectedDate,
+
+    }) : super(key: key);
+
+    bool habilitaEdicion;
+TextEditingController txtCtrlFecha;
+List<DateTime> selectedDate;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomInput(
+                                      readOnly: true,
+                                      enable: habilitaEdicion,
+                                      width: 200,
+                                      hintText: ('Fecha').toUpperCase(),
+                                      icono: null,
+                                      textController: txtCtrlFecha,
+                                      iconButton: IconButton(
+                                          icon: Icon(
+                                            Icons.calendar_today,
+                                            color: Helper.brandColors[3],
+                                          ),
+                                          onPressed: () {
+                                            selectDateDeseada(
+                                              context,
+                                              txtCtrlFecha,
+                                              selectedDate,
+                                            );
+                                          }));
+  }
+
+  void selectDateDeseada(context, txtCtrlDate, selectedDate) async {
+    double width = MediaQuery.of(context).size.width * .8;
+
+    double height = MediaQuery.of(context).size.height * .5;
+    var results = await showCalendarDatePicker2Dialog(
+      context: context,
+      config: CalendarDatePicker2WithActionButtonsConfig(
+        selectedDayHighlightColor: Helper.brandColors[8],
+        calendarType: CalendarDatePicker2Type.single,
+        closeDialogOnCancelTapped: true,      ),
+      dialogSize: Size(width, height),
+      initialValue: [selectedDate],
+      borderRadius: BorderRadius.circular(5),
+    );
+}
+}
+
+
 
 // class Custom_Flip_Counter extends StatefulWidget {
 //   Custom_Flip_Counter(
