@@ -1,16 +1,17 @@
 import 'dart:io';
 
-import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/pages/forms/semanario_message.dart';
-import 'package:verona_app/pages/listas/tareas.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:win32/win32.dart';
 
 class TareasSemanarias extends StatelessWidget {
   static final routeName = 'TareasSemanarias';
@@ -20,16 +21,19 @@ class TareasSemanarias extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    final obra = args['obra'];
     return Scaffold(
           appBar: AppBar(
           title: Text('Tareas realizadas'),
           backgroundColor: Helper.brandColors[1],
           
         ),
-        backgroundColor: Helper.brandColors[1],
+        backgroundColor: Helper.brandColors[2],
         body: SafeArea(
+
       
-      child: _Semanario(selectedTask: selectedTask)),
+      child: _Semanario(obra: obra, selectedTask: selectedTask)),
         floatingActionButton: FloatingActionButton(
           onPressed: () => Navigator.pushNamed(context, SemanarioMessageForm.routeName, arguments: {'data': selectedTask}),
           child: Icon(Icons.navigate_next_rounded, size: 40),
@@ -41,52 +45,93 @@ class TareasSemanarias extends StatelessWidget {
   }
 }
 
-class _Semanario extends StatelessWidget {
-  _Semanario({Key? key, required this.selectedTask }) : super(key: key);
-
+class _Semanario extends StatefulWidget {
+  _Semanario({Key? key, required this.obra, required this.selectedTask }) : super(key: key);
+  Obra obra;
   List<Tarea> selectedTask;
 
   @override
+  State<_Semanario> createState() => _SemanarioState();
+}
+
+class _SemanarioState extends State<_Semanario> {
+  DateTime hasta = DateTime.now();
+
+  DateTime desde = DateTime.now().subtract(Duration(days: 5));
+
+  dynamic tareas;
+
+  late ObraService _obraService;
+
+  late TextEditingController txtCtrlDesde;
+
+  late TextEditingController txtCtrlHasta;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    tareas = widget.obra.obtenerTareasRealizadasByDias(dias:5);
+
+  }
+  
+  @override
   Widget build(BuildContext context) {
-    final _obraService = Provider.of<ObraService>(context);
-    final tareas = _obraService.obra.obtenerTareasRealizadasByDias(dias: 30);
+
+    txtCtrlDesde = new TextEditingController(text:Helper.getFechaFromTS(desde.millisecondsSinceEpoch, format: 'dd/MM/yyyy'));
+    txtCtrlHasta = new TextEditingController(text:Helper.getFechaFromTS(hasta.millisecondsSinceEpoch, format: 'dd/MM/yyyy'));
+
     asignarTareas(tareas);
-    final hasta = DateTime.now();
-    final desde = DateTime.now().subtract(Duration(days: 5));
 
-    TextEditingController txtCtrlDesde = new TextEditingController(text:Helper.getFechaFromTS(hasta.millisecondsSinceEpoch));
-    TextEditingController txtCtrlHasta = new TextEditingController(text:Helper.getFechaFromTS(desde.millisecondsSinceEpoch));
+    return  
+         Column(
+           children: [
+             Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                      children: [
+                       Container(
+                             padding: EdgeInsets.symmetric(vertical: 10),
+                             color: Helper.brandColors[2],
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                              Row(children: [ Container(padding: EdgeInsets.only(left: 25), width: 85, child: Text('Desde', style: TextStyle(color: Helper.brandColors[4]))),CalendarInput(habilitaEdicion: true, selectedDate: desde, txtCtrlFecha: txtCtrlDesde,), ] ,),
+                              Row(children: [ Container(padding: EdgeInsets.only(left: 25), width: 85, child: Text('Hasta', style: TextStyle(color: Helper.brandColors[4]))),CalendarInput(habilitaEdicion: true, selectedDate: hasta, txtCtrlFecha: txtCtrlHasta, )],),
+                              SizedBox(height: 10,),
+                              MainButton(onPressed: buscarTareas, text: 'Buscar tareas', width: 100, color: Helper.brandColors[8],fontSize: 15, height: 25, )
+                            ],),
+                      
+                        ), 
+                       _ListTask(
+                                etapaId: '', tareas: tareas, tareasSemanales: false, selectedTask:widget.selectedTask),                  
+                      ],
+                  
+                 ),
+              ),
+    ),
+           ],
+         );
+  }
 
-    return  Column(
-          
-          children: [
-          //  Container(
-                
-          //        margin: EdgeInsets.symmetric(vertical: 10),
-          //       child: Column(
-          //         mainAxisAlignment: MainAxisAlignment.center,
-          //         children: [
-          //         Row(children: [Text('Desde'),CalendarInput(habilitaEdicion: true, selectedDate: [hasta], txtCtrlFecha: txtCtrlDesde,), ],),
-          //         Row(children: [Text('Hasta'),CalendarInput(habilitaEdicion: true, selectedDate: [desde], txtCtrlFecha: txtCtrlHasta,)],)
-          //       ],),
-          
-          //   ), 
-           _ListTask(
-                    etapaId: '', tareas: tareas, tareasSemanales: false, selectedTask:selectedTask),
-            
+  buscarTareas(){
+    DateFormat formato = DateFormat('dd/MM/yyyy');
+    desde = formato.parse(txtCtrlDesde.text);
+    hasta = formato.parse(txtCtrlHasta.text);
 
-          ],
-
-   );
+    tareas = widget.obra.obtenerTareasRealizadasDesdeHasta(desde, hasta.add(Duration(days: 1)));
+    setState(() {
+      
+    });
   }
 
   asignarTareas(List tareas){
+    widget.selectedTask.clear();
     tareas.forEach((element) 
     {
-      selectedTask.addAll((element['tareas'] as List).map((e) => e));
+      widget.selectedTask.addAll((element['tareas'] as List).map((e) => e));
      });
   }
-  
 }
 
 class _ListTask extends StatefulWidget {
@@ -114,54 +159,63 @@ class __ListTaskState extends State<_ListTask> {
   Widget build(BuildContext context) {
     _obraService = Provider.of<ObraService>(context, listen: false);
 
-    return Expanded(
-      child: Column(
-        children: [
-          Expanded(
-              child: ListView.builder(
-            itemCount: widget.tareas.length,
-            padding: const EdgeInsets.only(bottom: 50),
-            itemBuilder: (context, index) {
-    
-            return Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Helper.brandColors[9], width: .2),
-                    borderRadius: BorderRadius.circular(5),
-                    color: Helper.brandColors[0],
+    if(widget.tareas.length == 0)
+    {
+      return Container(
+        height: 300,
+        child: Center(
+                                  child: Text(
+                                    'No hay tareas realizas entre fechas',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Helper.brandColors[4]),
+                                  ),
+                                ),
+      );
+    }
+    return ListView.builder(
+              itemCount: widget.tareas.length,
+              padding: const EdgeInsets.only(bottom: 50),
+                      shrinkWrap: true,
+                         physics: ClampingScrollPhysics(),
+
+              itemBuilder: (context, index) {
+      
+              return Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Helper.brandColors[9], width: .2),
+                      borderRadius: BorderRadius.circular(5),
+                      color: Helper.brandColors[0],
+                    ),
+                    child: ListTile(
+                      title: Text(widget.tareas[index]['subetapa']),
+                      textColor: Helper.brandColors[5],
+                    ),
                   ),
-                  child: ListTile(
-                    title: Text(widget.tareas[index]['subetapa']),
-                    textColor: Helper.brandColors[5],
-                  ),
-                ),
-    
-           
-                    ListView.builder(
-                       physics: ClampingScrollPhysics(),
-                  shrinkWrap: true,
-                    itemCount: widget.tareas[index]['tareas'].length,
-                  itemBuilder: (context, i) {
-                      return Container(
-                      color: Helper.brandColors[2],
-                      child: _TaskTile(
-                        etapaId: widget.etapaId,
-                        tarea: widget.tareas[index]['tareas'][i],
-                        index: i,
-                        onCheck: addTask,
-                        checkToMessage: checkToMessage,
-                      ),
-                    
-                    );})
-               
-                
-              ],
-            );
-            },
-          )),
-        ],
-      ),
+      
+             
+                      ListView.builder(
+                         physics: ClampingScrollPhysics(),
+                    shrinkWrap: true,
+                      itemCount: widget.tareas[index]['tareas'].length,
+                    itemBuilder: (context, i) {
+                        return Container(
+                        color: Helper.brandColors[2],
+                        child: _TaskTile(
+                          etapaId: widget.etapaId,
+                          tarea: widget.tareas[index]['tareas'][i],
+                          index: i,
+                          onCheck: addTask,
+                          checkToMessage: checkToMessage,
+                        ),
+                      
+                      );})
+                ],
+              );
+              },
+        
     );
   }
   addTask(Tarea task){

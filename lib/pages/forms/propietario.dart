@@ -34,9 +34,11 @@ class _PropietarioFormState extends State<PropietarioForm> {
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     String? _usuarioId;
+    String _pageFrom = 'menu';
     if (ModalRoute.of(context)!.settings.arguments != null) {
       final arguments = ModalRoute.of(context)!.settings.arguments as Map;
       _usuarioId = arguments['usuarioId'] ?? null;
+      _pageFrom = arguments['pageFrom'] ?? 'menu';
     }
     if (_usuarioId != null) edit = true;
     return Scaffold(
@@ -60,9 +62,7 @@ class _PropietarioFormState extends State<PropietarioForm> {
                   Text(
                     'nuevo propietario'.toUpperCase(),
                     style: TextStyle(
-                        foreground: Paint()
-                          ..shader = Helper.getGradient(
-                              [Helper.brandColors[8], Helper.brandColors[9]]),
+                        color: Helper.brandColors[8],
                         fontSize: 23),
                   ),
                   SizedBox(
@@ -87,10 +87,10 @@ class _PropietarioFormState extends State<PropietarioForm> {
 
                             final propietario = Miembro.fromJson(response.data);
 
-                            return _Form(propietario: propietario);
+                            return _Form(from: _pageFrom, propietario: propietario);
                           },
                         )
-                      : _Form(),
+                      : _Form(from: _pageFrom,),
                 ],
               ),
             ),
@@ -103,9 +103,10 @@ class _PropietarioFormState extends State<PropietarioForm> {
 }
 
 class _Form extends StatefulWidget {
-  _Form({Key? key, this.propietario = null}) : super(key: key);
+  _Form({Key? key,required this.from, this.propietario = null}) : super(key: key);
 
   Miembro? propietario;
+  String from;
 
   @override
   State<_Form> createState() => _FormState();
@@ -121,11 +122,7 @@ class _FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     if (widget.propietario != null) {
-      txtNombreCtrl.text = widget.propietario!.nombre;
-      txtApellidoCtrl.text = widget.propietario!.apellido;
-      txtDNICtrl.text = widget.propietario!.dni;
-      txtTelefonoCtrl.text = widget.propietario!.telefono;
-      txtMailCtrl.text = widget.propietario!.email;
+      setForm();
     }
     return Form(
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -176,7 +173,7 @@ class _FormState extends State<_Form> {
             children: [
               MainButton(
                   width: 100,
-                  color: Helper.brandColors[7],
+                  color: Helper.brandColors[8],
                   onPressed: () {
                     widget.propietario == null
                         ? grabarPropietario(context)
@@ -198,33 +195,49 @@ class _FormState extends State<_Form> {
     );
   }
 
+  void setForm() {
+     txtNombreCtrl.text = widget.propietario!.nombre;
+    txtApellidoCtrl.text = widget.propietario!.apellido;
+    txtDNICtrl.text = widget.propietario!.dni;
+    txtTelefonoCtrl.text = widget.propietario!.telefono;
+    txtMailCtrl.text = widget.propietario!.email;
+  }
+
   grabarPropietario(BuildContext context) async {
-    bool isValid = true;
-    final _service = Provider.of<UsuarioService>(context, listen: false);
+    // bool isValid = true;
+    // final _service = Provider.of<UsuarioService>(context, listen: false);
 
-    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-    txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
-    txtDNICtrl.text == '' ? isValid = false : true;
-    txtTelefonoCtrl.text == '' ? isValid = false : true;
-    txtMailCtrl.text == '' ? isValid = false : true;
+    // txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+    // txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
+    // txtDNICtrl.text == '' ? isValid = false : true;
+    // txtTelefonoCtrl.text == '' ? isValid = false : true;
+    // txtMailCtrl.text == '' ? isValid = false : true;
 
-    if (isValid) {
-      openLoadingDialog(context, mensaje: 'Guardando propietario...');
+    // if (isValid) {
+    //   openLoadingDialog(context, mensaje: 'Guardando propietario...');
 
-      final prop = Propietario(
-          nombre: txtNombreCtrl.text,
-          apellido: txtApellidoCtrl.text,
-          dni: txtDNICtrl.text,
-          telefono: txtTelefonoCtrl.text,
-          email: txtMailCtrl.text);
-      _service.grabarUsuario(prop);
-      resetForm();
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Propietario creado');
-      await openAlertDialogReturn(context, 'Propietario creado');
+    //   final prop = Propietario(
+    //       nombre: txtNombreCtrl.text,
+    //       apellido: txtApellidoCtrl.text,
+    //       dni: txtDNICtrl.text,
+    //       telefono: txtTelefonoCtrl.text,
+    //       email: txtMailCtrl.text);
+    //   _service.grabarUsuario(prop);
+    //   resetForm();
+    //   closeLoadingDialog(context);
+    //   openAlertDialog(context, 'Propietario creado');
+    //   await openAlertDialogReturn(context, 'Propietario creado');
+      leavePage(context);
+    // } else {
+    //   openAlertDialog(context, 'Formulario invalido');
+    // }
+  }
+
+  void leavePage(BuildContext context) {
+    if(widget.from == 'obra'){
       Navigator.of(context).popAndPushNamed(AgregarPropietariosPage.routeName);
-    } else {
-      openAlertDialog(context, 'Formulario invalido');
+    }else{
+      Navigator.of(context).pop();
     }
   }
 

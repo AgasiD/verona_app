@@ -180,16 +180,16 @@ class Obra {
   }
 
   estaPropietario(usuarioId) {
-    return propietarios.indexWhere((element) => element.dni == usuarioId) > -1;
+    return propietarios.indexWhere((element) => element.id == usuarioId) > -1;
   }
 
   sumarPropietario(Propietario prop) {
-    !estaPropietario(prop.dni) ? this.propietarios.add(prop) : false;
+    !estaPropietario(prop.id) ? this.propietarios.add(prop) : false;
   }
 
   quitarPropietario(Propietario prop) {
-    if (estaPropietario(prop.dni)) {
-      propietarios.removeWhere((element) => element.dni == prop.dni);
+    if (estaPropietario(prop.id)) {
+      propietarios.removeWhere((element) => element.id == prop.id);
     }
   }
 
@@ -259,9 +259,22 @@ class Obra {
 
   List<dynamic> obtenerTareasRealizadasByDias({int dias = 5}){
 
-    int hoy = DateTime.now().millisecondsSinceEpoch;
+    DateTime hasta = DateTime.now();
 
-    int desde = DateTime.now().subtract(Duration(days: dias)).millisecondsSinceEpoch;
+    DateTime desde = DateTime.now().subtract(Duration(days: dias));
+
+    return _buscarTareas(desde, hasta);
+
+  }
+
+
+  List<dynamic> obtenerTareasRealizadasDesdeHasta(DateTime desde, DateTime hasta){
+
+    return _buscarTareas(desde, hasta);
+
+  }
+
+  _buscarTareas(DateTime desde, DateTime hasta){
 
     List<dynamic> tareasRealizadas = [];
     List<dynamic> etapa_sub_tareasRealizadas = [];
@@ -278,9 +291,8 @@ class Obra {
 
         subetapa.tareas.forEach((tarea) {
           
-          if(tarea.tsRealizado >= desde && tarea.tsRealizado <= hoy){
+          if(tarea.realizado && (tarea.tsRealizado >= desde.millisecondsSinceEpoch && tarea.tsRealizado <= hasta.millisecondsSinceEpoch)){
              tareasRealizadas.add(tarea);
-             print('add');
           }
         });
           etapa_sub_tareasRealizadas.last['tareas'] = tareasRealizadas;
@@ -289,9 +301,6 @@ class Obra {
 
      });
      etapa_sub_tareasRealizadas = etapa_sub_tareasRealizadas.where((e) => e['tareas'].length > 0 ).toList();
-     print('tareasRealizadas: ${etapa_sub_tareasRealizadas.length} ');
-
-     print(etapa_sub_tareasRealizadas);
     return etapa_sub_tareasRealizadas;
   }
 

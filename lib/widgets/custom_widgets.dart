@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
@@ -1778,7 +1779,6 @@ class _ListaTareaState extends State<ListaTarea> {
     _obraService = Provider.of<ObraService>(context, listen: false);
 
     return ReorderableListView(
-
       // itemCount: tareas.length,
       padding: const EdgeInsets.only(bottom: 50),
 
@@ -1839,10 +1839,6 @@ class _TareaTile extends StatefulWidget {
 
 class _TareaTileState extends State<_TareaTile> {
   late ObraService _obraService;
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1886,10 +1882,7 @@ class _TareaTileState extends State<_TareaTile> {
                           TextStyle(color: Helper.brandColors[3], fontSize: 15),
                     ),
                     onChanged: (value) async {
-                      final tareasSemanales = true;
-                      if (tareasSemanales) {
-                        return;
-                      }
+                     
                       await actualizaTareaBD(context, value);
                     },
                     value: widget.tarea.realizado,
@@ -1966,6 +1959,7 @@ class _TareaTileState extends State<_TareaTile> {
 
   Future<void> actualizaTareaBD(BuildContext context, bool? value) async {
     openLoadingDialog(context, mensaje: 'Actualizando...');
+    final ts = DateTime.now().millisecondsSinceEpoch;
     final response = await _obraService.actualizarTarea(
         _obraService.obra.id,
         widget.etapaId,
@@ -1973,9 +1967,10 @@ class _TareaTileState extends State<_TareaTile> {
         widget.tarea.id,
         value!,
         new Preferences().id,
-        DateTime.now().millisecondsSinceEpoch);
+        ts);
     closeLoadingDialog(context);
     widget.tarea.realizado = value!;
+    widget.tarea.tsRealizado = ts;
     _obraService.notifyListeners();
 
     if (response.fallo) {
@@ -2029,46 +2024,43 @@ class _TareaTileState extends State<_TareaTile> {
   }
 }
 
-
-
-
 class CalendarInput extends StatelessWidget {
-   CalendarInput({
+  CalendarInput({
     Key? key,
     required this.habilitaEdicion,
     required this.txtCtrlFecha,
     required this.selectedDate,
+  }) : super(key: key);
 
-    }) : super(key: key);
-
-    bool habilitaEdicion;
-TextEditingController txtCtrlFecha;
-List<DateTime> selectedDate;
+  bool habilitaEdicion;
+  TextEditingController txtCtrlFecha;
+  DateTime selectedDate;
 
   @override
   Widget build(BuildContext context) {
     return CustomInput(
-                                      readOnly: true,
-                                      enable: habilitaEdicion,
-                                      width: 200,
-                                      hintText: ('Fecha').toUpperCase(),
-                                      icono: null,
-                                      textController: txtCtrlFecha,
-                                      iconButton: IconButton(
-                                          icon: Icon(
-                                            Icons.calendar_today,
-                                            color: Helper.brandColors[3],
-                                          ),
-                                          onPressed: () {
-                                            selectDateDeseada(
-                                              context,
-                                              txtCtrlFecha,
-                                              selectedDate,
-                                            );
-                                          }));
+        readOnly: true,
+        enable: habilitaEdicion,
+        width: 200,
+        hintText: ('Fecha').toUpperCase(),
+        icono: null,
+        textController: txtCtrlFecha,
+        iconButton: IconButton(
+            icon: Icon(
+              Icons.calendar_today,
+              color: Helper.brandColors[3],
+            ),
+            onPressed: () {
+              selectDateDeseada(
+                context,
+                txtCtrlFecha,
+                selectedDate,
+              );
+            }));
   }
 
-  void selectDateDeseada(context, txtCtrlDate, selectedDate) async {
+  void selectDateDeseada(context, TextEditingController txtCtrlDate,
+      DateTime? selectedDate) async {
     double width = MediaQuery.of(context).size.width * .8;
 
     double height = MediaQuery.of(context).size.height * .5;
@@ -2077,12 +2069,20 @@ List<DateTime> selectedDate;
       config: CalendarDatePicker2WithActionButtonsConfig(
         selectedDayHighlightColor: Helper.brandColors[8],
         calendarType: CalendarDatePicker2Type.single,
-        closeDialogOnCancelTapped: true,      ),
+        closeDialogOnCancelTapped: true,
+      ),
       dialogSize: Size(width, height),
       initialValue: [selectedDate],
       borderRadius: BorderRadius.circular(5),
     );
-}
+
+    if (results != null) {
+      final date = results![0];
+      String formattedDate = DateFormat('dd/MM/yyyy').format(date!);
+      txtCtrlDate.text = formattedDate.toString();
+      selectedDate = date;
+    }
+  }
 }
 
 

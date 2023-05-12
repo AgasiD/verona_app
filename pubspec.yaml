@@ -76,7 +76,7 @@ dependencies:
   google_maps_flutter: 2.1.1
   cached_network_image: ^3.2.3
   multiselect: ^0.1.0
-  video_player: ^2.6.0
+  
 dependency_overrides:
   firebase_core_platform_interface: 4.5.1
 

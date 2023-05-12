@@ -60,12 +60,7 @@ class _MiembroFormState extends State<MiembroForm> {
                           snapshot.data as MyResponse;
                       if (!response.fallo) {
                         final usuario = Miembro.fromJson(response.data);
-                        _txtNombreCtrl.text = usuario.nombre;
-                        _txtApellidoCtrl.text = usuario.apellido;
-                        _txtDNICtrl.text = usuario.dni;
-                        _txtTelefonoCtrl.text = usuario.telefono;
-                        _txtMailCtrl.text = usuario.email;
-                        personalSelected = usuario.role.toString();
+                        setForm(usuario);
                         return _Form(
                           txtNombreCtrl: _txtNombreCtrl,
                           txtApellidoCtrl: _txtApellidoCtrl,
@@ -90,6 +85,15 @@ class _MiembroFormState extends State<MiembroForm> {
                   })),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
+  }
+
+  void setForm(Miembro usuario) {
+    _txtNombreCtrl.text = usuario.nombre;
+    _txtApellidoCtrl.text = usuario.apellido;
+    _txtDNICtrl.text = usuario.dni;
+    _txtTelefonoCtrl.text = usuario.telefono;
+    _txtMailCtrl.text = usuario.email;
+    personalSelected = usuario.role.toString();
   }
 }
 
@@ -160,9 +164,7 @@ class _Form extends StatelessWidget {
               Text(
                 edit ? 'Actualizar personal'.toUpperCase() : 'NUEVO MIEMBRO',
                 style: TextStyle(
-                    foreground: Paint()
-                      ..shader = Helper.getGradient(
-                          [Helper.brandColors[8], Helper.brandColors[9]]),
+                   color:Helper.brandColors[8],
                     fontSize: 23),
               ),
               SizedBox(

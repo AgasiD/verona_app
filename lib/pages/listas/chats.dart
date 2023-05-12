@@ -19,16 +19,13 @@ class ChatList extends StatefulWidget {
 }
 
 class _ChatListState extends State<ChatList> with RouteAware {
-  @override
-  void initState() {
-    super.initState();
-  }
-
+ 
   TextEditingController txtController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final _chatService = Provider.of<ChatService>(context);
+    print('inicioChat List');
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final _pref = new Preferences();
     _socketService.connect(_pref.id);

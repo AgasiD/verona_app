@@ -1,8 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/tarea.dart';
+import 'package:verona_app/services/chat_service.dart';
+import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class SemanarioMessageForm extends StatelessWidget {
@@ -19,7 +23,7 @@ class SemanarioMessageForm extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Helper.brandColors[2],
         appBar: AppBar(
-          title: Text('Tareas seleccionadas'),
+          title: Text('${data.length} tareas seleccionadas'),
           backgroundColor: Helper.brandColors[1],
           
         ),
@@ -42,7 +46,9 @@ class _Form extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            height: 50,
+            margin: EdgeInsets.only(top: 15),
+            height: 40,
+            // child: Text('Total tareas: ${data.length}', style: TextStyle(color: Helper.brandColors[4], fontSize: 18 )),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -118,14 +124,30 @@ class _Form extends StatelessWidget {
     });
 
     text += '\n¡Seguimos avanzando con los trabajos!';
-
+    text.replaceAll('"', '');
     return text;
   }
   
   enviarMensaje(context) async{
+    try{
+
     openLoadingDialog(context, mensaje: 'Enviando mensaje...');
-                        await Future.delayed(Duration(seconds: 2));
-                        closeLoadingDialog(context);
-                        openAlertDialog(context, 'El Mensaje NO ha sido enviado');
+    final _chatService = Provider.of<ChatService>(context, listen: false);
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+    final _pref = new Preferences();
+    final response = await _chatService.enviarMensajeChatGroup(_obraService.obra.id, _pref.id, txtCtrl.text);
+    closeLoadingDialog(context);
+    if( response.fallo )
+    {
+      openAlertDialog(context, 'Error al enviar mensaje', subMensaje: response.error);
+      return;
+    }
+    openAlertDialog(context, 'Mensaje enviado');
+    }catch( err ){
+      closeLoadingDialog(context);
+      openAlertDialog(context, 'Error al enviar mensaje', subMensaje: err.toString());
+
+    }
+    
   }
 }

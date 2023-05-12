@@ -42,8 +42,10 @@ class _AgregarPropietariosPageState extends State<AgregarPropietariosPage> {
               } else {
                 final propietarios = snapshot.data as List<Propietario>;
                 return Column(children: [
-                  _SearchListView(
-                      obra: _obraService.obra, propietarios: propietarios),
+                  Expanded(
+                    child: _SearchListView(
+                        obra: _obraService.obra, propietarios: propietarios),
+                  ),
                   Padding(
                       padding:
                           EdgeInsets.symmetric(horizontal: 15, vertical: 10),
@@ -158,29 +160,7 @@ class __customTileAddedState extends State<_customTileAdded> {
       children: [
         ListTile(
           onTap: () async {
-            String mensaje = '';
-            if (widget.agregado) {
-              openLoadingDialog(context, mensaje: 'Desasignando propietario');
-              mensaje = 'Propietario quitado';
-              await _ObraService.quitarUsuario(
-                  widget.obra.id, widget.propietario.dni);
-              widget.asignados
-                  .removeWhere((element) => element == widget.propietario.dni);
-              widget.agregado = !widget.agregado;
-              widget.obra.quitarPropietario(widget.propietario);
-            } else {
-              openLoadingDialog(context, mensaje: 'Asociando propietario...');
-              mensaje = 'Propietario asignado';
-              await _ObraService.agregarUsuario(
-                  widget.obra.id, widget.propietario.id);
-              widget.asignados.add(widget.propietario.dni);
-              widget.agregado = !widget.agregado;
-              widget.obra.sumarPropietario(widget.propietario);
-            }
-            closeLoadingDialog(context);
-            Helper.showSnackBar(context, mensaje, TextStyle(fontSize: 15),
-                Duration(milliseconds: 500), null);
-            setState(() {});
+            await cambiarAsignacion(context, _ObraService);
           },
           title: Text(
             '${widget.propietario.nombre} ${widget.propietario.apellido}',
@@ -196,6 +176,33 @@ class __customTileAddedState extends State<_customTileAdded> {
         )
       ],
     );
+  }
+
+  Future<void> cambiarAsignacion(BuildContext context, ObraService _ObraService) async {
+    String mensaje = '';
+    if (widget.agregado) {
+      openLoadingDialog(context, mensaje: 'Desasignando propietario');
+      mensaje = 'Propietario quitado';
+      await _ObraService.quitarUsuario(
+          widget.obra.id, widget.propietario.dni);
+      widget.asignados
+          .removeWhere((element) => element == widget.propietario.dni);
+      widget.agregado = !widget.agregado;
+      widget.obra.quitarPropietario(widget.propietario);
+    } else {
+      openLoadingDialog(context, mensaje: 'Asociando propietario...');
+      mensaje = 'Propietario asignado';
+      await _ObraService.agregarUsuario(
+          widget.obra.id, widget.propietario.id);
+      widget.asignados.add(widget.propietario.dni);
+      widget.agregado = !widget.agregado;
+      widget.obra.sumarPropietario(widget.propietario);
+    }
+    _ObraService.notifyListeners();
+    closeLoadingDialog(context);
+    Helper.showSnackBar(context, mensaje, TextStyle(fontSize: 15),
+        Duration(milliseconds: 500), null);
+    setState(() {});
   }
 }
 
@@ -241,7 +248,7 @@ class __SearchListViewState extends State<_SearchListView> {
                         ),
                         onPressed: () {
                           Navigator.pushReplacementNamed(
-                              context, PropietarioForm.routeName);
+                              context, PropietarioForm.routeName, arguments: {'pageFrom': 'obra'});
                         },
                       ),
                 textController: txtPropietarioCtrl,
@@ -252,17 +259,18 @@ class __SearchListViewState extends State<_SearchListView> {
             ],
           ),
         ),
-        Container(
-          height: MediaQuery.of(context).size.height * .62,
-          child: SingleChildScrollView(
-              child: _CustomListAdded(
-                  obra: widget.obra,
-                  propietarios: widget.propietarios
-                      .where((prop) => prop.nombre
-                          .toLowerCase()
-                          .contains(txtPropietarioCtrl.text.toLowerCase()))
-                      .toList(),
-                  filtro: txtPropietarioCtrl.text)),
+        Expanded(
+          child: Container(
+            child: SingleChildScrollView(
+                child: _CustomListAdded(
+                    obra: widget.obra,
+                    propietarios: widget.propietarios
+                        .where((prop) => prop.nombre
+                            .toLowerCase()
+                            .contains(txtPropietarioCtrl.text.toLowerCase()))
+                        .toList(),
+                    filtro: txtPropietarioCtrl.text)),
+          ),
         ),
       ],
     );

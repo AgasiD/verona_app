@@ -2,17 +2,14 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:image_fade/image_fade.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import 'package:badges/badges.dart' as badges;
 import 'package:verona_app/helpers/Enviroment.dart';
-
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
@@ -33,7 +30,6 @@ import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
-import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ObrasPage extends StatefulWidget {
@@ -148,7 +144,8 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.person_add_alt_sharp,
         'name': 'Nuevo propietario',
         'route': PropietarioForm.routeName,
-        'roles': [1]
+        'roles': [1],
+        'args': {'pageFrom': 'menu'}
       },
       {
         'icon': Icons.group_sharp,
@@ -252,6 +249,7 @@ class __SearchListViewState extends State<_SearchListView> {
                   obras = (response.data as List<dynamic>)
                       .map((e) => Obra.fromMap(e))
                       .toList();
+                  needReLogIn(response);
                   obrasFiltradas = obras;
                   return _CustomObras(
                     obras: obras,
@@ -265,7 +263,7 @@ class __SearchListViewState extends State<_SearchListView> {
                       Navigator.pushReplacementNamed(
                           context, LoginPage.routeName);
                     });
-                     return Container();
+                    return Container();
                   }
                   return Container(
                     child: Text(
@@ -276,6 +274,14 @@ class __SearchListViewState extends State<_SearchListView> {
                 }
               }
             })));
+  }
+
+  void needReLogIn(MyResponse response) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final _pref = new Preferences();
+      _pref.deletePreferences();
+      Navigator.pushReplacementNamed(context, LoginPage.routeName);
+    });
   }
 }
 

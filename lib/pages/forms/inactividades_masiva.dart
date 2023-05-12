@@ -12,7 +12,6 @@ import 'package:verona_app/models/inactividadBD.dart';
 import 'package:verona_app/services/inactividad_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
-import 'package:video_player/video_player.dart';
 
 class InactividadesMasivaForm extends StatelessWidget {
   static final routeName = 'InactividadesMasivaForm';

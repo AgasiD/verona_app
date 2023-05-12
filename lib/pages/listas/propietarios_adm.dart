@@ -6,6 +6,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
+import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -117,7 +118,7 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
         children: [
           CustomInput(
             width: MediaQuery.of(context).size.width * .95,
-            hintText: 'Nombre del propietarios...',
+            hintText: 'Nombre del propietario...',
             icono: Icons.search,
             textInputAction: TextInputAction.search,
             validaError: false,
@@ -140,8 +141,8 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                     color: Helper.brandColors[4],
                     icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
                     onPressed: () => Navigator.pushNamed(
-                        context, MiembroForm.routeName,
-                        arguments: {}),
+                        context, PropietarioForm.routeName,
+                        arguments: {'pageFrom': 'list'}),
                   ),
             textController: widget.txtController,
             onChange: (text) {

@@ -206,10 +206,10 @@ class Helper {
     return fechaMensaje;
   }
 
-  static String getFechaFromTS(int ts) {
+  static String getFechaFromTS(int ts, {format = 'dd/MM/yy'}) {
     final tiempoMensaje = DateTime.fromMillisecondsSinceEpoch(ts);
 
-    var fecha = DateFormat('dd/MM/yy').format(tiempoMensaje);
+    var fecha = DateFormat(format).format(tiempoMensaje);
 
     return fecha;
   }

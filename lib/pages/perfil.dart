@@ -264,7 +264,7 @@ class PerfilPage extends StatelessWidget {
                                   usuario.role == 3
                                       ? PropietarioForm.routeName
                                       : MiembroForm.routeName,
-                                  arguments: {"usuarioId": usuario.id});
+                                  arguments: {"usuarioId": usuario.id, "pageFrom": 'profile'});
                             },
                             child: Text('Editar usuario',
                                 style: TextStyle(

@@ -37,8 +37,6 @@ class _TareasCheckListState extends State<TareasCheckList> {
         .singleWhere((subetapa) => subetapa.id == subetapaId)
         .tareas;
 
-    // tareas = [new Tarea(descripcion: '12332', etapa: '111', isDefault: false)];
-
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: AppBar(
