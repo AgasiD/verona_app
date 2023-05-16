@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -253,5 +254,13 @@ class Helper {
   static bool habilitaByRole(List<int> lista) {
     final rol = new Preferences().role;
     return lista.contains(rol);
+  }
+
+  static  Future<double> getWeigth( XFile file, ) async {
+    final sizeInBytes = await file.length();
+    double sizeInMb = sizeInBytes / (1024 * 1024); // Convertir a MB
+    print('Tamaño de archivo: $sizeInMb MB');
+    return sizeInMb;
+    
   }
 }

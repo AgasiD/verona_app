@@ -86,14 +86,14 @@ class PerfilPage extends StatelessWidget {
                                     : NetworkImage(usuario.profileURL),
                                 child: sinImg
                                     ? FittedBox(
-                                      child: Text(
+                                        child: Text(
                                           '${usuario.nombre[0].toUpperCase()} ${usuario.apellido[0].toUpperCase()}',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             color: Helper.brandColors[5],
                                           ),
                                         ),
-                                    )
+                                      )
                                     : Container()),
                           ),
                         ),
@@ -102,7 +102,7 @@ class PerfilPage extends StatelessWidget {
                               final ImagePicker _picker = ImagePicker();
                               final image = await _picker.pickImage(
                                   source: ImageSource.gallery);
-                                  
+
                               if (image != null) {
                                 openLoadingDialog(context,
                                     mensaje: 'Subiendo imagen...');
@@ -138,139 +138,55 @@ class PerfilPage extends StatelessWidget {
                             child: Text(textoImg,
                                 style:
                                     TextStyle(color: Helper.brandColors[8]))),
-                        Container(
-                          child: Text(
-                            '${usuario.nombre.toUpperCase()} ${usuario.apellido.toUpperCase()}',
-                            style: TextStyle(
-                                overflow: TextOverflow.ellipsis,
-                                color: Helper.brandColors[5],
-                                fontSize: 25),
-                          ),
+                        Text(
+                          '${usuario.nombre.toUpperCase()} ${usuario.apellido.toUpperCase()}',
+                          style: TextStyle(
+                              overflow: TextOverflow.clip,
+                              color: Helper.brandColors[5],
+                              fontSize: 25),
                         ),
                         Padding(
                           padding: EdgeInsets.only(
                               left: esPhone
-                                  ? MediaQuery.of(context).size.width * .15
+                                  ? MediaQuery.of(context).size.width * .1
                                   : MediaQuery.of(context).size.width * .4),
                           child: Column(children: [
-                            Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(FontAwesomeIcons.solidUser,
-                                      color: Helper.brandColors[8], size: 25),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 20),
-                                  child: Text(
-                                    '${usuario.username.toUpperCase()}',
-                                    style: TextStyle(
-                                        color: Helper.brandColors[3],
-                                        fontSize: 20),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(FontAwesomeIcons.briefcase,
-                                      color: Helper.brandColors[8], size: 25),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 20),
-                                  child: Text(
-                                    '${Helper.getProfesion(usuario.role).toUpperCase()}',
-                                    style: TextStyle(
-                                      color: Helper.brandColors[5],
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(FontAwesomeIcons.idCard,
-                                      color: Helper.brandColors[8], size: 25),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 20),
-                                  child: Text(
-                                    '${usuario.dni.toUpperCase()}',
-                                    style: TextStyle(
-                                      color: Helper.brandColors[5],
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(FontAwesomeIcons.at,
-                                      color: Helper.brandColors[8], size: 25),
-                                ),
-                                 FittedBox(
-                                  fit: BoxFit.none,
-                                    child:
-                                Padding(
-                                  padding: EdgeInsets.only(left: 20),
-                                  child: Text(
-                                      '${usuario.email.toUpperCase()}',
-                                      style: TextStyle(
-                                        color: Helper.brandColors[5],
-                                        // fontSize: 10,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Container(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Icon(FontAwesomeIcons.phone,
-                                        color: Helper.brandColors[8], size: 25),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 20),
-                                  child: Text(
-                                    '${usuario.telefono.toUpperCase()}',
-                                    style: TextStyle(
-                                      color: Helper.brandColors[5],
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            
+                            DataRow(
+                                text: '${usuario.username.toUpperCase()}',
+                                icon: FontAwesomeIcons.solidUser),
+                            DataRow(
+                                icon: FontAwesomeIcons.briefcase,
+                                text:
+                                    '${Helper.getProfesion(usuario.role).toUpperCase()}'),
+                            DataRow(
+                                icon: FontAwesomeIcons.idCard,
+                                text: '${usuario.dni.toUpperCase()}'),
+                            DataRow(
+                                icon: FontAwesomeIcons.at,
+                                text: '${usuario.email.toUpperCase()}'),
+                            DataRow(
+                                icon: FontAwesomeIcons.phone,
+                                text: '${usuario.telefono.toUpperCase()}'),
                           ]),
                         ),
-                         
-                        _pref.role == 1 ? TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                  context,
-                                  usuario.role == 3
-                                      ? PropietarioForm.routeName
-                                      : MiembroForm.routeName,
-                                  arguments: {"usuarioId": usuario.id, "pageFrom": 'profile'});
-                            },
-                            child: Text('Editar usuario',
-                                style: TextStyle(
-                                    fontSize: 17,
-                                    color: Helper.brandColors[8])))
-                                    : Container(),
+                        _pref.role == 1
+                            ? TextButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                      context,
+                                      usuario.role == 3
+                                          ? PropietarioForm.routeName
+                                          : MiembroForm.routeName,
+                                      arguments: {
+                                        "usuarioId": usuario.id,
+                                        "pageFrom": 'profile'
+                                      });
+                                },
+                                child: Text('Editar usuario',
+                                    style: TextStyle(
+                                        fontSize: 17,
+                                        color: Helper.brandColors[8])))
+                            : Container(),
                         TextButton(
                             onPressed: () {
                               Navigator.pushNamed(
@@ -281,7 +197,6 @@ class PerfilPage extends StatelessWidget {
                                 style: TextStyle(
                                     fontSize: 17,
                                     color: Helper.brandColors[8]))),
-                                    
                         perfilPropio
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -364,41 +279,20 @@ class PerfilPage extends StatelessWidget {
                                         TextStyle(color: Helper.brandColors[5]),
                                   ),
                                 ),
-                                onPressed: () async {
-                                  final confirma =
-                                      await openDialogConfirmationReturn(
-                                          context,
-                                          'Confirmar para eliminar personal');
-
-                                  // eliminar obra
-                                  openLoadingDialog(context,
-                                      mensaje: 'Eliminando personal...');
-                                  final response = await _usuarioService
-                                      .deleteUsuario(_usuarioId);
-
-                                  closeLoadingDialog(context);
-                                  if (response.fallo) {
-                                    openAlertDialog(
-                                        context, 'Error al desactivar usuario',
-                                        subMensaje: response.error);
-                                  } else {
-                                    await openAlertDialogReturn(context,
-                                        'Usuario desactivado con éxito');
-                                        _obraService.notifyListeners();
-                                    Navigator.pop(context);
-                                  }
-                                })
+                                onPressed: () async  => await eliminarUsuario(context, _usuarioService, _obraService))
                             : Container(),
-                            
-                             Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CustomNavigatorButton(icono: Icons.mobile_screen_share_sharp, accion: ()=>compartirUsuario(usuario), showNotif: false),
-                                    ],
-                                  ),
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CustomNavigatorButton(
+                                  icono: Icons.mobile_screen_share_sharp,
+                                  accion: () => compartirUsuario(usuario),
+                                  showNotif: false),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   );
@@ -412,23 +306,83 @@ class PerfilPage extends StatelessWidget {
     );
   }
 
-  compartirUsuario(Miembro usuario) async{
-    final _msg = '¡Bienvenido a Verona, ${usuario.nombre}! \n'+
-    'Tu usuario es: ${usuario.username} \n'+
-    'Si es tu primera vez, la contraseña irá vacía \n'+
-    //'Contraseña: ${usuario.} |'+
-    'Una vez que ingreses recordá asignarte una contraseña desde tu perfil. \n'+
-    'Descargá la app para tu dispositivo \n'+
-    'iOS: https://apps.apple.com/ar/app/verona/id1620027565?l=en \n'+
-    'Android: https://play.google.com/store/apps/details?id=com.edrex.veronaapp';
+  Future<void> eliminarUsuario(BuildContext context, UsuarioService _usuarioService, ObraService _obraService) async {
+    final confirma =
+        await openDialogConfirmationReturn(
+            context,
+            'Confirmar para eliminar personal');
+    
+    // eliminar obra
+    openLoadingDialog(context,
+        mensaje: 'Eliminando personal...');
+    final response = await _usuarioService
+        .deleteUsuario(_usuarioId);
+    
+    closeLoadingDialog(context);
+    if (response.fallo) {
+      openAlertDialog(
+          context, 'Error al desactivar usuario',
+          subMensaje: response.error);
+    } else {
+      await openAlertDialogReturn(context,
+          'Usuario desactivado con éxito');
+      _obraService.notifyListeners();
+      Navigator.pop(context);
+    }
+  }
+
+  compartirUsuario(Miembro usuario) async {
+    final _msg = '¡Bienvenido a Verona, ${usuario.nombre}! \n' +
+        'Tu usuario es: ${usuario.username} \n' +
+        'Si es tu primera vez, la contraseña irá vacía \n' +
+        //'Contraseña: ${usuario.} |'+
+        'Una vez que ingreses recordá asignarte una contraseña desde tu perfil. \n' +
+        'Descargá la app para tu dispositivo \n' +
+        'iOS: https://apps.apple.com/ar/app/verona/id1620027565?l=en \n' +
+        'Android: https://play.google.com/store/apps/details?id=com.edrex.veronaapp';
 
     String url = "wa.me";
-    var encoded = Uri.https(url,'', {"text": _msg, "phone": usuario.telefono});
+    var encoded = Uri.https(url, '', {"text": _msg, "phone": usuario.telefono});
     if (await canLaunchUrl(encoded))
-              await launchUrl(encoded, mode: LaunchMode.externalApplication);
-    else{
-        // openAlertDialog(context, 'No se puede visualizar el documento');
+      await launchUrl(encoded, mode: LaunchMode.externalApplication);
+    else {
+      // openAlertDialog(context, 'No se puede visualizar el documento');
     }
+  }
+}
 
+class DataRow extends StatelessWidget {
+  DataRow({
+    Key? key,
+    required this.text,
+    required this.icon,
+  }) : super(key: key);
+
+  String text;
+  IconData icon;
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+  children: [
+    Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Icon(icon,
+          color: Helper.brandColors[8], size: 25),
+    ),
+    Padding(
+      padding: EdgeInsets.only(left: 0),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Helper.brandColors[5],
+            // Eliminar la propiedad 'overflow' de TextStyle
+            
+          ),
+        ),
+      ),
+    ),
+  ]);
   }
 }

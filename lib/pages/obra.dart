@@ -523,7 +523,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       items.add(anotaciones);
     } else {
       final pedidos = Item(
-        rolesAcceso: [1, 2, 7],
+        rolesAcceso: [1, 2, 7, 6],
         icon: Icons.request_page_outlined,
         list: 6,
         titulo: 'Pedidos',

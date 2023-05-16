@@ -233,23 +233,22 @@ class __SearchListViewState extends State<_SearchListView> {
 
   @override
   Widget build(BuildContext context) {
-    final _obras = Provider.of<ObraService>(context);
+    final _obras = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
+    print('build obras');
     return SingleChildScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: FutureBuilder(
             future: _obras.obtenerObrasByUser(_pref.id),
-            builder: ((context, snapshot) {
+            builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(mensaje: 'Recuperando obras');
               } else {
                 final response = snapshot.data as MyResponse;
-
-                if (!response.fallo) {
+                    if (!response.fallo) {
                   obras = (response.data as List<dynamic>)
                       .map((e) => Obra.fromMap(e))
                       .toList();
-                  needReLogIn(response);
                   obrasFiltradas = obras;
                   return _CustomObras(
                     obras: obras,
@@ -258,11 +257,7 @@ class __SearchListViewState extends State<_SearchListView> {
                   );
                 } else {
                   if (response.error == 'Usuario inactivo') {
-                    _pref.deletePreferences();
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.pushReplacementNamed(
-                          context, LoginPage.routeName);
-                    });
+                    needReLogIn(response);
                     return Container();
                   }
                   return Container(
@@ -273,7 +268,10 @@ class __SearchListViewState extends State<_SearchListView> {
                   );
                 }
               }
-            })));
+            }
+
+            
+            ));
   }
 
   void needReLogIn(MyResponse response) {

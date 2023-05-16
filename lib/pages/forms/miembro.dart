@@ -11,6 +11,7 @@ import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/perfil.dart';
+import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -311,14 +312,15 @@ class _Form extends StatelessWidget {
   _grabarMiembro(BuildContext context) async {
     bool isValid = true;
     final _service = Provider.of<UsuarioService>(context, listen: false);
-    openLoadingDialog(context, mensaje: 'Cargando...');
+    final actionText = edit ? 'Actualizando... esto puede demorar' : 'Guardando datos...';
+    openLoadingDialog(context, mensaje: actionText);
     txtNombreCtrl.text.trim() == '' ? isValid = false : true;
     txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
     txtDNICtrl.text == '' ? isValid = false : true;
     txtTelefonoCtrl.text == '' ? isValid = false : true;
     txtMailCtrl.text == '' ? isValid = false : true;
 
-    if (isValid) {
+    if ( isValid) {
       final miembro = Miembro(
           id: edit ? usuarioId! : '',
           nombre: txtNombreCtrl.text,
@@ -331,6 +333,7 @@ class _Form extends StatelessWidget {
       edit
           ? response = await _service.modificarUsuario(miembro)
           : response = await _service.grabarUsuario(miembro);
+
       closeLoadingDialog(context);
       if (response.fallo) {
         edit
@@ -339,12 +342,16 @@ class _Form extends StatelessWidget {
             : openAlertDialog(context, 'No se pudo crear el personal',
                 subMensaje: response.error);
       } else {
+        final _obraService = Provider.of<ObraService>(context, listen: false);
+        _obraService.notifyListeners();
         edit
             ? await openAlertDialogReturn(context, 'Personal actualizado')
             : await openAlertDialogReturn(context, 'Personal creado');
         resetForm();
 
-        Navigator.pushReplacementNamed(context, PerfilPage.routeName,
+      edit 
+      ? Navigator.pop(context) 
+      : Navigator.pushReplacementNamed(context, PerfilPage.routeName,
             arguments: {"usuarioId": response.data['id']});
       }
     } else {

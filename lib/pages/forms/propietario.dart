@@ -204,33 +204,40 @@ class _FormState extends State<_Form> {
   }
 
   grabarPropietario(BuildContext context) async {
-    // bool isValid = true;
-    // final _service = Provider.of<UsuarioService>(context, listen: false);
+    bool isValid = true;
+    final _service = Provider.of<UsuarioService>(context, listen: false);
 
-    // txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-    // txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
-    // txtDNICtrl.text == '' ? isValid = false : true;
-    // txtTelefonoCtrl.text == '' ? isValid = false : true;
-    // txtMailCtrl.text == '' ? isValid = false : true;
+    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+    txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
+    txtDNICtrl.text == '' ? isValid = false : true;
+    txtTelefonoCtrl.text == '' ? isValid = false : true;
+    txtMailCtrl.text == '' ? isValid = false : true;
 
-    // if (isValid) {
-    //   openLoadingDialog(context, mensaje: 'Guardando propietario...');
+    if (isValid) {
+      openLoadingDialog(context, mensaje: 'Guardando propietario...');
 
-    //   final prop = Propietario(
-    //       nombre: txtNombreCtrl.text,
-    //       apellido: txtApellidoCtrl.text,
-    //       dni: txtDNICtrl.text,
-    //       telefono: txtTelefonoCtrl.text,
-    //       email: txtMailCtrl.text);
-    //   _service.grabarUsuario(prop);
-    //   resetForm();
-    //   closeLoadingDialog(context);
-    //   openAlertDialog(context, 'Propietario creado');
-    //   await openAlertDialogReturn(context, 'Propietario creado');
+      final prop = Propietario(
+          nombre: txtNombreCtrl.text,
+          apellido: txtApellidoCtrl.text,
+          dni: txtDNICtrl.text,
+          telefono: txtTelefonoCtrl.text,
+          email: txtMailCtrl.text);
+      final response = await _service.grabarUsuario(prop);
+      closeLoadingDialog(context);
+
+      if (response.fallo) {
+
+        await openAlertDialogReturn(context, 'Error al crear propietario',
+            subMensaje: response.error);
+        return;
+      }
+      resetForm();
+      
+      await openAlertDialogReturn(context, 'Propietario creado');
       leavePage(context);
-    // } else {
-    //   openAlertDialog(context, 'Formulario invalido');
-    // }
+    } else {
+      openAlertDialog(context, 'Formulario invalido');
+    }
   }
 
   void leavePage(BuildContext context) {

@@ -153,7 +153,6 @@ class HttpService extends ChangeNotifier {
     //Get the response from the server
     var responseData = await response.stream.toBytes();
     var responseString = String.fromCharCodes(responseData);
-    print(responseString);
 */
 
     // String imgId = '';

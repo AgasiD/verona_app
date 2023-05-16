@@ -124,7 +124,6 @@ class NotificationService extends ChangeNotifier {
       GlobalKey<ScaffoldMessengerState> messengerKey,
       BuildContext context) async {
     print('-----------NUEVA NOTIFICACION-----------');
-    print(_pref.type);
     final type = notif.data["type"];
     final navega = notif.data["navega"] ?? false;
     //notif.data["navega"] == "true" ? notif.data["navega"] = true : false;

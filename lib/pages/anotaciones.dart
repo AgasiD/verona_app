@@ -30,6 +30,7 @@ class AnotacionesPage extends StatelessWidget {
       backgroundColor: Helper.brandColors[1],
       body: GestureDetector(
                   onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                  
 
         child: SafeArea(
       
