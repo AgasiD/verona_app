@@ -40,7 +40,7 @@ class UsuarioService extends ChangeNotifier {
     return list;
   }
 
-   obtenerTodosUsuarios() async {
+   Future<List<Miembro>> obtenerTodosUsuarios() async {
     final datos = await this._http.get('$_endpoint/usuariosAll');
      final lista = datos["usuarios"];
     final list =
