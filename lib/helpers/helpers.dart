@@ -234,6 +234,25 @@ class Helper {
     );
   }
 
+  static InputDecoration getDecoration() => InputDecoration(
+        focusColor: Helper.brandColors[9],
+        contentPadding: EdgeInsets.zero,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7),
+          borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7),
+          borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7),
+          borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+        ),
+        fillColor: Helper.brandColors[1],
+        filled: true);
+  
+
   static String getEstadoPedido(int estado) {
     switch (estado) {
       case 1:

@@ -13,6 +13,8 @@ class Tarea {
     this.realizado = false,
     this.tsRealizado = 0,
     this.orden = 0,
+    this.idUsuario = '',
+    this.nombreUsuario = ''
   });
 
   String descripcion;
@@ -22,6 +24,8 @@ class Tarea {
   bool realizado;
   int tsRealizado;
   int orden;
+  String idUsuario;
+  String? nombreUsuario;
 
   factory Tarea.fromJson(Map<String, dynamic> json) => Tarea(
         descripcion: json["descripcion"] ?? '',
@@ -30,7 +34,9 @@ class Tarea {
         isDefault: json["isDefault"] ?? '',
         realizado: json["realizado"] ?? false,
         tsRealizado: json["tsRealizado"] ?? 0,
-        orden: json['orden'] ?? 0
+        orden: json['orden'] ?? 0,
+        idUsuario: json['idUsuario'] ?? '',
+        // nombreUsuario: json['nombreUsuario'] ?? 'Sin nombre usuario';
       );
 
   Map<String, dynamic> toJson() => {
@@ -41,5 +47,6 @@ class Tarea {
         "realizado": realizado,
         "tsRealizado": tsRealizado,
         "orden": orden,
+        "idUsuario": idUsuario
       };
 }

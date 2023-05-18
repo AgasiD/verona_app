@@ -29,8 +29,11 @@ class UsuarioService extends ChangeNotifier {
     return list;
   }
 
-  obtenerPersonal() async {
-    final datos = await this._http.get('$_endpoint/profesionales');
+  obtenerPersonal({ roles = null}) async {
+    final body = {
+      'roles':roles
+    };
+    final datos = await this._http.post('$_endpoint/profesionales', body);
     final lista = datos["usuarios"];
     final list =
         (lista as List<dynamic>).map((json) => Miembro.fromJson(json)).toList();
