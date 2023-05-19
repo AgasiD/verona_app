@@ -80,7 +80,8 @@ class _SemanarioState extends State<_Semanario> {
 
     _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     setFechas();
-    buscarTareas('1', paramDesde: desde, paramHasta: hasta);
+    
+   buscarTareas('1', paramDesde: desde, paramHasta: hasta, listener: false);
   }
 
   void setFechas() {
@@ -95,7 +96,7 @@ class _SemanarioState extends State<_Semanario> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _usuarioService.obtenerPersonal(roles: [1, 2]),
+         future:  _usuarioService.obtenerPersonal(roles: [1, 2]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Loading(
@@ -154,7 +155,7 @@ class _SemanarioState extends State<_Semanario> {
   }
 
   buscarTareas(String idUsuario,
-      {DateTime? paramDesde = null, DateTime? paramHasta = null}) async {
+      {DateTime? paramDesde = null, DateTime? paramHasta = null, listener = true}) async {
     DateFormat formato = DateFormat('dd/MM/yyyy');
     if (paramDesde == null && paramHasta == null) {
       desde = formato.parse(txtCtrlDesde.text);
@@ -163,6 +164,7 @@ class _SemanarioState extends State<_Semanario> {
       desde = paramDesde!;
       hasta = paramHasta!;
     }
+
     tareas = widget.obra
         .obtenerTareasRealizadasDesdeHasta(desde, hasta.add(Duration(days: 1)));
     if (idUsuario != '1') {
@@ -173,15 +175,16 @@ class _SemanarioState extends State<_Semanario> {
             .where((t) => t.idUsuario == idUsuario)
             .toList();
       });
+
       tareas = (tareas as List)
           .where((subetapa) => subetapa['tareas'].length > 0)
           .toList();
     }
+
     final usuarios = await _usuarioService.obtenerTodosUsuarios();
 
     _matchWithName(usuarios);
     asignarTareas(tareas);
-
     _tareasStream.add(tareas);
     // setState(() {});
   }
