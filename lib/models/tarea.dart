@@ -14,11 +14,13 @@ class Tarea {
     this.tsRealizado = 0,
     this.orden = 0,
     this.idUsuario = '',
-    this.nombreUsuario = ''
+    this.nombreUsuario = '',
+    this.nombreSubetapa = ''
   });
 
   String descripcion;
   String subetapa;
+  String nombreSubetapa;
   String id;
   bool isDefault;
   bool realizado;
@@ -26,6 +28,7 @@ class Tarea {
   int orden;
   String idUsuario;
   String? nombreUsuario;
+
 
   factory Tarea.fromJson(Map<String, dynamic> json) => Tarea(
         descripcion: json["descripcion"] ?? '',

@@ -1882,7 +1882,6 @@ class _TareaTileState extends State<_TareaTile> {
                           TextStyle(color: Helper.brandColors[3], fontSize: 15),
                     ),
                     onChanged: (value) async {
-                     
                       await actualizaTareaBD(context, value);
                     },
                     value: widget.tarea.realizado,
@@ -2021,6 +2020,23 @@ class _TareaTileState extends State<_TareaTile> {
 
     return _obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
         1;
+  }
+}
+
+class CustomCenterText extends StatelessWidget {
+  CustomCenterText({Key? key, required this.text, this.fontSize = 18})
+      : super(key: key);
+  String text;
+  double fontSize;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        text,
+        style: TextStyle(fontSize: fontSize, color: Helper.brandColors[4]),
+      ),
+    );
+    ;
   }
 }
 

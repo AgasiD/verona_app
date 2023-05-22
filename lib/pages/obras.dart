@@ -24,6 +24,7 @@ import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/listas/propietarios_adm.dart';
+import 'package:verona_app/pages/listas/tareas_semanaria.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/perfil.dart';
@@ -162,8 +163,9 @@ class _ObrasPageState extends State<ObrasPage> {
       {
         'icon': Icons.account_tree,
         'name': 'Control de obras',
-        'route': ControlObraABM.routeName,
-        'roles': !Environment.isProduction ? [1] : [999]
+        'route': TareasSemanarias.routeName,
+        'roles': !Environment.isProduction ? [1] : [999],
+        'args': {'single': false, 'obras': obras}
       },
       {
         'icon': Icons.request_page,

@@ -68,9 +68,7 @@ class _PedidosPanelControlState extends State<PedidosPanelControl>
 
                 final response = snapshot.data as MyResponse;
                 if (response.fallo)
-                  return Center(
-                    child: Text(response.error),
-                  );
+                  return CustomCenterText(text: response.error);
 
                 final obras = response.data;
 

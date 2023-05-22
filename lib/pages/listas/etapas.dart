@@ -20,13 +20,12 @@ class EtapasObra extends StatelessWidget {
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context);
     final _pref = new Preferences();
-    _obraService.obra.obtenerTareasRealizadasByDias(dias: 4);
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
       body: Column(
         children: [
           Expanded(child: _Etapas(etapas: _obraService.obra.etapas)),
-          _pref.role == 1 || _pref.role == 2 ? MainButton(onPressed: ()=> Navigator.pushNamed(context, TareasSemanarias.routeName, arguments: { 'obra': _obraService.obra }), text: 'Resumen semanal' , width: 150, height: 30, color: Helper.brandColors[8], fontSize: 15,) : Container()
+          _pref.role == 1 || _pref.role == 2 ? MainButton(onPressed: ()=> Navigator.pushNamed(context, TareasSemanarias.routeName, arguments: { 'obras': [_obraService.obra] }), text: 'Resumen semanal' , width: 150, height: 30, color: Helper.brandColors[8], fontSize: 15,) : Container()
         ],
       ),
       floatingActionButton:

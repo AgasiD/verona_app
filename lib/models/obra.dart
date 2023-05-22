@@ -268,7 +268,7 @@ class Obra {
   }
 
 
-  List<dynamic> obtenerTareasRealizadasDesdeHasta(DateTime desde, DateTime hasta){
+  dynamic obtenerTareasRealizadasDesdeHasta(DateTime desde, DateTime hasta){
 
     return _buscarTareas(desde, hasta);
 
@@ -283,10 +283,7 @@ class Obra {
       etapa.subetapas.forEach((subetapa) {
 
         List<Subetapa> subetapasRealizadas = [];
-        etapa_sub_tareasRealizadas.add({
-          "subetapa": subetapa.descripcion,
-          "tareas": []
-        });
+        
           List<Tarea> tareasRealizadas = [];
 
         subetapa.tareas.forEach((tarea) {
@@ -295,13 +292,19 @@ class Obra {
              tareasRealizadas.add(tarea);
           }
         });
+        if(tareasRealizadas.isNotEmpty){
+          etapa_sub_tareasRealizadas.add({
+            "subetapa": subetapa.descripcion,
+            "tareas": []
+          });
           etapa_sub_tareasRealizadas.last['tareas'] = tareasRealizadas;
+        }
         
        });
 
      });
      etapa_sub_tareasRealizadas = etapa_sub_tareasRealizadas.where((e) => e['tareas'].length > 0 ).toList();
-    return etapa_sub_tareasRealizadas;
+    return {'obra': this.nombre, 'obraId': this.id, "subetapas": etapa_sub_tareasRealizadas};
   }
 
   String ubicToText() {
