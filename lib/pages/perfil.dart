@@ -21,16 +21,18 @@ class PerfilPage extends StatelessWidget {
   PerfilPage({Key? key}) : super(key: key);
   static final routeName = 'perfil';
   late String _usuarioId;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late GlobalKey<ScaffoldState> _scaffoldKey;
   late bool perfilPropio = true;
 
   bool esPhone = true;
   @override
   Widget build(BuildContext context) {
+    _scaffoldKey = GlobalKey<ScaffoldState>();
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _imageService = Provider.of<ImageService>(context);
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    print('profile');
     final _pref = new Preferences();
     _usuarioId = arguments['usuarioId'];
     String textoImg = 'Cambiar imagen';
@@ -41,6 +43,8 @@ class PerfilPage extends StatelessWidget {
     if (MediaQuery.of(context).size.width > 1000) esPhone = false;
 
     return Scaffold(
+        resizeToAvoidBottomInset: false,
+
       key: _scaffoldKey,
       body: Container(
         color: Helper.brandColors[1],
@@ -48,6 +52,7 @@ class PerfilPage extends StatelessWidget {
           child: FutureBuilder(
             future: _usuarioService.obtenerUsuario(_usuarioId),
             builder: (context, snapshot) {
+              print('obtener USuario');
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Loading(
                   mensaje: 'Cargando datos...',

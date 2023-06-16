@@ -712,7 +712,7 @@ class _TaskTileState extends State<_TaskTile> {
                       ),
                       widget.tarea.idUsuario.isNotEmpty
                           ? Text(
-                              'Realizado por: ${widget.tarea.nombreUsuario} ',
+                              'Realizado por: ${widget.tarea.nombreUsuario} |',
                               // overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   color: Colors.white30,
@@ -754,7 +754,7 @@ class _TaskTileState extends State<_TaskTile> {
                       ),
                       widget.tarea.idUsuario.isNotEmpty
                           ? Text(
-                              'Realizado por: ${widget.tarea.nombreUsuario} ',
+                              'Realizado por: ${widget.tarea.nombreUsuario} |',
                               // overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   color: Colors.white30,

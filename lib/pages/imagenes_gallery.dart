@@ -94,13 +94,20 @@ class ImgGalleryPage extends StatelessWidget {
                                   //       arguments: {'imagenId': e['id']});
                                   // } else
                                   if (getType(e['mimeType']).toLowerCase() ==
-                                          'Carpeta'.toLowerCase() ||
-                                      e['mimeType']
-                                          .toString()
-                                          .contains('shortcut')) {
+                                          'Carpeta'.toLowerCase() ) {
                                     Navigator.pushNamed(
                                         (context), ImgGalleryPage.routeName,
                                         arguments: {'driveId': e['id']});
+
+                                          }
+                                  else if (
+                                      e['mimeType']
+                                          .toString()
+                                          .contains('shortcut')){
+                                             Navigator.pushNamed(
+                                        (context), ImgGalleryPage.routeName,
+                                        arguments: {'driveId': e['shortcutDetails']['targetId']});
+                                          
                                   } else {
                                     final Uri _url = Uri.parse(
                                         'https://drive.google.com/file/d/${e['id']}');

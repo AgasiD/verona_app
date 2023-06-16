@@ -51,6 +51,7 @@ class PedidosArchivadosList extends StatelessWidget {
           pedidos.where((element) => element['estado'] == estado).toList();
       agrupados.add({"estado": Helper.getEstadoPedido(5), "data": agrupacion});
     });
+    
     return agrupados;
   }
 }

@@ -126,11 +126,16 @@ class _CustomListViewState extends State<_CustomListView> {
                     (context), ImagenViewer.routeName,
                     arguments: {'imagenId': widget.data[i]['id']});
               } else if (getType(widget.data[i]['mimeType']).toLowerCase() ==
-                      'Carpeta'.toLowerCase() ||
-                  widget.data[i]['mimeType'].toString().contains('shortcut')) {
+                      'Carpeta'.toLowerCase()) {
                 actionOnTap = () => Navigator.pushNamed(
                     (context), DocumentosPage.routeName,
                     arguments: {'driveId': widget.data[i]['id']});
+
+                  }else if (widget.data[i]['mimeType'].toString().contains('shortcut')){
+                    actionOnTap = () => Navigator.pushNamed(
+                    (context), DocumentosPage.routeName,
+                    arguments: {'driveId': widget.data[i]['shortcutDetails']['targetId']});
+
               } else {
                 actionOnTap = () async {
                   final Uri _url = Uri.parse(

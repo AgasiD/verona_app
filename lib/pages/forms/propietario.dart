@@ -22,11 +22,6 @@ class PropietarioForm extends StatefulWidget {
   State<PropietarioForm> createState() => _PropietarioFormState();
 }
 
-final TextEditingController txtNombreCtrl = TextEditingController();
-final TextEditingController txtApellidoCtrl = TextEditingController();
-final TextEditingController txtDNICtrl = TextEditingController();
-final TextEditingController txtTelefonoCtrl = TextEditingController();
-final TextEditingController txtMailCtrl = TextEditingController();
 
 class _PropietarioFormState extends State<PropietarioForm> {
   bool edit = false;
@@ -118,79 +113,89 @@ class _FormState extends State<_Form> {
     super.dispose();
     resetForm();
   }
+final TextEditingController txtNombreCtrl = TextEditingController();
+final TextEditingController txtApellidoCtrl = TextEditingController();
+final TextEditingController txtDNICtrl = TextEditingController();
+final TextEditingController txtTelefonoCtrl = TextEditingController();
+final TextEditingController txtMailCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    
     if (widget.propietario != null) {
       setForm();
     }
-    return Form(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: Column(
-        children: [
-          CustomInput(
-            hintText: 'Nombre',
-            icono: Icons.person,
-            textController: txtNombreCtrl,
-            teclado: TextInputType.text,
-            validaError: true,
-            validarInput: (value) => Helper.campoObligatorio(value),
-          ),
-          CustomInput(
-              hintText: 'Apellido ',
+    return SingleChildScrollView(
+      child: Form(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          children: [
+                      TextFormField(),
+            
+            CustomInput(
+              hintText: 'Nombre',
               icono: Icons.person,
-              textController: txtApellidoCtrl,
+              textController: txtNombreCtrl,
+              teclado: TextInputType.text,
               validaError: true,
               validarInput: (value) => Helper.campoObligatorio(value),
-              teclado: TextInputType.text),
-          CustomInput(
-            hintText: 'DNI',
-            icono: Icons.assignment_ind_outlined,
-            textController: txtDNICtrl,
-            teclado: TextInputType.number,
-            validaError: true,
-            validarInput: (value) => Helper.validNumeros(value),
-          ),
-          CustomInput(
-            hintText: 'Numero de telefono',
-            icono: Icons.phone_android,
-            textController: txtTelefonoCtrl,
-            teclado: TextInputType.phone,
-            validaError: true,
-            validarInput: (value) => Helper.validNumeros(value),
-          ),
-          CustomInput(
-            hintText: 'Correo electronico',
-            icono: Icons.alternate_email,
-            textController: txtMailCtrl,
-            teclado: TextInputType.emailAddress,
-            validaError: true,
-            validarInput: (value) => Helper.validEmail(value),
-            textInputAction: TextInputAction.done,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              MainButton(
-                  width: 100,
-                  color: Helper.brandColors[8],
-                  onPressed: () {
-                    widget.propietario == null
-                        ? grabarPropietario(context)
-                        : editarPropietario(context);
-                    ;
-                  },
-                  text: 'Grabar'),
-              SecondaryButton(
-                  width: 100,
-                  color: Helper.brandColors[0],
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  text: 'Cancelar'),
-            ],
-          )
-        ],
+            ),
+            CustomInput(
+                hintText: 'Apellido ',
+                icono: Icons.person,
+                textController: txtApellidoCtrl,
+                validaError: true,
+                validarInput: (value) => Helper.campoObligatorio(value),
+                teclado: TextInputType.text),
+            CustomInput(
+              hintText: 'DNI',
+              icono: Icons.assignment_ind_outlined,
+              textController: txtDNICtrl,
+              teclado: TextInputType.number,
+              validaError: true,
+              validarInput: (value) => Helper.validNumeros(value),
+            ),
+            CustomInput(
+              hintText: 'Numero de telefono',
+              icono: Icons.phone_android,
+              textController: txtTelefonoCtrl,
+              teclado: TextInputType.phone,
+              validaError: true,
+              validarInput: (value) => Helper.validNumeros(value),
+            ),
+            CustomInput(
+              hintText: 'Correo electronico',
+              icono: Icons.alternate_email,
+              textController: txtMailCtrl,
+              teclado: TextInputType.emailAddress,
+              validaError: true,
+              validarInput: (value) => Helper.validEmail(value),
+              textInputAction: TextInputAction.done,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                MainButton(
+                    width: 100,
+                    color: Helper.brandColors[8],
+                    onPressed: () {
+                      widget.propietario == null
+                          ? grabarPropietario(context)
+                          : editarPropietario(context);
+                      ;
+                    },
+                    text: 'Grabar'),
+                SecondaryButton(
+                    width: 100,
+                    color: Helper.brandColors[0],
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    text: 'Cancelar'),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

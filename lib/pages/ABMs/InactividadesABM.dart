@@ -190,6 +190,12 @@ class _PendientesViewState extends State<_InactividadesView> {
                                                 color: Helper.brandColors[8]
                                                     .withOpacity(.8)),
                                           ),
+                                           Text(
+                                            obra['inactividades'][index]['nombreUsuario'],
+                                            style: TextStyle(
+                                                color: Helper.brandColors[8]
+                                                    .withOpacity(.8)),
+                                          ),
                                         ],
                                       ),
                                       avatar: "1",

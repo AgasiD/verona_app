@@ -9,12 +9,10 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:badges/badges.dart' as badges;
-import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/pages/ABMs/ControlObra.dart';
 import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
 import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
 import 'package:verona_app/pages/anotaciones.dart';
@@ -133,6 +131,7 @@ class _ObrasPageState extends State<ObrasPage> {
         ? header = WaterDropHeader()
         : header = MaterialClassicHeader();
     final textStyle = TextStyle(fontSize: 16, color: Helper.brandColors[4]);
+    print('carga menu');
     final menu = [
       {
         'icon': Icons.person_pin_rounded,
@@ -164,7 +163,7 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.account_tree,
         'name': 'Control de obras',
         'route': TareasSemanarias.routeName,
-        'roles': !Environment.isProduction ? [1] : [999],
+        'roles': [1],
         'args': {'single': false, 'obras': obras}
       },
       {
