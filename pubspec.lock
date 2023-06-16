@@ -96,11 +96,7 @@ packages:
       sha256: "2f5f53242b137bce78320103c433b7ec07cf7daba524d48da983f8146ad7717c"
       url: "https://pub.dev"
     source: hosted
-<<<<<<< HEAD
-    version: "0.2.9"
-=======
     version: "0.4.1"
->>>>>>> develop
   characters:
     dependency: transitive
     description:
