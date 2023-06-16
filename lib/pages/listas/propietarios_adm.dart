@@ -19,7 +19,6 @@ class PropietariosADM extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('jp;a');
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     return Scaffold(
       body: Container(

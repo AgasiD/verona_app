@@ -72,8 +72,8 @@ class _MiembroFormState extends State<MiembroForm> {
                         );
                       } else {
                         return Container(
-                            height: MediaQuery.of(context).size.height - 140,
-                            width: MediaQuery.of(context).size.width,
+                            // height: MediaQuery.of(context).size.height - 140,
+                            // width: MediaQuery.of(context).size.width,
                             child: Center(
                               child: Text(
                                 'Error al recuperar la información',
@@ -148,162 +148,167 @@ class _Form extends StatelessWidget {
     final colorHint = Helper.brandColors[3];
 
     return Container(
-      color: Helper.brandColors[2],
+      color: Helper.brandColors[1],
       padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
       width: double.infinity,
-      height: MediaQuery.of(context).size.height,
       child: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Logo(
-                size: 70,
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              Text(
-                edit ? 'Actualizar personal'.toUpperCase() : 'NUEVO MIEMBRO',
-                style: TextStyle(
-                   color:Helper.brandColors[8],
-                    fontSize: 23),
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              Form(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    CustomInput(
-                      hintText: 'Nombre',
-                      icono: Icons.person,
-                      textController: txtNombreCtrl,
-                      teclado: TextInputType.text,
-                      validaError: true,
-                      validarInput: (value) => Helper.campoObligatorio(value),
+                    Logo(
+                      size: 70,
                     ),
-                    CustomInput(
-                        hintText: 'Apellido ',
-                        icono: Icons.person,
-                        textController: txtApellidoCtrl,
-                        validaError: true,
-                        validarInput: (value) => Helper.campoObligatorio(value),
-                        teclado: TextInputType.text),
-                    CustomInput(
-                      hintText: 'DNI',
-                      icono: Icons.assignment_ind_outlined,
-                      textController: txtDNICtrl,
-                      teclado: TextInputType.number,
-                      validaError: true,
-                      // enable: !edit,
-                      validarInput: (value) => Helper.validNumeros(value),
+                    SizedBox(
+                      height: 15,
                     ),
-                    CustomInput(
-                      hintText: 'Numero de telefono',
-                      icono: Icons.phone_android,
-                      textController: txtTelefonoCtrl,
-                      teclado: TextInputType.phone,
-                      validaError: true,
-                      validarInput: (value) => Helper.validNumeros(value),
+                    Text(
+                      edit ? 'Actualizar personal'.toUpperCase() : 'NUEVO MIEMBRO',
+                      style: TextStyle(
+                         color:Helper.brandColors[8],
+                          fontSize: 23),
                     ),
-                    CustomInput(
-                      hintText: 'Correo electronico',
-                      icono: Icons.alternate_email,
-                      textController: txtMailCtrl,
-                      teclado: TextInputType.emailAddress,
-                      validaError: true,
-                      validarInput: (value) => Helper.validEmail(value),
-                      textInputAction: TextInputAction.done,
+                    SizedBox(
+                      height: 15,
                     ),
-                    Container(
-                      margin: EdgeInsets.only(bottom: 25),
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                              color: Helper.brandColors[0],
-                              blurRadius: 4,
-                              offset: Offset(10, 8))
+                    Form(
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      child: Column(
+                        children: [
+                          CustomInput(
+                            hintText: 'Nombre',
+                            icono: Icons.person,
+                            textController: txtNombreCtrl,
+                            teclado: TextInputType.text,
+                            validaError: true,
+                            validarInput: (value) => Helper.campoObligatorio(value),
+                          ),
+                          CustomInput(
+                              hintText: 'Apellido ',
+                              icono: Icons.person,
+                              textController: txtApellidoCtrl,
+                              validaError: true,
+                              validarInput: (value) => Helper.campoObligatorio(value),
+                              teclado: TextInputType.text),
+                          CustomInput(
+                            hintText: 'DNI',
+                            icono: Icons.assignment_ind_outlined,
+                            textController: txtDNICtrl,
+                            teclado: TextInputType.number,
+                            validaError: true,
+                            // enable: !edit,
+                            validarInput: (value) => Helper.validNumeros(value),
+                          ),
+                          CustomInput(
+                            hintText: 'Numero de telefono',
+                            icono: Icons.phone_android,
+                            textController: txtTelefonoCtrl,
+                            teclado: TextInputType.phone,
+                            validaError: true,
+                            validarInput: (value) => Helper.validNumeros(value),
+                          ),
+                          CustomInput(
+                            hintText: 'Correo electronico',
+                            icono: Icons.alternate_email,
+                            textController: txtMailCtrl,
+                            teclado: TextInputType.emailAddress,
+                            validaError: true,
+                            validarInput: (value) => Helper.validEmail(value),
+                            textInputAction: TextInputAction.done,
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(bottom: 25),
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Helper.brandColors[0],
+                                    blurRadius: 4,
+                                    offset: Offset(10, 8))
+                              ],
+                            ),
+                            child: DropdownButtonFormField2(
+                              items: miembros,
+                              value: personalSelected,
+                              style: TextStyle(
+                                  color: Helper.brandColors[5], fontSize: 16),
+                              iconSize: 30,
+                              buttonHeight: 60,
+                              buttonPadding: EdgeInsets.only(left: 20, right: 10),
+                              decoration: InputDecoration(
+                                  focusColor: Helper.brandColors[9],
+                                  contentPadding: EdgeInsets.zero,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(7),
+                                    borderSide: BorderSide(
+                                        color: Helper.brandColors[9], width: .2),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(7),
+                                    borderSide: BorderSide(
+                                        color: Helper.brandColors[9], width: .5),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(7),
+                                    borderSide: BorderSide(
+                                        color: Helper.brandColors[9], width: 2.0),
+                                  ),
+                                  fillColor: Helper.brandColors[1],
+                                  filled: true),
+                              hint: Text(
+                                'Seleccione puesto',
+                                style: TextStyle(fontSize: 16, color: colorHint),
+                              ),
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: colorHint,
+                              ),
+                              dropdownDecoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Helper.brandColors[2],
+                              ),
+                              onChanged: (value) {
+                                personalSelected = value.toString();
+                                //Do something when changing the item if you want.
+                              },
+                              onSaved: (value) {},
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              MainButton(
+                                width: 120,
+                                fontSize: 18,
+                                color: Helper.brandColors[8]
+                                    .withOpacity(.5)
+                                    .withAlpha(150),
+                                text: 'Grabar',
+                                onPressed: () async {
+                                  await _grabarMiembro(context);
+                                },
+                              ),
+                              SecondaryButton(
+                                  width: 120,
+                                  fontSize: 18,
+                                  color: Helper.brandColors[2],
+                                  text: 'Cancelar',
+                                  onPressed: () {
+                                    resetForm();
+            
+                                    Navigator.pop(context);
+                                  }),
+                            ],
+                          )
                         ],
                       ),
-                      child: DropdownButtonFormField2(
-                        items: miembros,
-                        value: personalSelected,
-                        style: TextStyle(
-                            color: Helper.brandColors[5], fontSize: 16),
-                        iconSize: 30,
-                        buttonHeight: 60,
-                        buttonPadding: EdgeInsets.only(left: 20, right: 10),
-                        decoration: InputDecoration(
-                            focusColor: Helper.brandColors[9],
-                            contentPadding: EdgeInsets.zero,
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(7),
-                              borderSide: BorderSide(
-                                  color: Helper.brandColors[9], width: .2),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(7),
-                              borderSide: BorderSide(
-                                  color: Helper.brandColors[9], width: .5),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(7),
-                              borderSide: BorderSide(
-                                  color: Helper.brandColors[9], width: 2.0),
-                            ),
-                            fillColor: Helper.brandColors[1],
-                            filled: true),
-                        hint: Text(
-                          'Seleccione puesto',
-                          style: TextStyle(fontSize: 16, color: colorHint),
-                        ),
-                        icon: Icon(
-                          Icons.arrow_drop_down,
-                          color: colorHint,
-                        ),
-                        dropdownDecoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Helper.brandColors[2],
-                        ),
-                        onChanged: (value) {
-                          personalSelected = value.toString();
-                          //Do something when changing the item if you want.
-                        },
-                        onSaved: (value) {},
-                      ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        MainButton(
-                          width: 120,
-                          fontSize: 18,
-                          color: Helper.brandColors[8]
-                              .withOpacity(.5)
-                              .withAlpha(150),
-                          text: 'Grabar',
-                          onPressed: () async {
-                            await _grabarMiembro(context);
-                          },
-                        ),
-                        SecondaryButton(
-                            width: 120,
-                            fontSize: 18,
-                            color: Helper.brandColors[2],
-                            text: 'Cancelar',
-                            onPressed: () {
-                              resetForm();
-
-                              Navigator.pop(context);
-                            }),
-                      ],
-                    )
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -32,7 +32,6 @@ class PerfilPage extends StatelessWidget {
     final _imageService = Provider.of<ImageService>(context);
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    print('profile');
     final _pref = new Preferences();
     _usuarioId = arguments['usuarioId'];
     String textoImg = 'Cambiar imagen';
@@ -40,11 +39,10 @@ class PerfilPage extends StatelessWidget {
     if (_usuarioId != _pref.id) {
       perfilPropio = false;
     }
-    if (MediaQuery.of(context).size.width > 1000) esPhone = false;
+    // if (MediaQuery.of(context).size.width > 1000) esPhone = false;
 
+    double paddingLeft = 0.00;
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-
       key: _scaffoldKey,
       body: Container(
         color: Helper.brandColors[1],
@@ -52,12 +50,14 @@ class PerfilPage extends StatelessWidget {
           child: FutureBuilder(
             future: _usuarioService.obtenerUsuario(_usuarioId),
             builder: (context, snapshot) {
-              print('obtener USuario');
+
               if (snapshot.connectionState == ConnectionState.waiting) {
+
                 return Loading(
                   mensaje: 'Cargando datos...',
                 );
               } else {
+
                 MyResponse response = snapshot.data as MyResponse;
                 if (response.fallo) {
                   print('Error al cargar datos');
@@ -69,10 +69,10 @@ class PerfilPage extends StatelessWidget {
                     textoImg = 'Subir imagen de perfil';
                     sinImg = true;
                   }
-
                   return Container(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
                           decoration: BoxDecoration(
@@ -151,10 +151,7 @@ class PerfilPage extends StatelessWidget {
                               fontSize: 25),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(
-                              left: esPhone
-                                  ? MediaQuery.of(context).size.width * .1
-                                  : MediaQuery.of(context).size.width * .4),
+                          padding: EdgeInsets.only(left: paddingLeft),
                           child: Column(children: [
                             DataRow(
                                 text: '${usuario.username.toUpperCase()}',
@@ -284,7 +281,8 @@ class PerfilPage extends StatelessWidget {
                                         TextStyle(color: Helper.brandColors[5]),
                                   ),
                                 ),
-                                onPressed: () async  => await eliminarUsuario(context, _usuarioService, _obraService))
+                                onPressed: () async => await eliminarUsuario(
+                                    context, _usuarioService, _obraService))
                             : Container(),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -311,26 +309,21 @@ class PerfilPage extends StatelessWidget {
     );
   }
 
-  Future<void> eliminarUsuario(BuildContext context, UsuarioService _usuarioService, ObraService _obraService) async {
-    final confirma =
-        await openDialogConfirmationReturn(
-            context,
-            'Confirmar para eliminar personal');
-    
+  Future<void> eliminarUsuario(BuildContext context,
+      UsuarioService _usuarioService, ObraService _obraService) async {
+    final confirma = await openDialogConfirmationReturn(
+        context, 'Confirmar para eliminar personal');
+
     // eliminar obra
-    openLoadingDialog(context,
-        mensaje: 'Eliminando personal...');
-    final response = await _usuarioService
-        .deleteUsuario(_usuarioId);
-    
+    openLoadingDialog(context, mensaje: 'Eliminando personal...');
+    final response = await _usuarioService.deleteUsuario(_usuarioId);
+
     closeLoadingDialog(context);
     if (response.fallo) {
-      openAlertDialog(
-          context, 'Error al desactivar usuario',
+      openAlertDialog(context, 'Error al desactivar usuario',
           subMensaje: response.error);
     } else {
-      await openAlertDialogReturn(context,
-          'Usuario desactivado con éxito');
+      await openAlertDialogReturn(context, 'Usuario desactivado con éxito');
       _obraService.notifyListeners();
       Navigator.pop(context);
     }
@@ -363,31 +356,43 @@ class DataRow extends StatelessWidget {
     required this.icon,
   }) : super(key: key);
 
-  String text;
-  IconData icon;
+  final String text;
+  final IconData icon;
+
   @override
   Widget build(BuildContext context) {
     return Row(
-  children: [
-    Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Icon(icon,
-          color: Helper.brandColors[8], size: 25),
-    ),
-    Padding(
-      padding: EdgeInsets.only(left: 0),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          text,
-          style: TextStyle(
-            color: Helper.brandColors[5],
-            // Eliminar la propiedad 'overflow' de TextStyle
-            
+      children: [
+        Expanded(
+          flex: 1,
+          child: SizedBox(), // Este espacio ocupará 1/4 del ancho total de la pantalla
+        ),
+        Expanded(
+          flex: 6,
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                child: Icon(icon, color: Helper.brandColors[8], size: 25),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 5),
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      color: Helper.brandColors[5], 
+                      overflow: TextOverflow.clip,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ),
-    ),
-  ]);
+      ],
+    );
   }
 }
+
+

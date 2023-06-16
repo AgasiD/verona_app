@@ -22,7 +22,6 @@ class PropietarioForm extends StatefulWidget {
   State<PropietarioForm> createState() => _PropietarioFormState();
 }
 
-
 class _PropietarioFormState extends State<PropietarioForm> {
   bool edit = false;
   @override
@@ -36,69 +35,76 @@ class _PropietarioFormState extends State<PropietarioForm> {
       _pageFrom = arguments['pageFrom'] ?? 'menu';
     }
     if (_usuarioId != null) edit = true;
-    return Scaffold(
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        color: Helper.brandColors[1],
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Container(
-              margin: EdgeInsets.symmetric(vertical: 25, horizontal: 15),
-              padding: EdgeInsets.all(20),
-              width: double.infinity,
-              child: Column(
-                children: [
-                  Logo(
-                    size: 70,
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Text(
-                    'nuevo propietario'.toUpperCase(),
-                    style: TextStyle(
-                        color: Helper.brandColors[8],
-                        fontSize: 23),
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  edit
-                      ? FutureBuilder(
-                          future: _usuarioService.obtenerUsuario(_usuarioId),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting)
-                              return Loading(
-                                mensaje: 'Cargando propietario',
-                              );
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        body: Container(
+          // height: MediaQuery.of(context).size.height,
+          color: Helper.brandColors[1],
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 25, horizontal: 15),
+                padding: EdgeInsets.all(20),
+                width: double.infinity,
+                child: Column(
+                  children: [
+                    Logo(
+                      size: 70,
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Text(
+                      'nuevo propietario'.toUpperCase(),
+                      style:
+                          TextStyle(color: Helper.brandColors[8], fontSize: 23),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    edit
+                        ? FutureBuilder(
+                            future: _usuarioService.obtenerUsuario(_usuarioId),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting)
+                                return Loading(
+                                  mensaje: 'Cargando propietario',
+                                );
 
-                            final response = snapshot.data as MyResponse;
-                            if (response.fallo)
-                              return Center(
-                                child: Text(
-                                    'Error al cargar datos ' + response.error),
-                              );
+                              final response = snapshot.data as MyResponse;
+                              if (response.fallo)
+                                return Center(
+                                  child: Text('Error al cargar datos ' +
+                                      response.error),
+                                );
 
-                            final propietario = Miembro.fromJson(response.data);
+                              final propietario =
+                                  Miembro.fromJson(response.data);
 
-                            return _Form(from: _pageFrom, propietario: propietario);
-                          },
-                        )
-                      : _Form(from: _pageFrom,),
-                ],
+                              return _Form(
+                                  from: _pageFrom, propietario: propietario);
+                            },
+                          )
+                        : _Form(
+                            from: _pageFrom,
+                          ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
+        bottomNavigationBar: CustomNavigatorFooter(),
       ),
-      bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
 }
 
 class _Form extends StatefulWidget {
-  _Form({Key? key,required this.from, this.propietario = null}) : super(key: key);
+  _Form({Key? key, required this.from, this.propietario = null})
+      : super(key: key);
 
   Miembro? propietario;
   String from;
@@ -113,15 +119,15 @@ class _FormState extends State<_Form> {
     super.dispose();
     resetForm();
   }
-final TextEditingController txtNombreCtrl = TextEditingController();
-final TextEditingController txtApellidoCtrl = TextEditingController();
-final TextEditingController txtDNICtrl = TextEditingController();
-final TextEditingController txtTelefonoCtrl = TextEditingController();
-final TextEditingController txtMailCtrl = TextEditingController();
+
+  final TextEditingController txtNombreCtrl = TextEditingController();
+  final TextEditingController txtApellidoCtrl = TextEditingController();
+  final TextEditingController txtDNICtrl = TextEditingController();
+  final TextEditingController txtTelefonoCtrl = TextEditingController();
+  final TextEditingController txtMailCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    
     if (widget.propietario != null) {
       setForm();
     }
@@ -130,8 +136,7 @@ final TextEditingController txtMailCtrl = TextEditingController();
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Column(
           children: [
-                      TextFormField(),
-            
+            TextFormField(),
             CustomInput(
               hintText: 'Nombre',
               icono: Icons.person,
@@ -201,7 +206,7 @@ final TextEditingController txtMailCtrl = TextEditingController();
   }
 
   void setForm() {
-     txtNombreCtrl.text = widget.propietario!.nombre;
+    txtNombreCtrl.text = widget.propietario!.nombre;
     txtApellidoCtrl.text = widget.propietario!.apellido;
     txtDNICtrl.text = widget.propietario!.dni;
     txtTelefonoCtrl.text = widget.propietario!.telefono;
@@ -231,13 +236,12 @@ final TextEditingController txtMailCtrl = TextEditingController();
       closeLoadingDialog(context);
 
       if (response.fallo) {
-
         await openAlertDialogReturn(context, 'Error al crear propietario',
             subMensaje: response.error);
         return;
       }
       resetForm();
-      
+
       await openAlertDialogReturn(context, 'Propietario creado');
       leavePage(context);
     } else {
@@ -246,9 +250,9 @@ final TextEditingController txtMailCtrl = TextEditingController();
   }
 
   void leavePage(BuildContext context) {
-    if(widget.from == 'obra'){
+    if (widget.from == 'obra') {
       Navigator.of(context).popAndPushNamed(AgregarPropietariosPage.routeName);
-    }else{
+    } else {
       Navigator.of(context).pop();
     }
   }

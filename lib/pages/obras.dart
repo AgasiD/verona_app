@@ -131,7 +131,6 @@ class _ObrasPageState extends State<ObrasPage> {
         ? header = WaterDropHeader()
         : header = MaterialClassicHeader();
     final textStyle = TextStyle(fontSize: 16, color: Helper.brandColors[4]);
-    print('carga menu');
     final menu = [
       {
         'icon': Icons.person_pin_rounded,
@@ -236,7 +235,6 @@ class __SearchListViewState extends State<_SearchListView> {
   Widget build(BuildContext context) {
     final _obras = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
-    print('build obras');
     return SingleChildScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: FutureBuilder(
