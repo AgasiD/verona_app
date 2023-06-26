@@ -29,7 +29,7 @@ class HttpService extends ChangeNotifier {
 
   post(String endpoint, Map<String, dynamic> body) async {
     final _pref = new Preferences();
-    //headers.addAll({'x-token': _pref.token});
+    headers.addAll({'x-token': _pref.token});
     Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);

@@ -5,18 +5,22 @@ import 'dart:io';
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:badges/badges.dart' as badges;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
 import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
+import 'package:verona_app/pages/ABMs/centro_notificaciones.dart';
 import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/forms/notificaciones.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
@@ -140,6 +144,12 @@ class _ObrasPageState extends State<ObrasPage> {
         'roles': []
       },
       {
+        'icon': Icons.holiday_village,
+        'name': 'Propietarios',
+        'route': PropietariosADM.routeName,
+        'roles': [1]
+      },
+      {
         'icon': Icons.person_add_alt_sharp,
         'name': 'Nuevo propietario',
         'route': PropietarioForm.routeName,
@@ -150,12 +160,6 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.group_sharp,
         'name': 'Personal',
         'route': PersonalADM.routeName,
-        'roles': [1]
-      },
-      {
-        'icon': Icons.holiday_village,
-        'name': 'Propietarios',
-        'route': PropietariosADM.routeName,
         'roles': [1]
       },
       {
@@ -176,6 +180,33 @@ class _ObrasPageState extends State<ObrasPage> {
         'name': 'Control inactividades',
         'route': InactividadesABM.routeName,
         'roles': [1, 2, 7],
+      },
+      {
+        'icon': Icons.notification_add,
+        'name': 'Envío de notificaciones',
+        'route': NotificacionesForm.routeName,
+        'roles': [1, 2, 7],
+      },
+      {
+        'icon': Icons.notification_important_rounded,
+        'name': 'Centro de autorización',
+        'route': NotificacionesABM.routeName,
+        'roles': [1],
+      },
+      {
+        'icon': FontAwesomeIcons.solidNewspaper,
+        'name': 'Noticias',
+        'route': NotificacionesABM.routeName,
+        'roles': [1, 2, 3, 4, 5, 6, 7, 8],
+        'navega': false,
+        'action': () async {
+          final Uri _url =
+              Uri.parse('https://www.veronaconstrucciones.com.ar/noticias');
+          if (await canLaunchUrl(_url))
+            await launchUrl(_url, mode: LaunchMode.externalApplication);
+          else
+            print('No se puede lanzar browser');
+        }
       },
       {
         'icon': Icons.edit_note_rounded,
@@ -244,7 +275,7 @@ class __SearchListViewState extends State<_SearchListView> {
                 return Loading(mensaje: 'Recuperando obras');
               } else {
                 final response = snapshot.data as MyResponse;
-                    if (!response.fallo) {
+                if (!response.fallo) {
                   obras = (response.data as List<dynamic>)
                       .map((e) => Obra.fromMap(e))
                       .toList();
@@ -267,10 +298,7 @@ class __SearchListViewState extends State<_SearchListView> {
                   );
                 }
               }
-            }
-
-            
-            ));
+            }));
   }
 
   void needReLogIn(MyResponse response) {

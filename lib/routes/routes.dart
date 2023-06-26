@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:verona_app/pages/ABMs/ControlObra.dart';
 import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
 import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
+import 'package:verona_app/pages/ABMs/centro_notificaciones.dart';
 import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/anotaciones.dart';
@@ -9,6 +10,8 @@ import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/etapa.dart';
 import 'package:verona_app/pages/forms/inactividades_masiva.dart';
+import 'package:verona_app/pages/forms/notificaciones.dart';
+import 'package:verona_app/pages/forms/notificaciones_edit.dart';
 import 'package:verona_app/pages/forms/semanario_message.dart';
 import 'package:verona_app/pages/forms/subetapa.dart';
 import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
@@ -102,4 +105,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   TareasExtrasPage.routeName: (_) => TareasExtrasPage(),
   TareasSemanarias.routeName: (_) => TareasSemanarias(),
   SemanarioMessageForm.routeName: (_) => SemanarioMessageForm(),
+  NotificacionesForm.routeName: (_) => NotificacionesForm(),
+  NotificacionesABM.routeName: (_) => NotificacionesABM(),
+  NotificacionesEditForm.routeName: (_) => NotificacionesEditForm(),
   };

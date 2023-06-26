@@ -6,6 +6,7 @@ import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/services/http_service.dart';
+import 'package:verona_app/widgets/custom_widgets.dart';
 
 class UsuarioService extends ChangeNotifier {
   HttpService _http = new HttpService();
@@ -20,6 +21,14 @@ class UsuarioService extends ChangeNotifier {
         .toList();
     return list;
   }
+
+    obtenerPropietariosAdmin() async {
+    final datos = await this._http.get('$_endpoint/propadmin');
+    final response = datos["response"];
+    final usuarios = MyResponse.fromJson(response);
+    return usuarios;
+  }
+
 
   obtenerPropietariosMiembro() async {
     final datos = await this._http.get('$_endpoint/propietario');
@@ -91,9 +100,14 @@ class UsuarioService extends ChangeNotifier {
   }
 
   validarUsuario(String usuario, String password) async {
+    try{
+
     final body = {"username": usuario, "password": password};
     final response = await this._http.post('$_endpoint/autenticar', body);
     return MyResponse.fromJson(response['response']);
+    }catch( err ){
+      print(err);
+    }
   }
 
   setTokenDevice(String usuarioId, String tokenDevice) async {

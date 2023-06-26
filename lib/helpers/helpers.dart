@@ -282,4 +282,8 @@ class Helper {
     return sizeInMb;
     
   }
+
+  static requestFocus(BuildContext context) {
+    return FocusScope.of(context).requestFocus(new FocusNode());
+  }
 }

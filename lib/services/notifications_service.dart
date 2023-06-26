@@ -8,6 +8,7 @@ import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/forms/notificaciones_edit.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/obra.dart';
@@ -161,6 +162,12 @@ class NotificationService extends ChangeNotifier {
             'obraId': notif.data['obraId'],
           });
           break;
+        case 'authNotif':
+          navigatorKey.currentState!
+              .pushNamed(NotificacionesEditForm.routeName, arguments: {
+            'idNotif': notif.data['idNotif'],
+          });
+          break;
       }
     } else {
       /* Si la notificacion llega estando dentro de la app  */
@@ -225,6 +232,18 @@ class NotificationService extends ChangeNotifier {
                           })),
                 );
                 break;
+              case 'authNotif':
+                snackBar = SnackBar(
+                  content: Text(notif.notification!.title ?? 'Sin titulo'),
+                  action: SnackBarAction(
+                      label: 'Ver',
+                      onPressed: () => navigatorKey.currentState!.pushNamed(
+                              NotificacionesEditForm.routeName,
+                              arguments: {
+                                'idNotif': notif.data['idNotif'],
+                              })),
+                );
+                break;
             }
 
             break;
@@ -233,7 +252,6 @@ class NotificationService extends ChangeNotifier {
 
         if (!currentPage.contains('chat')) {
           // Si no estoy en pantalla de chat
-
         } else {
           // if(route.settings.name == 'chat'){
 

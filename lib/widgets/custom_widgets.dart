@@ -175,10 +175,13 @@ class CustomDrawer extends StatelessWidget {
                     ),
                   ),
                 ]),
-                onPressed: () {
-                  Navigator.pushNamed(context, e["route"].toString(),
-                      arguments: e['args'] ?? null);
-                },
+                onPressed: 
+
+                  e['navega'] ?? true 
+                  ? () => Navigator.pushNamed(context, e["route"].toString(),
+                      arguments: e['args'] ?? null)
+                  : e['action']
+              
               ),
             ))
         .toList();
@@ -603,7 +606,7 @@ class CustomInputArea extends StatefulWidget {
   final double width;
   final IconButton iconButton;
   final int lines;
-
+  final bool enable;
   const CustomInputArea(
       {Key? key,
       required this.hintText,
@@ -613,6 +616,7 @@ class CustomInputArea extends StatefulWidget {
       this.width = double.infinity,
       this.lines = 1,
       this.iconButton = const IconButton(onPressed: null, icon: Icon(null)),
+      this.enable = true,
       required this.textController})
       : super(key: key);
 
@@ -628,6 +632,7 @@ class _CustomInputAreaState extends State<CustomInputArea> {
       padding: EdgeInsets.symmetric(horizontal: 15),
       margin: EdgeInsets.only(bottom: 16),
       child: TextField(
+        enabled: widget.enable,
         controller: widget.textController,
         maxLines: widget.lines,
         autocorrect: true,

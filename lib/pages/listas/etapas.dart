@@ -21,6 +21,8 @@ class EtapasObra extends StatelessWidget {
     final _obraService = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     return Scaffold(
+      
+      appBar: AppBar(title: Text('${_obraService.obra.nombre} - ${_obraService.obra.barrio}${_obraService.obra.lote}'), backgroundColor: Helper.brandColors[2], automaticallyImplyLeading: false),
       backgroundColor: Helper.brandColors[1],
       body: Column(
         children: [

@@ -38,10 +38,11 @@ class _TareasCheckListState extends State<TareasCheckList> {
         .tareas;
 
     return Scaffold(
+      // appBar: AppBar(title: Text('${_obraService.obra.nombre} - ${_obraService.obra.barrio}${_obraService.obra.lote}'), backgroundColor: Helper.brandColors[2], automaticallyImplyLeading: false),
       extendBodyBehindAppBar: false,
       appBar: AppBar(
           backgroundColor: Helper.brandColors[2],
-          title: Text('Tareas'),
+          title: Text('${_obraService.obra.nombre} - ${_obraService.obra.barrio}${_obraService.obra.lote}'),
           automaticallyImplyLeading: false,
           actions: [
             _pref.role == 1 || _pref.role == 2 || _pref.role == 7
