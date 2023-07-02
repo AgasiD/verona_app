@@ -212,7 +212,9 @@ class Obra {
     final indexSubetapa = etapas[indexEtapa]
         .subetapas
         .indexWhere((subetapa) => subetapa.id == tarea.subetapa);
-    etapas[indexEtapa].subetapas[indexSubetapa].tareas.add(tarea);
+    int posicion = tarea.orden ?? etapas[indexEtapa].subetapas[indexSubetapa].tareas.length;
+    posicion < 0 ? posicion =etapas[indexEtapa].subetapas[indexSubetapa].tareas.length  : posicion; 
+    etapas[indexEtapa].subetapas[indexSubetapa].tareas.insert(posicion, tarea);
   }
 
   quitarTarea(String etapaId, Tarea tarea) {

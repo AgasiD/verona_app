@@ -22,9 +22,9 @@ class SubetapaService extends ChangeNotifier {
     return resp;
   }
 
-  Future<MyResponse> obtenerExtras(etapaId) async {
+  Future<MyResponse> obtenerExtras(etapaId, obraId) async {
     final datos =
-        await this._http.get('$_endpoint/obtenerSubetapasExtras/$etapaId');
+        await this._http.get('$_endpoint/subetapasExtras/$etapaId/$obraId');
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
 

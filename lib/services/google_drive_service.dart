@@ -35,12 +35,12 @@ class GoogleDriveService extends ChangeNotifier {
       //obtener drive id de carpeta imagenes -> pedido/evidencia
       final response = await this.obtenerDocumentos(driveFolderId);
       var imageFolder = (response.data['files'] as List<dynamic>)
-          .firstWhere((file) => file['name'] == '06- Imagenes');
+          .firstWhere((file) => file['name'] == '12-FOTOS DE OBRA', orElse: null) ?? driveFolderId;
 
       final responseAux = await this.obtenerDocumentos(imageFolder['id']);
       var imageFolderEvidencia = (responseAux.data['files'] as List<dynamic>)
           .firstWhere(
-              (file) => file['name'].toString().contains('01- Pedidos'));
+              (file) => file['name'].toString().contains('01-PEDIDOS/EVIDENCIAS'), orElse: null) ?? imageFolder;
 
       final idFolder = imageFolderEvidencia['id'];
 

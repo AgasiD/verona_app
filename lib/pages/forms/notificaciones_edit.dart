@@ -1,3 +1,4 @@
+import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -26,7 +27,7 @@ class NotificacionesEditForm extends StatelessWidget {
                   return Loading(mensaje: 'Cargando información');
                 } else if (snapshot.hasError) {
                   return Center(
-                    child: Text('Error al recuperar información'),
+                    child: Text('Error al recuperar información', style: TextStyle(color: Helper.brandColors[4], fontSize: 18)),
                   );
                 }
                 final response = snapshot.data as MyResponse;
@@ -115,12 +116,17 @@ enable: !autorizado,
                 },
               ),
             ),
-            
+              TextButton(
+                onPressed: () => eliminarNotificacion(widget.notif['id']),
+                child: Text('Eliminar', style: TextStyle(color: Colors.red[400], fontSize: 17),),
+                
+              ),
               MainButton(
                 onPressed: () => enviarNotificacion(context),
                 text: !autorizado ? 'Autorizar' : 'Reenviar',
                 color: Helper.brandColors[8],
               ),
+            
           ],
         ),
       ),
@@ -159,6 +165,28 @@ enable: !autorizado,
       openAlertDialog(context, 'Error al enviar notificacion',
           subMensaje: err.toString());
     } finally {
+      return;
+    }
+  }
+  
+  eliminarNotificacion(notif) async{
+    if(!await openDialogConfirmationReturn(context, 'Confirme para eliminar notificación')) return;
+
+    bool loading = true;
+    try{
+      openLoadingDialog(context, mensaje: 'Eliminando...');
+      final _notifService = Provider.of<NotificacionesService>(context, listen: false);
+      final response = await _notifService.eliminarNotificacion(notif);
+      if(response.fallo){
+        throw Exception(response.error);
+      }
+      closeLoadingDialog(context);
+      loading = false;
+      await openAlertDialogReturn(context, 'Eliminada con éxito');
+      Navigator.pop(context);
+    }catch ( err ){
+      loading ? closeLoadingDialog(context) : false;
+      openAlertDialog(context, 'Error al eliminar', subMensaje: err.toString());
       return;
     }
   }

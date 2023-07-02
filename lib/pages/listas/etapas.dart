@@ -23,6 +23,8 @@ class EtapasObra extends StatelessWidget {
     return Scaffold(
       
       appBar: AppBar(title: Text('${_obraService.obra.nombre} - ${_obraService.obra.barrio}${_obraService.obra.lote}'), backgroundColor: Helper.brandColors[2], automaticallyImplyLeading: false),
+            extendBodyBehindAppBar: true,
+
       backgroundColor: Helper.brandColors[1],
       body: Column(
         children: [

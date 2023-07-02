@@ -10,8 +10,8 @@ class TareaService extends ChangeNotifier {
   HttpService _http = new HttpService();
   final _endpoint = 'api/tarea';
 
-  Future<MyResponse> obtenerTareasExtras(subetapaId) async {
-    final datos = await this._http.get('$_endpoint/extras/$subetapaId');
+  Future<MyResponse> obtenerTareasExtras(etapaId, subetapaId, obraId) async {
+    final datos = await this._http.get('$_endpoint/extras/$etapaId/$subetapaId/$obraId');
     final response = datos["response"];
     final resp = MyResponse.fromJson(response);
     return resp;

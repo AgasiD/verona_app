@@ -19,6 +19,7 @@ import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
 import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
 import 'package:verona_app/pages/ABMs/centro_notificaciones.dart';
 import 'package:verona_app/pages/anotaciones.dart';
+import 'package:verona_app/pages/anotaciones_general.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/notificaciones.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -199,19 +200,12 @@ class _ObrasPageState extends State<ObrasPage> {
         'route': NotificacionesABM.routeName,
         'roles': [1, 2, 3, 4, 5, 6, 7, 8],
         'navega': false,
-        'action': () async {
-          final Uri _url =
-              Uri.parse('https://www.veronaconstrucciones.com.ar/noticias');
-          if (await canLaunchUrl(_url))
-            await launchUrl(_url, mode: LaunchMode.externalApplication);
-          else
-            print('No se puede lanzar browser');
-        }
+        'action':() => Helper.launchWeb('https://www.veronaconstrucciones.com.ar/noticias', context)
       },
       {
         'icon': Icons.edit_note_rounded,
         'name': 'Mis anotaciones',
-        'route': AnotacionesPage.routeName,
+        'route': AnotacionesGeneralPage.routeName,
         'roles': [1, 2, 3, 7],
         'args': {'obraId': null},
       },

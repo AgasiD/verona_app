@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/notificaciones_edit.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
@@ -168,6 +170,8 @@ class NotificationService extends ChangeNotifier {
             'idNotif': notif.data['idNotif'],
           });
           break;
+        case 'update_app':
+        await Helper.launchWeb(Helper.getURLByPlatform(), context);
       }
     } else {
       /* Si la notificacion llega estando dentro de la app  */
@@ -244,6 +248,7 @@ class NotificationService extends ChangeNotifier {
                               })),
                 );
                 break;
+                
             }
 
             break;

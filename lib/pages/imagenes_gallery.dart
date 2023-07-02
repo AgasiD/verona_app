@@ -98,7 +98,6 @@ class ImgGalleryPage extends StatelessWidget {
                                     Navigator.pushNamed(
                                         (context), ImgGalleryPage.routeName,
                                         arguments: {'driveId': e['id']});
-
                                           }
                                   else if (
                                       e['mimeType']

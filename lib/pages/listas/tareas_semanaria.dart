@@ -44,28 +44,27 @@ class TareasSemanarias extends StatelessWidget {
               : FutureBuilder(
                   future: _obraService.obtenerObrasByUser(_pref.id),
                   builder: (context, snapshot) {
-                    try{
-
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Loading(
-                        mensaje: 'Cargando obras...',
-                      );
-                    }
-                    final response = snapshot.data as MyResponse;
-                    if (response.fallo) {
-                      print(response.error);
-                      return Container(
-                          child: Center(child: Text('Error al buscar obras')));
-                    }
-                    obras = (response.data as List)
-                        .map((json) => Obra.fromMap(json))
-                        .toList();
-                    return _Semanario(
-                        obras: obras,
-                        selectedTask: selectedTask,
-                        esSingle: esSingle);
-                    }
-                    catch( err ){
+                    try {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Loading(
+                          mensaje: 'Cargando obras...',
+                        );
+                      }
+                      final response = snapshot.data as MyResponse;
+                      if (response.fallo) {
+                        print(response.error);
+                        return Container(
+                            child:
+                                Center(child: Text('Error al buscar obras')));
+                      }
+                      obras = (response.data as List)
+                          .map((json) => Obra.fromMap(json))
+                          .toList();
+                      return _Semanario(
+                          obras: obras,
+                          selectedTask: selectedTask,
+                          esSingle: esSingle);
+                    } catch (err) {
                       return CustomCenterText(text: err.toString());
                     }
                   })),
@@ -132,68 +131,65 @@ class _SemanarioState extends State<_Semanario> {
     return FutureBuilder(
         future: _usuarioService.obtenerPersonal(roles: [1, 2]),
         builder: (context, snapshot) {
-          try{
-
-          
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Loading(
-              mensaje: 'Cargando usuarios...',
-            );
-          }
-          final response = snapshot.data as List<Miembro>;
-          personal.clear();
-          personal.add(
-            DropdownMenuItem(
-              value: '1',
-              child: AutoSizeText(
-                '--Todo el personal--'.toUpperCase(),
-                maxFontSize: 20,
-                minFontSize: 10,
-              ),
-            ),
-          );
-          response.sort((a, b) {
-            return a.nombre.compareTo(b.nombre);
-          });
-          response.forEach((miembro) => personal.add(
-                DropdownMenuItem(
-                    value: miembro.id,
-                    child: AutoSizeText(
-                      '${miembro.nombre} ${miembro.apellido}'.toUpperCase(),
-                      maxFontSize: 20,
-                      minFontSize: 10,
-                    )),
-              ));
-
-          return Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      FilterBar(
-                          desde: desde,
-                          txtCtrlDesde: txtCtrlDesde,
-                          hasta: hasta,
-                          txtCtrlHasta: txtCtrlHasta,
-                          personal: personal,
-                          obras: widget.obras,
-                          esSingle: widget.esSingle,
-                          action: buscarTareas),
-                      _ListTask(
-                        obras: obrasTareas,
-                        tareasStream: tareasStream,
-                        selectedTask: widget.selectedTask,
-                        esSingle: widget.esSingle,
-                      )
-                    ],
-                  ),
+          try {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Loading(
+                mensaje: 'Cargando usuarios...',
+              );
+            }
+            final response = snapshot.data as List<Miembro>;
+            personal.clear();
+            personal.add(
+              DropdownMenuItem(
+                value: '1',
+                child: AutoSizeText(
+                  '--Todo el personal--'.toUpperCase(),
+                  maxFontSize: 20,
+                  minFontSize: 10,
                 ),
               ),
-            ],
-          );
-          }catch ( err ){
-            
+            );
+            response.sort((a, b) {
+              return a.nombre.compareTo(b.nombre);
+            });
+            response.forEach((miembro) => personal.add(
+                  DropdownMenuItem(
+                      value: miembro.id,
+                      child: AutoSizeText(
+                        '${miembro.nombre} ${miembro.apellido}'.toUpperCase(),
+                        maxFontSize: 20,
+                        minFontSize: 10,
+                      )),
+                ));
+
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        FilterBar(
+                            desde: desde,
+                            txtCtrlDesde: txtCtrlDesde,
+                            hasta: hasta,
+                            txtCtrlHasta: txtCtrlHasta,
+                            personal: personal,
+                            obras: widget.obras,
+                            esSingle: widget.esSingle,
+                            action: buscarTareas),
+                        _ListTask(
+                          obras: obrasTareas,
+                          tareasStream: tareasStream,
+                          selectedTask: widget.selectedTask,
+                          esSingle: widget.esSingle,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          } catch (err) {
             return CustomCenterText(text: 'Hubo un error inesperado');
           }
         });
@@ -203,7 +199,8 @@ class _SemanarioState extends State<_Semanario> {
       {DateTime? paramDesde = null,
       DateTime? paramHasta = null,
       listener = true}) async {
-        // openLoadingDialog(context, mensaje: 'Buscando tareas...');
+
+    openLoadingDialog(context, mensaje: 'Buscando tareas...');
 
     obrasTareas.clear();
 
@@ -218,24 +215,20 @@ class _SemanarioState extends State<_Semanario> {
 
     //Obtengo las tareas desde las obras
 
-     if(idObra != '1')
-     {
-          if (!widget.esSingle) {
-
+    if (idObra != '1') {
+      if (!widget.esSingle) {
+        obras.forEach((obra) {
+          if (idObra == obra.id)
+            obrasTareas.add(obra.obtenerTareasRealizadasDesdeHasta(
+                desde, hasta.add(Duration(days: 1))));
+        });
+      }
+    } else {
       obras.forEach((obra) {
-        if(idObra == obra.id)
-          obrasTareas.add(obra.obtenerTareasRealizadasDesdeHasta(
-              desde, hasta.add(Duration(days: 1))));
-
-    });
-     }
-     }else{
-
-    obras.forEach((obra) {
-      obrasTareas.add(obra.obtenerTareasRealizadasDesdeHasta(
-          desde, hasta.add(Duration(days: 1))));
-    });
-     }
+        obrasTareas.add(obra.obtenerTareasRealizadasDesdeHasta(
+            desde, hasta.add(Duration(days: 1))));
+      });
+    }
 
     // Filtro de usuario
     if (!widget.esSingle) {
@@ -269,9 +262,10 @@ class _SemanarioState extends State<_Semanario> {
     if (widget.esSingle) {
       _asignarTareas(obrasTareas);
     }
-    // closeLoadingDialog(co);
+    closeLoadingDialog(context);
     _tareasStream.add(obrasTareas);
     // setState(() {});
+    
   }
 
   void _matchWithName(List<Miembro> usuarios) {
@@ -346,21 +340,25 @@ class _FilterBarState extends State<FilterBar> {
     // TODO: implement initState
     super.initState();
     final initValueObra = '1';
-    obrasItems = widget.obras.map((e) => DropdownMenuItem(child: Text(e.nombre.toUpperCase()),value: e.id,)).toList();
-    obrasItems.insert(0, DropdownMenuItem(child: Text('--TODOS LOS PROYECTOS--',), value: initValueObra,));
+    obrasItems = widget.obras
+        .map((e) => DropdownMenuItem(
+              child: Text(e.nombre.toUpperCase()),
+              value: e.id,
+            ))
+        .toList();
+    obrasItems.insert(
+        0,
+        DropdownMenuItem(
+          child: Text(
+            '--TODOS LOS PROYECTOS--',
+          ),
+          value: initValueObra,
+        ));
     obraSelected = initValueObra;
-
   }
-
 
   @override
   Widget build(BuildContext context) {
-
-
-
-
-
-
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10),
       color: Helper.brandColors[2],
@@ -404,91 +402,106 @@ class _FilterBarState extends State<FilterBar> {
                         width: 90,
                         child: Text('Personal',
                             style: TextStyle(color: Helper.brandColors[4]))),
-                    Container(
-                      width: 300,
-                      height: 80,
-                      child: DropdownButtonFormField2(
-                          value: userSelected,
-                          items: widget.personal,
-                          style: TextStyle(
-                              color: Helper.brandColors[5], fontSize: 16),
-                          iconSize: 30,
-                          buttonHeight: 60,
-                          buttonPadding: EdgeInsets.only(left: 20, right: 10),
-                          decoration: Helper.getDecoration(),
-                          hint: FittedBox(
-                            child: Text(
-                              'Todo el personal',
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: SizedBox(
+                          height: 80,
+                          child: DropdownButtonFormField2(
+                              value: userSelected,
+                              items: widget.personal,
                               style: TextStyle(
-                                  fontSize: 16, color: Helper.brandColors[3]),
-                            ),
-                          ),
-                          icon: Icon(
-                            Icons.arrow_drop_down,
-                            color: Helper.brandColors[3],
-                          ),
-                          dropdownMaxHeight:
-                              MediaQuery.of(context).size.height * .4,
-                          dropdownWidth: 300,
-                          dropdownDecoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Helper.brandColors[2],
-                          ),
-                          onChanged: (value) {
-                            userSelected = value as String;
-                          }),
+                                  color: Helper.brandColors[5], fontSize: 16),
+                              iconSize: 30,
+                              buttonHeight: 60,
+                              buttonPadding:
+                                  EdgeInsets.only(left: 20, right: 5),
+                              decoration: Helper.getDecoration(),
+                              hint: FittedBox(
+                                child: Text(
+                                  'Todo el personal',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Helper.brandColors[3]),
+                                ),
+                              ),
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: Helper.brandColors[3],
+                              ),
+                              dropdownMaxHeight:
+                                  MediaQuery.of(context).size.height * .4,
+                              dropdownWidth: 300,
+                              dropdownDecoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Helper.brandColors[2],
+                              ),
+                              onChanged: (value) {
+                                userSelected = value as String;
+                              }),
+                        ),
+                      ),
                     )
                   ],
                 ),
-          widget.esSingle 
-          ? Container()
-          : Row(
-            children: [
-              Container(
-                  padding: EdgeInsets.only(left: 20),
-                  width: 90,
-                  child: Text('Proyecto',
-                      style: TextStyle(color: Helper.brandColors[4]))),
-              Container(
-                width: 300,
-                height: 80,
-                child: DropdownButtonFormField2(
-                    value: obraSelected,
-                    items: obrasItems,
-                    style:
-                        TextStyle(color: Helper.brandColors[5], fontSize: 16),
-                    iconSize: 30,
-                    buttonHeight: 60,
-                    buttonPadding: EdgeInsets.only(left: 20, right: 10),
-                    decoration: Helper.getDecoration(),
-                    hint: FittedBox(
-                      child: Text(
-                        '--TODOS LOS PROYECTOS--',
-                        style: TextStyle(
-                            fontSize: 16, color: Helper.brandColors[3]),
+          widget.esSingle
+              ? Container()
+              : Row(
+                  children: [
+                    Container(
+                        padding: EdgeInsets.only(left: 20),
+                        width: 90,
+                        child: Text('Proyecto',
+                            style: TextStyle(color: Helper.brandColors[4]))),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: SizedBox(
+                          height: 80,
+                          child: DropdownButtonFormField2(
+                              value: obraSelected,
+                              items: obrasItems,
+                              style: TextStyle(
+                                  color: Helper.brandColors[5], fontSize: 16),
+                              iconSize: 30,
+                              buttonHeight: 60,
+                              buttonPadding:
+                                  EdgeInsets.only(left: 20, right: 10),
+                              decoration: Helper.getDecoration(),
+                              hint: FittedBox(
+                                fit: BoxFit.contain,
+                                child: Text(
+                                  '--TODOS LOS PROYECTOS--',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Helper.brandColors[3]),
+                                ),
+                              ),
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: Helper.brandColors[3],
+                              ),
+                              dropdownMaxHeight:
+                                  MediaQuery.of(context).size.height * .4,
+                              dropdownWidth: 250,
+                              dropdownDecoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Helper.brandColors[2],
+                              ),
+                              onChanged: (value) {
+                                obraSelected = value as String;
+                              }),
+                        ),
                       ),
-                    ),
-                    icon: Icon(
-                      Icons.arrow_drop_down,
-                      color: Helper.brandColors[3],
-                    ),
-                    dropdownMaxHeight: MediaQuery.of(context).size.height * .4,
-                    dropdownWidth: 300,
-                    dropdownDecoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: Helper.brandColors[2],
-                    ),
-                    onChanged: (value) {
-                     obraSelected = value as String;
-                    }),
-              )
-            ],
-          ),
+                    )
+                  ],
+                ),
           SizedBox(
             height: 10,
           ),
           MainButton(
-            onPressed: () => this.widget.action(widget.obras, userSelected, obraSelected),
+            onPressed: () =>
+                this.widget.action(widget.obras, userSelected, obraSelected),
             text: 'Buscar tareas',
             width: 100,
             color: Helper.brandColors[8],
@@ -534,7 +547,7 @@ class __ListTaskState extends State<_ListTask> {
         initialData: [],
         stream: widget.tareasStream,
         builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.active) {
+          if (snapshot.connectionState != ConnectionState.active && !snapshot.hasData) {
             return Loading(mensaje: 'Cargando tareas...');
           }
 

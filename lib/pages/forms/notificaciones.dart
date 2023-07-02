@@ -19,6 +19,7 @@ class NotificacionesForm extends StatelessWidget {
   static final routeName = 'NotificacionesForm';
   @override
   Widget build(BuildContext context) {
+    final _pref = new Preferences();
     final _usuariService = Provider.of<UsuarioService>(context);
     return GestureDetector(
         onTap: () => Helper.requestFocus(context),
@@ -45,6 +46,7 @@ class NotificacionesForm extends StatelessWidget {
                     .map((e) => Miembro.fromJson(e))
                     .toList();
                 final personal = (response.data['personal'] as List)
+                    .where((element) => element['id'] != _pref.id)
                     .map((e) => Miembro.fromJson(e))
                     .toList();
                 return _FormNotificaciones(
@@ -71,6 +73,8 @@ class _FormNotificaciones extends StatefulWidget {
   @override
   State<_FormNotificaciones> createState() => _FormNotificacionesState();
 }
+
+enum NotificationType { notification, obra, update_app }
 
 class _FormNotificacionesState extends State<_FormNotificaciones> {
   TextEditingController txtTitle = TextEditingController();
@@ -105,13 +109,23 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
               value: e.id,
             ))
         .toList();
-    adminSelected = widget.admin[0].id;
+
+    final _pref = new Preferences();
+    if (_pref.role == 1) {
+      adminSelected = _pref.id;
+    } else {
+      adminSelected = widget.admin[0].id;
+    }
     propietariosItems.sort((a, b) => a.compareTo(b));
     personalItems.sort((a, b) => a.compareTo(b));
   }
 
+  late int maxCaracters;
+  NotificationType _notificationType = NotificationType.notification;
+
   @override
   Widget build(BuildContext context) {
+    maxCaracters = 100;
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
@@ -139,81 +153,89 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                     ),
                   ),
                   CustomInputArea(
-                    hintText: 'Escriba hasta 50 caracteres',
+                    hintText: 'Escriba hasta $maxCaracters caracteres',
                     textController: txtMsg,
                     icono: Icons.notifications_active_sharp,
                     lines: 4,
                   ),
-                   DropDownMultiSelect(
-                          decoration: getDecoration(),
-                          childBuilder: (option) => Container(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Text(
-                              'Propietarios seleccionados: ' +
-                                  idPropietariosSelected.length.toString(),
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                  color: Helper.brandColors[5], fontSize: 17),
-                            ),
-                          ),
-                          selected_values_style: TextStyle(color: Colors.white),
-                          options: propietariosItems,
-                          selectedValues: idPropietariosSelected,
-                          whenEmpty: 'Sin obras seleccionadas',
-                          icon: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Icon(
-                              Icons.arrow_drop_down_outlined,
-                              size: 35,
-                              color: Helper.brandColors[3],
-                            ),
-                          ),
-                          onChanged: (x) {
-                            setState(() {
-                              idPropietariosSelected = x as List<String>;
-                            });
-                          },
+                  DropDownMultiSelect(
+                    decoration: getDecoration(),
+                    childBuilder: (option) => Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        'Propietarios seleccionados: ' +
+                            idPropietariosSelected.length.toString(),
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                            color: Helper.brandColors[5], fontSize: 17),
+                      ),
+                    ),
+                    selected_values_style: TextStyle(color: Colors.white),
+                    options: propietariosItems,
+                    selectedValues: idPropietariosSelected,
+                    whenEmpty: 'Sin obras seleccionadas',
+                    icon: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Icon(
+                        Icons.arrow_drop_down_outlined,
+                        size: 35,
+                        color: Helper.brandColors[3],
+                      ),
+                    ),
+                    onChanged: (x) {
+                      setState(() {
+                        idPropietariosSelected = x as List<String>;
+                      });
+                    },
+                  ),
+                  TextButton(
+                      onPressed: () => selectAllProp(),
+                      child: idPropietariosSelected.length ==
+                              propietariosItems.length
+                          ? Text(
+                              'Ninguno',
+                              style: TextStyle(color: Colors.red),
+                            )
+                          : Text('Todos')),
+                  DropDownMultiSelect(
+                      decoration: getDecoration(),
+                      childBuilder: (option) => Container(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            'Personal seleccionado: ' +
+                                idPersonalSelected.length.toString(),
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                                color: Helper.brandColors[5], fontSize: 17),
+                          )),
+                      selected_values_style: TextStyle(color: Colors.white),
+                      options: personalItems,
+                      selectedValues: idPersonalSelected,
+                      whenEmpty: 'Sin obras seleccionadas',
+                      icon: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Icon(
+                          Icons.arrow_drop_down_outlined,
+                          size: 35,
+                          color: Helper.brandColors[3],
                         ),
-                      TextButton(onPressed: () => selectAllProp(), child: idPropietariosSelected.length == propietariosItems.length ? Text('Ninguno') :Text('Todos')),                    
-                        DropDownMultiSelect(
-                            decoration: getDecoration(),
-                            childBuilder: (option) => Container(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                child: Text(
-                                  'Personal seleccionado: ' +
-                                      idPersonalSelected.length.toString(),
-                                  textAlign: TextAlign.right,
-                                  style: TextStyle(
-                                      color: Helper.brandColors[5],
-                                      fontSize: 17),
-                                )),
-                            selected_values_style:
-                                TextStyle(color: Colors.white),
-                            options: personalItems,
-                            selectedValues: idPersonalSelected,
-                            whenEmpty: 'Sin obras seleccionadas',
-                            icon: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: Icon(
-                                Icons.arrow_drop_down_outlined,
-                                size: 35,
-                                color: Helper.brandColors[3],
-                              ),
-                            ),
-                            onChanged: (x) {
-                              setState(() {
-                                idPersonalSelected = x as List<String>;
-                              });
-                            }),
-                      TextButton(onPressed: () => selectAllPersonal(), child: idPersonalSelected.length == personalItems.length ? Text('Ninguno') :Text('Todos')),
-                    
+                      ),
+                      onChanged: (x) {
+                        setState(() {
+                          idPersonalSelected = x as List<String>;
+                        });
+                      }),
+                  TextButton(
+                      onPressed: () => selectAllPersonal(),
+                      child: idPersonalSelected.length == personalItems.length
+                          ? Text('Ninguno', style: TextStyle(color: Colors.red))
+                          : Text('Todos')),
                   Container(
                     margin: EdgeInsets.only(top: 15),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Selecione autorizante:',
+                        Text('Seleccione autorizante:',
                             style: TextStyle(
                                 fontSize: 18, color: Helper.brandColors[4])),
                         SizedBox(
@@ -239,12 +261,65 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                             color: Helper.brandColors[2],
                           ),
                           onChanged: (value) {
-                            print(value);
                             adminSelected = value as String;
                           },
                           onSaved: (value) {
-                            print(value);
                             adminSelected = value as String;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top:15.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text('Tipo de notificación',
+                            style: TextStyle(
+                                fontSize: 18, color: Helper.brandColors[4])),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        RadioListTile(
+                          
+                          contentPadding: EdgeInsets.zero,
+                          splashRadius: 0,
+                          title: Text('Notificación', style: TextStyle(color: Helper.brandColors[4]),),
+                          value: NotificationType.notification,
+                          fillColor: MaterialStateColor.resolveWith((states) => Helper.brandColors[8]),
+                          groupValue: _notificationType,
+                          onChanged: (NotificationType? value) {
+                            setState(() {
+                              _notificationType = value!;
+                            });
+                          },
+                        ),
+                        RadioListTile(
+                          contentPadding: EdgeInsets.zero,
+                          splashRadius: 0,
+                          title: Text('Obra', style: TextStyle(color: Helper.brandColors[4]),),
+                          value: NotificationType.obra,
+                          fillColor: MaterialStateColor.resolveWith((states) => Helper.brandColors[8]),
+                          groupValue: _notificationType,
+                          onChanged: (NotificationType? value) {
+                            setState(() {
+                              _notificationType = value!;
+                            });
+                          },
+                        ),
+                        RadioListTile(
+                          contentPadding: EdgeInsets.zero,
+                          splashRadius: 0,
+                          title: Text('Actualización App', style: TextStyle(color: Helper.brandColors[4]),),
+                          value: NotificationType.update_app,
+                          fillColor: MaterialStateColor.resolveWith((states) => Helper.brandColors[8]),
+                          groupValue: _notificationType,
+                          onChanged: (NotificationType? value) {
+                            setState(() {
+                              _notificationType = value!;
+                            });
                           },
                         ),
                       ],
@@ -293,7 +368,7 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
       String idAuth = adminSelected;
       final _pref = new Preferences();
       final response = await _notifService.enviarNotificacion(
-          _pref.id, title, msg, ids, idAuth);
+          _pref.id, title, msg, ids, idAuth, _notificationType.name);
       closeLoadingDialog(context);
       if (response.fallo) {
         openAlertDialog(context, 'Error al enviar notificación',
@@ -309,17 +384,6 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
       return;
     }
   }
-
-  // addPropietario(String id) {
-  //   if (isAdded(id))
-  //     idUsuarioSelected.removeWhere((element) => element == id);
-  //   else
-  //     idUsuarioSelected.add(id);
-  // }
-
-  // isAdded(String id) {
-  //   return idUsuarioSelected.indexWhere((element) => element == id) >= 0;
-  // }
 
   obtenerIdByDni() {
     List<String> ids = [];
@@ -373,27 +437,27 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
       valido = false;
       mensaje = 'El título es obligatorio';
     }
-    if (txtMsg.text.trim().length > 50) {
+    if (txtMsg.text.trim().length > maxCaracters) {
       valido = false;
-      mensaje = 'Escriba máximo 50 caracteres (${txtMsg.text.trim().length})';
+      mensaje =
+          'Escriba máximo $maxCaracters caracteres (${txtMsg.text.trim().length})';
     }
     return [valido, mensaje];
   }
-  
-  
+
   selectAllProp() {
     setState(() {
-      if(idPropietariosSelected.length == propietariosItems.length){
+      if (idPropietariosSelected.length == propietariosItems.length) {
         idPropietariosSelected.clear();
         return;
       }
       idPropietariosSelected = propietariosItems.map((e) => e).toList();
     });
   }
-  
+
   selectAllPersonal() {
     setState(() {
-      if(idPersonalSelected.length == personalItems.length){
+      if (idPersonalSelected.length == personalItems.length) {
         idPersonalSelected.clear();
         return;
       }

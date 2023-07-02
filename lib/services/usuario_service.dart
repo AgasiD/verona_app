@@ -168,6 +168,12 @@ class UsuarioService extends ChangeNotifier {
     notifyListeners();
     return MyResponse.fromJson(response['response']);
   }
+  Future<MyResponse> obtenerAnotacionesByObra(String id) async{
+    
+    final response =
+        await this._http.get('$_endpoint/anotacionByObra/$id');
+    return MyResponse.fromJson(response['response']);
+  }
 
   Future<void> obtenerNovedades(String usuarioId) async {
 /*
@@ -226,4 +232,6 @@ tipos
     //   },
     // ];
   }
+
+
 }

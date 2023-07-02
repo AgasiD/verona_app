@@ -13,13 +13,14 @@ class NotificacionesService extends ChangeNotifier {
     
   }
 
-  Future<MyResponse> enviarNotificacion(String idUsuario, String title, String msg, List<String> ids, String idAuth ) async {
+  Future<MyResponse> enviarNotificacion(String idUsuario, String title, String msg, List<String> ids, String idAuth, String type ) async {
     final body = {
       'idUsuario': idUsuario,
       "title":title,
       "msg":msg,
       "destinos":ids,
       "idAuth":idAuth,
+      "type": type,
     };
     final datos = await this._http.post('$_endpoint', body);
     final resp = MyResponse.fromJson(datos);
@@ -44,4 +45,13 @@ class NotificacionesService extends ChangeNotifier {
     notifyListeners();
     return resp;
   }
+
+  Future<MyResponse> eliminarNotificacion(notifId) async{
+    final datos = await this._http.delete('$_endpoint/$notifId');
+    final response = datos;
+        notifyListeners();
+
+    return MyResponse.fromJson(response);
+  }
+
 }

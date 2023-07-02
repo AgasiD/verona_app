@@ -5,8 +5,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
+import 'package:verona_app/widgets/custom_widgets.dart';
 
 class Helper {
   static Color? primaryColor = Color(0x1E1E22); //Color(0xff222222);
@@ -27,11 +29,12 @@ class Helper {
   ];
   static const ESTADOSPEDIDO = [1, 2, 3, 5];
   static String nombre = 'Verona';
+  static String iosURL = 'https://apps.apple.com/ar/app/verona/id1620027565?l=en';
+  static String androidURL = 'https://play.google.com/store/apps/details?id=com.edrex.veronaapp';
   static int limit = 25;
   //static double maxWidth = MediaQuery.of(context).size.wi dth
   //static AssetImage splashImage = AssetImage('assets/icon/do-splash.png');
   static String version = '1.4.0';
-
   static String pushToken =
       'emHBj34PRTiMMMMea7q0B5:APA91bEIFvKKPYJYRcBW62_qqCV5_n_9WouqWVGbhjDTGbEjO54Lj_hSxQ1jWfaOQ_7m8veFU1srFUd4ElLxIZBWRexqdUs5gWyVsNQiU6r52lSdEMbolrtPWlAx6edW1l-DSa0EEAFx';
 
@@ -66,6 +69,10 @@ class Helper {
         style: style,
       ),
     ));
+  }
+
+  static getURLByPlatform(){
+    return Platform.isAndroid ? androidURL :  iosURL;
   }
 
   static IconData IconsMap(String icono) {
@@ -286,4 +293,18 @@ class Helper {
   static requestFocus(BuildContext context) {
     return FocusScope.of(context).requestFocus(new FocusNode());
   }
-}
+
+  static launchWeb(url, context) async {
+          try{
+
+          final Uri _url =
+              Uri.parse(url);
+         if (!await launchUrl(_url, mode: LaunchMode.externalApplication)) {
+          throw Exception('No se pudo lanzar la web $_url');
+          }
+          }catch ( err )
+          {
+            openAlertDialog(context, err.toString());
+          }
+        }
+  }

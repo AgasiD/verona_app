@@ -6,6 +6,7 @@ import 'package:verona_app/pages/ABMs/centro_notificaciones.dart';
 import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
 import 'package:verona_app/pages/anotaciones.dart';
+import 'package:verona_app/pages/anotaciones_general.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/etapa.dart';
@@ -57,6 +58,7 @@ import '../pages/forms/inactividadesBD.dart';
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   'prueba': (_) => ReorderableApp(),
   AgregarPropietariosPage.routeName: (_) => AgregarPropietariosPage(),
+  AnotacionesGeneralPage.routeName: (_) => AnotacionesGeneralPage(),
   AnotacionesPage.routeName: (_) => AnotacionesPage(),
   AsignarEquipoPage.routeName: (_) => AsignarEquipoPage(),
   ChatList.routeName: (_) => ChatList(),
@@ -108,4 +110,5 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   NotificacionesForm.routeName: (_) => NotificacionesForm(),
   NotificacionesABM.routeName: (_) => NotificacionesABM(),
   NotificacionesEditForm.routeName: (_) => NotificacionesEditForm(),
+  
   };

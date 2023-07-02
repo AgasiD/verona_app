@@ -28,7 +28,7 @@ class PerfilPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _scaffoldKey = GlobalKey<ScaffoldState>();
-    final _usuarioService = Provider.of<UsuarioService>(context);
+    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     final _imageService = Provider.of<ImageService>(context);
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
@@ -309,11 +309,12 @@ class PerfilPage extends StatelessWidget {
     );
   }
 
-  Future<void> eliminarUsuario(BuildContext context,
+  Future<void> eliminarUsuario(context,
       UsuarioService _usuarioService, ObraService _obraService) async {
-    final confirma = await openDialogConfirmationReturn(
-        context, 'Confirmar para eliminar personal');
+    if(!await openDialogConfirmationReturn(
+        context, 'Confirmar para eliminar personal')) return;
 
+    
     // eliminar obra
     openLoadingDialog(context, mensaje: 'Eliminando personal...');
     final response = await _usuarioService.deleteUsuario(_usuarioId);
@@ -322,9 +323,11 @@ class PerfilPage extends StatelessWidget {
     if (response.fallo) {
       openAlertDialog(context, 'Error al desactivar usuario',
           subMensaje: response.error);
+          return;
     } else {
-      await openAlertDialogReturn(context, 'Usuario desactivado con éxito');
-      _obraService.notifyListeners();
+     await openAlertDialogReturn(context, 'Usuario desactivado con éxito');
+            _obraService.notifyListeners();
+
       Navigator.pop(context);
     }
   }
@@ -336,8 +339,8 @@ class PerfilPage extends StatelessWidget {
         //'Contraseña: ${usuario.} |'+
         'Una vez que ingreses recordá asignarte una contraseña desde tu perfil. \n' +
         'Descargá la app para tu dispositivo \n' +
-        'iOS: https://apps.apple.com/ar/app/verona/id1620027565?l=en \n' +
-        'Android: https://play.google.com/store/apps/details?id=com.edrex.veronaapp';
+        'iOS: ${Helper.iosURL} \n' +
+        'Android: ${Helper.androidURL}';
 
     String url = "wa.me";
     var encoded = Uri.https(url, '', {"text": _msg, "phone": usuario.telefono});
