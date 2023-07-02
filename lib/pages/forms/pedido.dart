@@ -215,7 +215,6 @@ class _FormState extends State<_Form> {
     final _driveService =
         Provider.of<GoogleDriveService>(context, listen: false);
 
-
     return Container(
         color: Helper.brandColors[1],
         child: Container(
@@ -664,67 +663,7 @@ class _FormState extends State<_Form> {
                                           ]) && // delivery agrega y ve foto
                                           permiteVerByEstado([4, 5])) ||
                                       permiteVerByEstado([5, 6]) && tieneImagen
-                                  ? !entregaExterna
-                                      ? MaterialButton(
-                                          // evidencia
-                                          color: Helper.primaryColor,
-                                          textColor: Colors.white,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              imageSelected
-                                                  ? Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 10),
-                                                      child: Icon(
-                                                        Icons.check,
-                                                        color: Helper
-                                                            .brandColors[8],
-                                                      ))
-                                                  : Padding(
-                                                      padding: EdgeInsets.only(
-                                                          right: 14),
-                                                      child: Icon(
-                                                        Icons
-                                                            .photo_library_outlined,
-                                                        color: Helper
-                                                            .brandColors[9]
-                                                            .withOpacity(.6),
-                                                      )),
-                                              Text(imgButtonText,
-                                                  style:
-                                                      TextStyle(fontSize: 16)),
-                                            ],
-                                          ),
-                                          onPressed: () async {
-                                            if (!tieneImagen) {
-                                              final ImagePicker _picker =
-                                                  ImagePicker();
-                                              final image =
-                                                  await _picker.pickImage(
-                                                      source:
-                                                          ImageSource.camera);
-                                              if (image != null) {
-                                                _driveService
-                                                    .guardarImagenPedido(
-                                                        image!);
-
-                                                setState(() {
-                                                  imageSelected = true;
-                                                  tieneImagen = true;
-                                                });
-                                              }
-                                            } else {
-                                              Navigator.pushNamed(context,
-                                                  ImagenViewer.routeName,
-                                                  arguments: {
-                                                    'imagenId':
-                                                        widget.pedido!.imagenId
-                                                  });
-                                            }
-                                          })
-                                      : MaterialButton(
+                                  ? MaterialButton(
                                           color: Helper.primaryColor,
                                           textColor: Colors.white,
                                           child: Row(
@@ -755,84 +694,8 @@ class _FormState extends State<_Form> {
                                                       TextStyle(fontSize: 16)),
                                             ],
                                           ),
-                                          onPressed: () async {
-                                            try {
-                                              if (!tieneImagen) {
-                                                var acciones = [
-                                                  {
-                                                    "text":
-                                                        'Seleccionar de galería',
-                                                    "default": true,
-                                                    "accion": () async {
-                                                      final ImagePicker
-                                                          _picker =
-                                                          ImagePicker();
-                                                      final XFile? image =
-                                                          await _picker.pickImage(
-                                                              source:
-                                                                  ImageSource
-                                                                      .gallery);
-                                                      if (image != null) {
-                                                        tieneImagen = true;
-                                                        _driveService
-                                                            .guardarImagenPedido(
-                                                                image);
-                                                        Navigator.pop(context);
-                                                        setState(() {
-                                                          // imagenSelected = true;
-                                                          imgButtonText =
-                                                              'Imagenes seleccionada';
-                                                        });
-                                                      }
-                                                    },
-                                                  },
-                                                  {
-                                                    "text": 'Abrir camara',
-                                                    "default": false,
-                                                    "accion": () async {
-                                                      final ImagePicker
-                                                          _picker =
-                                                          ImagePicker();
-
-                                                      final XFile? image =
-                                                          await _picker.pickImage(
-                                                              source:
-                                                                  ImageSource
-                                                                      .camera);
-
-                                                      if (image != null) {
-                                                        tieneImagen = true;
-                                                        _driveService
-                                                            .guardarImagenPedido(
-                                                                image);
-                                                        Navigator.pop(context);
-                                                        setState(() {
-                                                          // imagenSelected = true;
-                                                          imgButtonText =
-                                                              'Imagen selecciona';
-                                                        });
-                                                      }
-                                                    },
-                                                  },
-                                                ];
-                                                openBottomSheet(
-                                                    context,
-                                                    'Subir documento',
-                                                    'Seleccionar método',
-                                                    acciones);
-                                              } else {
-                                                Navigator.pushNamed(context,
-                                                    ImagenViewer.routeName,
-                                                    arguments: {
-                                                      'imagenId': widget
-                                                          .pedido!.imagenId
-                                                    });
-                                              }
-                                            } catch (e) {
-                                              openAlertDialog(
-                                                  context, e.toString());
-                                            }
-                                          })
+                                          onPressed:() =>
+                                              guardarImagen(entregaExterna))
                                   : Container()
                               : Container()
                         ],
@@ -850,8 +713,8 @@ class _FormState extends State<_Form> {
                             : MainAxisAlignment.spaceAround
                         : MainAxisAlignment.spaceAround,
                     children: [
-permiteVerByEstado([0,1]) &&  permiteVerByRole([4])|| 
-                      !permiteVerByEstado([5]) && !permiteVerByRole([4]) 
+                      permiteVerByEstado([0, 1]) && permiteVerByRole([4]) ||
+                              !permiteVerByEstado([5]) && !permiteVerByRole([4])
                           ? MainButton(
                               width: 120,
                               fontSize: 18,
@@ -911,6 +774,42 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
             ),
           ),
         ));
+  }
+
+  guardarImagen(bool entregaExterna) async {
+    final _driveService =
+        Provider.of<GoogleDriveService>(context, listen: false);
+    final _pref = new Preferences();
+
+    bool ambosMetodos = _pref.role == 1 || _pref.role == 5 || entregaExterna;
+
+    try {
+      if (!tieneImagen) {
+        if (ambosMetodos) {
+          var acciones = [
+            {
+              "text": 'Seleccionar de galería',
+              "default": true,
+              "accion": await imagenFromGallery
+            },
+            {
+              "text": 'Abrir camara',
+              "default": false,
+              "accion": await imagenFromCamera
+            },
+          ];
+          openBottomSheet(
+              context, 'Subir documento', 'Seleccionar método', acciones);
+        } else {
+          await imagenFromCamera();
+        }
+      } else {
+        Navigator.pushNamed(context, ImagenViewer.routeName,
+            arguments: {'imagenId': widget.pedido!.imagenId});
+      }
+    } catch (e) {
+      openAlertDialog(context, e.toString());
+    }
   }
 
   grabarPedido(obraId, areaTxtController, ObraService _obraService,
@@ -1033,7 +932,6 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
         selectedDayHighlightColor: Helper.brandColors[8],
         calendarType: CalendarDatePicker2Type.single,
         closeDialogOnCancelTapped: true,
-        
       ),
       dialogSize: Size(width, height),
       initialValue: [selectedDate],
@@ -1048,7 +946,6 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
       widget.pedido!.fechaEstimada = formattedDate.toString();
       selectedDate = date;
     }
-
   }
 
   void selectDateDeseada(context, txtCtrlDate, selectedDate) async {
@@ -1060,7 +957,8 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
       config: CalendarDatePicker2WithActionButtonsConfig(
         selectedDayHighlightColor: Helper.brandColors[8],
         calendarType: CalendarDatePicker2Type.single,
-        closeDialogOnCancelTapped: true,      ),
+        closeDialogOnCancelTapped: true,
+      ),
       dialogSize: Size(width, height),
       initialValue: [selectedDate],
       borderRadius: BorderRadius.circular(5),
@@ -1155,5 +1053,36 @@ permiteVerByEstado([0,1]) &&  permiteVerByRole([4])||
         permiteVerByEstado([1, 2]) &&
             permiteVerByRole(
                 [5]); // habilitado para compras(5) antes de asignar
+  }
+
+  imagenFromGallery() async {
+    final _driveService = Provider.of<GoogleDriveService>(context, listen: false);
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      tieneImagen = true;
+      _driveService.guardarImagenPedido(image);
+      Navigator.pop(context);
+      setState(() {
+        // imagenSelected = true;
+        imgButtonText = 'Imagenes seleccionada';
+      });
+    }
+  }
+
+  imagenFromCamera() async {
+    final _driveService = Provider.of<GoogleDriveService>(context, listen: false);
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+
+    if (image != null) {
+      tieneImagen = true;
+      _driveService.guardarImagenPedido(image);
+      Navigator.pop(context);
+      setState(() {
+        // imagenSelected = true;
+        imgButtonText = 'Imagen selecciona';
+      });
+    }
   }
 }

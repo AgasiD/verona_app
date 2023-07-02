@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 
 //import 'package:file_picker/file_picker.dart';
@@ -98,8 +97,8 @@ class _FormState extends State<_Form> {
 
   String imgButtonText = '';
   DateTime selectedDate = DateTime.now();
-  late double latitud;
-  late double longitud;
+  double? latitud =  null;
+  double? longitud = null;
 
  final TextEditingController  txtNombreCtrl = TextEditingController();
   final TextEditingController txtBarrioCtrl = TextEditingController();
@@ -273,9 +272,15 @@ class _FormState extends State<_Form> {
                     onPressed: () async {
                       final ImagePicker _picker = ImagePicker();
                       // Pick an image
+                      openLoadingDialog(context, mensaje: 'Seleccionar imagen');
                       final image =
                           await _picker.pickImage(source: ImageSource.gallery);
+                          closeLoadingDialog(context);
                       if (image != null) {
+                        if(await Helper.getWeigth(image!) >= 32.00){
+                          openAlertDialog(context, 'Imagen debe ser menor a 32 MB.');
+                          return;
+                          }
                         _imageService.guardarImagen(image!);
                         setState(() {
                           imageSelected = true;
@@ -390,8 +395,8 @@ class _FormState extends State<_Form> {
             barrio: txtBarrioCtrl.text,
             lote: txtLoteCtrl.text,
             propietarios: [],
-            latitud: latitud,
-            longitud: longitud,
+            latitud: latitud ?? null,
+            longitud: longitud ?? null,
             descripcion: txtDescripCtrl.text,
             diasEstimados: int.parse(txtDuracionCtrl.text),
             diaInicio: new DateFormat("dd/MM/yyyy")

@@ -19,11 +19,7 @@ class ChatList extends StatefulWidget {
 }
 
 class _ChatListState extends State<ChatList> with RouteAware {
-  @override
-  void initState() {
-    super.initState();
-  }
-
+ 
   TextEditingController txtController = new TextEditingController();
 
   @override

@@ -37,11 +37,14 @@ class _Form extends StatefulWidget {
 }
 
 class _FormState extends State<_Form> {
+
+ 
+
   TextEditingController txtCtrlName = new TextEditingController();
   TextEditingController txtCtrlDias = new TextEditingController();
   Preferences _pref = new Preferences();
   String inactividadId = '';
-  String textAction = 'Nueva masiva';
+  String textAction = 'Nueva inactividad masiva';
   bool edit = false;
   bool esPrivado = false;
 
@@ -65,6 +68,9 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+
+
+    
     //NUEVA INACTIVIDAD
     _obraService = Provider.of<ObraService>(context);
     Color colorHint = Helper.brandColors[3];
@@ -288,6 +294,7 @@ DateTime selectedDate = DateTime.now();
               }),
         ),
         DropDownMultiSelect(
+          
           decoration: getDecoration(),
           childBuilder: (option) => Container(
               padding: EdgeInsets.symmetric(horizontal: 20),

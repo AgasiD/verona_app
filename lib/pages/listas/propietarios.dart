@@ -13,9 +13,7 @@ class PropietariosList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    final obraId = arguments['obraId'];
-    final _obraService = Provider.of<ObraService>(context, listen: false);
+    final _obraService = Provider.of<ObraService>(context);
     final obra = _obraService.obra as Obra;
     final _pref = new Preferences();
 
@@ -54,16 +52,17 @@ class PropietariosList extends StatelessWidget {
                 )
               : Column(
                   children: [
-                    Container(
-                        height: MediaQuery.of(context).size.height - 210,
-                        width: MediaQuery.of(context).size.width,
-                        child: Center(
-                          child: Text(
-                            'Aún no hay propietarios asignados',
-                            style: TextStyle(
-                                fontSize: 18, color: Helper.brandColors[4]),
-                          ),
-                        )),
+                    Expanded(
+                      child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          child: Center(
+                            child: Text(
+                              'Aún no hay propietarios asignados',
+                              style: TextStyle(
+                                  fontSize: 18, color: Helper.brandColors[4]),
+                            ),
+                          )),
+                    ),
                     _pref.role == 1
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
