@@ -37,10 +37,18 @@ packages:
     dependency: transitive
     description:
       name: async
-      sha256: bfe67ef28df125b7dddcea62755991f807aa39a2492a23e1550161692950bbe0
+      sha256: "947bfcf187f74dbc5e146c9eb9c0f10c9f8b30743e341481c1e2ed3ecc18c20c"
       url: "https://pub.dev"
     source: hosted
-    version: "2.10.0"
+    version: "2.11.0"
+  auto_size_text:
+    dependency: "direct main"
+    description:
+      name: auto_size_text
+      sha256: "3f5261cd3fb5f2a9ab4e2fc3fba84fd9fcaac8821f20a1d4e71f557521b22599"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   badges:
     dependency: "direct main"
     description:
@@ -96,11 +104,7 @@ packages:
       sha256: "2f5f53242b137bce78320103c433b7ec07cf7daba524d48da983f8146ad7717c"
       url: "https://pub.dev"
     source: hosted
-<<<<<<< HEAD
-    version: "0.2.9"
-=======
     version: "0.4.1"
->>>>>>> develop
   characters:
     dependency: transitive
     description:
@@ -373,26 +377,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_maps_flutter
-      sha256: "24392ef192f3b00bcd93151375676805a9933574423a5bd5509a0ead2e8a4215"
+      sha256: "6d5a374ab7ac75cf6d9de68eaef6702f1b9670b3943b5041ad98abc98e9870f4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.5"
-  google_maps_flutter_android:
-    dependency: transitive
-    description:
-      name: google_maps_flutter_android
-      sha256: "88d0ed9ef7be4ba4839b85e67bd305ba1c5141e23b6fd1e665ef257755d8fef6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.4.8"
-  google_maps_flutter_ios:
-    dependency: transitive
-    description:
-      name: google_maps_flutter_ios
-      sha256: "3a69e04df77afb60587b5270baf43dc51f1c254c79f69ddf1d9546f758d9f709"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.0"
+    version: "2.1.1"
   google_maps_flutter_platform_interface:
     dependency: transitive
     description:
@@ -445,18 +433,10 @@ packages:
     dependency: "direct main"
     description:
       name: image_picker
-      sha256: "715d68a53d6bcc2eae26005097dc74c375a04c0d7c0e657da84deebbbbbf51ed"
+      sha256: "04ad4167709ae01105afa1d4571ca31d0cfe2310f62db494cda21243c6d16644"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.6+4"
-  image_picker_android:
-    dependency: transitive
-    description:
-      name: image_picker_android
-      sha256: ca14b663fecbe7f5ddda83782abfb2e1dd2a23d6da49b6ed344bf8cf3871225a
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.8.5+9"
+    version: "0.8.4+5"
   image_picker_for_web:
     dependency: transitive
     description:
@@ -465,14 +445,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.11"
-  image_picker_ios:
-    dependency: transitive
-    description:
-      name: image_picker_ios
-      sha256: "93b4403350b54f45a5061632721ee29a563c8b45b1e22feda9049b8329bd1337"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.8.7"
   image_picker_platform_interface:
     dependency: transitive
     description:
@@ -541,10 +513,10 @@ packages:
     dependency: transitive
     description:
       name: matcher
-      sha256: c94db23593b89766cda57aab9ac311e3616cf87c6fa4e9749df032f66f30dcb8
+      sha256: "6501fbd55da300384b768785b83e5ce66991266cec21af89ab9ae7f5ce1c4cbb"
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.14"
+    version: "0.12.15"
   material_color_utilities:
     dependency: transitive
     description:
@@ -557,10 +529,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: "12307e7f0605ce3da64cf0db90e5fcab0869f3ca03f76be6bb2991ce0a55e82b"
+      sha256: "3c74dbf8763d36539f114c799d8a2d87343b5067e9d796ca22b5eb8437090ee3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.9.0"
+    version: "1.9.1"
   mime:
     dependency: transitive
     description:
@@ -569,6 +541,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  multiselect:
+    dependency: "direct main"
+    description:
+      name: multiselect
+      sha256: "8d0c4a7b89bee6c5e5e4a25ecba68c796dafc1917492d5606f0caa3947d5905a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
+  navigation_builder:
+    dependency: transitive
+    description:
+      name: navigation_builder
+      sha256: "95e25150191d9cd4e4b86504f33cd9e786d1e6732edb2e3e635bbedc5ef0dea7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   nested:
     dependency: transitive
     description:
@@ -577,8 +565,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-<<<<<<< HEAD
-=======
   octo_image:
     dependency: transitive
     description:
@@ -587,17 +573,12 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
->>>>>>> develop
   open_file_safe:
     dependency: "direct main"
     description:
       name: open_file_safe
-<<<<<<< HEAD
-      url: "https://pub.dartlang.org"
-=======
       sha256: "99a43b36307bf6946bdc3b54514bc5081af53f46feaec782c840a116b681647d"
       url: "https://pub.dev"
->>>>>>> develop
     source: hosted
     version: "3.2.3"
   path:
@@ -885,6 +866,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.11.0"
+  states_rebuilder:
+    dependency: transitive
+    description:
+      name: states_rebuilder
+      sha256: bf1a5ab5c543acdefce35e60f482eb7ab592339484fe3266d147ee597f18dc92
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.3.0"
   stream:
     dependency: transitive
     description:
@@ -937,10 +926,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "6182294da5abf431177fccc1ee02401f6df30f766bc6130a0852c6b6d7ee6b2d"
+      sha256: eb6ac1540b26de412b3403a163d919ba86f6a973fe6cc50ae3541b80092fdcfb
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.18"
+    version: "0.5.1"
   typed_data:
     dependency: transitive
     description:
@@ -1070,5 +1059,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.19.0 <4.0.0"
+  dart: ">=3.0.0-0 <4.0.0"
   flutter: ">=3.3.0"
