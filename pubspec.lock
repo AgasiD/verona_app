@@ -565,8 +565,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-<<<<<<< HEAD
-=======
   octo_image:
     dependency: transitive
     description:
@@ -575,17 +573,12 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
->>>>>>> develop
   open_file_safe:
     dependency: "direct main"
     description:
       name: open_file_safe
-<<<<<<< HEAD
-      url: "https://pub.dartlang.org"
-=======
       sha256: "99a43b36307bf6946bdc3b54514bc5081af53f46feaec782c840a116b681647d"
       url: "https://pub.dev"
->>>>>>> develop
     source: hosted
     version: "3.2.3"
   path:
