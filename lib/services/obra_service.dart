@@ -63,11 +63,13 @@ class ObraService extends ChangeNotifier {
     return data;
   }
 
-  actualizarObra(Obra obra) async {
-    final response = await this._http.put(_endpoint, obra.toMap());
+  actualizarObra(dynamic obra) async {
+    final response = await this._http.put(_endpoint, obra);
     notifyListeners();
     return response;
   }
+
+  
 
   Future<MyResponse> agregarUsuario(obraId, String dni) async {
     final data =

@@ -31,6 +31,7 @@ class Obra {
   String rootDriveCliente;
   String folderImagesCliente;
   String placeHolderImage = 'https://via.placeholder.com/300x150';
+  String folderPedidoImages;
   String? driveFolderId;
   String? ts;
   double? latitud;
@@ -63,6 +64,7 @@ class Obra {
     this.folderImagesCliente = '',
     this.latitud,
     this.longitud,
+    this.folderPedidoImages = '',
   }) {
     this.nombre = nombre;
     this.id = id;
@@ -92,6 +94,7 @@ class Obra {
     this.folderImagesCliente = folderImagesCliente;
     this.latitud = latitud;
     this.longitud = longitud;
+    this.folderPedidoImages = folderPedidoImages;
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
@@ -119,12 +122,13 @@ class Obra {
           .toList(),
       pedidos: json["pedidos"] ?? [],
       enabledFiles: json["enabledFiles"] as List<dynamic>,
-      folderImages: json['folderImages'] ?? '',
-      rootDriveCliente: json['rootDriveCliente'] ?? '',
-      folderImagesCliente: json['folderImagesCliente'] ?? '',
+      folderImages: json['folderImages'] ?? 'SinDato',
+      rootDriveCliente: json['rootDriveCliente'] ?? 'SinDato',
+      folderImagesCliente: json['folderImagesCliente'] ?? 'SinDato',
       latitud: json['latitud'],
       longitud: json['longitud'],
-      imageURL: json['imageURL'] ?? '');
+      folderPedidoImages: json['folderPedidoImages'] ?? 'SinDato',
+      imageURL: json['imageURL'] ?? 'SinDato');
 
   int get cantDiasInactivos {
     int dias = 0;
@@ -156,6 +160,7 @@ class Obra {
         'imageURL': this.imageURL,
         'longitud': this.longitud,
         'latitud':this.latitud,
+        'folderPedidoImages': this.folderPedidoImages
       };
 
   double get porcentajeRealizado {

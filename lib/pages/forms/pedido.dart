@@ -815,7 +815,7 @@ class _FormState extends State<_Form> {
   grabarPedido(obraId, areaTxtController, ObraService _obraService,
       GoogleDriveService _driveService) async {
     MyResponse response;
-
+    try{
     switch (widget.pedido!.estado) {
       case 0: // PEDIDO NUEVO
         final ped = new Pedido(
@@ -885,9 +885,12 @@ class _FormState extends State<_Form> {
         // return [true, 'No se ha cargado imagen/evidencia'];
         // } else {
         if (tieneImagen) {
+          
+          final idDrive = _obraService.obra.folderPedidoImages == '' ? _obraService.obra.driveFolderId : _obraService.obra.folderPedidoImages;
           final idImagen = await _driveService.grabarImagenPedido(
               'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}',
-              _obraService.obra.driveFolderId!);
+              idDrive!
+              );
           widget.pedido!.imagenId = idImagen;
         }
         response = await _obraService.editPedido(widget.pedido!);
@@ -896,9 +899,11 @@ class _FormState extends State<_Form> {
         } else {
           return [false, response.data];
         }
-
       default:
         break;
+    }
+    }catch ( err ){
+      openAlertDialog(context, 'Error al grabar pedido', subMensaje: err.toString());
     }
   }
 
