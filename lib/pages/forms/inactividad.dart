@@ -73,15 +73,18 @@ class _FormState extends State<_Form> {
 
       //Accion al grabar
       submitAction = () async {
+        late bool loading ;
+        try{
         inactividad.fecha = txtCtrlDate.text;
         inactividad.nombre = txtCtrlName.text;
         bool confirm = await openDialogConfirmationReturn(context, '¿Seguro que desea actualizar la inactividad?');
         if(!confirm) return;
         openLoadingDialog(context, mensaje: 'Actualizando inactividad...');
+        loading = true;
           MyResponse response;
           response = await _obraService.editInactividad(obraId, inactividad);
           closeLoadingDialog(context);
-
+        loading = false;
           if (response.fallo) {
             openAlertDialog(context, 'No se pudo grabar la inactividad',
                 subMensaje: response.error);
@@ -90,16 +93,23 @@ class _FormState extends State<_Form> {
            await openAlertDialogReturn(context, 'Inactividad actualizada');
            Navigator.pop(context);
           }
+        }catch ( err ){
+          loading ? closeLoadingDialog(context) : false;
+          openAlertDialog(context, 'Error al grabar inactividad', subMensaje: err.toString());
+        }
       };
       // fin accion al grabar
     } else {
       //NUEVA INACTIVIDAD
-      
-      String formattedDate = DateFormat('dd/MM/yyyy').format(now);
+      late bool loading;
+      try{
+
+     String formattedDate = DateFormat('dd/MM/yyyy').format(now);
       txtCtrlDate.text = formattedDate.toString();
       submitAction = () async {
         openDialogConfirmation(context, (context) async {
           openLoadingDialog(context, mensaje: 'Guardando inactividad...');
+          loading = true;
 
           final inactividad = new Inactividad(
               nombre: txtCtrlName.text,
@@ -110,7 +120,7 @@ class _FormState extends State<_Form> {
           MyResponse response;
           response = await _obraService.nuevaInactividad(obraId, inactividad);
           closeLoadingDialog(context);
-
+            loading = false;
           if (response.fallo) {
             openAlertDialog(context, 'No se pudo grabar la inactividad',
                 subMensaje: response.error);
@@ -118,7 +128,10 @@ class _FormState extends State<_Form> {
             openAlertDialog(context, 'Inactividad generada');
           }
         }, '¿Seguro que desea generar la inactividad?');
-      };
+      }; }catch ( err ){
+          loading ? closeLoadingDialog(context) : false;
+          openAlertDialog(context, 'Error al grabar inactividad', subMensaje: err.toString());
+        }
     }
 
     DateTime selectedDate = DateTime.now();

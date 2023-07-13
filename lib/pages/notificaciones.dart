@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -38,9 +39,12 @@ class _NotificationsList extends StatelessWidget {
     return FutureBuilder(
         future: _usuarioService.obtenerNotificaciones(_pref.id),
         builder: (context, snapshot) {
-          if (snapshot.data == null) {
+        if (snapshot.connectionState != ConnectionState.done) {
             return Loading(mensaje: 'Recuperando notificaciones');
-          } else {
+         } else if(snapshot.hasError){
+                return ErrorPage(errorMsg: snapshot.error.toString(), page: false);
+              }
+          else {
             final response = snapshot.data as MyResponse;
             if (response.fallo) {
               openAlertDialog(context, response.error);

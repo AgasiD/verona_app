@@ -6,6 +6,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/services/chat_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -36,9 +37,12 @@ class _ContactsPageState extends State<ContactsPage> {
           child: FutureBuilder(
             future: _pref.role == 1 ? _usuarios.obtenerTodosUsuarios() : _usuarios.obtenerPersonal(),
             builder: (_, snapshot) {
-              if (snapshot.data == null) {
+        if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(mensaje: 'Cargando contactos');
-              } else {
+              } else if (snapshot.hasError) {
+                  return ErrorPage(
+                      errorMsg: snapshot.error.toString(), page: false);
+                } else {
                 final contactos = (snapshot.data as List<dynamic>)
                     .where((e) => e.id != _pref.id)
                     .toList();

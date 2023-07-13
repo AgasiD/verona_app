@@ -21,6 +21,7 @@ import 'package:verona_app/pages/ABMs/centro_notificaciones.dart';
 import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/anotaciones_general.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/notificaciones.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
@@ -267,7 +268,20 @@ class __SearchListViewState extends State<_SearchListView> {
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(mensaje: 'Recuperando obras');
-              } else {
+              } else if(snapshot.hasError){
+                return SizedBox(
+                  height: 500,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(child: ErrorPage(errorMsg: snapshot.error.toString(), page: false)),
+                    ],
+                  ),
+                );
+              }
+              else {
+                try{
+
                 final response = snapshot.data as MyResponse;
                 if (!response.fallo) {
                   obras = (response.data as List<dynamic>)
@@ -290,6 +304,9 @@ class __SearchListViewState extends State<_SearchListView> {
                       style: TextStyle(color: Colors.red),
                     ),
                   );
+                }
+                }catch( err ){
+                  return  ErrorPage(errorMsg: snapshot.error.toString(), page: false);
                 }
               }
             }));

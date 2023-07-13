@@ -2,9 +2,11 @@
 
 import 'dart:async';
 
+import 'package:dotenv/dotenv.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
@@ -319,6 +321,8 @@ class _Form extends StatelessWidget {
     final _service = Provider.of<UsuarioService>(context, listen: false);
     final actionText = edit ? 'Actualizando... esto puede demorar' : 'Guardando datos...';
     openLoadingDialog(context, mensaje: actionText);
+    bool loading = true;
+    try{
     txtNombreCtrl.text.trim() == '' ? isValid = false : true;
     txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
     txtDNICtrl.text == '' ? isValid = false : true;
@@ -340,6 +344,7 @@ class _Form extends StatelessWidget {
           : response = await _service.grabarUsuario(miembro);
 
       closeLoadingDialog(context);
+      loading = false;
       if (response.fallo) {
         edit
             ? openAlertDialog(context, 'No se pudo actualizar el personal',
@@ -362,6 +367,10 @@ class _Form extends StatelessWidget {
     } else {
       closeLoadingDialog(context);
       openAlertDialog(context, 'Formulario invalido');
+    }
+    } catch ( err ){
+      loading ? closeLoadingDialog(context) : false;
+      openAlertDialog(context, 'Error al grabar', subMensaje: err.toString());
     }
   }
 

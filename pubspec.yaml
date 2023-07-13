@@ -117,10 +117,12 @@ flutter:
     - assets/loading-image.gif
     - assets/isotipo.png
     - assets/isotipo2.png
+    - assets/attention.png
     - assets/background.jpg
     - assets/background2.jpg
     - assets/user.png
     - enviroments/dev/.env
     - enviroments/prepro/.env
     - enviroments/prod/.env
+
     

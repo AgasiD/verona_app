@@ -494,6 +494,8 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
     bool confirm =
         await openDialogConfirmationReturn(context, "Seguro que quiere borrar");
     if (!confirm) return;
+    try{
+
     final response =
         await _inactividadService.borrar(widget.inactividades[index].id);
     if (response.fallo) {
@@ -504,6 +506,10 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
         Duration(milliseconds: 1300), null);
     widget.inactividades.removeAt(index);
     setState(() {});
+    }
+    catch ( err ){
+      openAlertDialog(context, 'Error al borrar inactividad', subMensaje: err.toString());
+    }
   }
 
   guardarInactividad() {

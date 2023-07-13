@@ -189,6 +189,7 @@ class _FormState extends State<_Form> {
 
   grabarElemento(context) async {
     final toReturn;
+    final loading = true;
     openLoadingDialog(context, mensaje: 'Grabando $tipo');
     final _obraService = Provider.of<ObraService>(context, listen: false);
     try {
@@ -260,7 +261,7 @@ class _FormState extends State<_Form> {
       }
       Navigator.pop(context, toReturn);
     } catch (err) {
-      closeLoadingDialog(context);
+      loading ? closeLoadingDialog(context) : false;
       openAlertDialog(
         context,
         'Error al grabar $tipo',

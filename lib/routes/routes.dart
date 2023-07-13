@@ -9,6 +9,7 @@ import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/anotaciones_general.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/etapa.dart';
 import 'package:verona_app/pages/forms/inactividades_masiva.dart';
 import 'package:verona_app/pages/forms/notificaciones.dart';
@@ -110,5 +111,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   NotificacionesForm.routeName: (_) => NotificacionesForm(),
   NotificacionesABM.routeName: (_) => NotificacionesABM(),
   NotificacionesEditForm.routeName: (_) => NotificacionesEditForm(),
+  ErrorPage.routeName: (_) => ErrorPage(),
   
   };

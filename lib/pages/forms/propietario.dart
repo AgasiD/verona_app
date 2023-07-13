@@ -214,38 +214,44 @@ class _FormState extends State<_Form> {
   }
 
   grabarPropietario(BuildContext context) async {
-    bool isValid = true;
+    bool isValid = true, loading = true;
     final _service = Provider.of<UsuarioService>(context, listen: false);
+    try {
+      txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+      txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
+      txtDNICtrl.text == '' ? isValid = false : true;
+      txtTelefonoCtrl.text == '' ? isValid = false : true;
+      txtMailCtrl.text == '' ? isValid = false : true;
 
-    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-    txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
-    txtDNICtrl.text == '' ? isValid = false : true;
-    txtTelefonoCtrl.text == '' ? isValid = false : true;
-    txtMailCtrl.text == '' ? isValid = false : true;
+      if (isValid) {
+        openLoadingDialog(context, mensaje: 'Guardando propietario...');
 
-    if (isValid) {
-      openLoadingDialog(context, mensaje: 'Guardando propietario...');
+        final prop = Propietario(
+            nombre: txtNombreCtrl.text,
+            apellido: txtApellidoCtrl.text,
+            dni: txtDNICtrl.text,
+            telefono: txtTelefonoCtrl.text,
+            email: txtMailCtrl.text);
+        final response = await _service.grabarUsuario(prop);
+        closeLoadingDialog(context);
+        loading = false;
 
-      final prop = Propietario(
-          nombre: txtNombreCtrl.text,
-          apellido: txtApellidoCtrl.text,
-          dni: txtDNICtrl.text,
-          telefono: txtTelefonoCtrl.text,
-          email: txtMailCtrl.text);
-      final response = await _service.grabarUsuario(prop);
-      closeLoadingDialog(context);
+        if (response.fallo) {
+          await openAlertDialogReturn(context, 'Error al crear propietario',
+              subMensaje: response.error);
+          return;
+        }
+        resetForm();
 
-      if (response.fallo) {
-        await openAlertDialogReturn(context, 'Error al crear propietario',
-            subMensaje: response.error);
-        return;
+        await openAlertDialogReturn(context, 'Propietario creado');
+        leavePage(context);
+      } else {
+        openAlertDialog(context, 'Formulario invalido');
       }
-      resetForm();
-
-      await openAlertDialogReturn(context, 'Propietario creado');
-      leavePage(context);
-    } else {
-      openAlertDialog(context, 'Formulario invalido');
+    } catch (err) {
+      loading ? closeLoadingDialog(context) : false;
+      openAlertDialog(context, 'Error al grabar propietario',
+          subMensaje: err.toString());
     }
   }
 
@@ -258,39 +264,45 @@ class _FormState extends State<_Form> {
   }
 
   editarPropietario(BuildContext context) async {
-    bool isValid = true;
+    bool isValid = true, loading = true;
     final _service = Provider.of<UsuarioService>(context, listen: false);
+    try {
+      txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+      txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
+      txtDNICtrl.text == '' ? isValid = false : true;
+      txtTelefonoCtrl.text == '' ? isValid = false : true;
+      txtMailCtrl.text == '' ? isValid = false : true;
 
-    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-    txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
-    txtDNICtrl.text == '' ? isValid = false : true;
-    txtTelefonoCtrl.text == '' ? isValid = false : true;
-    txtMailCtrl.text == '' ? isValid = false : true;
+      if (isValid) {
+        openLoadingDialog(context, mensaje: 'Actualizando propietario...');
 
-    if (isValid) {
-      openLoadingDialog(context, mensaje: 'Actualizando propietario...');
-
-      final prop = Miembro(
-          role: 3,
-          id: widget.propietario!.id,
-          nombre: txtNombreCtrl.text,
-          apellido: txtApellidoCtrl.text,
-          dni: txtDNICtrl.text,
-          telefono: txtTelefonoCtrl.text,
-          email: txtMailCtrl.text);
-      final response = await _service.modificarUsuario(prop) as MyResponse;
-      closeLoadingDialog(context);
-
-      if (response.fallo) {
-        await openAlertDialogReturn(context, 'Error al actualizar propietario',
-            subMensaje: response.error);
-        return;
+        final prop = Miembro(
+            role: 3,
+            id: widget.propietario!.id,
+            nombre: txtNombreCtrl.text,
+            apellido: txtApellidoCtrl.text,
+            dni: txtDNICtrl.text,
+            telefono: txtTelefonoCtrl.text,
+            email: txtMailCtrl.text);
+        final response = await _service.modificarUsuario(prop) as MyResponse;
+        closeLoadingDialog(context);
+        loading = false;
+        if (response.fallo) {
+          await openAlertDialogReturn(
+              context, 'Error al actualizar propietario',
+              subMensaje: response.error);
+          return;
+        }
+        await openAlertDialogReturn(context, 'Propietario actualizado')
+            .then((value) => Navigator.pop(context));
+        resetForm();
+      } else {
+        openAlertDialog(context, 'Formulario invalido');
       }
-      await openAlertDialogReturn(context, 'Propietario actualizado')
-          .then((value) => Navigator.pop(context));
-      resetForm();
-    } else {
-      openAlertDialog(context, 'Formulario invalido');
+    } catch (err) {
+      loading ? closeLoadingDialog(context) : false;
+      openAlertDialog(context, 'Error al grabar propietario',
+          subMensaje: err.toString());
     }
   }
 

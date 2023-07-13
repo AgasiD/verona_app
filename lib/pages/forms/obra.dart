@@ -397,10 +397,11 @@ class _FormState extends State<_Form> {
   }
 
   grabarObra(BuildContext context) async {
-    try {
+      bool loading = true;
       bool isValid = true;
       final _service = Provider.of<ObraService>(context, listen: false);
       final _imageService = Provider.of<ImageService>(context, listen: false);
+    try {
 
       txtNombreCtrl.text.trim() == '' ? isValid = false : true;
       txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
@@ -426,12 +427,14 @@ class _FormState extends State<_Form> {
           final dataImage = await _imageService.grabarImagen(obra.nombre);
           if (!dataImage['success']) {
             closeLoadingDialog(context);
+            loading = false;
             openAlertDialog(context, 'No se pudo cargar imagen');
             return;
           }
           final imageUrl = dataImage['data']['url'];
 
           obra.imageURL = imageUrl;
+          loading = false;
           closeLoadingDialog(context);
         }
         openLoadingDialog(context, mensaje: 'Grabando obra...');
@@ -457,7 +460,7 @@ class _FormState extends State<_Form> {
         openAlertDialog(context, 'Formulario invalido');
       }
     } catch (err) {
-      closeLoadingDialog(context);
+      loading ? closeLoadingDialog(context) : false;
 
       openAlertDialog(context, 'Error al grabar formulario',
           subMensaje: err.toString());

@@ -664,38 +664,36 @@ class _FormState extends State<_Form> {
                                           permiteVerByEstado([4, 5])) ||
                                       permiteVerByEstado([5, 6]) && tieneImagen
                                   ? MaterialButton(
-                                          color: Helper.primaryColor,
-                                          textColor: Colors.white,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              tieneImagen
-                                                  ? Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 10),
-                                                      child: Icon(
-                                                        Icons.check,
-                                                        color: Helper
-                                                            .brandColors[8],
-                                                      ))
-                                                  : Padding(
-                                                      padding: EdgeInsets.only(
-                                                          right: 14),
-                                                      child: Icon(
-                                                        Icons
-                                                            .photo_library_outlined,
-                                                        color: Helper
-                                                            .brandColors[9]
-                                                            .withOpacity(.6),
-                                                      )),
-                                              Text(imgButtonText,
-                                                  style:
-                                                      TextStyle(fontSize: 16)),
-                                            ],
-                                          ),
-                                          onPressed:() =>
-                                              guardarImagen(entregaExterna))
+                                      color: Helper.primaryColor,
+                                      textColor: Colors.white,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          tieneImagen
+                                              ? Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 10),
+                                                  child: Icon(
+                                                    Icons.check,
+                                                    color:
+                                                        Helper.brandColors[8],
+                                                  ))
+                                              : Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 14),
+                                                  child: Icon(
+                                                    Icons
+                                                        .photo_library_outlined,
+                                                    color: Helper.brandColors[9]
+                                                        .withOpacity(.6),
+                                                  )),
+                                          Text(imgButtonText,
+                                              style: TextStyle(fontSize: 16)),
+                                        ],
+                                      ),
+                                      onPressed: () =>
+                                          guardarImagen(entregaExterna))
                                   : Container()
                               : Container()
                         ],
@@ -731,30 +729,40 @@ class _FormState extends State<_Form> {
                                   mensaje2 = 'Error al actualizar el pedido';
                                   mensaje3 = 'Pedido actualizado con exito';
                                 }
+                                bool loading = true;
 
                                 openLoadingDialog(context, mensaje: mensaje1);
-                                final response = await grabarPedido(
-                                    _obraService.obra.id,
-                                    areaTxtController,
-                                    _obraService,
-                                    _driveService);
+                                try {
+                                  final response = await grabarPedido(
+                                      _obraService.obra.id,
+                                      areaTxtController,
+                                      _obraService,
+                                      _driveService);
 
-                                closeLoadingDialog(context);
-
-                                if (response[0]) {
-                                  openAlertDialog(context, mensaje2,
-                                      subMensaje: response[1]);
-                                } else {
-                                  openLoadingDialog(context, mensaje: mensaje3);
-                                  Timer(Duration(milliseconds: 750), () {
-                                    closeLoadingDialog(context);
+                                  closeLoadingDialog(context);
+                                  loading = false;
+                                  if (response[0]) {
+                                    openAlertDialog(context, mensaje2,
+                                        subMensaje: response[1]);
+                                  } else {
+                                    openLoadingDialog(context,
+                                        mensaje: mensaje3);
                                     Timer(Duration(milliseconds: 750), () {
-                                      Navigator.pop(
-                                        context,
-                                        PedidosPage.routeName,
-                                      );
+                                      closeLoadingDialog(context);
+                                      loading = false;
+                                      Timer(Duration(milliseconds: 750), () {
+                                        Navigator.pop(
+                                          context,
+                                          PedidosPage.routeName,
+                                        );
+                                      });
                                     });
-                                  });
+                                  }
+                                } catch (err) {
+                                  loading ? closeLoadingDialog(context) : false;
+                                  openAlertDialog(
+                                      context, 'Error al grabar pedido',
+                                      subMensaje: err.toString());
                                 }
                               },
                             )
@@ -815,95 +823,96 @@ class _FormState extends State<_Form> {
   grabarPedido(obraId, areaTxtController, ObraService _obraService,
       GoogleDriveService _driveService) async {
     MyResponse response;
-    try{
-    switch (widget.pedido!.estado) {
-      case 0: // PEDIDO NUEVO
-        final ped = new Pedido(
-            idObra: obraId,
-            idUsuario: _pref.id,
-            nota: areaTxtController.text,
-            prioridad: prioridad,
-            fechaDeseada: widget.pedido!.fechaDeseada,
-            titulo: titleTxtController.text
-            /*
+    try {
+      switch (widget.pedido!.estado) {
+        case 0: // PEDIDO NUEVO
+          final ped = new Pedido(
+              idObra: obraId,
+              idUsuario: _pref.id,
+              nota: areaTxtController.text,
+              prioridad: prioridad,
+              fechaDeseada: widget.pedido!.fechaDeseada,
+              titulo: titleTxtController.text
+              /*
           notificar a  
         */
-            );
-
-        response = await _obraService.nuevoPedido(ped);
-        if (response.fallo) {
-          return [true, response.error];
-        } else {
-          return [false, response.data];
-        }
-        break;
-      case 1: // PEDIDO SIN CONFIRMAR
-        widget.pedido!.nota = areaTxtController.text;
-        widget.pedido!.prioridad = prioridad;
-        widget.pedido!.titulo = titleTxtController.text;
-        response = await _obraService.editPedido(widget.pedido!);
-
-        if (response.fallo) {
-          return [true, response.error];
-        } else {
-          return [false, response.data];
-        }
-        break;
-      case 2: // PEDIDO CONFIRMADO. PENDIENTE DE COMPRA
-        widget.pedido!.nota = areaTxtController.text;
-        widget.pedido!.prioridad = prioridad;
-        widget.pedido!.titulo = titleTxtController.text;
-        response = await _obraService.editPedido(widget.pedido!);
-        if (response.fallo) {
-          return [true, response.error];
-        } else {
-          return [false, response.data];
-        }
-      case 3:
-        if (widget.pedido!.usuarioAsignado == '') {
-          return [true, 'No se ha seleccionado repartidor'];
-        }
-        widget.pedido!.indicaciones = indicacionesTxtController.text;
-        widget.pedido!.nota = areaTxtController.text;
-        widget.pedido!.prioridad = prioridad;
-        widget.pedido!.fechaEstimada = txtCtrlDate.text;
-        if (widget.pedido!.usuarioAsignado == '9999') {
-          widget.pedido!.entregaExterna = true;
-        }
-
-        response = await _obraService.editPedido(widget.pedido!);
-        if (response.fallo) {
-          return [true, response.error];
-        } else {
-          return [false, response.data];
-        }
-
-      case 4:
-        widget.pedido!.nota = areaTxtController.text;
-        widget.pedido!.prioridad = prioridad;
-        // openAlertDialog(context, 'No se ha cargado imagen/evidencia');
-        // return [true, 'No se ha cargado imagen/evidencia'];
-        // } else {
-        if (tieneImagen) {
-          
-          final idDrive = _obraService.obra.folderPedidoImages == '' ? _obraService.obra.driveFolderId : _obraService.obra.folderPedidoImages;
-          final idImagen = await _driveService.grabarImagenPedido(
-              'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}',
-              idDrive!
               );
-          widget.pedido!.imagenId = idImagen;
-        }
-        response = await _obraService.editPedido(widget.pedido!);
-        if (response.fallo) {
-          return [true, response.error];
-        } else {
-          return [false, response.data];
-        }
-      default:
-        break;
-    }
-    }catch ( err ){
-      openAlertDialog(context, 'Error al grabar pedido', subMensaje: err.toString());
+
+          response = await _obraService.nuevoPedido(ped);
+          if (response.fallo) {
+            return [true, response.error];
+          } else {
+            return [false, response.data];
+          }
+          break;
+        case 1: // PEDIDO SIN CONFIRMAR
+          widget.pedido!.nota = areaTxtController.text;
+          widget.pedido!.prioridad = prioridad;
+          widget.pedido!.titulo = titleTxtController.text;
+          response = await _obraService.editPedido(widget.pedido!);
+
+          if (response.fallo) {
+            return [true, response.error];
+          } else {
+            return [false, response.data];
+          }
+          break;
+        case 2: // PEDIDO CONFIRMADO. PENDIENTE DE COMPRA
+          widget.pedido!.nota = areaTxtController.text;
+          widget.pedido!.prioridad = prioridad;
+          widget.pedido!.titulo = titleTxtController.text;
+          response = await _obraService.editPedido(widget.pedido!);
+          if (response.fallo) {
+            return [true, response.error];
+          } else {
+            return [false, response.data];
+          }
+        case 3:
+          if (widget.pedido!.usuarioAsignado == '') {
+            return [true, 'No se ha seleccionado repartidor'];
+          }
+          widget.pedido!.indicaciones = indicacionesTxtController.text;
+          widget.pedido!.nota = areaTxtController.text;
+          widget.pedido!.prioridad = prioridad;
+          widget.pedido!.fechaEstimada = txtCtrlDate.text;
+          if (widget.pedido!.usuarioAsignado == '9999') {
+            widget.pedido!.entregaExterna = true;
+          }
+
+          response = await _obraService.editPedido(widget.pedido!);
+          if (response.fallo) {
+            return [true, response.error];
+          } else {
+            return [false, response.data];
+          }
+
+        case 4:
+          widget.pedido!.nota = areaTxtController.text;
+          widget.pedido!.prioridad = prioridad;
+          // openAlertDialog(context, 'No se ha cargado imagen/evidencia');
+          // return [true, 'No se ha cargado imagen/evidencia'];
+          // } else {
+          if (tieneImagen) {
+            final idDrive = _obraService.obra.folderPedidoImages == ''
+                ? _obraService.obra.driveFolderId
+                : _obraService.obra.folderPedidoImages;
+            final idImagen = await _driveService.grabarImagenPedido(
+                'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}',
+                idDrive!);
+            widget.pedido!.imagenId = idImagen;
+          }
+          response = await _obraService.editPedido(widget.pedido!);
+          if (response.fallo) {
+            return [true, response.error];
+          } else {
+            return [false, response.data];
+          }
+        default:
+          break;
+      }
+    } catch (err) {
+      openAlertDialog(context, 'Error al grabar pedido',
+          subMensaje: err.toString());
     }
   }
 
@@ -1061,7 +1070,8 @@ class _FormState extends State<_Form> {
   }
 
   imagenFromGallery() async {
-    final _driveService = Provider.of<GoogleDriveService>(context, listen: false);
+    final _driveService =
+        Provider.of<GoogleDriveService>(context, listen: false);
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
@@ -1076,7 +1086,8 @@ class _FormState extends State<_Form> {
   }
 
   imagenFromCamera() async {
-    final _driveService = Provider.of<GoogleDriveService>(context, listen: false);
+    final _driveService =
+        Provider.of<GoogleDriveService>(context, listen: false);
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.camera);
 
