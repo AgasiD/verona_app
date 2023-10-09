@@ -1149,7 +1149,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               if (name != ObrasPage.routeName) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
                     ObrasPage.routeName,
-                    (Route<dynamic> route) => route.isFirst);
+                    (Route<dynamic> route) => false);
                 // Navigator.pushNamed(context, ObrasPage.routeName);
               }
             },

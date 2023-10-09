@@ -9,7 +9,7 @@ class GoogleDriveService extends ChangeNotifier {
   final _endpoint = 'api/drive';
   late XFile _img;
   late List<XFile> _imgs;
-  late XFile _imgPedido;
+  late List<XFile?>? imgsPedido;
   String rootDrive = '1yT0HU9X49RQGy6jK0rTE0FX0RFJwBfkf';
   late FilePickerResult _document;
 
@@ -30,23 +30,12 @@ class GoogleDriveService extends ChangeNotifier {
     }
   }
 
-  grabarImagenPedido(String fileName, String driveFolderId) async {
-    if (_imgPedido != null) {
-      //obtener drive id de carpeta imagenes -> pedido/evidencia
-      // final response = await this.obtenerDocumentos(driveFolderId);
-      // var imageFolder = (response.data['files'] as List<dynamic>)
-      //     .firstWhere((file) => file['name'] == '12-FOTOS DE OBRA', orElse: null) ?? driveFolderId;
-
-      // final responseAux = await this.obtenerDocumentos(imageFolder['id']);
-      // var imageFolderEvidencia = (responseAux.data['files'] as List<dynamic>)
-      //     .firstWhere(
-      //         (file) => file['name'].toString().contains('01-PEDIDOS/EVIDENCIAS'), orElse: null) ?? imageFolder;
-
-      // final idFolder = imageFolderEvidencia['id'];
-      final idFolder = driveFolderId;
+  grabarImagenPedido(String fileName, String driveFolderId, XFile image) async {
+    if (imgsPedido != null) {
+    final idFolder = driveFolderId;
       final datos = await this
           ._http
-          .uploadImage(_imgPedido, _endpoint + "/$fileName/jpg/$idFolder");
+          .uploadImage(image, _endpoint + "/$fileName/jpg/$idFolder");
       final autorizar = await setPermisosToFile(datos);
 
       return datos;
@@ -111,8 +100,8 @@ class GoogleDriveService extends ChangeNotifier {
     return this._imgs.length;
   }
 
-  guardarImagenPedido(XFile img) {
-    this._imgPedido = img;
+  guardarImagenPedido(List<XFile?>? img) {
+    this.imgsPedido = img;
   }
 
   guardarDocumento(FilePickerResult document) {

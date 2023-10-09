@@ -20,7 +20,7 @@ class Pedido {
       this.ts = 0,
       this.tsAsignado = 0,
       this.tsCerrado = 0,
-      this.imagenId = '',
+      this.imagenId = const [],
       this.fechaEstimada = '',
       this.fechaDeseada = '',
       this.indicaciones = '',
@@ -34,7 +34,7 @@ class Pedido {
   String nota;
   String titulo;
   String usuarioAsignado;
-  String imagenId;
+  List imagenId;
   String fechaEstimada;
   String fechaDeseada;
   String indicaciones;
@@ -56,7 +56,7 @@ class Pedido {
       ts: json["ts"],
       tsAsignado: json['tsAsignado'] ?? 0,
       tsCerrado: json['tsCerrado'] ?? 0,
-      imagenId: json['imagenId'] ?? '',
+      imagenId: json['imagenId'] ?? [],
       fechaEstimada: json['fechaEstimada'] ?? '',
       fechaDeseada: json['fechaDeseada'] ?? '',
       indicaciones: json['indicaciones'] ?? '',

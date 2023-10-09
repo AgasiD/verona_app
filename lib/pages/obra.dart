@@ -47,7 +47,7 @@ class ObraPage extends StatelessWidget {
     var imagen = obra.imageURL == ''
         ? Helper.imageNetwork(
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-    : Helper.imageNetwork(obra.imageURL);
+        : Helper.imageNetwork(obra.imageURL);
 
     MediaQuery.of(context).size.width > 1000 ? esPhone = false : true;
 
@@ -67,26 +67,24 @@ class ObraPage extends StatelessWidget {
                   flexibleSpace: FlexibleSpaceBar(
                     background: Hero(
                       tag: obra.id,
-                      child:   CachedNetworkImage(
-                      imageUrl: obra.imageURL,
-                      imageBuilder: (context, imageProvider) => Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: imageProvider,
-                            fit: BoxFit.fill
-                          ),
-                        ),
-                      ),
-                      placeholder: (context, url) => Center(
-                          child: CircularProgressIndicator(
-                        color: Helper.brandColors[8],
-                      )),
-                      errorWidget: (context, url, error) => Container(
-                        color: Helper.brandColors[8],
-                        alignment: Alignment.center,
-                        child: Image(image: AssetImage('assets/image.png')),
-                    
-                    )),
+                      child: CachedNetworkImage(
+                          imageUrl: obra.imageURL,
+                          imageBuilder: (context, imageProvider) => Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                      image: imageProvider, fit: BoxFit.fill),
+                                ),
+                              ),
+                          placeholder: (context, url) => Center(
+                                  child: CircularProgressIndicator(
+                                color: Helper.brandColors[8],
+                              )),
+                          errorWidget: (context, url, error) => Container(
+                                color: Helper.brandColors[8],
+                                alignment: Alignment.center,
+                                child: Image(
+                                    image: AssetImage('assets/image.png')),
+                              )),
                     ),
                   ),
                 ),
@@ -157,10 +155,19 @@ class ObraPage extends StatelessWidget {
                                     margin: EdgeInsets.only(top: 25),
                                     child: TextButton(
                                         style: ButtonStyle(
-                                            backgroundColor:
-                                                MaterialStateProperty.all(
-                                                    Color.fromARGB(
-                                                        255, 122, 9, 1))),
+                                          side: MaterialStateProperty.all(
+                                            BorderSide(
+                                              color: Color.fromARGB(
+                                                  255, 164, 11, 0),
+
+                                              width: 1.0, // Ancho del borde
+                                            ),
+                                          ),
+                                        ),
+                                        // backgroundColor:
+                                        //     MaterialStateProperty.all(
+                                        //         Color.fromARGB(
+                                        //             255, 122, 9, 1))),
                                         child: Container(
                                           width: 150,
                                           child: Row(
@@ -170,12 +177,13 @@ class ObraPage extends StatelessWidget {
                                               Text(
                                                 'Eliminar obra',
                                                 style: TextStyle(
-                                                    color:
-                                                        Helper.brandColors[5]),
+                                                  color: Color.fromARGB(255, 197, 13, 0),
+                                                ),
                                               ),
                                               Icon(
                                                 Icons.delete,
-                                                color: Helper.brandColors[5],
+                                                color: Color.fromARGB(
+                                                    255, 164, 11, 0),
                                               )
                                             ],
                                           ),
@@ -270,14 +278,14 @@ class _DiasViewState extends State<_DiasView> {
 
       Future.delayed(Duration(milliseconds: 1500), () {
         diasEstimados = widget.obra.diasEstimados;
-        diasInactivos = widget.obra.diasInactivos.length;
+        diasInactivos = widget.obra.cantDiasInactivos;
         diasTranscurridos = widget.obra.getDiasTranscurridos();
         if (activeST) setState(() {});
       });
-    }else{
-       diasEstimados = widget.obra.diasEstimados;
-        diasInactivos = widget.obra.cantDiasInactivos;
-        diasTranscurridos = widget.obra.getDiasTranscurridos();
+    } else {
+      diasEstimados = widget.obra.diasEstimados;
+      diasInactivos = widget.obra.cantDiasInactivos;
+      diasTranscurridos = widget.obra.getDiasTranscurridos();
     }
     return Container(
       margin: EdgeInsets.only(top: 25),
@@ -625,7 +633,6 @@ class CaracteristicaButton extends StatelessWidget {
               children: [
                 tieneNovedad(_obraService.obra.id, listItem, _socketService)
                     ? badges.Badge(
-
                         badgeColor: Helper.brandColors[8],
                         child: Padding(
                           padding: const EdgeInsets.all(0),
@@ -688,30 +695,26 @@ class _ObraBigrafy extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    IconButton(
-                      padding: EdgeInsets.all(0),
-                      iconSize: 40,
-                      alignment: Alignment.centerLeft,
-                      onPressed: () => abrirMap(context),
-                      icon: Icon(
-
-                        Icons.location_on_outlined,
-                        color: Helper.brandColors[8],
-                        
-                      ),
-                    ),
-                    Text(this.obra.barrio,
-                        style: TextStyle(
-                            color: Helper.brandColors[5],
-                            fontSize: 20,
-                            fontWeight: FontWeight.w100)),
-                  ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                IconButton(
+                  padding: EdgeInsets.all(0),
+                  iconSize: 40,
+                  alignment: Alignment.centerLeft,
+                  onPressed: () => abrirMap(context),
+                  icon: Icon(
+                    Icons.location_on_outlined,
+                    color: Helper.brandColors[8],
+                  ),
                 ),
-            
+                Text(this.obra.barrio,
+                    style: TextStyle(
+                        color: Helper.brandColors[5],
+                        fontSize: 20,
+                        fontWeight: FontWeight.w100)),
+              ],
+            ),
             _pref.role == 1
                 ? IconButton(
                     onPressed: () {
@@ -731,7 +734,6 @@ class _ObraBigrafy extends StatelessWidget {
           height: 10,
         ),
         Row(
-          
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
@@ -739,7 +741,7 @@ class _ObraBigrafy extends StatelessWidget {
               Helper.brandColors[8],
               Helper.brandColors[9]
             ], this.obra.nombre, fontsize: 42.0),
-           
+
             Container(
               margin: EdgeInsets.only(left: 20),
               child: Text(this.obra.lote,
@@ -770,28 +772,28 @@ class _ObraBigrafy extends StatelessWidget {
       return;
     }
 
-  if(availableMaps.length > 1){
+    if (availableMaps.length > 1) {
+      var acciones = availableMaps.map((e) {
+        return {
+          "text": e.mapName,
+          "default": true,
+          "accion": () async {
+            await e.showMarker(
+              coords: Coords(
+                  _obraService.obra.latitud!, _obraService.obra.longitud!),
+              title: obra.nombre,
+            );
+          }
+        };
+      }).toList();
 
-    var acciones = availableMaps.map((e) {
-      return {
-        "text": e.mapName,
-        "default": true,
-        "accion": () async {
-          await e.showMarker(
-            coords:
-                Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
-            title: obra.nombre,
-          );
-        }
-      };
-    }).toList();
-
-    openBottomSheet(context, 'Abrir mapa', 'Seleccionar aplicacion', acciones);
-  }else{
-    await availableMaps.first.showMarker(
-      coords: Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
-      title: obra.nombre,
-    );
-  }
+      openBottomSheet(
+          context, 'Abrir mapa', 'Seleccionar aplicacion', acciones);
+    } else {
+      await availableMaps.first.showMarker(
+        coords: Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
+        title: obra.nombre,
+      );
+    }
   }
 }

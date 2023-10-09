@@ -54,7 +54,7 @@ class ChatService extends ChangeNotifier {
   Future<MyResponse> enviarMensajeChatGroup(String obraId, String id, String text) async {
     final body = {"obraId": obraId, "idFrom": id, "mensaje": text};
     final data =
-        await this._http.post('$_endpoint/messageToGroup/$chatId', body);
+        await this._http.post('$_endpoint/messageToGroup', body);
     final response = MyResponse.fromJson(data['response']);
     return response;
   }

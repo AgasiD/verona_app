@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:badges/badges.dart' as badges;
-import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
@@ -18,7 +17,6 @@ import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
 import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
 import 'package:verona_app/pages/ABMs/centro_notificaciones.dart';
-import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/anotaciones_general.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/error.dart';

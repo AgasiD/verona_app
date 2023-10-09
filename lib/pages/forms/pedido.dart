@@ -132,7 +132,7 @@ class _FormState extends State<_Form> {
         // ESTADO: Pedido Asignado
         pedidoEnStock = true;
         pedidoConfirmado = true;
-        tieneImagen = widget.pedido!.imagenId == '' ? false : true;
+        tieneImagen = widget.pedido!.imagenId.isEmpty ? false : true;
         tieneImagen ? imgButtonText = 'Ver evidencia' : false;
         indicacionesTxtController.text = widget.pedido!.indicaciones;
         repartidoId = widget.pedido!.usuarioAsignado == ''
@@ -144,7 +144,7 @@ class _FormState extends State<_Form> {
 
       if (widget.pedido!.estado == 5) {
         // ESTADO: Pedido cerrado
-        tieneImagen = widget.pedido!.imagenId == '' ? false : true;
+        tieneImagen = widget.pedido!.imagenId.isEmpty ? false : true;
         imgButtonText = tieneImagen ? 'Ver evidencia' : 'Foto/Evidencia';
         pedidoConfirmado = true;
         pedidoEnStock = true;
@@ -278,8 +278,6 @@ class _FormState extends State<_Form> {
                                       closeLoadingDialog(context);
                                       var downloadsDirectory =
                                           await getTemporaryDirectory();
-                                      String tempPath =
-                                          downloadsDirectory!.path;
 
                                       Helper.showSnackBar(
                                           context,
@@ -813,7 +811,7 @@ class _FormState extends State<_Form> {
         }
       } else {
         Navigator.pushNamed(context, ImagenViewer.routeName,
-            arguments: {'imagenId': widget.pedido!.imagenId});
+            arguments: {'imageIds': widget.pedido!.imagenId});
       }
     } catch (e) {
       openAlertDialog(context, e.toString());
@@ -823,6 +821,7 @@ class _FormState extends State<_Form> {
   grabarPedido(obraId, areaTxtController, ObraService _obraService,
       GoogleDriveService _driveService) async {
     MyResponse response;
+      bool loading = false;
     try {
       switch (widget.pedido!.estado) {
         case 0: // PEDIDO NUEVO
@@ -889,17 +888,27 @@ class _FormState extends State<_Form> {
         case 4:
           widget.pedido!.nota = areaTxtController.text;
           widget.pedido!.prioridad = prioridad;
-          // openAlertDialog(context, 'No se ha cargado imagen/evidencia');
-          // return [true, 'No se ha cargado imagen/evidencia'];
-          // } else {
+       
           if (tieneImagen) {
             final idDrive = _obraService.obra.folderPedidoImages == ''
                 ? _obraService.obra.driveFolderId
                 : _obraService.obra.folderPedidoImages;
-            final idImagen = await _driveService.grabarImagenPedido(
-                'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}',
-                idDrive!);
-            widget.pedido!.imagenId = idImagen;
+            List<String> idsImagenes = [];
+            int index = 1;
+            for (var img in _driveService.imgsPedido!) {
+              loading = true;
+              openLoadingDialog(context,mensaje: 'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
+              final idImagen = await _driveService.grabarImagenPedido(
+                  'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)',
+                  idDrive!,
+                  img!);
+              idsImagenes.add(idImagen);
+              index++;
+              closeLoadingDialog(context);
+            };
+            loading = false;
+
+            widget.pedido!.imagenId = idsImagenes;
           }
           response = await _obraService.editPedido(widget.pedido!);
           if (response.fallo) {
@@ -911,6 +920,7 @@ class _FormState extends State<_Form> {
           break;
       }
     } catch (err) {
+      loading ? closeLoadingDialog(context) : false;
       openAlertDialog(context, 'Error al grabar pedido',
           subMensaje: err.toString());
     }
@@ -1073,14 +1083,14 @@ class _FormState extends State<_Form> {
     final _driveService =
         Provider.of<GoogleDriveService>(context, listen: false);
     final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
+    final List<XFile?>? images = await _picker.pickMultiImage();
+    if (images != null && images.length > 0) {
       tieneImagen = true;
-      _driveService.guardarImagenPedido(image);
+      _driveService.guardarImagenPedido(images);
       Navigator.pop(context);
       setState(() {
         // imagenSelected = true;
-        imgButtonText = 'Imagenes seleccionada';
+        imgButtonText = 'Imagenes seleccionadas (${images.length})';
       });
     }
   }
@@ -1093,7 +1103,7 @@ class _FormState extends State<_Form> {
 
     if (image != null) {
       tieneImagen = true;
-      _driveService.guardarImagenPedido(image);
+      _driveService.guardarImagenPedido([image]);
       Navigator.pop(context);
       setState(() {
         // imagenSelected = true;

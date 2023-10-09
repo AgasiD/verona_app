@@ -519,7 +519,7 @@ class _TareasView extends StatefulWidget {
 }
 
 class _TareasViewState extends State<_TareasView> {
-  int valueSelect = 1;
+  int valueSelect = 1;  
   int cantRegistros = 10;
   List<Tarea> tareasAux = [];
   TextEditingController searchCtrl = TextEditingController();

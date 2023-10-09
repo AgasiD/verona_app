@@ -184,7 +184,7 @@ class __customTileAddedState extends State<_customTileAdded> {
       openLoadingDialog(context, mensaje: 'Desasignando propietario');
       mensaje = 'Propietario quitado';
       await _ObraService.quitarUsuario(
-          widget.obra.id, widget.propietario.dni);
+          widget.obra.id, widget.propietario.id);
       widget.asignados
           .removeWhere((element) => element == widget.propietario.dni);
       widget.agregado = !widget.agregado;

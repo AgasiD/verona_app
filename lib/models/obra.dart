@@ -261,7 +261,7 @@ class Obra {
       diaAnalizado = diaAnalizado.add(Duration(days: 1));
     }
 
-    return diasTranscurridos;
+    return diasTranscurridos - cantDiasInactivos;
   }
 
   List<dynamic> obtenerTareasRealizadasByDias({int dias = 5}){
