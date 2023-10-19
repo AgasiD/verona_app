@@ -23,6 +23,7 @@ import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/chat_service.dart';
+import 'package:verona_app/services/notificaciones_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';

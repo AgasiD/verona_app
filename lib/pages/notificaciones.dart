@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -55,11 +57,15 @@ class _NotificationsList extends StatelessWidget {
                 // dividir por por fechas entre hoy y el resto
                 return FutureBuilder(
                   future: _usuarioService.leerNotificaciones(_pref.id),
-                  builder: (context, snapshot) => Container(
+                  builder: (context, snapshot) 
+                  {
+                    // final _socketService = Provider.of<SocketService>(context, listen: false);
+                    // _socketService.notifyListeners();
+                    return Container(
                       margin: EdgeInsets.only(top: 15),
                       child: _CustomListView(
                         data: notificaciones,
-                      )),
+                      ));},
                 );
               } else {
                 return Container(

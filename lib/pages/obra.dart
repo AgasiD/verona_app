@@ -6,7 +6,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:badges/badges.dart' as badges;
 
 import 'package:flutter/material.dart';
-import 'package:image_fade/image_fade.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -28,6 +27,7 @@ import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+
 
 class ObraPage extends StatelessWidget {
   static const String routeName = 'obra';
@@ -177,7 +177,8 @@ class ObraPage extends StatelessWidget {
                                               Text(
                                                 'Eliminar obra',
                                                 style: TextStyle(
-                                                  color: Color.fromARGB(255, 197, 13, 0),
+                                                  color: Color.fromARGB(
+                                                      255, 197, 13, 0),
                                                 ),
                                               ),
                                               Icon(
@@ -188,35 +189,8 @@ class ObraPage extends StatelessWidget {
                                             ],
                                           ),
                                         ),
-                                        onPressed: () {
-                                          openDialogConfirmation(context,
-                                              (context) async {
-                                            // eliminar obra
-                                            openLoadingDialog(context,
-                                                mensaje: 'Eliminando obra...');
-                                            final response = await _service
-                                                .eliminarObra(obraId);
-                                            closeLoadingDialog(context);
-                                            if (response.fallo) {
-                                              openAlertDialog(context,
-                                                  'Error al elimiar obra',
-                                                  subMensaje: response.error);
-                                            } else {
-                                              openAlertDialog(context,
-                                                  'Obra eliminada con éxito');
-                                              Timer(
-                                                  Duration(milliseconds: 750),
-                                                  () => closeLoadingDialog(
-                                                      context));
-                                              Timer(
-                                                  Duration(milliseconds: 750),
-                                                  () => Navigator
-                                                          .pushReplacementNamed(
-                                                        context,
-                                                        ObrasPage.routeName,
-                                                      ));
-                                            }
-                                          }, 'Confirmar para eliminar obra');
+                                        onPressed: () async {
+                                          await eliminarObra(context, obraId);
                                         }),
                                   )
                                 : Container()
@@ -229,6 +203,38 @@ class ObraPage extends StatelessWidget {
                 ),
               ],
             )));
+  }
+
+  eliminarObra(context, obraId) async {
+    bool loading = true;
+    final confirm = await openDialogConfirmationReturn(
+        context, 'Confirmar para eliminar obra');
+    if (!confirm) {
+      loading = false;
+      return;
+    }
+    try {
+      final _obraService = Provider.of<ObraService>(context, listen: false);
+      openLoadingDialog(context, mensaje: 'Eliminando obra... esto puede demorar');
+      loading = true;
+      final response = await _obraService.eliminarObra(obraId);
+      closeLoadingDialog(context);
+      loading = false;
+      if (response.fallo) {
+        openAlertDialog(context, 'Error al elimiar obra',
+            subMensaje: response.error);
+      } else {
+        await openAlertDialogReturn(context, 'Obra eliminada con éxito');
+        Navigator.pushReplacementNamed(
+          context,
+          ObrasPage.routeName,
+        );
+      }
+    } catch (err) {
+      loading ? closeLoadingDialog(context) : false;
+      openAlertDialog(context, 'Error al eliminar obra',
+          subMensaje: err.toString());
+    }
   }
 
   tieneMensajeSinLeer(String obraId, String chatId) {
