@@ -183,9 +183,8 @@ class _TareaTileState extends State<_TareaTile> {
     final checkboxTile = Container(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
         child: GestureDetector(
-            onLongPress: () {
-              openAlertDialog(context, 'Descripción',
-                  subMensaje: widget.tarea.descripcion);
+            onLongPress: () async{
+              // await openDialogConfirmationReturn(context, widget.tarea.descripcion);
             },
             child: widget.edit
                 ? ListTile(
@@ -207,8 +206,12 @@ class _TareaTileState extends State<_TareaTile> {
                 : CheckboxListTile(
                     enabled: [1, 2, 7].contains(_pref.role),
                     tileColor: Helper.brandColors[2],
-                    checkColor: Helper.brandColors[5],
-                    activeColor: Helper.brandColors[8],
+                    checkColor: widget.tarea.iniciado 
+                    ? widget.tarea.realizado ? Helper.brandColors[5] : Helper.brandColors[8] 
+                    : Helper.brandColors[5],
+                    activeColor:widget.tarea.iniciado 
+                    ? widget.tarea.realizado ? Helper.brandColors[8] : Helper.brandColors[5] 
+                    : Helper.brandColors[8],
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       '${widget.index + 1} - ${widget.tarea.descripcion}',
@@ -216,28 +219,51 @@ class _TareaTileState extends State<_TareaTile> {
                       style:
                           TextStyle(color: Helper.brandColors[3], fontSize: 15),
                     ),
+                    
                     onChanged: (value) async {
-                      openLoadingDialog(context, mensaje: 'Actualizando...');
-                      final response = await _obraService.actualizarTarea(
-                          _obraService.obra.id,
-                          widget.etapaId,
-                          widget.tarea.subetapa,
-                          widget.tarea.id,
-                          value!,
-                          new Preferences().id,
-                          DateTime.now().millisecondsSinceEpoch);
-                      closeLoadingDialog(context);
-                      widget.tarea.realizado = value!;
-                      _obraService.notifyListeners();
-
-                      if (response.fallo) {
-                        openAlertDialog(context, 'Error al actualizar tarea',
-                            subMensaje: response.error);
+                      
+                      if( !widget.tarea.iniciado )
+                      {
+                        widget.tarea.iniciado = true;
+                        setState(() {
+                          
+                        });
+                        return;
+                      }else{
+                        if( !widget.tarea.realizado){
+                          widget.tarea.realizado = true;
+                        }else{
+                          widget.tarea.iniciado = false;
+                          widget.tarea.realizado = false;
+                        }
                       }
+                        setState(() {
+                          
+                        });
+                      
 
-                      setState(() {});
+                      // openLoadingDialog(context, mensaje: 'Actualizando...');
+
+
+                      // final response = await _obraService.actualizarTarea(
+                      //     _obraService.obra.id,
+                      //     widget.etapaId,
+                      //     widget.tarea.subetapa,
+                      //     widget.tarea.id,
+                      //     value!,
+                      //     new Preferences().id,
+                      //     DateTime.now().millisecondsSinceEpoch);
+                      // closeLoadingDialog(context);
+                      // widget.tarea.realizado = value!;
+                      // _obraService.notifyListeners();
+
+                      // if (response.fallo) {
+                      //   openAlertDialog(context, 'Error al actualizar tarea',
+                      //       subMensaje: response.error);
+                      // }
+
                     },
-                    value: widget.tarea.realizado,
+                    value: widget.tarea.iniciado,
                   )));
 
     if (_pref.role == 1 && !widget.tarea.realizado)
