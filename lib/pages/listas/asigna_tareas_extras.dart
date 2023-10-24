@@ -38,7 +38,7 @@ class TareasExtrasPage extends StatelessWidget {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-            future: _tareaService.obtenerTareasExtras(subetapaId),
+            future: _tareaService.obtenerTareasExtras(etapaId, subetapaId, _obraService.obra.id),
             builder: (context, snapshot) {
               if (snapshot.data == null) {
                 return Loading(

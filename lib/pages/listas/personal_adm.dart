@@ -42,13 +42,15 @@ class PersonalADM extends StatelessWidget {
 
                     return Column(
                       children: [
-                        Container(
-                          height: MediaQuery.of(context).size.height - 160,
-                          color: Helper.brandColors[1],
-                          child: _CustomSearchListView(
-                            txtController: txtBuscador,
-                            data: dataTile.toList(),
-                            dataFiltrada: dataTile.toList(),
+                        Expanded(
+                          child: Container(
+                            height: MediaQuery.of(context).size.height - 160,
+                            color: Helper.brandColors[1],
+                            child: _CustomSearchListView(
+                              txtController: txtBuscador,
+                              data: dataTile.toList(),
+                              dataFiltrada: dataTile.toList(),
+                            ),
                           ),
                         )
                       ],

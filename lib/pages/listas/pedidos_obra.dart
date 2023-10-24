@@ -241,7 +241,7 @@ class _PedidosByEstado extends StatelessWidget {
                               style: TextStyle(
                                   color: Helper.brandColors[8].withOpacity(.8)),
                             ),
-                          ],
+                          ],  
                         ),
                         avatar: pedidos[index]['prioridad']
                             .toString()

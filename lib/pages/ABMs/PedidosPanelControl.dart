@@ -68,9 +68,7 @@ class _PedidosPanelControlState extends State<PedidosPanelControl>
 
                 final response = snapshot.data as MyResponse;
                 if (response.fallo)
-                  return Center(
-                    child: Text(response.error),
-                  );
+                  return CustomCenterText(text: response.error);
 
                 final obras = response.data;
 
@@ -133,6 +131,7 @@ class _PendientesViewState extends State<_PendientesView> {
 
     return widget.pendientes.length > 0 
     ? ListView.builder(
+      
       itemCount: widget.pendientes.length,
       itemBuilder: (context, i)  {
       final obra = widget.pendientes[i];

@@ -6,7 +6,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:badges/badges.dart' as badges;
 
 import 'package:flutter/material.dart';
-import 'package:image_fade/image_fade.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,6 +28,7 @@ import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
+
 class ObraPage extends StatelessWidget {
   static const String routeName = 'obra';
 
@@ -39,7 +39,6 @@ class ObraPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-    
     final _service = Provider.of<ObraService>(context);
     final _pref = new Preferences();
     final esDelivery = _pref.role == 6;
@@ -68,26 +67,24 @@ class ObraPage extends StatelessWidget {
                   flexibleSpace: FlexibleSpaceBar(
                     background: Hero(
                       tag: obra.id,
-                      child:   CachedNetworkImage(
-                      imageUrl: obra.imageURL,
-                      imageBuilder: (context, imageProvider) => Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: imageProvider,
-                            fit: BoxFit.fill
-                          ),
-                        ),
-                      ),
-                      placeholder: (context, url) => Center(
-                          child: CircularProgressIndicator(
-                        color: Helper.brandColors[8],
-                      )),
-                      errorWidget: (context, url, error) => Container(
-                        color: Helper.brandColors[8],
-                        alignment: Alignment.center,
-                        child: Image(image: AssetImage('assets/image.png')),
-                    
-                    )),
+                      child: CachedNetworkImage(
+                          imageUrl: obra.imageURL,
+                          imageBuilder: (context, imageProvider) => Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                      image: imageProvider, fit: BoxFit.fill),
+                                ),
+                              ),
+                          placeholder: (context, url) => Center(
+                                  child: CircularProgressIndicator(
+                                color: Helper.brandColors[8],
+                              )),
+                          errorWidget: (context, url, error) => Container(
+                                color: Helper.brandColors[8],
+                                alignment: Alignment.center,
+                                child: Image(
+                                    image: AssetImage('assets/image.png')),
+                              )),
                     ),
                   ),
                 ),
@@ -158,10 +155,19 @@ class ObraPage extends StatelessWidget {
                                     margin: EdgeInsets.only(top: 25),
                                     child: TextButton(
                                         style: ButtonStyle(
-                                            backgroundColor:
-                                                MaterialStateProperty.all(
-                                                    Color.fromARGB(
-                                                        255, 122, 9, 1))),
+                                          side: MaterialStateProperty.all(
+                                            BorderSide(
+                                              color: Color.fromARGB(
+                                                  255, 164, 11, 0),
+
+                                              width: 1.0, // Ancho del borde
+                                            ),
+                                          ),
+                                        ),
+                                        // backgroundColor:
+                                        //     MaterialStateProperty.all(
+                                        //         Color.fromARGB(
+                                        //             255, 122, 9, 1))),
                                         child: Container(
                                           width: 150,
                                           child: Row(
@@ -171,45 +177,20 @@ class ObraPage extends StatelessWidget {
                                               Text(
                                                 'Eliminar obra',
                                                 style: TextStyle(
-                                                    color:
-                                                        Helper.brandColors[5]),
+                                                  color: Color.fromARGB(
+                                                      255, 197, 13, 0),
+                                                ),
                                               ),
                                               Icon(
                                                 Icons.delete,
-                                                color: Helper.brandColors[5],
+                                                color: Color.fromARGB(
+                                                    255, 164, 11, 0),
                                               )
                                             ],
                                           ),
                                         ),
-                                        onPressed: () {
-                                          openDialogConfirmation(context,
-                                              (context) async {
-                                            // eliminar obra
-                                            openLoadingDialog(context,
-                                                mensaje: 'Eliminando obra...');
-                                            final response = await _service
-                                                .eliminarObra(obraId);
-                                            closeLoadingDialog(context);
-                                            if (response.fallo) {
-                                              openAlertDialog(context,
-                                                  'Error al elimiar obra',
-                                                  subMensaje: response.error);
-                                            } else {
-                                              openAlertDialog(context,
-                                                  'Obra eliminada con éxito');
-                                              Timer(
-                                                  Duration(milliseconds: 750),
-                                                  () => closeLoadingDialog(
-                                                      context));
-                                              Timer(
-                                                  Duration(milliseconds: 750),
-                                                  () => Navigator
-                                                          .pushReplacementNamed(
-                                                        context,
-                                                        ObrasPage.routeName,
-                                                      ));
-                                            }
-                                          }, 'Confirmar para eliminar obra');
+                                        onPressed: () async {
+                                          await eliminarObra(context, obraId);
                                         }),
                                   )
                                 : Container()
@@ -222,6 +203,38 @@ class ObraPage extends StatelessWidget {
                 ),
               ],
             )));
+  }
+
+  eliminarObra(context, obraId) async {
+    bool loading = true;
+    final confirm = await openDialogConfirmationReturn(
+        context, 'Confirmar para eliminar obra');
+    if (!confirm) {
+      loading = false;
+      return;
+    }
+    try {
+      final _obraService = Provider.of<ObraService>(context, listen: false);
+      openLoadingDialog(context, mensaje: 'Eliminando obra... esto puede demorar');
+      loading = true;
+      final response = await _obraService.eliminarObra(obraId);
+      closeLoadingDialog(context);
+      loading = false;
+      if (response.fallo) {
+        openAlertDialog(context, 'Error al elimiar obra',
+            subMensaje: response.error);
+      } else {
+        await openAlertDialogReturn(context, 'Obra eliminada con éxito');
+        Navigator.pushReplacementNamed(
+          context,
+          ObrasPage.routeName,
+        );
+      }
+    } catch (err) {
+      loading ? closeLoadingDialog(context) : false;
+      openAlertDialog(context, 'Error al eliminar obra',
+          subMensaje: err.toString());
+    }
   }
 
   tieneMensajeSinLeer(String obraId, String chatId) {
@@ -271,14 +284,14 @@ class _DiasViewState extends State<_DiasView> {
 
       Future.delayed(Duration(milliseconds: 1500), () {
         diasEstimados = widget.obra.diasEstimados;
-        diasInactivos = widget.obra.diasInactivos.length;
+        diasInactivos = widget.obra.cantDiasInactivos;
         diasTranscurridos = widget.obra.getDiasTranscurridos();
         if (activeST) setState(() {});
       });
-    }else{
-       diasEstimados = widget.obra.diasEstimados;
-        diasInactivos = widget.obra.cantDiasInactivos;
-        diasTranscurridos = widget.obra.getDiasTranscurridos();
+    } else {
+      diasEstimados = widget.obra.diasEstimados;
+      diasInactivos = widget.obra.cantDiasInactivos;
+      diasTranscurridos = widget.obra.getDiasTranscurridos();
     }
     return Container(
       margin: EdgeInsets.only(top: 25),
@@ -524,7 +537,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       items.add(anotaciones);
     } else {
       final pedidos = Item(
-        rolesAcceso: [1, 2, 7],
+        rolesAcceso: [1, 2, 7, 6],
         icon: Icons.request_page_outlined,
         list: 6,
         titulo: 'Pedidos',
@@ -626,7 +639,6 @@ class CaracteristicaButton extends StatelessWidget {
               children: [
                 tieneNovedad(_obraService.obra.id, listItem, _socketService)
                     ? badges.Badge(
-
                         badgeColor: Helper.brandColors[8],
                         child: Padding(
                           padding: const EdgeInsets.all(0),
@@ -687,33 +699,28 @@ class _ObraBigrafy extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 21),
       child: Column(children: [
         Row(
-          
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    IconButton(
-                      padding: EdgeInsets.all(0),
-                      iconSize: 40,
-                      alignment: Alignment.centerLeft,
-                      onPressed: () => abrirMap(context),
-                      icon: Icon(
-
-                        Icons.location_on_outlined,
-                        color: Helper.brandColors[8],
-                        
-                      ),
-                    ),
-                    Text(this.obra.barrio,
-                        style: TextStyle(
-                            color: Helper.brandColors[5],
-                            fontSize: 20,
-                            fontWeight: FontWeight.w100)),
-                  ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                IconButton(
+                  padding: EdgeInsets.all(0),
+                  iconSize: 40,
+                  alignment: Alignment.centerLeft,
+                  onPressed: () => abrirMap(context),
+                  icon: Icon(
+                    Icons.location_on_outlined,
+                    color: Helper.brandColors[8],
+                  ),
                 ),
-            
+                Text(this.obra.barrio,
+                    style: TextStyle(
+                        color: Helper.brandColors[5],
+                        fontSize: 20,
+                        fontWeight: FontWeight.w100)),
+              ],
+            ),
             _pref.role == 1
                 ? IconButton(
                     onPressed: () {
@@ -740,10 +747,7 @@ class _ObraBigrafy extends StatelessWidget {
               Helper.brandColors[8],
               Helper.brandColors[9]
             ], this.obra.nombre, fontsize: 42.0),
-            // Text(
-            //   this.nombre,
-            //   style: TextStyle(color: Helper.brandColors[8], fontSize: 42),
-            // ), // Nombre del proyecto
+
             Container(
               margin: EdgeInsets.only(left: 20),
               child: Text(this.obra.lote,
@@ -774,28 +778,28 @@ class _ObraBigrafy extends StatelessWidget {
       return;
     }
 
-  if(availableMaps.length > 1){
+    if (availableMaps.length > 1) {
+      var acciones = availableMaps.map((e) {
+        return {
+          "text": e.mapName,
+          "default": true,
+          "accion": () async {
+            await e.showMarker(
+              coords: Coords(
+                  _obraService.obra.latitud!, _obraService.obra.longitud!),
+              title: obra.nombre,
+            );
+          }
+        };
+      }).toList();
 
-    var acciones = availableMaps.map((e) {
-      return {
-        "text": e.mapName,
-        "default": true,
-        "accion": () async {
-          await e.showMarker(
-            coords:
-                Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
-            title: obra.nombre,
-          );
-        }
-      };
-    }).toList();
-
-    openBottomSheet(context, 'Abrir mapa', 'Seleccionar aplicacion', acciones);
-  }else{
-    await availableMaps.first.showMarker(
-      coords: Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
-      title: obra.nombre,
-    );
-  }
+      openBottomSheet(
+          context, 'Abrir mapa', 'Seleccionar aplicacion', acciones);
+    } else {
+      await availableMaps.first.showMarker(
+        coords: Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),
+        title: obra.nombre,
+      );
+    }
   }
 }

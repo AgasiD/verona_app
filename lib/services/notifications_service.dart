@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/forms/notificaciones_edit.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/obra.dart';
@@ -124,7 +127,6 @@ class NotificationService extends ChangeNotifier {
       GlobalKey<ScaffoldMessengerState> messengerKey,
       BuildContext context) async {
     print('-----------NUEVA NOTIFICACION-----------');
-    print(_pref.type);
     final type = notif.data["type"];
     final navega = notif.data["navega"] ?? false;
     //notif.data["navega"] == "true" ? notif.data["navega"] = true : false;
@@ -162,6 +164,14 @@ class NotificationService extends ChangeNotifier {
             'obraId': notif.data['obraId'],
           });
           break;
+        case 'authNotif':
+          navigatorKey.currentState!
+              .pushNamed(NotificacionesEditForm.routeName, arguments: {
+            'idNotif': notif.data['idNotif'],
+          });
+          break;
+        case 'update_app':
+        await Helper.launchWeb(Helper.getURLByPlatform(), context);
       }
     } else {
       /* Si la notificacion llega estando dentro de la app  */
@@ -226,6 +236,19 @@ class NotificationService extends ChangeNotifier {
                           })),
                 );
                 break;
+              case 'authNotif':
+                snackBar = SnackBar(
+                  content: Text(notif.notification!.title ?? 'Sin titulo'),
+                  action: SnackBarAction(
+                      label: 'Ver',
+                      onPressed: () => navigatorKey.currentState!.pushNamed(
+                              NotificacionesEditForm.routeName,
+                              arguments: {
+                                'idNotif': notif.data['idNotif'],
+                              })),
+                );
+                break;
+                
             }
 
             break;
@@ -234,7 +257,6 @@ class NotificationService extends ChangeNotifier {
 
         if (!currentPage.contains('chat')) {
           // Si no estoy en pantalla de chat
-
         } else {
           // if(route.settings.name == 'chat'){
 

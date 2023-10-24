@@ -51,6 +51,7 @@ class PedidosArchivadosList extends StatelessWidget {
           pedidos.where((element) => element['estado'] == estado).toList();
       agrupados.add({"estado": Helper.getEstadoPedido(5), "data": agrupacion});
     });
+    
     return agrupados;
   }
 }
@@ -119,7 +120,7 @@ class _PedidosByEstado extends StatelessWidget {
                                   color: Helper.brandColors[8].withOpacity(.8)),
                             ),
                             Text(
-                              ('Por: ${pedidos[index]['usuario']['nombre']} ${pedidos[index]['usuario']['apellido']}')
+                              ('Por: ${pedidos[index]['usuario']['nombre']??'Sin nombre'} ${pedidos[index]['usuario']['apellido']??''}')
                                   .toUpperCase(),
                               style: TextStyle(
                                   color: Helper.brandColors[8].withOpacity(.8)),

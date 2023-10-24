@@ -16,6 +16,7 @@ import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/image_service.dart';
 import 'package:verona_app/services/inactividad_service.dart';
+import 'package:verona_app/services/notificaciones_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -94,6 +95,9 @@ class _AppStateState extends State<AppState> {
         ),
         ChangeNotifierProvider(
           create: (_) => SubetapaService(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificacionesService(),
         ),
 
         ChangeNotifierProvider(

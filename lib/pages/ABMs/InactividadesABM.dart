@@ -190,6 +190,12 @@ class _PendientesViewState extends State<_InactividadesView> {
                                                 color: Helper.brandColors[8]
                                                     .withOpacity(.8)),
                                           ),
+                                           Text(
+                                            obra['inactividades'][index]['nombreUsuario'],
+                                            style: TextStyle(
+                                                color: Helper.brandColors[8]
+                                                    .withOpacity(.8)),
+                                          ),
                                         ],
                                       ),
                                       avatar: "1",
@@ -226,8 +232,9 @@ class _PendientesViewState extends State<_InactividadesView> {
                     ],
                   );
                 }),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
+            floatingActionButton: 
+            CustomNavigatorButton(
+            accion: () {
                 Navigator.pushNamed(context, InactividadesMasivaForm.routeName,
                     arguments: {
                       "obras": widget.obras
@@ -235,8 +242,11 @@ class _PendientesViewState extends State<_InactividadesView> {
                           .toList()
                     });
               },
-              child: Icon(Icons.add),
-            ),
+            icono: Icons.add,
+            showNotif: false,
+          )
+            
+          
           )
         : Container(
             height: MediaQuery.of(context).size.height,
@@ -465,15 +475,17 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
           margin: EdgeInsets.only(top: 15),
           child: Table(columnWidths: columnWidths, children: datos)),
       floatingActionButton: Visibility(
-          child: FloatingActionButton(
-              onPressed: () async {
+          child: CustomNavigatorButton(
+            accion: () async {
                 InactividadBD? inactividadResponse = await Navigator.pushNamed(
                         context, InactividadesBDForm.routeName, arguments: {})
                     as InactividadBD?;
                 widget.inactividades.add(inactividadResponse!);
                 setState(() {});
               },
-              child: Icon(Icons.add))),
+            icono: Icons.add,
+            showNotif: false,
+          )),
     );
   }
 
@@ -482,6 +494,8 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
     bool confirm =
         await openDialogConfirmationReturn(context, "Seguro que quiere borrar");
     if (!confirm) return;
+    try{
+
     final response =
         await _inactividadService.borrar(widget.inactividades[index].id);
     if (response.fallo) {
@@ -492,6 +506,10 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
         Duration(milliseconds: 1300), null);
     widget.inactividades.removeAt(index);
     setState(() {});
+    }
+    catch ( err ){
+      openAlertDialog(context, 'Error al borrar inactividad', subMensaje: err.toString());
+    }
   }
 
   guardarInactividad() {

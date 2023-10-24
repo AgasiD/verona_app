@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/listas/contactos.dart';
 import 'package:verona_app/services/chat_service.dart';
 
@@ -19,11 +20,6 @@ class ChatList extends StatefulWidget {
 }
 
 class _ChatListState extends State<ChatList> with RouteAware {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   TextEditingController txtController = new TextEditingController();
 
   @override
@@ -39,8 +35,11 @@ class _ChatListState extends State<ChatList> with RouteAware {
           child: FutureBuilder(
               future: _chatService.obtenerChats(_pref.id),
               builder: (context, snapshot) {
-                if (snapshot.data == null) {
+                if (snapshot.connectionState != ConnectionState.done) {
                   return Loading(mensaje: 'Cargando chats');
+                } else if (snapshot.hasError) {
+                  return ErrorPage(
+                      errorMsg: snapshot.error.toString(), page: false);
                 } else {
                   final response = snapshot.data as MyResponse;
                   final chats = response.data as List;

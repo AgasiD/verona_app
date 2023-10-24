@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -38,9 +41,12 @@ class _NotificationsList extends StatelessWidget {
     return FutureBuilder(
         future: _usuarioService.obtenerNotificaciones(_pref.id),
         builder: (context, snapshot) {
-          if (snapshot.data == null) {
+        if (snapshot.connectionState != ConnectionState.done) {
             return Loading(mensaje: 'Recuperando notificaciones');
-          } else {
+         } else if(snapshot.hasError){
+                return ErrorPage(errorMsg: snapshot.error.toString(), page: false);
+              }
+          else {
             final response = snapshot.data as MyResponse;
             if (response.fallo) {
               openAlertDialog(context, response.error);
@@ -51,11 +57,15 @@ class _NotificationsList extends StatelessWidget {
                 // dividir por por fechas entre hoy y el resto
                 return FutureBuilder(
                   future: _usuarioService.leerNotificaciones(_pref.id),
-                  builder: (context, snapshot) => Container(
+                  builder: (context, snapshot) 
+                  {
+                    // final _socketService = Provider.of<SocketService>(context, listen: false);
+                    // _socketService.notifyListeners();
+                    return Container(
                       margin: EdgeInsets.only(top: 15),
                       child: _CustomListView(
                         data: notificaciones,
-                      )),
+                      ));},
                 );
               } else {
                 return Container(
@@ -92,7 +102,10 @@ class _CustomListViewState extends State<_CustomListView> {
     {'doc': Icons.document_scanner_outlined},
     {'pedido': Icons.request_page_outlined},
     {'inactivity': Icons.work_off_outlined},
-    {'obra': Icons.house}
+    {'obra': Icons.house},
+    {'notification': Icons.notifications_active},
+    {'update_app': Icons.download},
+
   ];
   @override
   Widget build(BuildContext context) {
@@ -115,10 +128,9 @@ class _CustomListViewState extends State<_CustomListView> {
                 final notificacion = notificaciones[i];
                 iconAvatar = iconos
                     .where(
-                        (element) => element.containsKey(notificacion['type']))
-                    .first[notificacion['type']];
+                        (element) => element.containsKey(notificacion['type']??'notification'))
+                    .first[notificacion['type']??'notification'];
 
-                notificacion['type'];
                 String route = '';
                 Map<String, dynamic> arg = {};
                 switch (notificacion['type']) {
@@ -140,10 +152,16 @@ class _CustomListViewState extends State<_CustomListView> {
                       arg = {};
                     }
                     break;
+                  case 'update_app':
+                  route = 'update';
+                  actionOnTap = () async {
+                    print('tap');
+                    await Helper.launchWeb(Helper.getURLByPlatform(), context);
+                    };
                 }
-                if (route == '') {
+                if (route == '' && notificacion['type'] != 'update_app') {
                   actionOnTap = null;
-                } else {
+                } else if(route != '' && notificacion['type'] != 'update_app') {
                   actionOnTap = () =>
                       Navigator.pushNamed((context), route, arguments: arg);
                 }

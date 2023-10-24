@@ -6,6 +6,7 @@ import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/services/http_service.dart';
+import 'package:verona_app/widgets/custom_widgets.dart';
 
 class UsuarioService extends ChangeNotifier {
   HttpService _http = new HttpService();
@@ -21,6 +22,14 @@ class UsuarioService extends ChangeNotifier {
     return list;
   }
 
+    obtenerPropietariosAdmin() async {
+    final datos = await this._http.get('$_endpoint/propadmin');
+    final response = datos["response"];
+    final usuarios = MyResponse.fromJson(response);
+    return usuarios;
+  }
+
+
   obtenerPropietariosMiembro() async {
     final datos = await this._http.get('$_endpoint/propietario');
     final lista = datos["usuarios"];
@@ -29,15 +38,18 @@ class UsuarioService extends ChangeNotifier {
     return list;
   }
 
-  obtenerPersonal() async {
-    final datos = await this._http.get('$_endpoint/profesionales');
+  obtenerPersonal({ roles = null}) async {
+    final body = {
+      'roles':roles
+    };
+    final datos = await this._http.post('$_endpoint/profesionales', body);
     final lista = datos["usuarios"];
     final list =
         (lista as List<dynamic>).map((json) => Miembro.fromJson(json)).toList();
     return list;
   }
 
-   obtenerTodosUsuarios() async {
+   Future<List<Miembro>> obtenerTodosUsuarios() async {
     final datos = await this._http.get('$_endpoint/usuariosAll');
      final lista = datos["usuarios"];
     final list =
@@ -88,9 +100,14 @@ class UsuarioService extends ChangeNotifier {
   }
 
   validarUsuario(String usuario, String password) async {
+    try{
+
     final body = {"username": usuario, "password": password};
     final response = await this._http.post('$_endpoint/autenticar', body);
     return MyResponse.fromJson(response['response']);
+    }catch( err ){
+      print(err);
+    }
   }
 
   setTokenDevice(String usuarioId, String tokenDevice) async {
@@ -151,6 +168,12 @@ class UsuarioService extends ChangeNotifier {
     notifyListeners();
     return MyResponse.fromJson(response['response']);
   }
+  Future<MyResponse> obtenerAnotacionesByObra(String id) async{
+    
+    final response =
+        await this._http.get('$_endpoint/anotacionByObra/$id');
+    return MyResponse.fromJson(response['response']);
+  }
 
   Future<void> obtenerNovedades(String usuarioId) async {
 /*
@@ -209,4 +232,6 @@ tipos
     //   },
     // ];
   }
+
+
 }

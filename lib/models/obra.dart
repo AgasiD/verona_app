@@ -31,6 +31,7 @@ class Obra {
   String rootDriveCliente;
   String folderImagesCliente;
   String placeHolderImage = 'https://via.placeholder.com/300x150';
+  String folderPedidoImages;
   String? driveFolderId;
   String? ts;
   double? latitud;
@@ -63,6 +64,7 @@ class Obra {
     this.folderImagesCliente = '',
     this.latitud,
     this.longitud,
+    this.folderPedidoImages = '',
   }) {
     this.nombre = nombre;
     this.id = id;
@@ -92,6 +94,7 @@ class Obra {
     this.folderImagesCliente = folderImagesCliente;
     this.latitud = latitud;
     this.longitud = longitud;
+    this.folderPedidoImages = folderPedidoImages;
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
@@ -119,12 +122,13 @@ class Obra {
           .toList(),
       pedidos: json["pedidos"] ?? [],
       enabledFiles: json["enabledFiles"] as List<dynamic>,
-      folderImages: json['folderImages'] ?? '',
-      rootDriveCliente: json['rootDriveCliente'] ?? '',
-      folderImagesCliente: json['folderImagesCliente'] ?? '',
+      folderImages: json['folderImages'] ?? 'SinDato',
+      rootDriveCliente: json['rootDriveCliente'] ?? 'SinDato',
+      folderImagesCliente: json['folderImagesCliente'] ?? 'SinDato',
       latitud: json['latitud'],
       longitud: json['longitud'],
-      imageURL: json['imageURL'] ?? '');
+      folderPedidoImages: json['folderPedidoImages'] ?? 'SinDato',
+      imageURL: json['imageURL'] ?? 'SinDato');
 
   int get cantDiasInactivos {
     int dias = 0;
@@ -156,6 +160,7 @@ class Obra {
         'imageURL': this.imageURL,
         'longitud': this.longitud,
         'latitud':this.latitud,
+        'folderPedidoImages': this.folderPedidoImages
       };
 
   double get porcentajeRealizado {
@@ -180,16 +185,16 @@ class Obra {
   }
 
   estaPropietario(usuarioId) {
-    return propietarios.indexWhere((element) => element.dni == usuarioId) > -1;
+    return propietarios.indexWhere((element) => element.id == usuarioId) > -1;
   }
 
   sumarPropietario(Propietario prop) {
-    !estaPropietario(prop.dni) ? this.propietarios.add(prop) : false;
+    !estaPropietario(prop.id) ? this.propietarios.add(prop) : false;
   }
 
   quitarPropietario(Propietario prop) {
-    if (estaPropietario(prop.dni)) {
-      propietarios.removeWhere((element) => element.dni == prop.dni);
+    if (estaPropietario(prop.id)) {
+      propietarios.removeWhere((element) => element.id == prop.id);
     }
   }
 
@@ -212,7 +217,9 @@ class Obra {
     final indexSubetapa = etapas[indexEtapa]
         .subetapas
         .indexWhere((subetapa) => subetapa.id == tarea.subetapa);
-    etapas[indexEtapa].subetapas[indexSubetapa].tareas.add(tarea);
+    int posicion = tarea.orden ?? etapas[indexEtapa].subetapas[indexSubetapa].tareas.length;
+    posicion < 0 ? posicion =etapas[indexEtapa].subetapas[indexSubetapa].tareas.length  : posicion; 
+    etapas[indexEtapa].subetapas[indexSubetapa].tareas.insert(posicion, tarea);
   }
 
   quitarTarea(String etapaId, Tarea tarea) {
@@ -254,7 +261,57 @@ class Obra {
       diaAnalizado = diaAnalizado.add(Duration(days: 1));
     }
 
-    return diasTranscurridos;
+    return diasTranscurridos - cantDiasInactivos;
+  }
+
+  List<dynamic> obtenerTareasRealizadasByDias({int dias = 5}){
+
+    DateTime hasta = DateTime.now();
+
+    DateTime desde = DateTime.now().subtract(Duration(days: dias));
+
+    return _buscarTareas(desde, hasta);
+
+  }
+
+
+  dynamic obtenerTareasRealizadasDesdeHasta(DateTime desde, DateTime hasta){
+
+    return _buscarTareas(desde, hasta);
+
+  }
+
+  _buscarTareas(DateTime desde, DateTime hasta){
+
+    List<dynamic> tareasRealizadas = [];
+    List<dynamic> etapa_sub_tareasRealizadas = [];
+    this.etapas.forEach((etapa) {
+      
+      etapa.subetapas.forEach((subetapa) {
+
+        List<Subetapa> subetapasRealizadas = [];
+        
+          List<Tarea> tareasRealizadas = [];
+
+        subetapa.tareas.forEach((tarea) {
+          
+          if(tarea.realizado && (tarea.tsRealizado >= desde.millisecondsSinceEpoch && tarea.tsRealizado <= hasta.millisecondsSinceEpoch)){
+             tareasRealizadas.add(tarea);
+          }
+        });
+        if(tareasRealizadas.isNotEmpty){
+          etapa_sub_tareasRealizadas.add({
+            "subetapa": subetapa.descripcion,
+            "tareas": []
+          });
+          etapa_sub_tareasRealizadas.last['tareas'] = tareasRealizadas;
+        }
+        
+       });
+
+     });
+     etapa_sub_tareasRealizadas = etapa_sub_tareasRealizadas.where((e) => e['tareas'].length > 0 ).toList();
+    return {'obra': this.nombre, 'obraId': this.id, "subetapas": etapa_sub_tareasRealizadas};
   }
 
   String ubicToText() {

@@ -2,37 +2,37 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:image_fade/image_fade.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:badges/badges.dart' as badges;
-import 'package:verona_app/helpers/Enviroment.dart';
 
+import 'package:badges/badges.dart' as badges;
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/pages/ABMs/ControlObra.dart';
 import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
 import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
-import 'package:verona_app/pages/anotaciones.dart';
+import 'package:verona_app/pages/ABMs/centro_notificaciones.dart';
+import 'package:verona_app/pages/anotaciones_general.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/error.dart';
+import 'package:verona_app/pages/forms/notificaciones.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/listas/propietarios_adm.dart';
+import 'package:verona_app/pages/listas/tareas_semanaria.dart';
+import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
-import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class ObrasPage extends StatefulWidget {
@@ -144,10 +144,17 @@ class _ObrasPageState extends State<ObrasPage> {
         'roles': []
       },
       {
+        'icon': Icons.holiday_village,
+        'name': 'Propietarios',
+        'route': PropietariosADM.routeName,
+        'roles': [1]
+      },
+      {
         'icon': Icons.person_add_alt_sharp,
         'name': 'Nuevo propietario',
         'route': PropietarioForm.routeName,
-        'roles': [1]
+        'roles': [1],
+        'args': {'pageFrom': 'menu'}
       },
       {
         'icon': Icons.group_sharp,
@@ -156,37 +163,51 @@ class _ObrasPageState extends State<ObrasPage> {
         'roles': [1]
       },
       {
-        'icon': Icons.holiday_village,
-        'name': 'Propietarios',
-        'route': PropietariosADM.routeName,
-        'roles': [1]
-      }, 
-      {
         'icon': Icons.account_tree,
         'name': 'Control de obras',
-        'route': ControlObraABM.routeName,
-        'roles': !Environment.isProduction ? [1] : [999]
-      } ,
+        'route': TareasSemanarias.routeName,
+        'roles': [1],
+        'args': {'single': false, 'obras': obras}
+      },
       {
         'icon': Icons.request_page,
         'name': 'Pedidos',
         'route': PedidosPanelControl.routeName,
-        'roles': [1,5],
+        'roles': [1, 5],
       },
       {
-        'icon': Icons.edit_note_rounded,
-        'name': 'Mis anotaciones',
-        'route': AnotacionesPage.routeName,
-        'roles': [1, 2, 3, 7],
-        'args': {'obraId': null},
-      },
-       {
         'icon': Icons.work_off_outlined,
         'name': 'Control inactividades',
         'route': InactividadesABM.routeName,
         'roles': [1, 2, 7],
       },
-      
+      {
+        'icon': Icons.notification_add,
+        'name': 'Envío de notificaciones',
+        'route': NotificacionesForm.routeName,
+        'roles': [1, 2, 7],
+      },
+      {
+        'icon': Icons.notification_important_rounded,
+        'name': 'Centro de autorización',
+        'route': NotificacionesABM.routeName,
+        'roles': [1],
+      },
+      {
+        'icon': FontAwesomeIcons.solidNewspaper,
+        'name': 'Noticias',
+        'route': NotificacionesABM.routeName,
+        'roles': [1, 2, 3, 4, 5, 6, 7, 8],
+        'navega': false,
+        'action':() => Helper.launchWeb('https://www.veronaconstrucciones.com.ar/noticias', context)
+      },
+      {
+        'icon': Icons.edit_note_rounded,
+        'name': 'Mis anotaciones',
+        'route': AnotacionesGeneralPage.routeName,
+        'roles': [1, 2, 3, 7],
+        'args': {'obraId': null},
+      },
     ];
 
     return Scaffold(
@@ -229,19 +250,37 @@ class __SearchListViewState extends State<_SearchListView> {
   late List<Obra> obrasFiltradas;
 
   @override
+  void initState() {
+    super.initState();
+    final _pref = new Preferences();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final _obras = Provider.of<ObraService>(context);
+    final _obras = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
     return SingleChildScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: FutureBuilder(
             future: _obras.obtenerObrasByUser(_pref.id),
-            builder: ((context, snapshot) {
-              if (snapshot.data == null) {
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(mensaje: 'Recuperando obras');
-              } else {
-                final response = snapshot.data as MyResponse;
+              } else if(snapshot.hasError){
+                return SizedBox(
+                  height: 500,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(child: ErrorPage(errorMsg: snapshot.error.toString(), page: false)),
+                    ],
+                  ),
+                );
+              }
+              else {
+                try{
 
+                final response = snapshot.data as MyResponse;
                 if (!response.fallo) {
                   obras = (response.data as List<dynamic>)
                       .map((e) => Obra.fromMap(e))
@@ -253,6 +292,10 @@ class __SearchListViewState extends State<_SearchListView> {
                     openDrawer: widget.openDrawer,
                   );
                 } else {
+                  if (response.error == 'Usuario inactivo') {
+                    needReLogIn(response);
+                    return Container();
+                  }
                   return Container(
                     child: Text(
                       response.error,
@@ -260,8 +303,19 @@ class __SearchListViewState extends State<_SearchListView> {
                     ),
                   );
                 }
+                }catch( err ){
+                  return  ErrorPage(errorMsg: snapshot.error.toString(), page: false);
+                }
               }
-            })));
+            }));
+  }
+
+  void needReLogIn(MyResponse response) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final _pref = new Preferences();
+      _pref.deletePreferences();
+      Navigator.pushReplacementNamed(context, LoginPage.routeName);
+    });
   }
 }
 
@@ -551,7 +605,6 @@ class _CustomObrasState extends State<_CustomObras> {
                             ]),
                       ]),
                     ),
-
                     Expanded(
                         child: CachedNetworkImage(
                       imageUrl: obra.imageURL,
@@ -559,7 +612,6 @@ class _CustomObrasState extends State<_CustomObras> {
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             image: imageProvider,
-
                           ),
                         ),
                       ),
@@ -573,8 +625,6 @@ class _CustomObrasState extends State<_CustomObras> {
                         child: Image(image: AssetImage('assets/image.png')),
                       ),
                     )),
-
-                 
                   ],
                 ),
               ),

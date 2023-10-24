@@ -79,5 +79,8 @@ class Preferences {
 
   deletePreferences() {
     logged = false;
+    id = '';
+    nombre = '';
+    
   }
 }

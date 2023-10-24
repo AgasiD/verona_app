@@ -15,6 +15,7 @@ class SubetapasExtrasPage extends StatelessWidget {
   SubetapasExtrasPage({Key? key}) : super(key: key);
   static final routeName = 'subetapas_extras';
   late List<Subetapa> subetapas;
+  int ordenSug = 1;
   @override
   Widget build(BuildContext context) {
     final arguements = ModalRoute.of(context)!.settings.arguments as Map;
@@ -30,9 +31,7 @@ class SubetapasExtrasPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(
             context, Etapa_Sub_Tarea_Form.routeName,
-            arguments: {
-              'etapaId': etapaId,
-            }),
+            arguments: {'etapaId': etapaId, 'ordenSug': ordenSug}),
         backgroundColor: Helper.brandColors[8],
         mini: true,
         child: Icon(Icons.add),
@@ -42,7 +41,8 @@ class SubetapasExtrasPage extends StatelessWidget {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-            future: _subetapasService.obtenerExtras(etapaId),
+            future:
+                _subetapasService.obtenerExtras(etapaId, _obraService.obra.id),
             builder: (context, snapshot) {
               if (snapshot.data == null) {
                 return Loading(
@@ -54,7 +54,7 @@ class SubetapasExtrasPage extends StatelessWidget {
                 subetapas = lista.map((e) => Subetapa.fromJson(e)).toList();
                 subetapas
                     .sort(((a, b) => a.descripcion.compareTo(b.descripcion)));
-
+                ordenSug = subetapas.length;
                 final indexEtapa = _obraService.obra.etapas
                     .indexWhere((element) => element.id == etapaId);
                 _obraService.obra.etapas[indexEtapa];

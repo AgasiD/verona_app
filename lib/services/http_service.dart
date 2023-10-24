@@ -29,7 +29,7 @@ class HttpService extends ChangeNotifier {
 
   post(String endpoint, Map<String, dynamic> body) async {
     final _pref = new Preferences();
-    //headers.addAll({'x-token': _pref.token});
+    headers.addAll({'x-token': _pref.token});
     Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
@@ -50,16 +50,15 @@ class HttpService extends ChangeNotifier {
     return data;
   }
 
-  //1NfikU2TIukDVU4XZ4syRAWfCJbNpDk2N id Original de la obra
-  //1qbP0XlOCKeWsYjJjwJQPoDVshvmi2z7K
-
   put(String endpoint, Map<String, dynamic> body) async {
     final _pref = new Preferences();
     Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
+        final bodyReq =  json.encode(body);
+        print(bodyReq.length);
     final response =
-        await http.put(url, body: json.encode(body), headers: headers);
+        await http.put(url, body: bodyReq, headers: headers);
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
@@ -153,7 +152,6 @@ class HttpService extends ChangeNotifier {
     //Get the response from the server
     var responseData = await response.stream.toBytes();
     var responseString = String.fromCharCodes(responseData);
-    print(responseString);
 */
 
     // String imgId = '';

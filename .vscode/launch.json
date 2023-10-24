@@ -8,16 +8,26 @@
             "name": "verona_app DEBUG",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "debug" 
-            
+            "flutterMode": "debug",
+            "justMyCode": true,
+            "logging": {
+                "exceptionPauseMode": "Unhandled",
+                "console": true,
+                "file": true
+            }
             // "flutterMode": "release"
         },
         {
             "name": "verona_app RELEASE",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "justMyCode": true,
+            "logging": {
+                "exceptionPauseMode": "Unhandled",
+                "console": true,
+                "file": true
+            }
         }
     ],
-    
 }

@@ -21,6 +21,8 @@ class SocketService with ChangeNotifier {
 
   bool conectando = false;
   List<dynamic> novedades = [];
+
+
   void connect(clientId) {
     if (clientId != null && clientId.toString().trim() != '' && !conectando) {
       conectando = true;
@@ -152,7 +154,10 @@ class SocketService with ChangeNotifier {
   }
 
   tieneNovedadesNotif() {
-    return novedades.where((novedad) => novedad['menu'] < 7).length > 0;
+    // this._socket.emit('unread-notif', userId);
+
+    return novedades.where((novedad) => novedad['menu'] < 7 && novedad['leido'] != null ? !novedad['leido'] : false ).length > 0;
+    // return false;
   }
 
   void escucharNotificaciones() {

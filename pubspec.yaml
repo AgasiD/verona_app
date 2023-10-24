@@ -76,6 +76,9 @@ dependencies:
   google_maps_flutter: 2.1.1
   cached_network_image: ^3.2.3
   multiselect: ^0.1.0
+  auto_size_text: ^3.0.0
+  carousel_slider: ^4.2.1
+
 dependency_overrides:
   firebase_core_platform_interface: 4.5.1
 
@@ -115,10 +118,12 @@ flutter:
     - assets/loading-image.gif
     - assets/isotipo.png
     - assets/isotipo2.png
+    - assets/attention.png
     - assets/background.jpg
     - assets/background2.jpg
     - assets/user.png
     - enviroments/dev/.env
     - enviroments/prepro/.env
     - enviroments/prod/.env
+
     

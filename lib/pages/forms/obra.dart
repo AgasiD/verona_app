@@ -2,11 +2,11 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 
 //import 'package:file_picker/file_picker.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -39,8 +39,6 @@ class ObraForm extends StatelessWidget {
   static String nameForm = 'Nueva obra';
   static String alertMessage = 'Confirmar nueva obra';
 
- 
-
   @override
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
@@ -69,7 +67,8 @@ class ObraForm extends StatelessWidget {
                               final obra = snapshot.data as Obra;
 
                               return _Form(
-                                  obra: snapshot.data as Obra,);
+                                obra: snapshot.data as Obra,
+                              );
                             }
                           }))),
         ),
@@ -82,10 +81,10 @@ class ObraForm extends StatelessWidget {
 class _Form extends StatefulWidget {
   @override
   Obra? obra;
-  _Form(
-      {Key? key,
-      this.obra,})
-      : super(key: key);
+  _Form({
+    Key? key,
+    this.obra,
+  }) : super(key: key);
 
   @override
   State<_Form> createState() => _FormState();
@@ -98,10 +97,10 @@ class _FormState extends State<_Form> {
 
   String imgButtonText = '';
   DateTime selectedDate = DateTime.now();
-  late double latitud;
-  late double longitud;
+  double? latitud = null;
+  double? longitud = null;
 
- final TextEditingController  txtNombreCtrl = TextEditingController();
+  final TextEditingController txtNombreCtrl = TextEditingController();
   final TextEditingController txtBarrioCtrl = TextEditingController();
   final TextEditingController txtLoteCtrl = TextEditingController();
   final TextEditingController txtDescripCtrl = TextEditingController();
@@ -111,8 +110,7 @@ class _FormState extends State<_Form> {
   final TextEditingController txtCoordenadas = TextEditingController();
   @override
   void initState() {
-
-    if(!Environment.isProduction) crearDrive = false;
+    if (!Environment.isProduction) crearDrive = false;
     super.initState();
 
     if (widget.obra != null) {
@@ -135,7 +133,8 @@ class _FormState extends State<_Form> {
     } else {
       final f = new DateFormat('dd/MM/yyyy');
       txtDiaInicio.text = f.format(DateTime.now()).toString();
-    } }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -196,25 +195,25 @@ class _FormState extends State<_Form> {
               Container(
                   margin: EdgeInsets.only(bottom: 20),
                   child: CustomInput(
-                icono: Icons.calendar_month,
-                hintText: 'Fecha inicio (dd/mm/aaaa)',
-                readOnly: true,
-                enable: true,
-                // width: 200,
-                textController: txtDiaInicio,
-                iconButton: IconButton(
-                    icon: Icon(
-                      Icons.calendar_today,
-                      color: Helper.brandColors[3],
-                    ),
-                    onPressed: () {
-                      selectDateDeseada(
-                        context,
-                        txtDiaInicio,
-                        selectedDate,
-                      );
-                    }),
-              )),
+                    icono: Icons.calendar_month,
+                    hintText: 'Fecha inicio (dd/mm/aaaa)',
+                    readOnly: true,
+                    enable: true,
+                    // width: 200,
+                    textController: txtDiaInicio,
+                    iconButton: IconButton(
+                        icon: Icon(
+                          Icons.calendar_today,
+                          color: Helper.brandColors[3],
+                        ),
+                        onPressed: () {
+                          selectDateDeseada(
+                            context,
+                            txtDiaInicio,
+                            selectedDate,
+                          );
+                        }),
+                  )),
               CustomInput(
                 hintText: 'Duración estimada (días)',
                 icono: Icons.hourglass_bottom,
@@ -232,20 +231,34 @@ class _FormState extends State<_Form> {
                 textController: txtDescripCtrl,
                 lines: 3,
               ),
-              CustomInput(hintText: 'Ubicación', 
-              readOnly: true,
-              iconButton: IconButton(icon: Icon(Icons.search, color: Helper.brandColors[4],), onPressed: ()async=>openMap(),),
-               icono: Icons.location_on_outlined, textController: txtCoordenadas)
-              ,
-               Visibility(
+              CustomInput(
+                  hintText: 'Ubicación',
+                  readOnly: true,
+                  iconButton: IconButton(
+                    icon: Icon(
+                      Icons.search,
+                      color: Helper.brandColors[4],
+                    ),
+                    onPressed: () async => openMap(),
+                  ),
+                  icono: Icons.location_on_outlined,
+                  textController: txtCoordenadas),
+              Visibility(
                 visible: edit,
                 child: Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
-                  child: CustomInput(hintText: "Id de carpeta drive", icono: FontAwesomeIcons.googleDrive, textController: txtIdDrive, 
-                  iconButton: IconButton(onPressed: () => refreshDriveId(), icon: Icon(Icons.refresh, color: Helper.brandColors[4],))),
+                  child: CustomInput(
+                      hintText: "Id de carpeta drive",
+                      icono: FontAwesomeIcons.googleDrive,
+                      textController: txtIdDrive,
+                      iconButton: IconButton(
+                          onPressed: () => refreshDriveId(),
+                          icon: Icon(
+                            Icons.refresh,
+                            color: Helper.brandColors[4],
+                          ))),
                 ),
               ),
-
               Container(
                 alignment: Alignment.centerLeft,
                 child: MaterialButton(
@@ -273,9 +286,16 @@ class _FormState extends State<_Form> {
                     onPressed: () async {
                       final ImagePicker _picker = ImagePicker();
                       // Pick an image
+                      openLoadingDialog(context, mensaje: 'Seleccionar imagen');
                       final image =
                           await _picker.pickImage(source: ImageSource.gallery);
+                      closeLoadingDialog(context);
                       if (image != null) {
+                        if (await Helper.getWeigth(image!) >= 32.00) {
+                          openAlertDialog(
+                              context, 'Imagen debe ser menor a 32 MB.');
+                          return;
+                        }
                         _imageService.guardarImagen(image!);
                         setState(() {
                           imageSelected = true;
@@ -288,18 +308,22 @@ class _FormState extends State<_Form> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Crear carpeta en Drive', style: TextStyle(fontSize: 18, color: Helper.brandColors[4]),),
+                    Text(
+                      'Crear carpeta en Drive',
+                      style:
+                          TextStyle(fontSize: 18, color: Helper.brandColors[4]),
+                    ),
                     Checkbox(
-                      activeColor: Helper.brandColors[8],
-                      value: crearDrive, onChanged: (a){
-                      setState(() {
-                        crearDrive = a!;
-                      });
-                    })
+                        activeColor: Helper.brandColors[8],
+                        value: crearDrive,
+                        onChanged: (a) {
+                          setState(() {
+                            crearDrive = a!;
+                          });
+                        })
                   ],
                 ),
               ),
-             
               SizedBox(height: 40),
               Container(
                 margin: EdgeInsets.only(bottom: 40),
@@ -373,16 +397,16 @@ class _FormState extends State<_Form> {
   }
 
   grabarObra(BuildContext context) async {
-    try {
+      bool loading = true;
       bool isValid = true;
       final _service = Provider.of<ObraService>(context, listen: false);
       final _imageService = Provider.of<ImageService>(context, listen: false);
+    try {
 
       txtNombreCtrl.text.trim() == '' ? isValid = false : true;
       txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
       txtLoteCtrl.text.trim() == '' ? isValid = false : true;
       int.tryParse(txtDuracionCtrl.text) == null ? isValid = false : true;
-      
 
       if (isValid) {
         final obra = Obra(
@@ -390,32 +414,32 @@ class _FormState extends State<_Form> {
             barrio: txtBarrioCtrl.text,
             lote: txtLoteCtrl.text,
             propietarios: [],
-            latitud: latitud,
-            longitud: longitud,
+            latitud: latitud ?? null,
+            longitud: longitud ?? null,
             descripcion: txtDescripCtrl.text,
             diasEstimados: int.parse(txtDuracionCtrl.text),
             diaInicio: new DateFormat("dd/MM/yyyy")
-          .parse(txtDiaInicio.text)
-          .millisecondsSinceEpoch
-            );
-            
+                .parse(txtDiaInicio.text)
+                .millisecondsSinceEpoch);
+
         if (_imageService.imagenValida()) {
           openLoadingDialog(context, mensaje: 'Subiendo imagen');
           final dataImage = await _imageService.grabarImagen(obra.nombre);
           if (!dataImage['success']) {
             closeLoadingDialog(context);
+            loading = false;
             openAlertDialog(context, 'No se pudo cargar imagen');
             return;
           }
           final imageUrl = dataImage['data']['url'];
 
           obra.imageURL = imageUrl;
+          loading = false;
           closeLoadingDialog(context);
         }
         openLoadingDialog(context, mensaje: 'Grabando obra...');
         MyResponse response = await _service.grabarObra(obra, crearDrive);
-        if(response.fallo)
-          throw new Exception(response.error);
+        if (response.fallo) throw new Exception(response.error);
         final obraResponse = Obra.fromMap(response.data);
         txtNombreCtrl.clear();
         txtBarrioCtrl.clear();
@@ -436,7 +460,7 @@ class _FormState extends State<_Form> {
         openAlertDialog(context, 'Formulario invalido');
       }
     } catch (err) {
-      closeLoadingDialog(context);
+      loading ? closeLoadingDialog(context) : false;
 
       openAlertDialog(context, 'Error al grabar formulario',
           subMensaje: err.toString());
@@ -444,102 +468,120 @@ class _FormState extends State<_Form> {
   }
 
   actualizarObra(BuildContext context, String obraId, String imageId) async {
-    bool isValid = true;
-    final _service = Provider.of<ObraService>(context, listen: false);
-    final _imageService = Provider.of<ImageService>(context, listen: false);
+    bool isValid = true, loading = false;
+    try {
+      final _service = Provider.of<ObraService>(context, listen: false);
+      final _imageService = Provider.of<ImageService>(context, listen: false);
 
-    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-    txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
-    txtLoteCtrl.text.trim() == '' ? isValid = false : true;
-    int.tryParse(txtDuracionCtrl.text) == null ? isValid = false : true;
+      txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+      txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
+      txtLoteCtrl.text.trim() == '' ? isValid = false : true;
+      int.tryParse(txtDuracionCtrl.text) == null ? isValid = false : true;
+      if (isValid) {
+        widget.obra!.nombre = txtNombreCtrl.text;
+        widget.obra!.barrio = txtBarrioCtrl.text;
+        widget.obra!.lote = txtLoteCtrl.text;
+        widget.obra!.descripcion = txtDescripCtrl.text;
+        widget.obra!.diasEstimados = int.parse(txtDuracionCtrl.text);
+        widget.obra!.id = obraId;
+        widget.obra!.diaInicio = new DateFormat("dd/MM/yyyy")
+            .parse(txtDiaInicio.text)
+            .millisecondsSinceEpoch;
 
-    if (isValid) {
-      widget.obra!.nombre = txtNombreCtrl.text;
-      widget.obra!.barrio = txtBarrioCtrl.text;
-      widget.obra!.lote =   txtLoteCtrl.text;
-      widget.obra!.descripcion = txtDescripCtrl.text;
-      widget.obra!.diasEstimados = int.parse(txtDuracionCtrl.text);
-      widget.obra!.id = obraId;
-      widget.obra!.diaInicio = new DateFormat("dd/MM/yyyy")
-          .parse(txtDiaInicio.text)
-          .millisecondsSinceEpoch;
+        if (_imageService.imagenValida()) {
+          openLoadingDialog(context, mensaje: 'Subiendo imagen');
+          loading = true;
+          final dataImage =
+              await _imageService.grabarImagen(widget.obra!.nombre);
+          if (!dataImage['success']) {
+            closeLoadingDialog(context);
+            openAlertDialog(context, 'No se pudo cargar imagen');
+            return;
+          }
+          final imageUrl = dataImage['data']['url'];
 
-      if (_imageService.imagenValida()) {
-        openLoadingDialog(context, mensaje: 'Subiendo imagen');
-        final dataImage = await _imageService.grabarImagen(widget.obra!.nombre);
-        if (!dataImage['success']) {
+          widget.obra!.imageURL = imageUrl;
           closeLoadingDialog(context);
-          openAlertDialog(context, 'No se pudo cargar imagen');
-          return;
+          loading = false;
         }
-        final imageUrl = dataImage['data']['url'];
-
-        widget.obra!.imageURL = imageUrl;
+        openLoadingDialog(context, mensaje: 'Actualizando obra...');
+        loading = true;
+        Map<String, dynamic> response =
+            await _service.actualizarObra({
+              'id': widget.obra!.id,
+              'nombre': widget.obra!.nombre,
+              'barrio': widget.obra!.barrio,
+              'lote': widget.obra!.lote,
+              'diaInicio': widget.obra!.diaInicio,
+              'diasEstimados': widget.obra!.diasEstimados,
+              'descripcion': widget.obra!.descripcion,
+              'latitud': widget.obra!.latitud,
+              'longitud': widget.obra!.longitud,
+              'driveFolderId': widget.obra!.driveFolderId,
+              'imageURL': widget.obra!.imageURL,
+            });
+        final obraResponse = Obra.fromMap(response["response"]);
+        _imageService.descartarImagen();
         closeLoadingDialog(context);
+        loading = true;
+        await openAlertDialogReturn(context, 'Obra modificada con éxito');
+
+        Navigator.pop(context);
+      } else {
+        openAlertDialog(context, 'Formulario invalido');
       }
-      openLoadingDialog(context, mensaje: 'Actualizando obra...');
-      Map<String, dynamic> response =
-          await _service.actualizarObra(widget.obra!);
-      final obraResponse = Obra.fromMap(response["obra"]);
-      _imageService.descartarImagen();
-      closeLoadingDialog(context);
-      await openAlertDialogReturn(context, 'Obra modificada con éxito');
-      
-    Navigator.pop(context);    
-  
-    } else {
-      openAlertDialog(context, 'Formulario invalido');
+    } catch (err) {
+      loading ? closeLoadingDialog(context) : false;
+      openAlertDialog(context, 'Error al actualizar',
+          subMensaje: err.toString());
+      return;
     }
   }
-  
-  refreshDriveId() async{
-    if(txtIdDrive.text.isEmpty)
-    {
+
+  refreshDriveId() async {
+    if (txtIdDrive.text.isEmpty) {
       openAlertDialog(context, 'Ingrese ID de carpeta para actualizar');
       return;
     }
-    openLoadingDialog(context,mensaje: "Actualizando carpetas de obra...");
+    openLoadingDialog(context, mensaje: "Actualizando carpetas de obra...");
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final response = await _obraService.actualizarIdDrive(txtIdDrive.text);
     closeLoadingDialog(context);
-    if(response.fallo){
-      openAlertDialog(context, "Error al actualizar carpetas", subMensaje: response.error);
+    if (response.fallo) {
+      openAlertDialog(context, "Error al actualizar carpetas",
+          subMensaje: response.error);
       return;
     }
 
-      await openAlertDialogReturn (context, "Carpetas actualizadas con éxito");
-      widget.obra!.driveFolderId = response.data["driveFolderId"];
-      widget.obra!.folderImages = response.data["folderImages"];
-      widget.obra!.rootDriveCliente = response.data["rootDriveCliente"];
-      widget.obra!.folderImagesCliente = response.data["folderImagesCliente"];
-      _obraService.notifyListeners();
-
-
-
+    await openAlertDialogReturn(context, "Carpetas actualizadas con éxito");
+    widget.obra!.driveFolderId = response.data["driveFolderId"];
+    widget.obra!.folderImages = response.data["folderImages"];
+    widget.obra!.rootDriveCliente = response.data["rootDriveCliente"];
+    widget.obra!.folderImagesCliente = response.data["folderImagesCliente"];
+    _obraService.notifyListeners();
   }
-  
+
   openMap() async {
-    
     dynamic arguments = null;
-    if(edit)  arguments = {'latitud': widget.obra!.latitud, 'longitud': widget.obra!.longitud};
-    Marker? coordenadas = await Navigator.pushNamed(context, MapCoordenates.routeName, arguments: arguments) as Marker?;
+    if (edit)
+      arguments = {
+        'latitud': widget.obra!.latitud,
+        'longitud': widget.obra!.longitud
+      };
+    Marker? coordenadas = await Navigator.pushNamed(
+        context, MapCoordenates.routeName,
+        arguments: arguments) as Marker?;
 
-    
-    if( coordenadas != null ) {
-      if(edit){
-
-      widget.obra!.latitud = coordenadas.position.latitude;
-      widget.obra!.longitud = coordenadas.position.longitude;
-            txtCoordenadas.text = widget.obra!.ubicToText();      
-
-      }else{
-       latitud = coordenadas.position.latitude;
-       longitud = coordenadas.position.longitude;
-             txtCoordenadas.text = '${latitud} ${longitud}';      
-
+    if (coordenadas != null) {
+      if (edit) {
+        widget.obra!.latitud = coordenadas.position.latitude;
+        widget.obra!.longitud = coordenadas.position.longitude;
+        txtCoordenadas.text = widget.obra!.ubicToText();
+      } else {
+        latitud = coordenadas.position.latitude;
+        longitud = coordenadas.position.longitude;
+        txtCoordenadas.text = '${latitud} ${longitud}';
       }
     }
-    
-
   }
 }
