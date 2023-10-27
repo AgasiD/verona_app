@@ -18,10 +18,11 @@ class Subetapa {
   int get cantTareas => tareas.length;
   int get cantTareasTerminadas =>
       tareas.where((element) => element.realizado).length;
+  int get cantTareasIniciadas => tareas.where((element) => element.iniciado && !element.realizado).length;
   bool get realizado => cantTareasTerminadas == cantTareas;
   double get porcentajeRealizado => tareas.length > 0
       ? double.parse(
-          (cantTareasTerminadas / tareas.length * 100).toStringAsFixed(2))
+          ((cantTareasTerminadas + (cantTareasIniciadas/2)) / tareas.length * 100).toStringAsFixed(2))
       : 0;
 
   String descripcion;

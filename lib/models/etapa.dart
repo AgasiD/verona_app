@@ -26,6 +26,16 @@ class Etapa {
     return terminadas;
   }
 
+    int get cantSubtareasIniciadas {
+  int iniciadas = 0;
+    if (subetapas.length > 0) {
+      subetapas.forEach((sub) {
+        iniciadas += sub.cantTareasIniciadas;
+      });
+    }
+    return iniciadas;
+  }
+
   int get totalTareas {
     int total = 0;
     if (subetapas.length > 0) {
@@ -40,7 +50,7 @@ class Etapa {
 
   double get porcentajeRealizado => totalTareas > 0
       ? double.parse(
-          (cantSubtareasTerminadas / totalTareas * 100).toStringAsFixed(2))
+          ((cantSubtareasTerminadas+ (cantSubtareasIniciadas/2) ) / totalTareas * 100).toStringAsFixed(2))
       : 0;
 
   String descripcion;
