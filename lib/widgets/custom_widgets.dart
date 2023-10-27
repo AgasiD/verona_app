@@ -1971,7 +1971,9 @@ class _TareaTileState extends State<_TareaTile> {
         widget.tarea.subetapa,
         widget.tarea.id,
         value!,
+        false,
         new Preferences().id,
+        0,
         ts);
     closeLoadingDialog(context);
     widget.tarea.realizado = value!;

@@ -171,21 +171,27 @@ class ObraService extends ChangeNotifier {
     return resp;
   }
 
+
   Future<MyResponse> actualizarTarea(
-      String obraId,
-      String etapaId,
-      String subetapaId,
-      String tareaId,
-      bool realizada,
-      String usuarioId,
-      int ts) async {
+    String obraId,
+    String etapaId,
+    String subetapaId,
+    String tareaId,
+    bool iniciada,
+    bool realizada,
+    String usuarioId,
+    int tsRealizado,
+    int tsIniciado,
+  ) async {
     final body = {
       "etapaId": etapaId,
       "subetapaId": subetapaId,
       "tareaId": tareaId,
-      "valor": realizada,
+      "iniciado": iniciada,
+      "tsIniciado": tsIniciado,
+      "realizado": realizada,
+      "tsRealizado": tsRealizado,
       "usuarioId": usuarioId,
-      "ts": ts
     };
     final cadena = '$_endpoint/actualizaTarea/$obraId';
     final datos = await this._http.put(cadena, body);
