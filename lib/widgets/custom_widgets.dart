@@ -428,42 +428,44 @@ class _CustomInputState extends State<CustomInput> {
         errorMaxLines: 1);
     return Column(
       children: [
-        Container(
-          width: widget.width,
-          padding: EdgeInsets.only(right: 15),
-          margin: EdgeInsets.only(bottom: 10),
-          child: TextFormField(
-            textCapitalization: TextCapitalization.sentences,
-            enabled: widget.enable,
-            readOnly: widget.readOnly,
-            controller: widget.textController,
-            maxLines: widget.lines ?? 1,
-            autocorrect: widget.autocorrect,
-            keyboardType: widget.teclado,
-            keyboardAppearance: Brightness.dark,
-            obscureText: widget.isPassword,
-            decoration: inputDecoration,
-            textInputAction: widget.textInputAction,
-            style: TextStyle(color: Helper.brandColors[5]),
-            onChanged: (text) {
-              inputValid = widget.validarInput(text) == null
-                  ? ValidInput()
-                  : ValidInput(error: widget.validarInput(text)!, value: false);
-              widget.onChange(text);
-              setState(() {});
-            },
-          ),
-          // ignore: prefer_const_literals_to_create_immutables
-          decoration: BoxDecoration(
-            border: Border.all(color: Helper.brandColors[9], width: .2),
-            borderRadius: BorderRadius.circular(7),
-            color: Helper.brandColors[1],
-            boxShadow: [
-              BoxShadow(
-                  color: Helper.brandColors[0],
-                  blurRadius: 4,
-                  offset: Offset(10, 8))
-            ],
+        LimitedBox(
+          maxWidth: widget.width,
+          child: Container(
+            padding: EdgeInsets.only(right: 15),
+            margin: EdgeInsets.only(bottom: 10),
+            child: TextFormField(
+              textCapitalization: TextCapitalization.sentences,
+              enabled: widget.enable,
+              readOnly: widget.readOnly,
+              controller: widget.textController,
+              maxLines: widget.lines ?? 1,
+              autocorrect: widget.autocorrect,
+              keyboardType: widget.teclado,
+              keyboardAppearance: Brightness.dark,
+              obscureText: widget.isPassword,
+              decoration: inputDecoration,
+              textInputAction: widget.textInputAction,
+              style: TextStyle(color: Helper.brandColors[5]),
+              onChanged: (text) {
+                inputValid = widget.validarInput(text) == null
+                    ? ValidInput()
+                    : ValidInput(error: widget.validarInput(text)!, value: false);
+                widget.onChange(text);
+                setState(() {});
+              },
+            ),
+            // ignore: prefer_const_literals_to_create_immutables
+            decoration: BoxDecoration(
+              border: Border.all(color: Helper.brandColors[9], width: .2),
+              borderRadius: BorderRadius.circular(7),
+              color: Helper.brandColors[1],
+              boxShadow: [
+                BoxShadow(
+                    color: Helper.brandColors[0],
+                    blurRadius: 4,
+                    offset: Offset(10, 8))
+              ],
+            ),
           ),
         ),
         widget.validaError

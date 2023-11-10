@@ -12,6 +12,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/main.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
@@ -199,7 +200,8 @@ class _ObrasPageState extends State<ObrasPage> {
         'route': NotificacionesABM.routeName,
         'roles': [1, 2, 3, 4, 5, 6, 7, 8],
         'navega': false,
-        'action':() => Helper.launchWeb('https://www.veronaconstrucciones.com.ar/noticias', context)
+        'action': () => Helper.launchWeb(
+            'https://www.veronaconstrucciones.com.ar/noticias', context)
       },
       {
         'icon': Icons.edit_note_rounded,
@@ -266,45 +268,47 @@ class __SearchListViewState extends State<_SearchListView> {
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(mensaje: 'Recuperando obras');
-              } else if(snapshot.hasError){
+              } else if (snapshot.hasError) {
                 return SizedBox(
                   height: 500,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(child: ErrorPage(errorMsg: snapshot.error.toString(), page: false)),
+                      Expanded(
+                          child: ErrorPage(
+                              errorMsg: snapshot.error.toString(),
+                              page: false)),
                     ],
                   ),
                 );
-              }
-              else {
-                try{
-
-                final response = snapshot.data as MyResponse;
-                if (!response.fallo) {
-                  obras = (response.data as List<dynamic>)
-                      .map((e) => Obra.fromMap(e))
-                      .toList();
-                  obrasFiltradas = obras;
-                  return _CustomObras(
-                    obras: obras,
-                    obrasFiltradas: obras,
-                    openDrawer: widget.openDrawer,
-                  );
-                } else {
-                  if (response.error == 'Usuario inactivo') {
-                    needReLogIn(response);
-                    return Container();
+              } else {
+                try {
+                  final response = snapshot.data as MyResponse;
+                  if (!response.fallo) {
+                    obras = (response.data as List<dynamic>)
+                        .map((e) => Obra.fromMap(e))
+                        .toList();
+                    obrasFiltradas = obras;
+                    return _CustomObras(
+                      obras: obras,
+                      obrasFiltradas: obras,
+                      openDrawer: widget.openDrawer,
+                    );
+                  } else {
+                    if (response.error == 'Usuario inactivo') {
+                      needReLogIn(response);
+                      return Container();
+                    }
+                    return Container(
+                      child: Text(
+                        response.error,
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    );
                   }
-                  return Container(
-                    child: Text(
-                      response.error,
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  );
-                }
-                }catch( err ){
-                  return  ErrorPage(errorMsg: snapshot.error.toString(), page: false);
+                } catch (err) {
+                  return ErrorPage(
+                      errorMsg: snapshot.error.toString(), page: false);
                 }
               }
             }));
@@ -488,16 +492,7 @@ class _CustomObrasState extends State<_CustomObras> {
         ],
       ),
       widget.obras.length > 0
-          ? ListView.builder(
-              physics:
-                  NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
-              padding: EdgeInsets.only(top: 5),
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: widget.obrasFiltradas.length,
-              itemBuilder: (BuildContext ctx, index) {
-                return _obraCard(context, widget.obrasFiltradas[index], index);
-              })
+          ? View_ObraCard(widget: widget)
           : Center(
               child: Text(
                 'Aún no hay obras asignadas ',
@@ -505,132 +500,6 @@ class _CustomObrasState extends State<_CustomObras> {
               ),
             ),
     ]);
-  }
-
-  ZoomIn _obraCard(BuildContext context, Obra obra, int index) {
-    final heightCard = MediaQuery.of(context).size.height * .2;
-    var imagen = obra.imageURL == ''
-        ? Helper.imageNetwork(
-            'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-        : Helper.imageNetwork(obra.imageURL
-            // 'https://drive.google.com/uc?export=view&id=${obra.imageId}',
-            );
-    final _socketService = Provider.of<SocketService>(context);
-
-    return ZoomIn(
-      delay: Duration(milliseconds: (index + 1) * 100),
-      child: Container(
-        height: heightCard,
-        margin: EdgeInsets.symmetric(horizontal: 15),
-        child: GestureDetector(
-            onTap: (() {
-              _obraService.obra = obra;
-              Navigator.pushNamed(context, ObraPage.routeName,
-                  arguments: {'obraId': obra.id});
-            }),
-            child: Container(
-              child: Card(
-                elevation: 10,
-                color: Helper.brandColors[2],
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      width: MediaQuery.of(context).size.width * .47,
-                      child: Stack(children: [
-                        tieneNovedad(obra.id, _socketService)
-                            ? Positioned(
-                                top: 10,
-                                left: 10,
-                                child: badges.Badge(
-                                  badgeColor: Helper.brandColors[8],
-                                  badgeContent: Padding(
-                                    padding: const EdgeInsets.all(0),
-                                    // child: Text(badgeData.toString()),
-                                  ),
-                                ))
-                            : Container(),
-                        Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(obra.nombre,
-                                      style: TextStyle(
-                                          color: Helper.brandColors[3],
-                                          fontSize: 21,
-                                          fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(obra.lote,
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Helper.brandColors[8],
-                                      fontWeight: FontWeight.bold)),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Container(
-                                // alignment: Alignment.topRight,
-                                margin: EdgeInsets.only(bottom: 10),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                        '${(obra.porcentajeRealizado).toString()}%',
-                                        style: TextStyle(
-                                            color: Helper.brandColors[3],
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold)),
-                                    Container(
-                                      margin: EdgeInsets.symmetric(vertical: 3),
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 30),
-                                      child: LinearProgressIndicator(
-                                        value: obra.porcentajeRealizado / 100,
-                                        semanticsLabel: 'HoLA',
-                                        backgroundColor: Helper.brandColors[3],
-                                        color: Helper.brandColors[8],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Text('', style: TextStyle(color: Helper.brandColors[3])),
-                            ]),
-                      ]),
-                    ),
-                    Expanded(
-                        child: CachedNetworkImage(
-                      imageUrl: obra.imageURL,
-                      imageBuilder: (context, imageProvider) => Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: imageProvider,
-                          ),
-                        ),
-                      ),
-                      placeholder: (context, url) => Center(
-                          child: CircularProgressIndicator(
-                        color: Helper.brandColors[8],
-                      )),
-                      errorWidget: (context, url, error) => Container(
-                        color: Helper.brandColors[8],
-                        alignment: Alignment.center,
-                        child: Image(image: AssetImage('assets/image.png')),
-                      ),
-                    )),
-                  ],
-                ),
-              ),
-            )),
-      ),
-    );
   }
 
   tieneNovedad(String obraId, SocketService _socketService) {
@@ -664,5 +533,277 @@ class _CustomObrasState extends State<_CustomObras> {
         break;
     }
     setState(() {});
+  }
+}
+
+class View_ObraCard extends StatelessWidget {
+  View_ObraCard({
+    Key? key,
+    required this.widget,
+  }) : super(key: key);
+
+  final _CustomObras widget;
+  late ObraService _obraService;
+  bool isTablet = false;
+
+  @override
+  Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size.shortestSide;
+    size > 600 ? isTablet = true : isTablet = false;
+    _obraService = Provider.of<ObraService>(context, listen: false);
+    if (isTablet) {
+      final gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+      );
+      return GridView.builder(
+          gridDelegate: gridDelegate,
+          physics:
+              NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
+          padding: EdgeInsets.only(top: 5),
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          itemCount: widget.obrasFiltradas.length,
+          itemBuilder: (BuildContext ctx, index) {
+            return _obraCard(context, widget.obrasFiltradas[index], index,
+                grid: true);
+          });
+    }
+    return ListView.builder(
+        physics:
+            NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
+        padding: EdgeInsets.only(top: 5),
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        itemCount: widget.obrasFiltradas.length,
+        itemBuilder: (BuildContext ctx, index) {
+          return _obraCard(context, widget.obrasFiltradas[index], index);
+        });
+  }
+
+  ZoomIn _obraCard(BuildContext context, Obra obra, int index,
+      {bool grid = false}) {
+    final heightCard = MediaQuery.of(context).size.height * .2;
+    var imagen = obra.imageURL == ''
+        ? Helper.imageNetwork(
+            'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
+        : Helper.imageNetwork(obra.imageURL
+            // 'https://drive.google.com/uc?export=view&id=${obra.imageId}',
+            );
+    final _socketService = Provider.of<SocketService>(context);
+
+    final mainInfo = isTablet
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: CachedNetworkImage(
+                imageUrl: obra.imageURL,
+                imageBuilder: (context, imageProvider) => Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: imageProvider,
+                    ),
+                  ),
+                ),
+                placeholder: (context, url) => Center(
+                    child: CircularProgressIndicator(
+                  color: Helper.brandColors[8],
+                )),
+                errorWidget: (context, url, error) => Container(
+                  color: Helper.brandColors[8],
+                  alignment: Alignment.center,
+                  child: Image(image: AssetImage('assets/image.png')),
+                ),
+              )),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                width: MediaQuery.of(context).size.width * .47,
+                child: Stack(children: [
+                  tieneNovedad(obra.id, _socketService)
+                      ? Positioned(
+                          top: 10,
+                          left: 10,
+                          child: badges.Badge(
+                            badgeColor: Helper.brandColors[8],
+                            badgeContent: Padding(
+                              padding: const EdgeInsets.all(0),
+                              // child: Text(badgeData.toString()),
+                            ),
+                          ))
+                      : Container(),
+                  Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          // alignment: Alignment.topRight,
+                          margin: EdgeInsets.only(bottom: 10),
+                          child: Column(
+                            children: [
+                              Text('${(obra.porcentajeRealizado).toString()}%',
+                                  style: TextStyle(
+                                      color: Helper.brandColors[3],
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold)),
+                              Container(
+                                margin: EdgeInsets.symmetric(vertical: 3),
+                                padding: EdgeInsets.symmetric(horizontal: 30),
+                                child: LinearProgressIndicator(
+                                  value: obra.porcentajeRealizado / 100,
+                                  semanticsLabel: 'HoLA',
+                                  backgroundColor: Helper.brandColors[3],
+                                  color: Helper.brandColors[8],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(obra.nombre,
+                                style: TextStyle(
+                                    color: Helper.brandColors[3],
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(obra.lote,
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: Helper.brandColors[8],
+                                fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          height: 10,
+                        ),
+                      ]
+                      // Text('', style: TextStyle(color: Helper.brandColors[3])),],
+                      )
+                ]),
+              ),
+            ],
+          )
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+             
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                width: MediaQuery.of(context).size.width * .47,
+                child: Stack(children: [
+                  tieneNovedad(obra.id, _socketService)
+                      ? Positioned(
+                          top: 10,
+                          left: 10,
+                          child: badges.Badge(
+                            badgeColor: Helper.brandColors[8],
+                            badgeContent: Padding(
+                              padding: const EdgeInsets.all(0),
+                              // child: Text(badgeData.toString()),
+                            ),
+                          ))
+                      : Container(),
+                  Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(obra.nombre,
+                                style: TextStyle(
+                                    color: Helper.brandColors[3],
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(obra.lote,
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: Helper.brandColors[8],
+                                fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          // alignment: Alignment.topRight,
+                          margin: EdgeInsets.only(bottom: 10),
+                          child: Column(
+                            children: [
+                              Text('${(obra.porcentajeRealizado).toString()}%',
+                                  style: TextStyle(
+                                      color: Helper.brandColors[3],
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold)),
+                              Container(
+                                margin: EdgeInsets.symmetric(vertical: 3),
+                                padding: EdgeInsets.symmetric(horizontal: 30),
+                                child: LinearProgressIndicator(
+                                  value: obra.porcentajeRealizado / 100,
+                                  semanticsLabel: 'HoLA',
+                                  backgroundColor: Helper.brandColors[3],
+                                  color: Helper.brandColors[8],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]
+                      // Text('', style: TextStyle(color: Helper.brandColors[3])),],
+                      )
+                ]),
+              ),
+               Expanded(
+                  child: CachedNetworkImage(
+                imageUrl: obra.imageURL,
+                imageBuilder: (context, imageProvider) => Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: imageProvider,
+                    ),
+                  ),
+                ),
+                placeholder: (context, url) => Center(
+                    child: CircularProgressIndicator(
+                  color: Helper.brandColors[8],
+                )),
+                errorWidget: (context, url, error) => Container(
+                  color: Helper.brandColors[8],
+                  alignment: Alignment.center,
+                  child: Image(image: AssetImage('assets/image.png')),
+                ),
+              )),
+            ],
+          );
+    return ZoomIn(
+      delay: Duration(milliseconds: (index + 1) * 100),
+      child: Container(
+        height: heightCard,
+        margin: EdgeInsets.symmetric(horizontal: 15),
+        child: GestureDetector(
+            onTap: (() {
+              _obraService.obra = obra;
+              Navigator.pushNamed(context, ObraPage.routeName,
+                  arguments: {'obraId': obra.id});
+            }),
+            child: Container(
+              child: Card(
+                  elevation: 10, color: Helper.brandColors[2], child: mainInfo),
+            )),
+      ),
+    );
+  }
+
+  tieneNovedad(String obraId, SocketService _socketService) {
+    final dato = _socketService.novedades.indexWhere(
+        (novedad) => novedad['tipo'] == 1 && novedad['obraId'] == obraId);
+    return dato >= 0;
   }
 }

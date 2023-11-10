@@ -81,12 +81,16 @@ class __FormState extends State<_Form> {
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 50),
         child: Column(children: [
-          CustomInput(
-            hintText: 'Usuario',
-            icono: Icons.person_outline,
-            textController: emailCtrl,
+          LimitedBox(
+            maxWidth: 200,
+            child: CustomInput(
+              hintText: 'Usuario',
+              icono: Icons.person_outline,
+              textController: emailCtrl,
+            ),
           ),
           CustomInput(
+            width: 200,
             hintText: 'Contraseña',
             icono: Icons.password_outlined,
             textController: passCtrl,

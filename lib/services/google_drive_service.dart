@@ -108,9 +108,9 @@ class GoogleDriveService extends ChangeNotifier {
     this._document = document;
   }
 
-  obtenerDocumentos(String folderId) async {
+  obtenerDocumentos(String usuarioId, String folderId) async {
     folderId = folderId == '' ? 'SinID' : folderId;
-    final datos = await this._http.get('$_endpoint/inFolder/$folderId');
+    final datos = await this._http.get('$_endpoint/inFolder/$usuarioId/$folderId');
     final response = MyResponse.fromJson(datos['response']);
 
     return response;

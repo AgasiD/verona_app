@@ -221,7 +221,7 @@ class _TareaTileState extends State<_TareaTile> {
                           TextStyle(color: Helper.brandColors[3], fontSize: 15),
                     ),
                     onChanged: (value) async {
-                      if (!widget.tarea.iniciado) {
+                      if (!widget.tarea.iniciado && !widget.tarea.realizado) {
                         widget.tarea.iniciado = true;
                         await iniciarTarea(widget.tarea);
                       } else {
@@ -371,6 +371,8 @@ class _TareaTileState extends State<_TareaTile> {
 
   finalizarTarea(Tarea tarea) async {
     openLoadingDialog(context, mensaje: 'Finalizando tarea...');
+    final ts = DateTime.now().millisecondsSinceEpoch;
+
     final response = await _obraService.actualizarTarea(
       _obraService.obra.id,
       widget.etapaId,
@@ -379,13 +381,14 @@ class _TareaTileState extends State<_TareaTile> {
       tarea.iniciado,
       true,
       new Preferences().id,
-      DateTime.now().millisecondsSinceEpoch,
+      ts,
       tarea.tsIniciado,
     );
     closeLoadingDialog(context);
     widget.tarea.realizado = true;
     widget.tarea.iniciado = true;
-    
+    widget.tarea.tsRealizado = ts;
+
     _obraService.notifyListeners();
 
     if (response.fallo) {
@@ -396,6 +399,8 @@ class _TareaTileState extends State<_TareaTile> {
 
   iniciarTarea(Tarea tarea) async {
     openLoadingDialog(context, mensaje: 'Iniciando tarea...');
+    final ts = DateTime.now().millisecondsSinceEpoch;
+
     final response = await _obraService.actualizarTarea(
       _obraService.obra.id,
       widget.etapaId,
@@ -405,12 +410,13 @@ class _TareaTileState extends State<_TareaTile> {
       false,
       new Preferences().id,
       0,
-      DateTime.now().millisecondsSinceEpoch,
+      ts,
     );
     closeLoadingDialog(context);
 
     widget.tarea.iniciado = true;
     widget.tarea.realizado = false;
+    widget.tarea.tsIniciado = ts;
     _obraService.notifyListeners();
 
     if (response.fallo) {

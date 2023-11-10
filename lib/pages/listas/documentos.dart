@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/chat.dart';
@@ -42,9 +43,10 @@ class _DocumentosList extends StatelessWidget {
     final _driveService = Provider.of<GoogleDriveService>(context);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     String driveId = arguments['driveId'] ?? '';
+    final _pref = new Preferences();
 
     return FutureBuilder(
-        future: _driveService.obtenerDocumentos(driveId),
+        future: _driveService.obtenerDocumentos(_pref.id, driveId),
         builder: (context, snapshot) {
           if (snapshot.data == null) {
             return Loading(mensaje: 'Recuperando documentos');

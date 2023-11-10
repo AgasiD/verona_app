@@ -295,7 +295,9 @@ class Obra {
 
         subetapa.tareas.forEach((tarea) {
           
-          if(tarea.realizado && (tarea.tsRealizado >= desde.millisecondsSinceEpoch && tarea.tsRealizado <= hasta.millisecondsSinceEpoch)){
+          if((tarea.realizado && (tarea.tsRealizado >= desde.millisecondsSinceEpoch && tarea.tsRealizado <= hasta.millisecondsSinceEpoch))
+          || tarea.iniciado && !tarea.realizado && (tarea.tsIniciado >= desde.millisecondsSinceEpoch && tarea.tsIniciado <= hasta.millisecondsSinceEpoch)
+          ){
              tareasRealizadas.add(tarea);
           }
         });

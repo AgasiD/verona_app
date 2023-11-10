@@ -713,8 +713,8 @@ class _TaskTileState extends State<_TaskTile> {
                 ? CheckboxListTile(
                     enabled: [1, 2, 7].contains(_pref.role),
                     tileColor: Helper.brandColors[2],
-                    checkColor: Helper.brandColors[5],
-                    activeColor: Helper.brandColors[8],
+                    checkColor: (widget.tarea.iniciado && !widget.tarea.realizado) ?  Helper.brandColors[8] : Helper.brandColors[5] ,
+                    activeColor: (widget.tarea.iniciado && !widget.tarea.realizado) ?  Helper.brandColors[5] : Helper.brandColors[8] ,
                     contentPadding: EdgeInsets.zero,
                     title: Wrap(children: [
                       Text(
@@ -865,7 +865,9 @@ class _TaskTileState extends State<_TaskTile> {
         widget.tarea.subetapa,
         widget.tarea.id,
         value!,
+        false,
         new Preferences().id,
+        0,
         DateTime.now().millisecondsSinceEpoch);
     closeLoadingDialog(context);
     widget.tarea.realizado = value!;

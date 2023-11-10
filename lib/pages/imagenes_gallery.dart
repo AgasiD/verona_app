@@ -44,7 +44,7 @@ class ImgGalleryPage extends StatelessWidget {
                   ),
                 )
               : FutureBuilder(
-                  future: _driveService.obtenerDocumentos(_driveId),
+                  future: _driveService.obtenerDocumentos(_pref.id, _driveId),
                   builder: ((context, snapshot) {
                     if (snapshot.data == null) {
                       return Loading(mensaje: 'Recuperando imagenes');
