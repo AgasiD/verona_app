@@ -132,11 +132,15 @@ class Obra {
 
   int get cantDiasInactivos {
     int dias = 0;
-    this.diasInactivos.forEach((element) { dias += element['diasInactivos'] == null ? 1 : element['diasInactivos'] as int ??1 ;});
+    this.diasInactivos.forEach((element) {
+      dias += element['diasInactivos'] == null
+          ? 1
+          : element['diasInactivos'] as int ?? 1;
+    });
     return dias;
   }
 
-  Map<String,dynamic> toMap() => {
+  Map<String, dynamic> toMap() => {
         'nombre': this.nombre,
         'id': this.id,
         'barrio': this.barrio,
@@ -159,28 +163,32 @@ class Obra {
         'enabledFiles': this.enabledFiles,
         'imageURL': this.imageURL,
         'longitud': this.longitud,
-        'latitud':this.latitud,
+        'latitud': this.latitud,
         'folderPedidoImages': this.folderPedidoImages
       };
 
   double get porcentajeRealizado {
     int cantTotalTareas = 0;
     int cantTotalTaresHechas = 0;
+    int cantTotalTaresIniciadas = 0;
     if (etapas.length > 0) {
       etapas.forEach((etapa) {
         cantTotalTareas += etapa.totalTareas;
-        cantTotalTaresHechas += etapa.cantSubtareasTerminadas;
+        cantTotalTaresHechas += etapa.cantTareasTerminadas;
+        cantTotalTaresIniciadas += etapa.cantSubtareasIniciadas;
       });
     } else {
       cantTotalTareas = 0;
       cantTotalTaresHechas = 0;
+      cantTotalTaresIniciadas = 0;
       return 0;
     }
 
-    if (cantTotalTareas > 0)
-      return double.parse(
-          (cantTotalTaresHechas / cantTotalTareas * 100).toStringAsFixed(2));
-    else
+    if (cantTotalTareas > 0) {
+      return double.parse(((cantTotalTaresHechas +
+              (cantTotalTaresIniciadas / 2)) / cantTotalTareas * 100)
+          .toStringAsFixed(2));
+    } else
       return 0;
   }
 
@@ -217,8 +225,11 @@ class Obra {
     final indexSubetapa = etapas[indexEtapa]
         .subetapas
         .indexWhere((subetapa) => subetapa.id == tarea.subetapa);
-    int posicion = tarea.orden ?? etapas[indexEtapa].subetapas[indexSubetapa].tareas.length;
-    posicion < 0 ? posicion =etapas[indexEtapa].subetapas[indexSubetapa].tareas.length  : posicion; 
+    int posicion = tarea.orden ??
+        etapas[indexEtapa].subetapas[indexSubetapa].tareas.length;
+    posicion < 0
+        ? posicion = etapas[indexEtapa].subetapas[indexSubetapa].tareas.length
+        : posicion;
     etapas[indexEtapa].subetapas[indexSubetapa].tareas.insert(posicion, tarea);
   }
 
@@ -245,7 +256,7 @@ class Obra {
 
   getDiasTranscurridos({bool countSaturday = false, bool countSunday = false}) {
     //sin fines de semana
-    if(diaInicio == 0 || diaInicio < 0){
+    if (diaInicio == 0 || diaInicio < 0) {
       return 0;
     }
     DateTime diaAnalizado, diaInicial, diaFin;
@@ -264,60 +275,57 @@ class Obra {
     return diasTranscurridos - cantDiasInactivos;
   }
 
-  List<dynamic> obtenerTareasRealizadasByDias({int dias = 5}){
-
+  List<dynamic> obtenerTareasRealizadasByDias({int dias = 5}) {
     DateTime hasta = DateTime.now();
 
     DateTime desde = DateTime.now().subtract(Duration(days: dias));
 
     return _buscarTareas(desde, hasta);
-
   }
 
-
-  dynamic obtenerTareasRealizadasDesdeHasta(DateTime desde, DateTime hasta){
-
+  dynamic obtenerTareasRealizadasDesdeHasta(DateTime desde, DateTime hasta) {
     return _buscarTareas(desde, hasta);
-
   }
 
-  _buscarTareas(DateTime desde, DateTime hasta){
-
+  _buscarTareas(DateTime desde, DateTime hasta) {
     List<dynamic> tareasRealizadas = [];
     List<dynamic> etapa_sub_tareasRealizadas = [];
     this.etapas.forEach((etapa) {
-      
       etapa.subetapas.forEach((subetapa) {
-
         List<Subetapa> subetapasRealizadas = [];
-        
-          List<Tarea> tareasRealizadas = [];
+
+        List<Tarea> tareasRealizadas = [];
 
         subetapa.tareas.forEach((tarea) {
-          
-          if((tarea.realizado && (tarea.tsRealizado >= desde.millisecondsSinceEpoch && tarea.tsRealizado <= hasta.millisecondsSinceEpoch))
-          || tarea.iniciado && !tarea.realizado && (tarea.tsIniciado >= desde.millisecondsSinceEpoch && tarea.tsIniciado <= hasta.millisecondsSinceEpoch)
-          ){
-             tareasRealizadas.add(tarea);
+          if ((tarea.realizado &&
+                  (tarea.tsRealizado >= desde.millisecondsSinceEpoch &&
+                      tarea.tsRealizado <= hasta.millisecondsSinceEpoch)) ||
+              tarea.iniciado &&
+                  !tarea.realizado &&
+                  (tarea.tsIniciado >= desde.millisecondsSinceEpoch &&
+                      tarea.tsIniciado <= hasta.millisecondsSinceEpoch)) {
+            tareasRealizadas.add(tarea);
           }
         });
-        if(tareasRealizadas.isNotEmpty){
-          etapa_sub_tareasRealizadas.add({
-            "subetapa": subetapa.descripcion,
-            "tareas": []
-          });
+        if (tareasRealizadas.isNotEmpty) {
+          etapa_sub_tareasRealizadas
+              .add({"subetapa": subetapa.descripcion, "tareas": []});
           etapa_sub_tareasRealizadas.last['tareas'] = tareasRealizadas;
         }
-        
-       });
-
-     });
-     etapa_sub_tareasRealizadas = etapa_sub_tareasRealizadas.where((e) => e['tareas'].length > 0 ).toList();
-    return {'obra': this.nombre, 'obraId': this.id, "subetapas": etapa_sub_tareasRealizadas};
+      });
+    });
+    etapa_sub_tareasRealizadas = etapa_sub_tareasRealizadas
+        .where((e) => e['tareas'].length > 0)
+        .toList();
+    return {
+      'obra': this.nombre,
+      'obraId': this.id,
+      "subetapas": etapa_sub_tareasRealizadas
+    };
   }
 
   String ubicToText() {
-    if(this.latitud == null) return '';
-     return '${this.latitud} ${this.longitud} ';
+    if (this.latitud == null) return '';
+    return '${this.latitud} ${this.longitud} ';
   }
 }

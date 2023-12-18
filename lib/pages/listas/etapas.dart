@@ -20,6 +20,9 @@ class EtapasObra extends StatelessWidget {
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context);
     final _pref = new Preferences();
+    // _obraService.obra.etapas.sort(( a,b){
+    //   return b.orden.compareTo(a.orden);
+    // });
     return Scaffold(
       
       appBar: AppBar(title: Text('${_obraService.obra.nombre} - ${_obraService.obra.barrio}${_obraService.obra.lote}'), backgroundColor: Helper.brandColors[2], automaticallyImplyLeading: false),

@@ -120,51 +120,55 @@ class _Form extends StatelessWidget {
 
   String generarTexto(List<Tarea> data) {
     String text = '¡Hola! Les envío el resumen de lo logrado esta semana \n\n';
-    final subetapas =
-        data.map((e) => {'subetapa': e.subetapa, 'nombre': e.nombreSubetapa, 'realizado': e.realizado, 'iniciado': e.iniciado});
 
-    // convert each item to a string by using JSON encoding
-    final jsonList = subetapas.map((item) => jsonEncode(item)).toList();
+    final subetapas = data
+        .map((e) => e.subetapa)
+        .toList(); //, 'realizado': e.realizado, 'iniciado': e.iniciado});
 
-    // using toSet - toList strategy
-    final uniqueJsonList = jsonList.toSet().toList();
+    List<Map<String, dynamic>> subetapas_map = [];
+    final subetapas_not_repeat = subetapas.toSet().toList();
+    subetapas_not_repeat.forEach((idSub) {
+      final nombre = data.firstWhere((t) => t.subetapa == idSub).nombreSubetapa;
+      subetapas_map.add({"subetapa": idSub, "nombre": nombre});
+    }); 
 
-    // convert each item back to the original form using JSON decoding
-    final subetapasFiltro_finaliazadas =
-        uniqueJsonList.map((item) => jsonDecode(item)).toList().where((t) => t['iniciado'] && t['realizado'] );
+    /* INSERTO TAREAS FINALIZADAS */
+    bool insert_title_finished = false;
+    subetapas_map.forEach((sub_finished) {
+      final tareas_finished = data
+          .where((t) => t.realizado && t.subetapa == sub_finished['subetapa'])
+          .toList();
+      if (tareas_finished.length > 0) {
+        if (!insert_title_finished) {
+          insert_title_finished = true;
+          text += '\nLas siguientes tareas han sido finalizdas: \n';
+        }
+        text += '\n--${sub_finished['nombre']!.toUpperCase()}--\n\n';
+        tareas_finished.forEach((tarea) {
+          text += '- ${tarea.descripcion}\n\n';
+        });
+      }
+    });
 
-        final subetapasFiltro_iniciadas =
-        uniqueJsonList.map((item) => jsonDecode(item)).toList().where((t) => t['iniciado'] && !t['realizado'] );
-
- if(subetapasFiltro_iniciadas.length > 0 )
+    /* INSERTO TAREAS INICIADAS  */
+    bool insert_title_init = false;
+    subetapas_map.forEach((sub_init) {
+      final tareas_finished = data
+          .where((t) =>
+              t.iniciado && !t.realizado && t.subetapa == sub_init['subetapa'])
+          .toList();
+      if (tareas_finished.length > 0) {
+        if (!insert_title_init) {
+          insert_title_init = true;
           text += '\nLas siguientes tareas han sido iniciadas: \n';
-
-    subetapasFiltro_iniciadas.forEach((subetapa) {
-      text += '\n--${subetapa['nombre']!.toUpperCase()}--\n\n';
-
-      final tareasBySubetapa = data
-          .where((tarea) => tarea.subetapa == subetapa['subetapa'] && tarea.iniciado && !tarea.realizado)
-          .toList();
-      tareasBySubetapa.forEach((tarea) {
-        text += '- ${tarea.descripcion}\n\n';
-      });
+        }
+        text += '\n--${sub_init['nombre']!.toUpperCase()}--\n\n';
+        tareas_finished.forEach((tarea) {
+          text += '- ${tarea.descripcion}\n\n';
+        });
+      }
     });
 
-    if(subetapasFiltro_finaliazadas.length > 0 )
-          text += '\nLas siguientes tareas han finalizado\n\n';
-
-    subetapasFiltro_finaliazadas.forEach((subetapa) {
-      text += '\n--${subetapa['nombre']!.toUpperCase()}--\n\n';
-
-      final tareasBySubetapa = data
-          .where((tarea) => tarea.subetapa == subetapa['subetapa'] && tarea.iniciado && tarea.realizado)
-          .toList();
-      tareasBySubetapa.forEach((tarea) {
-        text += '- ${tarea.descripcion} (${tarea.realizado ? 'finalizado' : 'iniciado'})\n\n';
-      });
-    });
-
-   
     text += '\n¡Seguimos avanzando con los trabajos!';
     text.replaceAll('"', '');
     return text;

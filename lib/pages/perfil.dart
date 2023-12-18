@@ -316,7 +316,7 @@ class PerfilPage extends StatelessWidget {
 
     
     // eliminar obra
-    openLoadingDialog(context, mensaje: 'Eliminando personal...');
+    openLoadingDialog(context, mensaje: 'Eliminando personal, puede demorar...', );
     final response = await _usuarioService.deleteUsuario(_usuarioId);
 
     closeLoadingDialog(context);

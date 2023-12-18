@@ -735,7 +735,9 @@ class _TaskTileState extends State<_TaskTile> {
                           : Container(),
                       widget.tarea.idUsuario.isNotEmpty
                           ? Text(
-                              '${Helper.getFechaHoraFromTS(widget.tarea.tsRealizado)}',
+                              widget.tarea.iniciado && widget.tarea.realizado 
+                              ? '${Helper.getFechaHoraFromTS(widget.tarea.tsRealizado)}'
+                              : '${Helper.getFechaHoraFromTS(widget.tarea.tsIniciado)}',
                               // overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   color: Colors.white30,
@@ -767,7 +769,9 @@ class _TaskTileState extends State<_TaskTile> {
                       ),
                       widget.tarea.idUsuario.isNotEmpty
                           ? Text(
-                              'Realizado por: ${widget.tarea.nombreUsuario} |',
+                                                            widget.tarea.iniciado && !widget.tarea.realizado 
+                                                            ? 'Iniciado por: ${widget.tarea.nombreUsuario} |'
+                                                            : 'Realizado por: ${widget.tarea.nombreUsuario} |',
                               // overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   color: Colors.white30,

@@ -12,7 +12,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 class HttpService extends ChangeNotifier {
   //bool loading = false;
   String _baseUrl = Environment.API_URL;
-  final headers = {"Content-Type": "application/json"};
+  final headers = {"Content-Type": "application/json", 'Connection': 'keep-alive'};
   late Uri url;
   HttpService() {}
 
@@ -22,14 +22,14 @@ class HttpService extends ChangeNotifier {
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
 
-    final response = await http.get(url, headers: {'x-token': _pref.token});
+    final response = await http.get(url, headers: {'x-token': _pref.token, 'Connection': 'keep-alive'});
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
 
   post(String endpoint, Map<String, dynamic> body) async {
     final _pref = new Preferences();
-    headers.addAll({'x-token': _pref.token});
+    headers.addAll({'x-token': _pref.token,'Connection': 'keep-alive'});
     Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
