@@ -145,7 +145,7 @@ class _FormState extends State<_Form> {
       if (widget.pedido!.estado == 5) {
         // ESTADO: Pedido cerrado
         tieneImagen = widget.pedido!.imagenId.isEmpty ? false : true;
-        imgButtonText = tieneImagen ? 'Ver evidencia' : 'Foto/Evidencia';
+        imgButtonText = tieneImagen ? 'Ver evidencia' : 'Foto/Eviden cia';
         pedidoConfirmado = true;
         pedidoEnStock = true;
         repartidoId = widget.pedido!.usuarioAsignado == ''
@@ -811,7 +811,7 @@ class _FormState extends State<_Form> {
         }
       } else {
         Navigator.pushNamed(context, ImagenViewer.routeName,
-            arguments: {'imageIds': widget.pedido!.imagenId});
+            arguments: {'imagenId': widget.pedido!.imagenId[0]});
       }
     } catch (e) {
       openAlertDialog(context, e.toString());

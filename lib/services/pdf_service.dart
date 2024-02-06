@@ -11,8 +11,8 @@ class PDFService {
     try {
       final pdf = pw.Document();
       pdf.addPage(
-        pw.Page(
-          build: (pw.Context context) => pw.Container(
+        pw.MultiPage(
+          build: (pw.Context context) => [pw.Container(
             child: pw.Column(children: [
               pw.Text(pedido.titulo, style: pw.TextStyle(fontSize: 35)),
               pw.SizedBox(height: 30),
@@ -36,7 +36,7 @@ class PDFService {
                   style: pw.TextStyle(fontSize: 18),
                   overflow: pw.TextOverflow.clip)
             ]),
-          ),
+          )],
         ),
       );
       final genero = await generarPDF(pdf, pedido.titulo.replaceAll(' ', ''));

@@ -175,6 +175,8 @@ class _PedidosByEstado extends StatelessWidget {
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final _socketService = Provider.of<SocketService>(context);
     final esEstadoCerrado = estado.toUpperCase() == 'CERRADO';
+    ordenarPedidos();
+    
     if (esEstadoCerrado) filtrarPedidosxFechaCerrada();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,6 +291,11 @@ class _PedidosByEstado extends StatelessWidget {
             element['tsCerrado'] >
             DateTime.now().subtract(Duration(days: 5)).millisecondsSinceEpoch)
         .toList();
+  }
+  
+  void ordenarPedidos() {
+    print(pedidos);
+    pedidos.sort((a,b) => a['ts'] > b['ts'] ? -1 : 1 );
   }
 
   // pedidosArchivados() {

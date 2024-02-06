@@ -174,7 +174,7 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.request_page,
         'name': 'Pedidos',
         'route': PedidosPanelControl.routeName,
-        'roles': [1, 5],
+        'roles': [1, 2, 5 ],
       },
       {
         'icon': Icons.work_off_outlined,

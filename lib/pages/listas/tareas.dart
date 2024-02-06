@@ -400,7 +400,7 @@ class _TareaTileState extends State<_TareaTile> {
   iniciarTarea(Tarea tarea) async {
     openLoadingDialog(context, mensaje: 'Iniciando tarea...');
     final ts = DateTime.now().millisecondsSinceEpoch;
-
+    final _pref =       new Preferences();
     final response = await _obraService.actualizarTarea(
       _obraService.obra.id,
       widget.etapaId,
@@ -408,7 +408,7 @@ class _TareaTileState extends State<_TareaTile> {
       widget.tarea.id,
       true,
       false,
-      new Preferences().id,
+      _pref.id,
       0,
       ts,
     );
@@ -417,6 +417,7 @@ class _TareaTileState extends State<_TareaTile> {
     widget.tarea.iniciado = true;
     widget.tarea.realizado = false;
     widget.tarea.tsIniciado = ts;
+    widget.tarea.idUsuario =       _pref.id;
     _obraService.notifyListeners();
 
     if (response.fallo) {
@@ -426,6 +427,7 @@ class _TareaTileState extends State<_TareaTile> {
   }
 
   reiniciarTarea(Tarea tarea) async {
+    final _pref = new Preferences();
     openLoadingDialog(context, mensaje: 'Reiniciando tarea...');
     final response = await _obraService.actualizarTarea(
       _obraService.obra.id,
@@ -434,7 +436,7 @@ class _TareaTileState extends State<_TareaTile> {
       widget.tarea.id,
       false,
       false,
-      new Preferences().id,
+      _pref.id,
       0,
       0,
     );
@@ -443,6 +445,9 @@ class _TareaTileState extends State<_TareaTile> {
     widget.tarea.iniciado = false;
     widget.tarea.tsIniciado = 0;
     widget.tarea.tsRealizado = 0;
+    widget.tarea.idUsuario = _pref.id;
+    widget.tarea.nombreUsuario = _pref.nombre ;
+
     _obraService.notifyListeners();
 
     if (response.fallo) {

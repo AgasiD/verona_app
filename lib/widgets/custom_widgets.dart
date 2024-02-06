@@ -210,24 +210,29 @@ class CustomDrawer extends StatelessWidget {
             Positioned(
               bottom: 20,
               left: 85,
-              child: TextButton(
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(
-                        'Cerrar sesion ',
-                        style: TextStyle(color: Helper.brandColors[4]),
-                      ),
-                      Icon(Icons.logout, color: Helper.brandColors[8])
-                    ]),
-                onPressed: () async {
-                  final confirma = await openDialogConfirmationReturn(
-                      context, 'Confirme para cerrar sesión');
-                  confirma
-                      ? await cerrarSesion(
-                          _usuarioService, _pref, context, _socketService)
-                      : false;
-                },
+              child: Column(
+                children: [
+                  TextButton(
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text(
+                            'Cerrar sesion ',
+                            style: TextStyle(color: Helper.brandColors[4]),
+                          ),
+                          Icon(Icons.logout, color: Helper.brandColors[8])
+                        ]),
+                    onPressed: () async {
+                      final confirma = await openDialogConfirmationReturn(
+                          context, 'Confirme para cerrar sesión');
+                      confirma
+                          ? await cerrarSesion(
+                              _usuarioService, _pref, context, _socketService)
+                          : false;
+                    },
+                  ),
+                  Text('v.${Helper.version}', style: TextStyle(color: Helper.brandColors[5]),)
+                ],
               ),
             ),
             Padding(

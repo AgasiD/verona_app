@@ -185,9 +185,11 @@ class Obra {
     }
 
     if (cantTotalTareas > 0) {
-      return double.parse(((cantTotalTaresHechas +
-              (cantTotalTaresIniciadas / 2)) / cantTotalTareas * 100)
-          .toStringAsFixed(2));
+      return double.parse(
+          ((cantTotalTaresHechas + (cantTotalTaresIniciadas / 2)) /
+                  cantTotalTareas *
+                  100)
+              .toStringAsFixed(2));
     } else
       return 0;
   }
@@ -297,15 +299,22 @@ class Obra {
         List<Tarea> tareasRealizadas = [];
 
         subetapa.tareas.forEach((tarea) {
-          if ((tarea.realizado &&
+          if ((!tarea.realizado && tarea.iniciado == true && 
+            (
+              (
+                tarea.tsIniciado  > desde.millisecondsSinceEpoch  && tarea.tsIniciado  < hasta.millisecondsSinceEpoch 
+              ) 
+             || (
+              tarea.tsIniciado  < desde.millisecondsSinceEpoch  && tarea.tsIniciado  < hasta.millisecondsSinceEpoch 
+             ) 
+            )
+          ) ||
+              (tarea.realizado &&
                   (tarea.tsRealizado >= desde.millisecondsSinceEpoch &&
-                      tarea.tsRealizado <= hasta.millisecondsSinceEpoch)) ||
-              tarea.iniciado &&
-                  !tarea.realizado &&
-                  (tarea.tsIniciado >= desde.millisecondsSinceEpoch &&
-                      tarea.tsIniciado <= hasta.millisecondsSinceEpoch)) {
+                      tarea.tsRealizado <= hasta.millisecondsSinceEpoch))) {
             tareasRealizadas.add(tarea);
           }
+          ;
         });
         if (tareasRealizadas.isNotEmpty) {
           etapa_sub_tareasRealizadas
