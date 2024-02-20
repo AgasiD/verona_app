@@ -419,7 +419,7 @@ class _CustomObrasState extends State<_CustomObras> {
             Expanded(
               child: CustomInput(
                 width: MediaQuery.of(context).size.width * .87,
-                hintText: 'Nombre de proyecto',
+                hintText: 'Nombre del proyecto',
                 icono: Icons.search,
                 textInputAction: TextInputAction.search,
                 validaError: false,
@@ -452,6 +452,8 @@ class _CustomObrasState extends State<_CustomObras> {
                 onChange: (text) {
                   widget.obrasFiltradas = widget.obras
                       .where((obra) => obra.nombre
+                          .toLowerCase()
+                          .contains(text.toLowerCase()) || obra.lote
                           .toLowerCase()
                           .contains(text.toLowerCase()))
                       .toList();
