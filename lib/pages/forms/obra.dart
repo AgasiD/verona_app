@@ -558,6 +558,8 @@ class _FormState extends State<_Form> {
     widget.obra!.folderImages = response.data["folderImages"];
     widget.obra!.rootDriveCliente = response.data["rootDriveCliente"];
     widget.obra!.folderImagesCliente = response.data["folderImagesCliente"];
+    widget.obra!.articulosId = response.data["articulosId"] ?? '';
+    
     _obraService.notifyListeners();
   }
 

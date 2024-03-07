@@ -155,7 +155,6 @@ class _CustomListViewState extends State<_CustomListView> {
                   case 'update_app':
                   route = 'update';
                   actionOnTap = () async {
-                    print('tap');
                     await Helper.launchWeb(Helper.getURLByPlatform(), context);
                     };
                 }

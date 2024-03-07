@@ -29,12 +29,14 @@ class Helper {
   ];
   static const ESTADOSPEDIDO = [1, 2, 3, 5];
   static String nombre = 'Verona';
-  static String iosURL = 'https://apps.apple.com/ar/app/verona/id1620027565?l=en';
-  static String androidURL = 'https://play.google.com/store/apps/details?id=com.edrex.veronaapp';
+  static String iosURL =
+      'https://apps.apple.com/ar/app/verona/id1620027565?l=en';
+  static String androidURL =
+      'https://play.google.com/store/apps/details?id=com.edrex.veronaapp';
   static int limit = 25;
   //static double maxWidth = MediaQuery.of(context).size.wi dth
   //static AssetImage splashImage = AssetImage('assets/icon/do-splash.png');
-  static String version = '1.20.3';
+  static String version = '1.22.2';
   static String pushToken =
       'emHBj34PRTiMMMMea7q0B5:APA91bEIFvKKPYJYRcBW62_qqCV5_n_9WouqWVGbhjDTGbEjO54Lj_hSxQ1jWfaOQ_7m8veFU1srFUd4ElLxIZBWRexqdUs5gWyVsNQiU6r52lSdEMbolrtPWlAx6edW1l-DSa0EEAFx';
 
@@ -71,8 +73,8 @@ class Helper {
     ));
   }
 
-  static getURLByPlatform(){
-    return Platform.isAndroid ? androidURL :  iosURL;
+  static getURLByPlatform() {
+    return Platform.isAndroid ? androidURL : iosURL;
   }
 
   static IconData IconsMap(String icono) {
@@ -233,32 +235,31 @@ class Helper {
     return Text(
       text,
       style: new TextStyle(
-          // foreground: Paint()..shader = linearGradient,
-          color: colors[0],
-          fontSize: fontsize,
-          fontWeight: FontWeight.bold,
-          ),
+        // foreground: Paint()..shader = linearGradient,
+        color: colors[0],
+        fontSize: fontsize,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 
   static InputDecoration getDecoration() => InputDecoration(
-        focusColor: Helper.brandColors[9],
-        contentPadding: EdgeInsets.zero,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(7),
-          borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(7),
-          borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(7),
-          borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
-        ),
-        fillColor: Helper.brandColors[1],
-        filled: true);
-  
+      focusColor: Helper.brandColors[9],
+      contentPadding: EdgeInsets.zero,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+      ),
+      fillColor: Helper.brandColors[1],
+      filled: true);
 
   static String getEstadoPedido(int estado) {
     switch (estado) {
@@ -282,12 +283,12 @@ class Helper {
     return lista.contains(rol);
   }
 
-  static  Future<double> getWeigth( XFile file, ) async {
+  static Future<double> getWeigth(
+    XFile file,
+  ) async {
     final sizeInBytes = await file.length();
     double sizeInMb = sizeInBytes / (1024 * 1024); // Convertir a MB
-    print('Tamaño de archivo: $sizeInMb MB');
     return sizeInMb;
-    
   }
 
   static requestFocus(BuildContext context) {
@@ -295,16 +296,21 @@ class Helper {
   }
 
   static launchWeb(url, context) async {
-          try{
-
-          final Uri _url =
-              Uri.parse(url);
-         if (!await launchUrl(_url, mode: LaunchMode.externalApplication)) {
-          throw Exception('No se pudo lanzar la web $_url');
-          }
-          }catch ( err )
-          {
-            openAlertDialog(context, err.toString());
-          }
-        }
+    try {
+      final Uri _url = Uri.parse(url);
+      if (!await launchUrl(_url, mode: LaunchMode.externalApplication)) {
+        throw Exception('No se pudo lanzar la web $_url');
+      }
+    } catch (err) {
+      openAlertDialog(context, err.toString());
+    }
   }
+
+  static  formatIsoDateString(String isoString) {
+
+    DateTime date = DateTime.parse(isoString);
+    DateFormat formatter = DateFormat('dd/MM/yyyy');
+
+    return formatter.format(date);
+  }
+}

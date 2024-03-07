@@ -12,7 +12,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/main.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
@@ -35,6 +34,8 @@ import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+
+import 'noticias.dart';
 
 class ObrasPage extends StatefulWidget {
   ObrasPage({Key? key}) : super(key: key);
@@ -200,8 +201,9 @@ class _ObrasPageState extends State<ObrasPage> {
         'route': NotificacionesABM.routeName,
         'roles': [1, 2, 3, 4, 5, 6, 7, 8],
         'navega': false,
-        'action': () => Helper.launchWeb(
-            'https://www.veronaconstrucciones.com.ar/noticias', context)
+        'action': () => Navigator.pushNamed(context, NoticiasPage.routeName)
+        // Helper.launchWeb(
+        //     'https://www.veronaconstrucciones.com.ar/noticias', context)
       },
       {
         'icon': Icons.edit_note_rounded,
@@ -588,9 +590,7 @@ class View_ObraCard extends StatelessWidget {
     var imagen = obra.imageURL == ''
         ? Helper.imageNetwork(
             'https://www.emsevilla.es/wp-content/uploads/2020/10/no-image-1.png')
-        : Helper.imageNetwork(obra.imageURL
-            // 'https://drive.google.com/uc?export=view&id=${obra.imageId}',
-            );
+        : Helper.imageNetwork(obra.imageURL);
     final _socketService = Provider.of<SocketService>(context);
 
     final mainInfo = isTablet
@@ -603,6 +603,7 @@ class View_ObraCard extends StatelessWidget {
                 imageBuilder: (context, imageProvider) => Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
+                      fit: BoxFit.cover,
                       image: imageProvider,
                     ),
                   ),
@@ -652,7 +653,7 @@ class View_ObraCard extends StatelessWidget {
                                 padding: EdgeInsets.symmetric(horizontal: 30),
                                 child: LinearProgressIndicator(
                                   value: obra.porcentajeRealizado / 100,
-                                  semanticsLabel: 'HoLA',
+                                  semanticsLabel: 'test',
                                   backgroundColor: Helper.brandColors[3],
                                   color: Helper.brandColors[8],
                                 ),

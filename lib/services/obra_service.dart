@@ -374,4 +374,13 @@ class ObraService extends ChangeNotifier {
     notifyListeners();
     return resp;
   }
+
+  Future<MyResponse> obtenerObraArticuloFile(String obraId) async{
+        final datos = await this._http.get('$_endpoint/articuloobra/$obraId',);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
+    return resp;
+
+  }
 }

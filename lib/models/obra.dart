@@ -17,6 +17,7 @@ class Obra {
 
   List<Miembro> equipo;
   List<Propietario> propietarios;
+  String articulosId;
   String barrio;
   String chatE;
   String chatI;
@@ -37,64 +38,65 @@ class Obra {
   double? latitud;
   double? longitud;
   Obra({
-    required this.nombre,
-    this.id = '',
     required this.barrio,
+    required this.diasEstimados,
+    required this.lote,
+    required this.nombre,
+    this.articulosId = '',
     this.chatE = '',
     this.chatI = '',
-    required this.diasEstimados,
+    this.descripcion = 'Sin descripción',
+    this.diaInicio = 0,
     this.diasInactivos = const [],
     this.diasTranscurridos = 0,
-    this.diaInicio = 0,
     this.docs = const [],
+    this.driveFolderId = '',
+    this.enabledFiles = const [],
     this.equipo = const [],
     this.etapas = const [],
-    this.imageId = '',
-    required this.lote,
-    this.propietarios = const [],
-    this.descripcion = 'Sin descripción',
-    this.pedidos = const [],
-    this.driveFolderId = '',
-    this.imgFolderId = '',
-    this.enabledFiles = const [],
-    ts,
-    this.imageURL = '',
     this.folderImages = '',
-    this.rootDriveCliente = '',
     this.folderImagesCliente = '',
+    this.folderPedidoImages = '',
+    this.id = '',
+    this.imageId = '',
+    this.imageURL = '',
+    this.imgFolderId = '',
     this.latitud,
     this.longitud,
-    this.folderPedidoImages = '',
+    this.pedidos = const [],
+    this.propietarios = const [],
+    this.rootDriveCliente = '',
+    ts,
   }) {
-    this.nombre = nombre;
-    this.id = id;
     this.barrio = barrio;
     this.chatE = chatE;
     this.chatI = chatI;
+    this.descripcion = descripcion;
+    this.diaInicio = diaInicio;
     this.diasEstimados = diasEstimados;
     this.diasInactivos = diasInactivos;
     this.diasTranscurridos = diasTranscurridos;
-    this.diaInicio = diaInicio;
     this.docs = docs;
+    this.driveFolderId = driveFolderId;
+    this.enabledFiles = enabledFiles;
     this.equipo = equipo;
     this.etapas = etapas;
+    this.folderImages = folderImages;
+    this.folderImagesCliente = folderImagesCliente;
+    this.folderPedidoImages = folderPedidoImages;
+    this.id = id;
     this.imageId = imageId;
-    this.lote = lote;
-    this.descripcion = descripcion;
-    this.pedidos = pedidos;
-    this.driveFolderId = driveFolderId;
+    this.imageURL = imageURL;
     this.imgFolderId = imgFolderId;
-    this.enabledFiles = enabledFiles;
+    this.latitud = latitud;
+    this.longitud = longitud;
+    this.lote = lote;
+    this.nombre = nombre;
+    this.pedidos = pedidos;
+    this.rootDriveCliente = rootDriveCliente;
     this.ts =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
-    this.imageURL = imageURL;
-    this.folderImages = folderImages;
-    this.rootDriveCliente = rootDriveCliente;
-    this.folderImagesCliente = folderImagesCliente;
-    this.latitud = latitud;
-    this.longitud = longitud;
-    this.folderPedidoImages = folderPedidoImages;
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
@@ -128,6 +130,7 @@ class Obra {
       latitud: json['latitud'],
       longitud: json['longitud'],
       folderPedidoImages: json['folderPedidoImages'] ?? 'SinDato',
+      articulosId: json['articulosId'] ?? '',
       imageURL: json['imageURL'] ?? 'SinDato');
 
   int get cantDiasInactivos {
@@ -164,7 +167,8 @@ class Obra {
         'imageURL': this.imageURL,
         'longitud': this.longitud,
         'latitud': this.latitud,
-        'folderPedidoImages': this.folderPedidoImages
+        'folderPedidoImages': this.folderPedidoImages,
+        'articulosId': this.articulosId
       };
 
   double get porcentajeRealizado {
@@ -299,16 +303,12 @@ class Obra {
         List<Tarea> tareasRealizadas = [];
 
         subetapa.tareas.forEach((tarea) {
-          if ((!tarea.realizado && tarea.iniciado == true && 
-            (
-              (
-                tarea.tsIniciado  > desde.millisecondsSinceEpoch  && tarea.tsIniciado  < hasta.millisecondsSinceEpoch 
-              ) 
-             || (
-              tarea.tsIniciado  < desde.millisecondsSinceEpoch  && tarea.tsIniciado  < hasta.millisecondsSinceEpoch 
-             ) 
-            )
-          ) ||
+          if ((!tarea.realizado &&
+                  tarea.iniciado == true &&
+                  ((tarea.tsIniciado > desde.millisecondsSinceEpoch &&
+                          tarea.tsIniciado < hasta.millisecondsSinceEpoch) ||
+                      (tarea.tsIniciado < desde.millisecondsSinceEpoch &&
+                          tarea.tsIniciado < hasta.millisecondsSinceEpoch))) ||
               (tarea.realizado &&
                   (tarea.tsRealizado >= desde.millisecondsSinceEpoch &&
                       tarea.tsRealizado <= hasta.millisecondsSinceEpoch))) {

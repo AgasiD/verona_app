@@ -6,6 +6,7 @@ class NotificacionesService extends ChangeNotifier {
   HttpService _http = new HttpService();
   final _endpoint = 'api/notificacion';
 
+
   Future<MyResponse> obtenerNotificaciones(String idAdmin, bool autorizada) async {
     final datos = await this._http.get('$_endpoint/$idAdmin/$autorizada');
     final response = datos;

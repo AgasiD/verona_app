@@ -1,19 +1,17 @@
 import 'dart:async';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:badges/badges.dart' as badges;
-
 import 'package:flutter/material.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/anotaciones.dart';
-
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/forms/obra.dart';
 import 'package:verona_app/pages/imagenes_gallery.dart';
@@ -27,7 +25,6 @@ import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
-
 
 class ObraPage extends StatelessWidget {
   static const String routeName = 'obra';
@@ -215,7 +212,8 @@ class ObraPage extends StatelessWidget {
     }
     try {
       final _obraService = Provider.of<ObraService>(context, listen: false);
-      openLoadingDialog(context, mensaje: 'Eliminando obra... esto puede demorar');
+      openLoadingDialog(context,
+          mensaje: 'Eliminando obra... esto puede demorar');
       loading = true;
       final response = await _obraService.eliminarObra(obraId);
       closeLoadingDialog(context);
@@ -498,13 +496,55 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       );
       items.add(status);
 
+      // final certificados = Item(
+      //   icon: Icons.library_add_check_outlined,
+      //   rolesAcceso: [1, 2, 7],
+      //   list: 5,
+      //   titulo: 'Certificados de obra',
+      //   values: [].toList(),
+      //   accion: () => {},
+      // );
+      // items.add(certificados);
+
       final certificados = Item(
-        icon: Icons.library_add_check_outlined,
-        rolesAcceso: [1, 2, 7],
+        icon: Icons.format_list_numbered_outlined,
+        rolesAcceso: [1, 2, 3, 4, 5, 6, 7],
         list: 5,
-        titulo: 'Certificados de obra',
+        titulo: 'Artículos de obra',
         values: [].toList(),
-        accion: () => {},
+        accion: () async {
+          if (obra.articulosId == '') {
+            openAlertDialog(context, 'No hay documento asignado');
+          } else {
+            openLoadingDialog(context, mensaje: 'Cargando archivo...');
+            final _obraService = Provider.of<ObraService>(context, listen: false);
+            final response = await _obraService.obtenerObraArticuloFile(obra.id)
+                as MyResponse;
+            closeLoadingDialog(context);
+
+            if (response.fallo) {
+              openAlertDialog(context, 'Hubo en error al cargar el archivo.',
+                  subMensaje: response.error);
+              return;
+            }
+            final file = response.data;
+            Uri _url;
+            switch (file["mimeType"]) {
+              case "application/vnd.google-apps.document":
+                _url = Uri.parse(
+                    'https://docs.google.com/document/d/${obra.articulosId}');
+                break;
+              default:
+                _url = Uri.parse(
+                    'https://docs.google.com/spreadsheets/d/${obra.articulosId}');
+                break;
+            }
+            if (await canLaunchUrl(_url))
+              await launchUrl(_url, mode: LaunchMode.externalApplication);
+            else
+              openAlertDialog(context, 'No se puede visualizar el documento');
+          }
+        },
       );
       items.add(certificados);
 
@@ -751,7 +791,10 @@ class _ObraBigrafy extends StatelessWidget {
             Container(
               margin: EdgeInsets.only(left: 20),
               child: Text(this.obra.lote,
-                  style: TextStyle(color: Helper.brandColors[5], fontSize: 17)),
+                  style: TextStyle(
+                      color: Helper.brandColors[5],
+                      fontSize: 20,
+                      fontWeight: FontWeight.w100)),
             ) // Lote del proyecto
           ],
         ),

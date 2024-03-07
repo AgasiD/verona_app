@@ -294,7 +294,6 @@ class _PedidosByEstado extends StatelessWidget {
   }
   
   void ordenarPedidos() {
-    print(pedidos);
     pedidos.sort((a,b) => a['ts'] > b['ts'] ? -1 : 1 );
   }
 

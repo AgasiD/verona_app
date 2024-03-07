@@ -20,6 +20,7 @@ import 'package:verona_app/pages/chat.dart';
 
 import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/login.dart';
+import 'package:verona_app/pages/noticias.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/chat_service.dart';
@@ -1163,6 +1164,20 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
             },
           ),
           CustomNavigatorButton(
+            showNotif: false,
+            icono: Icons.newspaper,
+            accion: () {
+              final name = ModalRoute.of(context)!.settings.name;
+              if (name != NoticiasPage.routeName) {
+                _chatService.tieneMensaje = false;
+                // Navigator.pushNamed(context, ChatList.routeName);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    NoticiasPage.routeName, (Route<dynamic> route) => true);
+                setState(() {});
+              }
+            },
+          ),
+          CustomNavigatorButton(
             showNotif: _socketService.tieneNovedadesNotif(),
             icono: Icons.notifications_none_rounded,
             accion: () {
@@ -1174,21 +1189,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
                 // Navigator.pushNamed(context, NotificacionesPage.routeName);
               }
             },
-          ),
-          CustomNavigatorButton(
-            showNotif: _socketService.tieneMensaje,
-            icono: Icons.message_outlined,
-            accion: () {
-              final name = ModalRoute.of(context)!.settings.name;
-              if (name != ChatList.routeName) {
-                _chatService.tieneMensaje = false;
-                // Navigator.pushNamed(context, ChatList.routeName);
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                    ChatList.routeName, (Route<dynamic> route) => true);
-                setState(() {});
-              }
-            },
-          ),
+          )
         ],
       ),
     );

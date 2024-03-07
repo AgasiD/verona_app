@@ -43,6 +43,7 @@ import 'package:verona_app/pages/listas/subetapas.dart';
 import 'package:verona_app/pages/listas/tareas.dart';
 import 'package:verona_app/pages/listas/tareas_semanaria.dart';
 import 'package:verona_app/pages/login.dart';
+import 'package:verona_app/pages/noticia_view.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/obras.dart';
@@ -55,6 +56,8 @@ import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/widgets/map_coordinates.dart';
 
 import '../pages/forms/inactividadesBD.dart';
+import '../pages/mensaje_form.dart';
+import '../pages/noticias.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   'prueba': (_) => ReorderableApp(),
@@ -112,5 +115,9 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   NotificacionesABM.routeName: (_) => NotificacionesABM(),
   NotificacionesEditForm.routeName: (_) => NotificacionesEditForm(),
   ErrorPage.routeName: (_) => ErrorPage(),
-  
+  NoticiasPage.routeName: (_) => NoticiasPage(),
+  NoticiaView.routeName: (_) => NoticiaView(),
+  MensajeForm.routeName: (_) => MensajeForm(),
+
+
   };

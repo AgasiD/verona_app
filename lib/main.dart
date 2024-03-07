@@ -8,6 +8,7 @@ import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/login.dart';
+import 'package:verona_app/pages/noticias.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/routes/routes.dart';
 import 'package:verona_app/services/auth_service.dart';
@@ -23,6 +24,7 @@ import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/subetapa_service.dart';
 import 'package:verona_app/services/tarea_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
+import 'package:verona_app/services/whatsapp_service.dart';
 import 'package:vibration/vibration.dart';
 
 void main() async {
@@ -53,6 +55,14 @@ class _AppStateState extends State<AppState> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          create: (_) => WSService(),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => WixService(),
+          lazy: false,
+        ),
         ChangeNotifierProvider(
           create: (_) => ObraService(),
           lazy: false,
