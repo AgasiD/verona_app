@@ -68,29 +68,23 @@ class NoticiaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(this.post['title']);
     final widgets = [
       Hero(
-          tag: post['coverMedia']['image']['id'],
+          tag: post['coverMedia']['image'] == null ? '' : post['coverMedia']['image']['id'],
           child: Container(
             width: 150,
             height: 150,
             child: CachedNetworkImage(
-              imageUrl: post['coverMedia']['image']['url'],
+              imageUrl: post['coverMedia']['image'] == null ? '' : post['coverMedia']['image']['url'],
               imageBuilder: (context, imageProvider) => Container(
                 decoration: BoxDecoration(
                   image:
                       DecorationImage(image: imageProvider, fit: BoxFit.cover),
                 ),
               ),
-              // placeholder: (context, url) {
-              
-              //   return Center(
-              //       child: CircularProgressIndicator(
-              //     color: Helper.brandColors[8],
-              //   ));
-              // },
               errorWidget: (context, url, error) => Container(
-                color: Helper.brandColors[8],
+                color: Helper.brandColors[4],
                 alignment: Alignment.center,
                 child: Image(image: AssetImage('assets/image.png')),
               ),
