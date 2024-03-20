@@ -36,7 +36,7 @@ class Helper {
   static int limit = 25;
   //static double maxWidth = MediaQuery.of(context).size.wi dth
   //static AssetImage splashImage = AssetImage('assets/icon/do-splash.png');
-  static String version = '1.22.2';
+  static String version = '1.22.3';
   static String pushToken =
       'emHBj34PRTiMMMMea7q0B5:APA91bEIFvKKPYJYRcBW62_qqCV5_n_9WouqWVGbhjDTGbEjO54Lj_hSxQ1jWfaOQ_7m8veFU1srFUd4ElLxIZBWRexqdUs5gWyVsNQiU6r52lSdEMbolrtPWlAx6edW1l-DSa0EEAFx';
 

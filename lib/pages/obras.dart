@@ -310,7 +310,7 @@ class __SearchListViewState extends State<_SearchListView> {
                   }
                 } catch (err) {
                   return ErrorPage(
-                      errorMsg: snapshot.error.toString(), page: false);
+                      errorMsg: err.toString(), page: false);
                 }
               }
             }));
