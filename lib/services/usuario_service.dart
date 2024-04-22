@@ -148,7 +148,7 @@ class UsuarioService extends ChangeNotifier {
     final body = {"id": anotacionId};
     final response =
         await this._http.post('$_endpoint/eliminarAnotacion/$id', body);
-    notifyListeners();
+    // notifyListeners();
     return MyResponse.fromJson(response['response']);
   }
 

@@ -28,7 +28,7 @@ class PerfilPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _scaffoldKey = GlobalKey<ScaffoldState>();
-    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
+    final _usuarioService = Provider.of<UsuarioService>(context);
     final _imageService = Provider.of<ImageService>(context);
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
@@ -39,7 +39,6 @@ class PerfilPage extends StatelessWidget {
     if (_usuarioId != _pref.id) {
       perfilPropio = false;
     }
-    // if (MediaQuery.of(context).size.width > 1000) esPhone = false;
 
     double paddingLeft = 0.00;
     return Scaffold(
@@ -50,14 +49,11 @@ class PerfilPage extends StatelessWidget {
           child: FutureBuilder(
             future: _usuarioService.obtenerUsuario(_usuarioId),
             builder: (context, snapshot) {
-
               if (snapshot.connectionState == ConnectionState.waiting) {
-
                 return Loading(
                   mensaje: 'Cargando datos...',
                 );
               } else {
-
                 MyResponse response = snapshot.data as MyResponse;
                 if (response.fallo) {
                   print('Error al cargar datos');
@@ -309,24 +305,26 @@ class PerfilPage extends StatelessWidget {
     );
   }
 
-  Future<void> eliminarUsuario(context,
-      UsuarioService _usuarioService, ObraService _obraService) async {
-    if(!await openDialogConfirmationReturn(
+  Future<void> eliminarUsuario(
+      context, UsuarioService _usuarioService, ObraService _obraService) async {
+    if (!await openDialogConfirmationReturn(
         context, 'Confirmar para eliminar personal')) return;
 
-    
     // eliminar obra
-    openLoadingDialog(context, mensaje: 'Eliminando personal, puede demorar...', );
+    openLoadingDialog(
+      context,
+      mensaje: 'Eliminando personal, puede demorar...',
+    );
     final response = await _usuarioService.deleteUsuario(_usuarioId);
 
     closeLoadingDialog(context);
     if (response.fallo) {
       openAlertDialog(context, 'Error al desactivar usuario',
           subMensaje: response.error);
-          return;
+      return;
     } else {
-     await openAlertDialogReturn(context, 'Usuario desactivado con éxito');
-            _obraService.notifyListeners();
+      await openAlertDialogReturn(context, 'Usuario desactivado con éxito');
+      _obraService.notifyListeners();
 
       Navigator.pop(context);
     }
@@ -368,14 +366,16 @@ class DataRow extends StatelessWidget {
       children: [
         Expanded(
           flex: 1,
-          child: SizedBox(), // Este espacio ocupará 1/4 del ancho total de la pantalla
+          child:
+              SizedBox(), // Este espacio ocupará 1/4 del ancho total de la pantalla
         ),
         Expanded(
           flex: 6,
           child: Row(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                 child: Icon(icon, color: Helper.brandColors[8], size: 25),
               ),
               Expanded(
@@ -384,7 +384,7 @@ class DataRow extends StatelessWidget {
                   child: Text(
                     text,
                     style: TextStyle(
-                      color: Helper.brandColors[5], 
+                      color: Helper.brandColors[5],
                       overflow: TextOverflow.clip,
                     ),
                   ),
@@ -397,5 +397,3 @@ class DataRow extends StatelessWidget {
     );
   }
 }
-
-

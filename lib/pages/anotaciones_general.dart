@@ -1,5 +1,4 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -9,10 +8,8 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/anotacion.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
-import 'package:win32/win32.dart';
 
 class AnotacionesGeneralPage extends StatefulWidget {
   AnotacionesGeneralPage({Key? key}) : super(key: key);
@@ -97,7 +94,6 @@ class AnotacionesGenerales extends StatelessWidget {
             child: Text('Error al cargar datos'),
           );
         usuario = Miembro.fromJson(response.data);
-
         return Action_Form(usuario: usuario, txtTarea: txtTarea, obraId: null);
       },
     );

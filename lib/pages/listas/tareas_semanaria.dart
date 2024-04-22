@@ -52,7 +52,7 @@ class TareasSemanarias extends StatelessWidget {
                       }
                       final response = snapshot.data as MyResponse;
                       if (response.fallo) {
-                        print(response.error);
+                        debugPrint(response.error);
                         return Container(
                             child:
                                 Center(child: Text('Error al buscar obras')));
@@ -157,7 +157,8 @@ class _SemanarioState extends State<_Semanario> {
                       value: miembro.id,
                       child: AutoSizeText(
                         '${miembro.nombre} ${miembro.apellido}'.toUpperCase(),
-                        maxFontSize: 20,
+                        maxFontSize: 12
+                        ,
                         minFontSize: 10,
                       )),
                 ));
@@ -419,9 +420,10 @@ class _FilterBarState extends State<FilterBar> {
                               decoration: Helper.getDecoration(),
                               hint: FittedBox(
                                 child: Text(
+
                                   'Todo el personal',
                                   style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 12,
                                       color: Helper.brandColors[3]),
                                 ),
                               ),
@@ -702,6 +704,8 @@ class _TaskTileState extends State<_TaskTile> {
     _obraService = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
 
+    String user_text = widget.tarea.iniciado && !widget.tarea.realizado ? 'Iniciado por: ${widget.tarea.nombreUsuario} | ${Helper.getFechaHoraFromTS(widget.tarea.tsIniciado)}' : 'Realizado por: ${widget.tarea.nombreUsuario} | ${Helper.getFechaHoraFromTS(widget.tarea.tsRealizado)}';
+
     final checkboxTile = Container(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
         child: GestureDetector(
@@ -725,7 +729,7 @@ class _TaskTileState extends State<_TaskTile> {
                       ),
                       widget.tarea.idUsuario.isNotEmpty
                           ? Text(
-                              widget.tarea.iniciado && !widget.tarea.realizado ? 'Iniciado por: ${widget.tarea.nombreUsuario} | ' : 'Realizado por: ${widget.tarea.nombreUsuario} | ',
+                              user_text,
                               // overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   color: Colors.white30,
@@ -733,18 +737,7 @@ class _TaskTileState extends State<_TaskTile> {
                                   fontWeight: FontWeight.bold),
                             )
                           : Container(),
-                      widget.tarea.idUsuario.isNotEmpty
-                          ? Text(
-                              widget.tarea.iniciado && widget.tarea.realizado 
-                              ? '${Helper.getFechaHoraFromTS(widget.tarea.tsRealizado)}'
-                              : '${Helper.getFechaHoraFromTS(widget.tarea.tsIniciado)}',
-                              // overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  color: Colors.white30,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold),
-                            )
-                          : Container(),
+      
                     ]),
                     onChanged: (value) async {
                       widget.onCheck(widget.tarea);
@@ -768,21 +761,7 @@ class _TaskTileState extends State<_TaskTile> {
                             color: Helper.brandColors[3], fontSize: 15),
                       ),
                       widget.tarea.idUsuario.isNotEmpty
-                          ? Text(
-                                                            widget.tarea.iniciado && !widget.tarea.realizado 
-                                                            ? 'Iniciado por: ${widget.tarea.nombreUsuario} | '
-                                                            : 'Realizado por: ${widget.tarea.nombreUsuario} | ',
-                              // overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  color: Colors.white30,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold),
-                            )
-                          : Container(),
-                      widget.tarea.idUsuario.isNotEmpty
-                          ? Text(
-                              '${Helper.getFechaHoraFromTS(widget.tarea.tsRealizado)}',
-                              // overflow: TextOverflow.ellipsis,
+                          ? Text(user_text,
                               style: TextStyle(
                                   color: Colors.white30,
                                   fontSize: 15,
