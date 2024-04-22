@@ -68,7 +68,6 @@ class NoticiaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(this.post['title']);
     final widgets = [
       Hero(
           tag: post['coverMedia']['image'] == null ? '' : post['coverMedia']['image']['id'],

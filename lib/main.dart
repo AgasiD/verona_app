@@ -13,6 +13,7 @@ import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/routes/routes.dart';
 import 'package:verona_app/services/auth_service.dart';
 import 'package:verona_app/services/chat_service.dart';
+import 'package:verona_app/services/config_service.dart';
 import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/image_service.dart';
@@ -56,6 +57,10 @@ class _AppStateState extends State<AppState> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (_) => ConfigService(),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
           create: (_) => WSService(),
           lazy: false,
         ),
@@ -66,7 +71,8 @@ class _AppStateState extends State<AppState> {
         ChangeNotifierProvider(
           create: (_) => ObraService(),
           lazy: false,
-        ),  ChangeNotifierProvider(
+        ),
+        ChangeNotifierProvider(
           create: (_) => InactividadService(),
           lazy: false,
         ),

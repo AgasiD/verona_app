@@ -9,7 +9,8 @@ import 'package:verona_app/models/anotacion.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
-import 'package:win32/win32.dart';
+
+import 'anotaciones_form.dart';
 
 class AnotacionesPage extends StatelessWidget {
   AnotacionesPage({Key? key}) : super(key: key);
@@ -18,24 +19,19 @@ class AnotacionesPage extends StatelessWidget {
 
   late Miembro usuario;
 
-
-
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as Map;
-    String? obraId = args['obraId'] ;
+    String? obraId = args['obraId'];
     final _pref = new Preferences();
-    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
+    final _usuarioService = Provider.of<UsuarioService>(context);
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
+      floatingActionButton: CustomNavigatorButton(icono: Icons.add, accion: () => Navigator.pushNamed(context, AnotacionForm.routeName, arguments: { "obraId": obraId }), showNotif: false),
       body: GestureDetector(
-                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                  
-
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: SafeArea(
-      
           child: Container(
-            
             child: FutureBuilder(
               future: _usuarioService.obtenerUsuario(_pref.id),
               builder: (context, snapshot) {
@@ -47,8 +43,9 @@ class AnotacionesPage extends StatelessWidget {
                     child: Text('Error al cargar datos'),
                   );
                 usuario = Miembro.fromJson(response.data);
-      
-                return Action_Form(usuario: usuario, txtTarea: txtTarea, obraId: obraId);
+
+                return Action_Form(
+                    usuario: usuario, txtTarea: txtTarea, obraId: obraId);
               },
             ),
           ),
@@ -84,39 +81,40 @@ class _Action_FormState extends State<Action_Form> {
   Widget build(BuildContext context) {
     _usuarioService = Provider.of<UsuarioService>(context);
     List<Anotacion> anotaciones;
-    if((widget.obraId == '' || widget.obraId == null)){
-      anotaciones = widget.usuario.anotaciones!.where((anotacion) => anotacion.obraId == null).toList();
-    }else{
-      anotaciones = widget.usuario.anotaciones!.where((anotacion) => anotacion.obraId == widget.obraId).toList();
+    if ((widget.obraId == '' || widget.obraId == null)) {
+      anotaciones = widget.usuario.anotaciones!
+          .where((anotacion) => anotacion.obraId == null)
+          .toList();
+    } else {
+      anotaciones = widget.usuario.anotaciones!
+          .where((anotacion) => anotacion.obraId == widget.obraId)
+          .toList();
     }
     return Column(children: [
       Expanded(
-        child: anotaciones == null ||
-               anotaciones.isEmpty
+        child: anotaciones == null || anotaciones.isEmpty
             ? Center(
                 child: Text('¡Escribí tu primer anotación!',
                     style:
                         TextStyle(fontSize: 20, color: Helper.brandColors[4])))
             : ListView.builder(
                 controller: listScrollController,
-                itemCount: anotaciones == null
-                    ? 0
-                    : anotaciones!.length,
+                itemCount: anotaciones == null ? 0 : anotaciones!.length,
                 itemBuilder: (context, index) => AnotacionTile(
-                    anota: anotaciones![index],
-                    action: eliminarAnotacion),
+                    anota: anotaciones![index], action: eliminarAnotacion),
               ),
       ),
-      InputTarea(
-        
-          focus: focus, action: agregarAnotacion, txtTarea: widget.txtTarea)
+    //   InputTarea(
+    //       focus: focus, action: agregarAnotacion, txtTarea: widget.txtTarea)
+    // ]);
     ]);
   }
 
   agregarAnotacion() {
     final _pref = new Preferences();
     if (widget.txtTarea.text.isNotEmpty) {
-      final anotacion = Anotacion(widget.txtTarea.text, id: Uuid().v4(), obraId: widget.obraId);
+      final anotacion = Anotacion(widget.txtTarea.text,
+          id: Uuid().v4(), obraId: widget.obraId);
       _usuarioService.agregarAnotacion(_pref.id, anotacion).then((response) {
         if (response.fallo) {
           openAlertDialog(context, 'Error al crear anotacion',
@@ -141,7 +139,7 @@ class _Action_FormState extends State<Action_Form> {
     });
   }
 
-  eliminarAnotacion(String id) {
+eliminarAnotacion(String id) {
     final _pref = new Preferences();
     _usuarioService.eliminarAnotacion(_pref.id, id).then((value) {
       if (value.fallo) {
@@ -197,7 +195,6 @@ class _InputTareaState extends State<InputTarea> {
     return Container(
       color: Helper.brandColors[2],
       child: TextFormField(
-        
         autofocus: true,
         minLines: 1,
         focusNode: widget.focus,
@@ -257,42 +254,36 @@ class _AnotacionTileState extends State<AnotacionTile> {
           children: [
             Theme(
               data: ThemeData(unselectedWidgetColor: Helper.brandColors[4]),
-              child: CheckboxListTile(
-                tileColor: Helper.brandColors[1],
-                checkColor: Helper.brandColors[5],
-                activeColor: Helper.brandColors[8],
-                selectedTileColor: Helper.brandColors[8],
+              child: ListTile(
+                trailing: Icon(
+                  widget.anota.realizado 
+                  ?  Icons.check_box
+                   : Icons.check_box_outline_blank_rounded,
+                    color: Helper.brandColors[8]),
                 title: Text(
-                  widget.anota.descripcion,
-                  // overflow: TextOverflow.ellipsis,
+                  
+                  widget.anota.descripcion.replaceAll(RegExp(r'\n'), ' '),
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: Helper.brandColors[3]),
                 ),
-                onChanged: (value) => cambiarEstado(value!),
-                // onChanged: (value) async {
-                //   openLoadingDialog(context, mensaje: 'Actualizando...');
-                //   // final response = await _obraService.actualizarTarea(
-                //   //     _obraService.obra.id,
-                //   //     widget.etapaId,
-                //   //     widget.tarea.subetapa,
-                //   //     widget.tarea.id,
-                //   //     value!,
-                //   //     new Preferences().id,
-                //   //     DateTime.now().millisecondsSinceEpoch);
-                //   closeLoadingDialog(context);
-                //   widget.tarea.realizado = value!;
-                //   // _obraService.notifyListeners();
-
-                //   if (response.fallo) {
-                //     openAlertDialog(context, 'Error al actualizar tarea',
-                //         subMensaje: response.error);
-                //   }
-
-                //   setState(() {});
-                // },
-                // value: widget.tarea.realizado,
-                value: widget.anota.realizado,
+                onTap: () => Navigator.pushNamed(context, AnotacionForm.routeName, arguments: { "anotacion": widget.anota }),
               ),
+              // child: CheckboxListTile(
+              //   tileColor: Helper.brandColors[1],
+              //   checkColor: Helper.brandColors[5],
+              //   activeColor: Helper.brandColors[8],
+              //   selectedTileColor: Helper.brandColors[8],
+              //   title: Text(
+              //     widget.anota.descripcion,
+              //     // overflow: TextOverflow.ellipsis,
+              //     style: TextStyle(color: Helper.brandColors[3]),
+              //   ),
+              //   onChanged: (value) => cambiarEstado(value!),
+              // },
+              // value: widget.tarea.realizado,
+              // value: widget.anota.realizado,
             ),
+            // ),
             Divider(
               color: Helper.brandColors[8],
             )

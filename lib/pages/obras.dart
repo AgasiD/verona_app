@@ -19,6 +19,7 @@ import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
 import 'package:verona_app/pages/ABMs/centro_notificaciones.dart';
 import 'package:verona_app/pages/anotaciones_general.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/envio_reportes.dart';
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/notificaciones.dart';
 import 'package:verona_app/pages/forms/obra.dart';
@@ -30,6 +31,7 @@ import 'package:verona_app/pages/listas/tareas_semanaria.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/pages/perfil.dart';
+import 'package:verona_app/pages/settings.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -178,7 +180,7 @@ class _ObrasPageState extends State<ObrasPage> {
         'roles': [1, 2, 5 ],
       },
       {
-        'icon': Icons.work_off_outlined,
+        'icon': Icons.work_off,
         'name': 'Control inactividades',
         'route': InactividadesABM.routeName,
         'roles': [1, 2, 7],
@@ -211,6 +213,18 @@ class _ObrasPageState extends State<ObrasPage> {
         'route': AnotacionesGeneralPage.routeName,
         'roles': [1, 2, 3, 7],
         'args': {'obraId': null},
+      },
+      {
+        'icon': Icons.send,
+        'name': 'Envío de reportes',
+        'route': EnvioReporteSemanal.routeName,
+        'roles': [1],
+      },
+      {
+        'icon': Icons.settings,
+        'name': 'Configuraciones',
+        'route': SettingsPage.routeName,
+        'roles': [1],
       },
     ];
 

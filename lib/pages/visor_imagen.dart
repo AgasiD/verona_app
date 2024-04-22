@@ -23,6 +23,7 @@ class ImagenViewer extends StatelessWidget {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final imagenId = arguments['imagenId'];
     url = 'https://drive.google.com/uc?export=view&id=$imagenId';
+    // url = 'https://drive.usercontent.google.com/download?id=$imagenId&export=view&authuser=0';
     final token =
         'ya29.A0ARrdaM_6GO94psBfX0G8FhqeJLZ2ItNjaOOVYcYBwRmNssneRoaF82hENqCcrQrVfMKrJEjtyEdVPO7nxiJUU3xZiKkYLTWrTm8-PSJV-kiuxErcHwX_2Vd31vi6VfS8XDw9IRwnalhvtTqzE2H2RP7z40NRNg';
 

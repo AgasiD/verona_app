@@ -381,6 +381,17 @@ class ObraService extends ChangeNotifier {
     final resp = MyResponse.fromJson(response);
     // notifyListeners();
     return resp;
-
   }
+  
+  Future<MyResponse> enviarReportes( List<String> ids ) async {
+    final body = {
+      "ids": ids
+    };
+       final datos = await this._http.post('$_endpoint/envioreporte', body);
+    final response = datos["response"];
+    final resp = MyResponse.fromJson(response);
+    // notifyListeners();
+    return resp;
+  }
+
 }

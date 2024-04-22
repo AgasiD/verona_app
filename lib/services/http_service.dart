@@ -56,7 +56,6 @@ class HttpService extends ChangeNotifier {
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
         final bodyReq =  json.encode(body);
-        print(bodyReq.length);
     final response =
         await http.put(url, body: bodyReq, headers: headers);
     Map<String, dynamic> data = json.decode(response.body);

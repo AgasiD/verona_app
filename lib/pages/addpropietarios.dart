@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/models/message.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
@@ -98,8 +99,7 @@ class __CustomListAddedState extends State<_CustomListAdded> {
         .where((prop) =>
             prop.nombre.toLowerCase().contains(widget.filtro.toLowerCase()))
         .toList();
-    List<String> asignados =
-        widget.obra.propietarios.map((e) => e.dni).toList();
+    List<String> asignados = widget.obra.propietarios.map((e) => e.id).toList();
     return ListView.builder(
         physics:
             NeverScrollableScrollPhysics(), // esto hace que no rebote el gridview al scrollear
@@ -110,8 +110,7 @@ class __CustomListAddedState extends State<_CustomListAdded> {
         itemBuilder: (BuildContext ctx, i) {
           final propietario = widget.propietarios[i];
           final agregado =
-              asignados.indexWhere((element) => element == propietario.dni) >
-                  -1;
+              asignados.indexWhere((element) => element == propietario.id) > -1;
           Icon icono = agregado
               ? Icon(
                   Icons.check,
@@ -178,31 +177,50 @@ class __customTileAddedState extends State<_customTileAdded> {
     );
   }
 
-  Future<void> cambiarAsignacion(BuildContext context, ObraService _ObraService) async {
+  Future<void> cambiarAsignacion(
+      BuildContext context, ObraService _ObraService) async {
     String mensaje = '';
-    if (widget.agregado) {
-      openLoadingDialog(context, mensaje: 'Desasignando propietario');
-      mensaje = 'Propietario quitado';
-      await _ObraService.quitarUsuario(
-          widget.obra.id, widget.propietario.id);
-      widget.asignados
-          .removeWhere((element) => element == widget.propietario.dni);
-      widget.agregado = !widget.agregado;
-      widget.obra.quitarPropietario(widget.propietario);
-    } else {
-      openLoadingDialog(context, mensaje: 'Asociando propietario...');
-      mensaje = 'Propietario asignado';
-      await _ObraService.agregarUsuario(
-          widget.obra.id, widget.propietario.id);
-      widget.asignados.add(widget.propietario.dni);
-      widget.agregado = !widget.agregado;
-      widget.obra.sumarPropietario(widget.propietario);
+    bool loading = false;
+    try {
+      if (widget.agregado) {
+        openLoadingDialog(context, mensaje: 'Quitando propietario');
+        loading = true;
+        mensaje = 'Propietario quitado';
+        final response = await _ObraService.quitarUsuario(
+            widget.obra.id, widget.propietario.id);
+        if (response.fallo) {
+          throw Exception(response.error);
+        }
+        widget.asignados
+            .removeWhere((element) => element == widget.propietario.dni);
+        widget.agregado = !widget.agregado;
+        widget.obra.quitarPropietario(widget.propietario);
+      } else {
+        openLoadingDialog(context, mensaje: 'Asociando propietario...');
+        loading = true;
+        mensaje = 'Propietario asignado';
+        final response = await _ObraService.agregarUsuario(
+            widget.obra.id, widget.propietario.id);
+        if (response.fallo) {
+          throw Exception(response.error);
+        }
+        widget.asignados.add(widget.propietario.dni);
+        widget.agregado = !widget.agregado;
+        widget.obra.sumarPropietario(widget.propietario);
+      }
+      _ObraService.notifyListeners();
+      closeLoadingDialog(context);
+      loading = false;
+      Helper.showSnackBar(context, mensaje, TextStyle(fontSize: 15),
+          Duration(milliseconds: 500), null);
+      setState(() {});
+    } catch (err) {
+      if (loading) {
+        closeLoadingDialog(context);
+      }
+      final mensaje = 'Error al asignar propietario';
+      openAlertDialog(context, mensaje);
     }
-    _ObraService.notifyListeners();
-    closeLoadingDialog(context);
-    Helper.showSnackBar(context, mensaje, TextStyle(fontSize: 15),
-        Duration(milliseconds: 500), null);
-    setState(() {});
   }
 }
 
@@ -248,7 +266,8 @@ class __SearchListViewState extends State<_SearchListView> {
                         ),
                         onPressed: () {
                           Navigator.pushReplacementNamed(
-                              context, PropietarioForm.routeName, arguments: {'pageFrom': 'obra'});
+                              context, PropietarioForm.routeName,
+                              arguments: {'pageFrom': 'obra'});
                         },
                       ),
                 textController: txtPropietarioCtrl,

@@ -205,7 +205,6 @@ class _FormularioState extends State<_Formulario> {
     super.initState();
     values = widget.obras.map((e) => e['nombre'] as String).toList();
     selected = widget.obras.map((e) => e['nombre'] as String).toList();
-    ;
      DateTime now = DateTime.now();
 
     String formattedDate = DateFormat('dd/MM/yyyy').format(now);

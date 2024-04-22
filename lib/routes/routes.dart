@@ -9,6 +9,7 @@ import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/anotaciones_general.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/envio_reportes.dart';
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/etapa.dart';
 import 'package:verona_app/pages/forms/inactividades_masiva.dart';
@@ -52,9 +53,11 @@ import 'package:verona_app/pages/listas/pedidos.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/pages/prueba.dart';
 import 'package:verona_app/pages/search_message.dart';
+import 'package:verona_app/pages/settings.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/widgets/map_coordinates.dart';
 
+import '../pages/anotaciones_form.dart';
 import '../pages/forms/inactividadesBD.dart';
 import '../pages/mensaje_form.dart';
 import '../pages/noticias.dart';
@@ -118,6 +121,8 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   NoticiasPage.routeName: (_) => NoticiasPage(),
   NoticiaView.routeName: (_) => NoticiaView(),
   MensajeForm.routeName: (_) => MensajeForm(),
-
+  SettingsPage.routeName: (_) => SettingsPage(),
+  EnvioReporteSemanal.routeName: (_) => EnvioReporteSemanal(),
+AnotacionForm.routeName: (_) => AnotacionForm(),
 
   };

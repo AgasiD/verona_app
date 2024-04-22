@@ -517,7 +517,8 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
             openAlertDialog(context, 'No hay documento asignado');
           } else {
             openLoadingDialog(context, mensaje: 'Cargando archivo...');
-            final _obraService = Provider.of<ObraService>(context, listen: false);
+            final _obraService =
+                Provider.of<ObraService>(context, listen: false);
             final response = await _obraService.obtenerObraArticuloFile(obra.id)
                 as MyResponse;
             closeLoadingDialog(context);
@@ -547,6 +548,24 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         },
       );
       items.add(certificados);
+
+      final estado_planos = Item(
+        icon: Icons.map_outlined,
+        rolesAcceso: [1, 2, 4, 5, 6, 7],
+        list: 5,
+        titulo: 'Estado de planos',
+        values: [].toList(),
+        accion: () async {
+          Uri _url;
+          _url = Uri.parse(
+              'https://docs.google.com/spreadsheets/d/1z-ZCv6hxfVyE9RT2zoiB1ZgzI8uEgtTSLUyzw9rpTDk');
+          if (await canLaunchUrl(_url))
+            await launchUrl(_url, mode: LaunchMode.externalApplication);
+          else
+            openAlertDialog(context, 'No se puede visualizar el documento');
+        },
+      );
+      items.add(estado_planos);
 
       final pedidos = Item(
         rolesAcceso: [1, 2, 4, 5, 6, 7],
