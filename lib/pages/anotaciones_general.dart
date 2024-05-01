@@ -8,8 +8,11 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/anotacion.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+
+import 'anotaciones_form.dart';
 
 class AnotacionesGeneralPage extends StatefulWidget {
   AnotacionesGeneralPage({Key? key}) : super(key: key);
@@ -29,7 +32,6 @@ class _AnotacionesGeneralPageState extends State<AnotacionesGeneralPage>
   Widget build(BuildContext context) {
     _tabCtrl = TabController(length: 2, vsync: this);
     _tabCtrl.index = index;
-    final args = ModalRoute.of(context)!.settings.arguments as Map;
     return DefaultTabController(
         length: 2,
         child: Scaffold(
@@ -68,7 +70,8 @@ class _AnotacionesGeneralPageState extends State<AnotacionesGeneralPage>
                       ]),
                 ),
               )),
-          bottomNavigationBar: CustomNavigatorFooter(),
+      floatingActionButton: index == 0 ?  CustomNavigatorButton(icono: Icons.add, accion: () => Navigator.pushNamed(context, AnotacionForm.routeName, arguments: { "usuarioId": 0 }), showNotif: false) : null,
+
         ));
   }
 }
@@ -76,26 +79,39 @@ class _AnotacionesGeneralPageState extends State<AnotacionesGeneralPage>
 class AnotacionesGenerales extends StatelessWidget {
   AnotacionesGenerales({Key? key}) : super(key: key);
   late Miembro usuario;
+ TextEditingController txtTarea = new TextEditingController();
 
-  @override
+ @override
   Widget build(BuildContext context) {
-    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    String? obraId = args['obraId'];
     final _pref = new Preferences();
-    TextEditingController txtTarea = new TextEditingController();
+    final _usuarioService = Provider.of<UsuarioService>(context);
+    return Container(
+      
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: SafeArea(
+          child: Container(
+            child: FutureBuilder(
+              future: _usuarioService.obtenerUsuario(_pref.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  return Loading(mensaje: 'Cargando...');
+                final response = snapshot.data as MyResponse;
+                if (response.fallo)
+                  return Center(
+                    child: Text('Error al cargar datos'),
+                  );
+                usuario = Miembro.fromJson(response.data);
 
-    return FutureBuilder(
-      future: _usuarioService.obtenerUsuario(_pref.id),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting)
-          return Loading(mensaje: 'Cargando...');
-        final response = snapshot.data as MyResponse;
-        if (response.fallo)
-          return Center(
-            child: Text('Error al cargar datos'),
-          );
-        usuario = Miembro.fromJson(response.data);
-        return Action_Form(usuario: usuario, txtTarea: txtTarea, obraId: null);
-      },
+                return Action_Form(
+                    usuario: usuario, txtTarea: txtTarea, obraId: obraId);
+              },
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -148,8 +164,9 @@ class _Action_FormState extends State<Action_Form> {
                     anota: anotaciones![index], action: eliminarAnotacion),
               ),
       ),
-      InputTarea(
-          focus: focus, action: agregarAnotacion, txtTarea: widget.txtTarea)
+    //   InputTarea(
+    //       focus: focus, action: agregarAnotacion, txtTarea: widget.txtTarea)
+    // ]);
     ]);
   }
 
@@ -182,7 +199,7 @@ class _Action_FormState extends State<Action_Form> {
     });
   }
 
-  eliminarAnotacion(String id) {
+eliminarAnotacion(String id) {
     final _pref = new Preferences();
     _usuarioService.eliminarAnotacion(_pref.id, id).then((value) {
       if (value.fallo) {
@@ -196,13 +213,121 @@ class _Action_FormState extends State<Action_Form> {
   }
 }
 
+class AnotacionTile extends StatefulWidget {
+  AnotacionTile({Key? key, required this.anota, required this.action})
+      : super(key: key);
+  Anotacion anota;
+  Function action;
+
+  @override
+  State<AnotacionTile> createState() => _AnotacionTileState();
+}
+
+class _AnotacionTileState extends State<AnotacionTile> {
+  late UsuarioService _usuarioService;
+
+  @override
+  Widget build(BuildContext context) {
+    _usuarioService = Provider.of<UsuarioService>(context, listen: false);
+    return FadeInRight(
+      duration: Duration(milliseconds: 500),
+      child: Dismissible(
+        confirmDismiss: (direction) {
+          return openDialogConfirmationReturn(context, 'Confirme para borrar');
+        },
+        background: Container(
+            alignment: Alignment.centerRight,
+            child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Eliminar',
+                  style: TextStyle(color: Helper.brandColors[5]),
+                )),
+            color: Colors.red[400]),
+        onDismissed: (direction) => widget.action(widget.anota.id),
+        key: Key(widget.anota.id),
+        child: Column(
+          children: [
+            Theme(
+              data: ThemeData(unselectedWidgetColor: Helper.brandColors[4]),
+              child: ListTile(
+                trailing: Icon(
+                  widget.anota.realizado 
+                  ?  Icons.check_box
+                   : Icons.check_box_outline_blank_rounded,
+                    color: Helper.brandColors[8]),
+                title: Text(
+                  
+                  widget.anota.descripcion.replaceAll(RegExp(r'\n'), ' '),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Helper.brandColors[3]),
+                ),
+                onTap: () => Navigator.pushNamed(context, AnotacionForm.routeName, arguments: { "anotacion": widget.anota }),
+              ),
+              // child: CheckboxListTile(
+              //   tileColor: Helper.brandColors[1],
+              //   checkColor: Helper.brandColors[5],
+              //   activeColor: Helper.brandColors[8],
+              //   selectedTileColor: Helper.brandColors[8],
+              //   title: Text(
+              //     widget.anota.descripcion,
+              //     // overflow: TextOverflow.ellipsis,
+              //     style: TextStyle(color: Helper.brandColors[3]),
+              //   ),
+              //   onChanged: (value) => cambiarEstado(value!),
+              // },
+              // value: widget.tarea.realizado,
+              // value: widget.anota.realizado,
+            ),
+            // ),
+            Divider(
+              color: Helper.brandColors[8],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  actualizarAnota(Anotacion anota) async {
+    // final response = await _usuarioService.actualizarAnotacion();
+    // if (response.fallo)
+    //   openAlertDialog(context, 'Error al actualizar anotación');
+  }
+
+  cambiarEstado(bool value) {
+    final _pref = new Preferences();
+    widget.anota.cambioEstado(value);
+    _usuarioService.modificarAnotacion(_pref.id, widget.anota).then((value) {
+      if (value.fallo) {
+        openAlertDialog(context, 'Error al actualizar tarea',
+            subMensaje: value.error);
+        return;
+      }
+    });
+    setState(() {});
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 class AnotacionesPorObra extends StatelessWidget {
   AnotacionesPorObra({Key? key}) : super(key: key);
   late Miembro usuario;
 
   @override
   Widget build(BuildContext context) {
-    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
+    final _usuarioService = Provider.of<UsuarioService>(context);
     final _pref = new Preferences();
     TextEditingController txtTarea = new TextEditingController();
 
@@ -368,93 +493,3 @@ class _InputTareaState extends State<InputTarea> {
   }
 }
 
-class AnotacionTile extends StatefulWidget {
-  AnotacionTile({Key? key, required this.anota, required this.action})
-      : super(key: key);
-  Anotacion anota;
-  Function action;
-
-  @override
-  State<AnotacionTile> createState() => _AnotacionTileState();
-}
-
-class _AnotacionTileState extends State<AnotacionTile> {
-  late UsuarioService _usuarioService;
-
-  @override
-  Widget build(BuildContext context) {
-    _usuarioService = Provider.of<UsuarioService>(context, listen: false);
-    return FadeInRight(
-      duration: Duration(milliseconds: 500),
-      child: Dismissible(
-        confirmDismiss: (direction) {
-          return openDialogConfirmationReturn(context, 'Confirme para borrar');
-        },
-        background: Container(
-            alignment: Alignment.centerRight,
-            child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Eliminar',
-                  style: TextStyle(color: Helper.brandColors[5]),
-                )),
-            color: Colors.red[400]),
-        onDismissed: (direction) => widget.action(widget.anota.id),
-        key: Key(widget.anota.id),
-        child: Column(
-          children: [
-            Theme(
-              data: ThemeData(unselectedWidgetColor: Helper.brandColors[4]),
-              child: CheckboxListTile(
-                tileColor: Helper.brandColors[1],
-                checkColor: Helper.brandColors[5],
-                activeColor: Helper.brandColors[8],
-                selectedTileColor: Helper.brandColors[8],
-                title: Text(
-                  widget.anota.descripcion,
-                  // overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Helper.brandColors[3]),
-                ),
-                onChanged: (value) => cambiarEstado(value!),
-                value: widget.anota.realizado,
-              ),
-            ),
-            Divider(
-              color: Helper.brandColors[8],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  actualizarAnota(Anotacion anota) async {
-    // final response = await _usuarioService.actualizarAnotacion();
-    // if (response.fallo)
-    //   openAlertDialog(context, 'Error al actualizar anotación');
-  }
-
-  cambiarEstado(bool value) async {
-    bool loading = true;
-    try {
-      final _pref = new Preferences();
-      openLoadingDialog(context, mensaje: 'Actualizando...');
-      widget.anota.cambioEstado(value);
-      final response =
-          await _usuarioService.modificarAnotacion(_pref.id, widget.anota);
-      closeLoadingDialog(context);
-      loading = false;
-      if (response.fallo) {
-        openAlertDialog(context, 'Error al actualizar tarea',
-            subMensaje: response.error);
-        return;
-      }
-
-      setState(() {});
-    } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-
-      await openAlertDialogReturn(context, 'Error al actualizar');
-    }
-  }
-}

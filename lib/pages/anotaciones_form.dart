@@ -18,9 +18,11 @@ class AnotacionForm extends StatelessWidget {
   late String obraId;
   late Anotacion anotacion;
   late UsuarioService _usuarioService;
+  late bool isUsuario;
   String text = '';
   @override
   Widget build(BuildContext context) {
+    
     final args = ModalRoute.of(context)!.settings;
     final _pref = new Preferences();
     _usuarioService = Provider.of<UsuarioService>(context, listen: false);
@@ -30,8 +32,13 @@ class AnotacionForm extends StatelessWidget {
       is_new = false;
       anotacion = data['anotacion'];
       txtTarea.text = anotacion.descripcion;
-    } else {
-      obraId = data['obraId'];
+    } else if (data['usuarioId'] != null){ 
+      isUsuario = true;
+      obraId = '';
+      anotacion = new Anotacion('', obraId: obraId);
+    } else if (data['obraId'] != null){ 
+      isUsuario = false;
+       obraId = data['obraId'];
       anotacion = new Anotacion('', obraId: obraId);
     }
 
@@ -67,7 +74,6 @@ class AnotacionForm extends StatelessWidget {
                 },
               )),
             ),
-            bottomNavigationBar: CustomNavigatorFooter(),
           ),
         ));
   }
@@ -99,7 +105,7 @@ class AnotacionForm extends StatelessWidget {
       // if (widget.txtTarea.text.isNotEmpty) {
       final anotacion = Anotacion(text,
           id: Uuid().v4(),
-          obraId: obraId,
+          obraId: isUsuario ? null : obraId,
           realizado: realizado,
           tsGenerado: DateTime.now().millisecondsSinceEpoch);
       openLoadingDialog(context, mensaje: 'Grabando anotación...');

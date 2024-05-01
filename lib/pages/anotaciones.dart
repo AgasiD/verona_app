@@ -50,9 +50,7 @@ class AnotacionesPage extends StatelessWidget {
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: CustomNavigatorFooter(),
-    );
+      ),    );
   }
 }
 
@@ -150,70 +148,6 @@ eliminarAnotacion(String id) {
     });
     widget.usuario.eliminarAnotacion(id);
     //  setState(() {});
-  }
-}
-
-class InputTarea extends StatefulWidget {
-  InputTarea({
-    Key? key,
-    required this.focus,
-    required this.txtTarea,
-    required this.action,
-  }) : super(key: key);
-
-  Function action;
-  FocusNode focus;
-  final TextEditingController txtTarea;
-
-  @override
-  State<InputTarea> createState() => _InputTareaState();
-}
-
-class _InputTareaState extends State<InputTarea> {
-  @override
-  Widget build(BuildContext context) {
-    final inputDecoration = InputDecoration(
-        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-        hintText: 'Escriba descripción...',
-        focusedBorder: InputBorder.none,
-        border: InputBorder.none,
-        errorBorder: InputBorder.none,
-        suffixIcon: this.widget.txtTarea.text.isNotEmpty
-            ? IconButton(
-                splashColor: Colors.transparent,
-                // splashRadius: 12,
-                style: ButtonStyle(
-                    shadowColor: MaterialStateProperty.all(Colors.transparent)),
-                onPressed: () => widget.action(),
-                icon: Icon(
-                  Icons.send,
-                  color: Helper.brandColors[7],
-                ))
-            : null,
-        hintStyle: TextStyle(color: Helper.brandColors[3]),
-        errorMaxLines: 1);
-    return Container(
-      color: Helper.brandColors[2],
-      child: TextFormField(
-        autofocus: true,
-        minLines: 1,
-        focusNode: widget.focus,
-        textCapitalization: TextCapitalization.sentences,
-        controller: widget.txtTarea,
-        maxLines: 5,
-        autocorrect: false,
-        keyboardType: TextInputType.text,
-        textInputAction: TextInputAction.send,
-        keyboardAppearance: Brightness.dark,
-        decoration: inputDecoration,
-        style: TextStyle(color: Helper.brandColors[5]),
-        onChanged: (value) => {
-          if (widget.txtTarea.text.isEmpty || widget.txtTarea.text.length == 1)
-            setState(() {})
-        },
-        onFieldSubmitted: (a) => widget.action(),
-      ),
-    );
   }
 }
 
