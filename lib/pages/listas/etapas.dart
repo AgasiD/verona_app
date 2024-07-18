@@ -32,11 +32,11 @@ class EtapasObra extends StatelessWidget {
       body: Column(
         children: [
           Expanded(child: _Etapas(etapas: _obraService.obra.etapas)),
-          _pref.role == 1 || _pref.role == 2 ? MainButton(onPressed: ()=> Navigator.pushNamed(context, TareasSemanarias.routeName, arguments: { 'obras': [_obraService.obra] }), text: 'Resumen semanal' , width: 150, height: 30, color: Helper.brandColors[8], fontSize: 15,) : Container()
+          _pref.role == 1 || _pref.role == 2 || _pref.role == 8 ? MainButton(onPressed: ()=> Navigator.pushNamed(context, TareasSemanarias.routeName, arguments: { 'obras': [_obraService.obra] }), text: 'Resumen semanal' , width: 150, height: 30, color: Helper.brandColors[8], fontSize: 15,) : Container()
         ],
       ),
       floatingActionButton:
-          (_pref.role == 1 || _pref.role == 2 || _pref.role == 7)
+          (_pref.role == 1 || _pref.role == 2 || _pref.role == 8 || _pref.role == 7)
               ? FloatingActionButton(
                   onPressed: () =>
                       Navigator.pushNamed(context, EtapasExtrasPage.routeName, arguments: {'obra': _obraService.obra}),

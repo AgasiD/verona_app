@@ -123,12 +123,14 @@ class Obra {
           .map((e) => Propietario.fromJson(e))
           .toList(),
       pedidos: json["pedidos"] ?? [],
+
+      
       enabledFiles: (json["enabledFiles"] as List<dynamic>) ?? [],
       folderImages: json['folderImages'] ?? 'SinDato',
       rootDriveCliente: json['rootDriveCliente'] ?? 'SinDato',
       folderImagesCliente: json['folderImagesCliente'] ?? 'SinDato',
-      latitud: json['latitud'] ?? 0,
-      longitud: json['longitud'] ?? 0,
+      latitud: json['latitud'] ?? 0.00,
+      longitud: json['longitud'] ?? 0.00,
       folderPedidoImages: json['folderPedidoImages'] ?? 'SinDato',
       articulosId: json['articulosId'] ?? '',
       imageURL: json['imageURL'] ?? 'SinDato');

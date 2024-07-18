@@ -376,7 +376,7 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
 
     final _pref = new Preferences();
 
-    Map<int, FlexColumnWidth> columnWidths = _pref.role == 2 ? {
+    Map<int, FlexColumnWidth> columnWidths = _pref.role == 2 || _pref.role == 8 ? {
       0: FlexColumnWidth(3),
       1: FlexColumnWidth(1),
       2: FlexColumnWidth(1),
@@ -409,7 +409,7 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
               ),
             ),
             Visibility(
-              visible: _pref.role == 2,
+              visible: _pref.role == 2 || _pref.role == 8,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
@@ -450,7 +450,7 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
               decoration: InputDecoration(border: InputBorder.none),
             ),
             
-             _pref.role == 2 ? 
+             _pref.role == 2 || _pref.role == 8 ? 
                IconButton(
                   onPressed: editar
                       ? () => guardarInactividad()

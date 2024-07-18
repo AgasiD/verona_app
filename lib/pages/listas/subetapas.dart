@@ -29,7 +29,8 @@ class SubEtapasObra extends StatelessWidget {
           etapaId: _obraService.obra.etapas[index].id,
           subetapas: _obraService.obra.etapas[index].subetapas),
       floatingActionButton: (_pref.role == 1 ||
-              _pref.role == 2 ||
+              _pref.role == 2 || 
+              _pref.role == 8 || 
               _pref.role == 7)
           ? FloatingActionButton(
               onPressed: () => Navigator.pushNamed(

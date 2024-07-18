@@ -46,7 +46,7 @@ class _TareasCheckListState extends State<TareasCheckList> {
           title: Text('Tareas'),
           automaticallyImplyLeading: false,
           actions: [
-            _pref.role == 1 || _pref.role == 2 || _pref.role == 7
+            _pref.role == 1 || _pref.role == 2 || _pref.role == 8 || _pref.role == 7
                 ? IconButton(
                     onPressed: () {
                       editOrder = !editOrder;
@@ -73,6 +73,7 @@ class _TareasCheckListState extends State<TareasCheckList> {
       bottomNavigationBar: CustomNavigatorFooter(),
       floatingActionButton: (_pref.role == 1 ||
               _pref.role == 2 ||
+              _pref.role == 8 || 
               _pref.role == 7)
           ? FloatingActionButton(
               onPressed: () => Navigator.pushNamed(

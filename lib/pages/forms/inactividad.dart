@@ -182,7 +182,7 @@ class _FormState extends State<_Form> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Visibility(
-                      visible: _pref.role == 1 || _pref.role == 2,
+                      visible: _pref.role == 1 || _pref.role == 2 || _pref.role == 8,
                       child: MainButton(
                         color: Helper.brandColors[8],
                         onPressed: submitAction,

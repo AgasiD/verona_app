@@ -27,7 +27,7 @@ class Helper {
     Color(0xffB1770B),
     Color(0xffF8DE31),
   ];
-  static const ESTADOSPEDIDO = [1, 2, 3, 5];
+  static const ESTADOSPEDIDO = [1, 2, 3, 5];  
   static String nombre = 'Verona';
   static String iosURL =
       'https://apps.apple.com/ar/app/verona/id1620027565?l=en';
@@ -36,7 +36,7 @@ class Helper {
   static int limit = 25;
   //static double maxWidth = MediaQuery.of(context).size.wi dth
   //static AssetImage splashImage = AssetImage('assets/icon/do-splash.png');
-  static String version = '1.25.2';
+  static String version = '1.29.1';
   static String pushToken =
       'emHBj34PRTiMMMMea7q0B5:APA91bEIFvKKPYJYRcBW62_qqCV5_n_9WouqWVGbhjDTGbEjO54Lj_hSxQ1jWfaOQ_7m8veFU1srFUd4ElLxIZBWRexqdUs5gWyVsNQiU6r52lSdEMbolrtPWlAx6edW1l-DSa0EEAFx';
 
@@ -185,6 +185,8 @@ class Helper {
         return 'Delivery';
       case 7:
         return 'PM';
+      case 8:
+        return 'Administrador de Obra';
     }
     return 'Admin';
   }

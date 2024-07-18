@@ -165,10 +165,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       final _pref = new Preferences();
       if (_pref.id != null || _pref.id != '') {
         _socketService.connect(_pref.id);
+
+        final _notService =
+            Provider.of<NotificationService>(context, listen: false);
+        _notService.resetNotificationBadge();
+        final _usuario = Provider.of<UsuarioService>(context, listen: false);
+
+        final tokenResponse =
+            await _usuario.setTokenDevice(_pref.id, NotificationService.token!);
+        print(tokenResponse);
       }
-      final _notService =
-          Provider.of<NotificationService>(context, listen: false);
-      _notService.resetNotificationBadge();
 
       //renovar token
       // if (_pref.token != null && _pref.token != '') {

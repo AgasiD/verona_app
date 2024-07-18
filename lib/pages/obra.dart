@@ -605,7 +605,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
           Navigator.pushNamed(context, PedidoList.routeName,
               arguments: {'deliveryId': _pref.id});
         },
-      );
+      );  
       items.add(pedidos);
     }
     return items;

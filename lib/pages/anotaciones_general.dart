@@ -309,18 +309,6 @@ class _AnotacionTileState extends State<AnotacionTile> {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 class AnotacionesPorObra extends StatelessWidget {
   AnotacionesPorObra({Key? key}) : super(key: key);
   late Miembro usuario;

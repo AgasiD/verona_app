@@ -98,7 +98,7 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
 
     personalItems = widget.personal
         .map((e) =>
-            '${e.nombre.trim().toUpperCase()} ${e.apellido.trim().toUpperCase()}')
+            '${e.nombre.trim().toUpperCase()} ${e.apellido.trim().toUpperCase()}: ${e.dni}')
         .toList();
 
     administradoresItem = widget.admin
@@ -357,14 +357,14 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
       if (!await openDialogConfirmationReturn(
           context, 'Confirme para enviar notificación')) return;
 
-      openLoadingDialog(context, mensaje: 'Enviando notificación...');
       loading = true;
+      openLoadingDialog(context, mensaje: 'Enviando notificación...');
       final _notifService =
           Provider.of<NotificacionesService>(context, listen: false);
       String title = txtTitle.text.trim();
       String msg = txtMsg.text.trim();
       List<String> ids = obtenerIdByDni();
-      ids.addAll(obtenerByNombre());
+      // ids.addAll(obtenerByNombre());
       String idAuth = adminSelected;
       final _pref = new Preferences();
       final response = await _notifService.enviarNotificacion(
@@ -377,7 +377,7 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
       }
       openAlertDialog(context, 'Mensaje enviando con éxito');
     } catch (err) {
-      if (loading) closeLoadingDialog(context);
+      closeLoadingDialog(context);
       await openAlertDialogReturn(context, 'Error al enviar notificacion',
           subMensaje: err.toString());
     } finally {
@@ -391,14 +391,20 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
       idPropietariosSelected.forEach((item) {
         final dni = item.split(' ').last;
         final id =
-            widget.propietarios.singleWhere((prop) => prop.dni == dni).id;
+            widget.propietarios.where((prop) => prop.dni == dni).toList()[0].id;
+        ids.add(id);
+      });
+      idPersonalSelected.forEach((item) {
+        final dni = item.split(' ').last;
+        print(dni);
+        final id =
+            widget.personal.where((prop) => prop.dni == dni).toList()[0].id;
         ids.add(id);
       });
       return ids;
     } catch (err) {
-      openAlertDialog(context,
-          'Error al buscar ID de usuario seleccionado: ${err.toString()}');
-      throw new Exception();
+      
+      throw new Exception('Error al buscar ID de usuario seleccionado: ${err.toString()}');
     }
   }
 
@@ -407,17 +413,23 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
     try {
       idPersonalSelected.forEach((item) {
         final id = widget.personal
-            .singleWhere((personal) =>
+            .where((personal) =>
                 item ==
-                '${personal.nombre.trim().toUpperCase()} ${personal.apellido.trim().toUpperCase()}')
+            '${personal.nombre.trim().toUpperCase()} ${personal.apellido.trim().toUpperCase()}: ${personal.dni}').toList()[0]
+            .id;
+        ids.add(id);
+      });
+       idPropietariosSelected.forEach((item) {
+        final id = widget.propietarios
+            .where((prop) =>
+                item ==
+            '${prop.nombre.trim().toUpperCase()} ${prop.apellido.trim().toUpperCase()}: ${prop.dni}').toList()[0]
             .id;
         ids.add(id);
       });
       return ids;
     } catch (err) {
-      openAlertDialog(context,
-          'Error al buscar ID de usuario seleccionado: ${err.toString()}');
-      throw new Exception();
+      throw new Exception('Error al buscar ID de usuario seleccionado: ${err.toString()}');
     }
   }
 

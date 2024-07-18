@@ -57,7 +57,6 @@ class NotificationService extends ChangeNotifier {
     // when the app is in use or open
     if (message.notification != null) {}
     message.data.remove("navega");
-
     _messageStream.add(message);
   }
 

@@ -28,7 +28,7 @@ class AsignarEquipoPage extends StatelessWidget {
                 final profesionales = snapshot.data as List<Miembro>;
                 Map<String, List<Miembro>> profesiones;
 
-                final arq = profesionales.where((e) => e.role == 2).toList();
+                final arq = profesionales.where((e) => e.role == 2 && e.role == 8).toList();
                 final obreros =
                     profesionales.where((e) => e.role == 4 && !e.externo).toList();
                 final comp = profesionales.where((e) => e.role == 5).toList();

@@ -327,7 +327,7 @@ DateTime selectedDate = DateTime.now();
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Visibility(
-              visible: widget._pref.role == 1 || widget._pref.role == 2,
+              visible: widget._pref.role == 1 || widget._pref.role == 2 || widget._pref.role == 8,
               child: MainButton(
                 color: Helper.brandColors[8],
                 onPressed: () {
