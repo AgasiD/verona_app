@@ -35,14 +35,16 @@ class _ContactsPageState extends State<ContactsPage> {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-            future: _pref.role == 1 ? _usuarios.obtenerTodosUsuarios() : _usuarios.obtenerPersonal(),
+            future: _pref.role == 1
+                ? _usuarios.obtenerTodosUsuarios()
+                : _usuarios.obtenerPersonal(),
             builder: (_, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
+              if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(mensaje: 'Cargando contactos');
               } else if (snapshot.hasError) {
-                  return ErrorPage(
-                      errorMsg: snapshot.error.toString(), page: false);
-                } else {
+                return ErrorPage(
+                    errorMsg: snapshot.error.toString(), page: false);
+              } else {
                 final contactos = (snapshot.data as List<dynamic>)
                     .where((e) => e.id != _pref.id)
                     .toList();
@@ -222,10 +224,11 @@ class __ContactTileState extends State<_ContactTile> {
                 spacing: 30,
                 children: [
                   badges.Badge(
-                   badgeColor:  isConnected
+                      badgeStyle: badges.BadgeStyle(
+                    badgeColor: isConnected
                         ? Color.fromARGB(255, 163, 255, 167)!
                         : Color.fromARGB(255, 182, 43, 57)!,
-                  ),
+                  )),
                   Icon(
                     Icons.arrow_forward_ios_rounded,
                     color: Helper.brandColors[3],

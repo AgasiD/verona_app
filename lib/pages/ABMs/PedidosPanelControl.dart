@@ -19,7 +19,7 @@ class PedidosPanelControl extends StatefulWidget {
 
 class _PedidosPanelControlState extends State<PedidosPanelControl>
     with TickerProviderStateMixin {
-   late TabController _tabCtrl;
+  late TabController _tabCtrl;
 
   int index = 0;
 
@@ -95,18 +95,21 @@ class _PedidosPanelControlState extends State<PedidosPanelControl>
 
   obtenerPedidos(List<dynamic> obras, int estado) {
     var newObras = [];
-    obras = obras.where((obra) => (obra['pedidos'] as List).length > 0).toList();
+    obras =
+        obras.where((obra) => (obra['pedidos'] as List).length > 0).toList();
     obras.forEach((obra) {
       var filtrados = (obra["pedidos"] as List<dynamic>)
-           .where((pedido) => pedido['estado'] == estado).toList();
-           
-      filtrados.length > 0 ? newObras.add({
-        "nombre": obra["nombre"],
-        "barrio": obra["barrio"],
-        "obraId": obra["obraId"],
-        "pedidos": filtrados 
-      }) 
-      : false;
+          .where((pedido) => pedido['estado'] == estado)
+          .toList();
+
+      filtrados.length > 0
+          ? newObras.add({
+              "nombre": obra["nombre"],
+              "barrio": obra["barrio"],
+              "obraId": obra["obraId"],
+              "pedidos": filtrados
+            })
+          : false;
     });
     return newObras;
     // return newObras.toList();
@@ -121,117 +124,127 @@ class _PendientesView extends StatefulWidget {
   State<_PendientesView> createState() => _PendientesViewState();
 }
 
-late SocketService  _socketService;
+late SocketService _socketService;
 
 class _PendientesViewState extends State<_PendientesView> {
   @override
   Widget build(BuildContext context) {
-   final _obraService = Provider.of<ObraService>(context, listen: false);
-   _socketService = Provider.of<SocketService>(context);
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+    _socketService = Provider.of<SocketService>(context);
 
-    return widget.pendientes.length > 0 
-    ? ListView.builder(
-      
-      itemCount: widget.pendientes.length,
-      itemBuilder: (context, i)  {
-      final obra = widget.pendientes[i];
+    return widget.pendientes.length > 0
+        ? ListView.builder(
+            itemCount: widget.pendientes.length,
+            itemBuilder: (context, i) {
+              final obra = widget.pendientes[i];
 
-      return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: Helper.brandColors[9], width: .2),
-            borderRadius: BorderRadius.circular(5),
-            color: Helper.brandColors[0],
-          ),
-          child: ListTile(
-            title: Text('${obra['nombre'].toString().toUpperCase()} | ${obra['barrio'].toString().toUpperCase()} '),
-            textColor: Helper.brandColors[5],
-          ),
-        ),
-        obra['pedidos'].length > 0
-            ? ListView.builder(
-                itemCount: obra['pedidos'].length,
-                physics: ClampingScrollPhysics(),
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-                  final esPar = index % 2 == 0;
-                  final arg = {
-                    'pedidoId': obra['pedidos'][index]['id'],
-                    'obraId': obra['obraId']
-                  };
-                                    final txtFecha = 'Fecha Pedido ${Helper.getFechaFromTS(obra['pedidos'][index]['ts'])}';
-                  final textSubtitle = obra['pedidos'][index]['fechaEstimada'] == ''
-                      ? "${("Fecha deseada").toUpperCase()} ${obra['pedidos'][index]['fechaDeseada']}"
-                      : "${("Fecha de entrega").toUpperCase()} ${obra['pedidos'][index]['fechaEstimada']}";
-                  return Column(
-                    children: [
-                      _CustomListTile(
-                        esNovedad: _tieneNovedad(obra['obraId'],
-                            obra['pedidos'][index]['id']),
-                        esPar: false,
-                        title:
-                            "${obra['pedidos'][index]['titulo'].toString().toUpperCase()}",
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                             Text(  txtFecha.toUpperCase(),
-                              style: TextStyle(
-                                  color: Helper.brandColors[8].withOpacity(.8)),),
-                            Text(
-                              textSubtitle.toUpperCase(),
-                              style: TextStyle(
-                                  color: Helper.brandColors[8].withOpacity(.8)),
-                            ),
-                            Text(
-                              ('Por: ${obra['pedidos'][index]['usuario']['nombre']} ${obra['pedidos'][index]['usuario']['apellido']}')
-                                 .toUpperCase(),
-                              style: TextStyle(
-                                  color: Helper.brandColors[8].withOpacity(.8)),
-                            ),
-                          ],
-                        ),
-                        avatar: obra['pedidos'][index]['prioridad'].toString(),
-                        fontSize: 18,
-                        onTap: true,
-                        actionOnTap: () => Navigator.pushNamed(
-                            context, PedidoForm.routeName,
-                            arguments: arg),
-                      ),
-                      index != obra['pedidos'].length - 1
-                          ? Divider(
-                              color: Helper.brandColors[8],
-                            )
-                          : Container()
-                    ],
-                  );
-                })
-            : ListTile(
-                title: Text(
-                  'No hay pedidos',
-                  style: TextStyle(color: Helper.brandColors[3], fontSize: 19),
-                ),
-              )
-      ],
-    );}
-    )
-    : Container(
-              height: MediaQuery.of(context).size.height,
-              child: Center(
-                  child: Text(
-                    'No hay pedidos',
-                    style: TextStyle(color: Helper.brandColors[3], fontSize: 19),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      border:
+                          Border.all(color: Helper.brandColors[9], width: .2),
+                      borderRadius: BorderRadius.circular(5),
+                      color: Helper.brandColors[0],
+                    ),
+                    child: ListTile(
+                      title: Text(
+                          '${obra['nombre'].toString().toUpperCase()} | ${obra['barrio'].toString().toUpperCase()} '),
+                      textColor: Helper.brandColors[5],
+                    ),
                   ),
-                ),
-            );
-            
+                  obra['pedidos'].length > 0
+                      ? ListView.builder(
+                          itemCount: obra['pedidos'].length,
+                          physics: ClampingScrollPhysics(),
+                          shrinkWrap: true,
+                          itemBuilder: (BuildContext context, int index) {
+                            final esPar = index % 2 == 0;
+                            final arg = {
+                              'pedidoId': obra['pedidos'][index]['id'],
+                              'obraId': obra['obraId']
+                            };
+                            final txtFecha =
+                                'Fecha Pedido ${Helper.getFechaFromTS(obra['pedidos'][index]['ts'])}';
+                            final textSubtitle = obra['pedidos'][index]
+                                        ['fechaEstimada'] ==
+                                    ''
+                                ? "${("Fecha deseada").toUpperCase()} ${obra['pedidos'][index]['fechaDeseada']}"
+                                : "${("Fecha de entrega").toUpperCase()} ${obra['pedidos'][index]['fechaEstimada']}";
+                            return Column(
+                              children: [
+                                _CustomListTile(
+                                  esNovedad: _tieneNovedad(obra['obraId'],
+                                      obra['pedidos'][index]['id']),
+                                  esPar: false,
+                                  title:
+                                      "${obra['pedidos'][index]['titulo'].toString().toUpperCase()}",
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        txtFecha.toUpperCase(),
+                                        style: TextStyle(
+                                            color: Helper.brandColors[8]
+                                                .withOpacity(.8)),
+                                      ),
+                                      Text(
+                                        textSubtitle.toUpperCase(),
+                                        style: TextStyle(
+                                            color: Helper.brandColors[8]
+                                                .withOpacity(.8)),
+                                      ),
+                                      Text(
+                                        ('Por: ${obra['pedidos'][index]['usuario']['nombre']} ${obra['pedidos'][index]['usuario']['apellido']}')
+                                            .toUpperCase(),
+                                        style: TextStyle(
+                                            color: Helper.brandColors[8]
+                                                .withOpacity(.8)),
+                                      ),
+                                    ],
+                                  ),
+                                  avatar: obra['pedidos'][index]['prioridad']
+                                      .toString(),
+                                  fontSize: 18,
+                                  onTap: true,
+                                  actionOnTap: () => Navigator.pushNamed(
+                                      context, PedidoForm.routeName,
+                                      arguments: arg),
+                                ),
+                                index != obra['pedidos'].length - 1
+                                    ? Divider(
+                                        color: Helper.brandColors[8],
+                                      )
+                                    : Container()
+                              ],
+                            );
+                          })
+                      : ListTile(
+                          title: Text(
+                            'No hay pedidos',
+                            style: TextStyle(
+                                color: Helper.brandColors[3], fontSize: 19),
+                          ),
+                        )
+                ],
+              );
+            })
+        : Container(
+            height: MediaQuery.of(context).size.height,
+            child: Center(
+              child: Text(
+                'No hay pedidos',
+                style: TextStyle(color: Helper.brandColors[3], fontSize: 19),
+              ),
+            ),
+          );
+  }
 
-}
- _tieneNovedad(String obraId, String pedidoId) {
-    final dato = (_socketService.novedades??[]).indexWhere((novedad) =>
+  _tieneNovedad(String obraId, String pedidoId) {
+    final dato = (_socketService.novedades ?? []).indexWhere((novedad) =>
         novedad['tipo'] == 1 &&
         novedad['obraId'] == obraId &&
         novedad['pedidoId'] == pedidoId);
@@ -239,9 +252,6 @@ class _PendientesViewState extends State<_PendientesView> {
     return dato >= 0;
   }
 }
-
-
-
 
 class _CustomListTile extends StatelessWidget {
   bool esPar;
@@ -306,9 +316,11 @@ class _CustomListTile extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                           esNovedad
+                          esNovedad
                               ? badges.Badge(
-                                  badgeColor: Helper.brandColors[8],
+                                  badgeStyle: badges.BadgeStyle(
+                                    badgeColor: Helper.brandColors[8],
+                                  ),
                                   badgeContent: Padding(
                                     padding: const EdgeInsets.all(0),
                                     // child: Text(badgeData.toString()),
@@ -329,7 +341,8 @@ class _CustomListTile extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(Helper.toTextPrioridad(int.parse(avatar)).toUpperCase()),
+                      Text(Helper.toTextPrioridad(int.parse(avatar))
+                          .toUpperCase()),
                     ],
                   ),
                 ),

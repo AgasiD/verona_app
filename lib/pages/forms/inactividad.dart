@@ -195,7 +195,7 @@ class _FormState extends State<_Form> {
                           Navigator.pop(context);
                         },
                         text: 'Cancelar',
-                        width: 100,
+                        width: 95,
                         color: Helper.brandColors[2]),
                   ],
                 )
@@ -217,7 +217,7 @@ class _FormState extends State<_Form> {
         
       ),
       dialogSize: Size(width, height),
-      initialValue: [selectedDate],
+      value: [selectedDate],
       borderRadius: BorderRadius.circular(5),
     );
 

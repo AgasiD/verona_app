@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
 import 'package:verona_app/helpers/Preferences.dart';
+import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/noticias.dart';
@@ -267,7 +268,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       scaffoldMessengerKey: messengerKey, // Snacks
       routes: appRoutes,
       themeMode: ThemeMode.dark,
-    );
+      theme: ThemeData(
+        appBarTheme:AppBarTheme(
+          iconTheme: IconThemeData(
+            color: Helper.brandColors[4],  // Color del ícono del botón de retroceso
+          ),
+          titleTextStyle: TextStyle(
+            color: Helper.brandColors[3], // Color del título en el AppBar
+            fontSize: 20, // Tamaño de la fuente
+            fontWeight: FontWeight.bold, // Estilo de la fuente
+          ),
+      ),
+    ));
   }
 }
 

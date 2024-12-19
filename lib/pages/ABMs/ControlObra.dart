@@ -411,7 +411,6 @@ class _SubetapasViewState extends State<_SubetapasView> {
             Padding(
                 padding: const EdgeInsets.only(left: 0),
                 child: DropdownButtonFormField2(
-                  dropdownWidth: 200,
                   isExpanded: false,
                   onChanged: (a) {
                     widget.subetapas[i].etapa = a as String;
@@ -420,15 +419,9 @@ class _SubetapasViewState extends State<_SubetapasView> {
                   value: widget.subetapas[i].etapa.toString(),
                   items: etapas,
                   style: TextStyle(color: Helper.brandColors[5], fontSize: 14),
-                  icon: Icon(
-                    Icons.arrow_drop_down,
-                    color: Helper.brandColors[3],
-                  ),
-                  dropdownDecoration: BoxDecoration(
-                    // borderRadius: BorderRadius.circular(15),
-                    border: null,
-                    color: Helper.brandColors[2],
-                  ),
+                 decoration: getDecoration(),
+                        dropdownStyleData: DropdownStyleData(
+                            decoration: getDropdownDecoration()),
                 )),
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
@@ -634,15 +627,9 @@ class _TareasViewState extends State<_TareasView> {
                         color: Helper.brandColors[5],
                         fontSize: 14,
                         overflow: TextOverflow.ellipsis),
-                    icon: Icon(
-                      Icons.arrow_drop_down,
-                      color: Helper.brandColors[3],
-                    ),
-                    dropdownDecoration: BoxDecoration(
-                      // borderRadius: BorderRadius.circular(15),
-                      border: null,
-                      color: Helper.brandColors[2],
-                    ),
+                   decoration: getDecoration(),
+                        dropdownStyleData: DropdownStyleData(
+                            decoration: getDropdownDecoration()),
                   ),
                 )),
             Padding(
@@ -962,4 +949,30 @@ class _ItemPaginator extends StatelessWidget {
               child: text)),
     );
   }
+}
+getDecoration() {
+  return InputDecoration(
+      focusColor: Helper.brandColors[9],
+      contentPadding: EdgeInsets.zero,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+      ),
+      fillColor: Helper.brandColors[1],
+      filled: true);
+}
+
+getDropdownDecoration() {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(15),
+    color: Helper.brandColors[2],
+  );
 }

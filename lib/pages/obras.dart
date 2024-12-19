@@ -177,7 +177,7 @@ class _ObrasPageState extends State<ObrasPage> {
         'icon': Icons.request_page,
         'name': 'Pedidos',
         'route': PedidosPanelControl.routeName,
-        'roles': [1, 2, 5 ],
+        'roles': [1, 2, 5],
       },
       {
         'icon': Icons.work_off,
@@ -323,8 +323,7 @@ class __SearchListViewState extends State<_SearchListView> {
                     );
                   }
                 } catch (err) {
-                  return ErrorPage(
-                      errorMsg: err.toString(), page: false);
+                  return ErrorPage(errorMsg: err.toString(), page: false);
                 }
               }
             }));
@@ -467,11 +466,11 @@ class _CustomObrasState extends State<_CustomObras> {
                 textController: obrasTxtController,
                 onChange: (text) {
                   widget.obrasFiltradas = widget.obras
-                      .where((obra) => obra.nombre
-                          .toLowerCase()
-                          .contains(text.toLowerCase()) || obra.lote
-                          .toLowerCase()
-                          .contains(text.toLowerCase()))
+                      .where((obra) =>
+                          obra.nombre
+                              .toLowerCase()
+                              .contains(text.toLowerCase()) ||
+                          obra.lote.toLowerCase().contains(text.toLowerCase()))
                       .toList();
                   setState(() {});
                 },
@@ -641,7 +640,9 @@ class View_ObraCard extends StatelessWidget {
                           top: 10,
                           left: 10,
                           child: badges.Badge(
-                            badgeColor: Helper.brandColors[8],
+                            badgeStyle: badges.BadgeStyle(
+                              badgeColor: Helper.brandColors[8],
+                            ),
                             badgeContent: Padding(
                               padding: const EdgeInsets.all(0),
                               // child: Text(badgeData.toString()),
@@ -706,7 +707,6 @@ class View_ObraCard extends StatelessWidget {
         : Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-             
               Container(
                 padding: EdgeInsets.symmetric(vertical: 10),
                 width: MediaQuery.of(context).size.width * .47,
@@ -716,7 +716,9 @@ class View_ObraCard extends StatelessWidget {
                           top: 10,
                           left: 10,
                           child: badges.Badge(
-                            badgeColor: Helper.brandColors[8],
+                            badgeStyle: badges.BadgeStyle(
+                              badgeColor: Helper.brandColors[8],
+                            ),
                             badgeContent: Padding(
                               padding: const EdgeInsets.all(0),
                               // child: Text(badgeData.toString()),
@@ -727,7 +729,6 @@ class View_ObraCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -777,7 +778,7 @@ class View_ObraCard extends StatelessWidget {
                       )
                 ]),
               ),
-               Expanded(
+              Expanded(
                   child: CachedNetworkImage(
                 imageUrl: obra.imageURL,
                 imageBuilder: (context, imageProvider) => Container(

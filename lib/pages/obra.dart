@@ -698,7 +698,9 @@ class CaracteristicaButton extends StatelessWidget {
               children: [
                 tieneNovedad(_obraService.obra.id, listItem, _socketService)
                     ? badges.Badge(
+                      badgeStyle: badges.BadgeStyle(
                         badgeColor: Helper.brandColors[8],
+                      ),
                         child: Padding(
                           padding: const EdgeInsets.all(0),
                           // child: Text(badgeData.toString()),

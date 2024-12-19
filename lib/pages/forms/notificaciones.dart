@@ -170,7 +170,7 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                             color: Helper.brandColors[5], fontSize: 17),
                       ),
                     ),
-                    selected_values_style: TextStyle(color: Colors.white),
+                    selectedValuesStyle: TextStyle(color: Colors.white),
                     options: propietariosItems,
                     selectedValues: idPropietariosSelected,
                     whenEmpty: 'Sin obras seleccionadas',
@@ -208,7 +208,7 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                             style: TextStyle(
                                 color: Helper.brandColors[5], fontSize: 17),
                           )),
-                      selected_values_style: TextStyle(color: Colors.white),
+                      selectedValuesStyle: TextStyle(color: Colors.white),
                       options: personalItems,
                       selectedValues: idPersonalSelected,
                       whenEmpty: 'Sin obras seleccionadas',
@@ -245,21 +245,10 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                           value: adminSelected,
                           items: administradoresItem,
                           style: TextStyle(
-                              color: Helper.brandColors[5], fontSize: 16),
-                          iconSize: 30,
-                          // buttonWidth: 30,
-                          buttonHeight: 50,
-                          buttonPadding: EdgeInsets.only(left: 5, right: 10),
+                              color: Helper.brandColors[5], fontSize: 16),                    
                           decoration: getDecoration(),
-
-                          icon: Icon(
-                            Icons.arrow_drop_down,
-                            color: Helper.brandColors[4],
-                          ),
-                          dropdownDecoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Helper.brandColors[2],
-                          ),
+                        dropdownStyleData: DropdownStyleData(
+                            decoration: getDropdownDecoration()),
                           onChanged: (value) {
                             adminSelected = value as String;
                           },
@@ -464,4 +453,33 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
       idPersonalSelected = personalItems.map((e) => e).toList();
     });
   }
+}
+
+
+
+getDecoration() {
+  return InputDecoration(
+      focusColor: Helper.brandColors[9],
+      contentPadding: EdgeInsets.zero,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+      ),
+      fillColor: Helper.brandColors[1],
+      filled: true);
+}
+
+getDropdownDecoration() {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(15),
+    color: Helper.brandColors[2],
+  );
 }

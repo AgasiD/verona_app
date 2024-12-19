@@ -413,10 +413,7 @@ class _FilterBarState extends State<FilterBar> {
                               items: widget.personal,
                               style: TextStyle(
                                   color: Helper.brandColors[5], fontSize: 16),
-                              iconSize: 30,
-                              buttonHeight: 60,
-                              buttonPadding:
-                                  EdgeInsets.only(left: 20, right: 5),
+                          
                               decoration: Helper.getDecoration(),
                               hint: FittedBox(
                                 child: Text(
@@ -426,17 +423,6 @@ class _FilterBarState extends State<FilterBar> {
                                       fontSize: 12,
                                       color: Helper.brandColors[3]),
                                 ),
-                              ),
-                              icon: Icon(
-                                Icons.arrow_drop_down,
-                                color: Helper.brandColors[3],
-                              ),
-                              dropdownMaxHeight:
-                                  MediaQuery.of(context).size.height * .4,
-                              dropdownWidth: 300,
-                              dropdownDecoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Helper.brandColors[2],
                               ),
                               onChanged: (value) {
                                 userSelected = value as String;
@@ -465,10 +451,6 @@ class _FilterBarState extends State<FilterBar> {
                               items: obrasItems,
                               style: TextStyle(
                                   color: Helper.brandColors[5], fontSize: 16),
-                              iconSize: 30,
-                              buttonHeight: 60,
-                              buttonPadding:
-                                  EdgeInsets.only(left: 20, right: 10),
                               decoration: Helper.getDecoration(),
                               hint: FittedBox(
                                 fit: BoxFit.contain,
@@ -479,17 +461,8 @@ class _FilterBarState extends State<FilterBar> {
                                       color: Helper.brandColors[3]),
                                 ),
                               ),
-                              icon: Icon(
-                                Icons.arrow_drop_down,
-                                color: Helper.brandColors[3],
-                              ),
-                              dropdownMaxHeight:
-                                  MediaQuery.of(context).size.height * .4,
-                              dropdownWidth: 250,
-                              dropdownDecoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Helper.brandColors[2],
-                              ),
+                        dropdownStyleData: DropdownStyleData(
+                            decoration: getDropdownDecoration()),
                               onChanged: (value) {
                                 obraSelected = value as String;
                               }),
@@ -903,4 +876,32 @@ class _TaskTileState extends State<_TaskTile> {
     return _obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
         1;
   }
+}
+
+
+getDecoration() {
+  return InputDecoration(
+      focusColor: Helper.brandColors[9],
+      contentPadding: EdgeInsets.zero,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+      ),
+      fillColor: Helper.brandColors[1],
+      filled: true);
+}
+
+getDropdownDecoration() {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(15),
+    color: Helper.brandColors[2],
+  );
 }

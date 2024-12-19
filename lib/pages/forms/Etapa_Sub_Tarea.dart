@@ -161,12 +161,12 @@ class _FormState extends State<_Form> {
                   onPressed: () => Navigator.pop(context, null),
                   text: 'Cancelar',
                   color: Helper.brandColors[3],
-                  width: 120,
+                  width: 95,
                 ),
                 MainButton(
                   onPressed: () => grabar(),
                   text: 'Grabar',
-                  width: 120.0,
+                  width: 95.0,
                   color: Helper.brandColors[8],
                 )
               ],

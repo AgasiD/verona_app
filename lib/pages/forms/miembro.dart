@@ -235,9 +235,7 @@ class _Form extends StatelessWidget {
                               value: personalSelected,
                               style: TextStyle(
                                   color: Helper.brandColors[5], fontSize: 16),
-                              iconSize: 30,
-                              buttonHeight: 60,
-                              buttonPadding: EdgeInsets.only(left: 20, right: 10),
+                             
                               decoration: InputDecoration(
                                   focusColor: Helper.brandColors[9],
                                   contentPadding: EdgeInsets.zero,
@@ -262,14 +260,8 @@ class _Form extends StatelessWidget {
                                 'Seleccione puesto',
                                 style: TextStyle(fontSize: 16, color: colorHint),
                               ),
-                              icon: Icon(
-                                Icons.arrow_drop_down,
-                                color: colorHint,
-                              ),
-                              dropdownDecoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Helper.brandColors[2],
-                              ),
+                        dropdownStyleData: DropdownStyleData(
+                            decoration: getDropdownDecoration()),
                               onChanged: (value) {
                                 personalSelected = value.toString();
                                 //Do something when changing the item if you want.
@@ -281,7 +273,7 @@ class _Form extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               MainButton(
-                                width: 120,
+                                width: 95,
                                 fontSize: 18,
                                 color: Helper.brandColors[8]
                                     .withOpacity(.5)
@@ -292,7 +284,7 @@ class _Form extends StatelessWidget {
                                 },
                               ),
                               SecondaryButton(
-                                  width: 120,
+                                  width: 95,
                                   fontSize: 18,
                                   color: Helper.brandColors[2],
                                   text: 'Cancelar',
@@ -381,4 +373,32 @@ class _Form extends StatelessWidget {
     txtTelefonoCtrl.text = '';
     txtMailCtrl.text = '';
   }
+}
+
+
+getDecoration() {
+  return InputDecoration(
+      focusColor: Helper.brandColors[9],
+      contentPadding: EdgeInsets.zero,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+      ),
+      fillColor: Helper.brandColors[1],
+      filled: true);
+}
+
+getDropdownDecoration() {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(15),
+    color: Helper.brandColors[2],
+  );
 }

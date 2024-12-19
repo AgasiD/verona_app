@@ -242,22 +242,12 @@ DateTime selectedDate = DateTime.now();
                   value: widget.selectedInactividad,
                   items: widget.inactividadesItems,
                   style: TextStyle(color: Helper.brandColors[5], fontSize: 16),
-                  iconSize: 30,
-                  buttonHeight: 60,
-                  buttonPadding: EdgeInsets.only(left: 20, right: 10),
                   decoration: getDecoration(),
                   hint: Text(
                     'Seleccione inactividad',
                     style: TextStyle(fontSize: 16, color: widget.colorHint),
                   ),
-                  icon: Icon(
-                    Icons.arrow_drop_down,
-                    color: widget.colorHint,
-                  ),
-                  dropdownDecoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Helper.brandColors[2],
-                  ),
+               
                   onChanged: (value) {
                     setState(() {
                       setInactividad(value as String);
@@ -302,7 +292,7 @@ DateTime selectedDate = DateTime.now();
                 textAlign: TextAlign.right,
                 style: TextStyle(color: Helper.brandColors[5], fontSize: 17),
               )),
-          selected_values_style: TextStyle(color: Colors.white),
+          selectedValuesStyle: TextStyle(color: Colors.white),
           options: values,
           selectedValues: selected,
           whenEmpty: 'Sin obras seleccionadas',
@@ -343,7 +333,7 @@ DateTime selectedDate = DateTime.now();
                   Navigator.pop(context);
                 },
                 text: 'Cancelar',
-                width: 100,
+                width: 95,
                 color: Helper.brandColors[2]),
           ],
         )
@@ -363,7 +353,8 @@ DateTime selectedDate = DateTime.now();
         closeDialogOnCancelTapped: true,
       ),
       dialogSize: Size(width, height),
-      initialValue: [selectedDate],
+
+      value: [selectedDate],
       borderRadius: BorderRadius.circular(5),
     );
 
