@@ -97,6 +97,7 @@ class HttpService extends ChangeNotifier {
     return imgId;
   }
 
+
   uploadDocument(FilePickerResult file, String endpoint) async {
     String imgId = '';
     // open a bytestream
