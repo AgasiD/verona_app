@@ -13,21 +13,24 @@ import 'package:verona_app/widgets/custom_widgets.dart';
 import 'anotaciones_form.dart';
 
 class AnotacionesPage extends StatelessWidget {
-  AnotacionesPage({Key? key}) : super(key: key);
+  AnotacionesPage({Key? key, required this.obraId}) : super(key: key);
   static final routeName = 'anotaciones';
+  String obraId;
   TextEditingController txtTarea = new TextEditingController();
 
   late Miembro usuario;
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as Map;
-    String? obraId = args['obraId'];
     final _pref = new Preferences();
     final _usuarioService = Provider.of<UsuarioService>(context);
     return Scaffold(
       backgroundColor: Helper.brandColors[1],
-      floatingActionButton: CustomNavigatorButton(icono: Icons.add, accion: () => Navigator.pushNamed(context, AnotacionForm.routeName, arguments: { "obraId": obraId }), showNotif: false),
+      floatingActionButton: CustomNavigatorButton(
+          icono: Icons.add,
+          accion: () => Navigator.pushNamed(context, AnotacionForm.routeName,
+              arguments: {"obraId": obraId}),
+          showNotif: false),
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: SafeArea(
@@ -50,7 +53,8 @@ class AnotacionesPage extends StatelessWidget {
             ),
           ),
         ),
-      ),    );
+      ),
+    );
   }
 }
 
@@ -102,9 +106,9 @@ class _Action_FormState extends State<Action_Form> {
                     anota: anotaciones![index], action: eliminarAnotacion),
               ),
       ),
-    //   InputTarea(
-    //       focus: focus, action: agregarAnotacion, txtTarea: widget.txtTarea)
-    // ]);
+      //   InputTarea(
+      //       focus: focus, action: agregarAnotacion, txtTarea: widget.txtTarea)
+      // ]);
     ]);
   }
 
@@ -137,15 +141,13 @@ class _Action_FormState extends State<Action_Form> {
     });
   }
 
-eliminarAnotacion(String id) {
+  eliminarAnotacion(String id) async {
     final _pref = new Preferences();
-    _usuarioService.eliminarAnotacion(_pref.id, id).then((value) {
-      if (value.fallo) {
-        openAlertDialog(context, 'Error al eliminar anotacion',
-            subMensaje: value.error);
-        return;
-      }
-    });
+    final value = await _usuarioService.eliminarAnotacion(_pref.id, id);
+    if (value.fallo) {
+      openAlertDialog(context, 'Error al eliminar anotacion',
+          subMensaje: value.error);
+    }
     widget.usuario.eliminarAnotacion(id);
     //  setState(() {});
   }
@@ -190,17 +192,18 @@ class _AnotacionTileState extends State<AnotacionTile> {
               data: ThemeData(unselectedWidgetColor: Helper.brandColors[4]),
               child: ListTile(
                 trailing: Icon(
-                  widget.anota.realizado 
-                  ?  Icons.check_box
-                   : Icons.check_box_outline_blank_rounded,
+                    widget.anota.realizado
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank_rounded,
                     color: Helper.brandColors[8]),
                 title: Text(
-                  
                   widget.anota.descripcion.replaceAll(RegExp(r'\n'), ' '),
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: Helper.brandColors[3]),
                 ),
-                onTap: () => Navigator.pushNamed(context, AnotacionForm.routeName, arguments: { "anotacion": widget.anota }),
+                onTap: () => Navigator.pushNamed(
+                    context, AnotacionForm.routeName,
+                    arguments: {"anotacion": widget.anota}),
               ),
               // child: CheckboxListTile(
               //   tileColor: Helper.brandColors[1],

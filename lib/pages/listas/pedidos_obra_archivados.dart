@@ -244,7 +244,10 @@ class _CustomListTile extends StatelessWidget {
                         children: [
                           esNovedad
                               ? badges.Badge(
+                                badgeStyle: badges.BadgeStyle(
                                   badgeColor: Helper.brandColors[8],
+                                  
+                                ),
                                   badgeContent: Padding(
                                     padding: const EdgeInsets.all(0),
                                     // child: Text(badgeData.toString()),

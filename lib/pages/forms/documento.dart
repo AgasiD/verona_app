@@ -213,25 +213,18 @@ class _FormState extends State<_Form> {
               height: 40,
             ),
             DropdownButtonFormField2(
+              
               value: fileType,
               items: formato,
               style: TextStyle(color: Helper.brandColors[5], fontSize: 16),
-              iconSize: 30,
-              buttonHeight: 60,
-              buttonPadding: EdgeInsets.only(left: 20, right: 10),
+          
               decoration: getDecoration(),
               hint: Text(
                 '',
                 style: TextStyle(fontSize: 16, color: Helper.brandColors[3]),
               ),
-              icon: Icon(
-                Icons.arrow_drop_down,
-                color: Helper.brandColors[3],
-              ),
-              dropdownDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Helper.brandColors[2],
-              ),
+                        dropdownStyleData: DropdownStyleData(
+                            decoration: getDropdownDecoration()),
               onChanged: (value) {
                 setState(() {
                   fileType = value.toString();
@@ -410,7 +403,7 @@ class _FormState extends State<_Form> {
                         Navigator.pop(context);
                       },
                       text: 'Cancelar',
-                      width: 100,
+                      width: 95,
                       color: Helper.brandColors[2]),
                 ],
               ),
@@ -440,4 +433,31 @@ class _FormState extends State<_Form> {
         fillColor: Helper.brandColors[1],
         filled: true);
   }
+}
+
+getDecoration() {
+  return InputDecoration(
+      focusColor: Helper.brandColors[9],
+      contentPadding: EdgeInsets.zero,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+      ),
+      fillColor: Helper.brandColors[1],
+      filled: true);
+}
+
+getDropdownDecoration() {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(15),
+    color: Helper.brandColors[2],
+  );
 }

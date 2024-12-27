@@ -181,7 +181,7 @@ class _FormState extends State<_Form> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 MainButton(
-                    width: 100,
+                    width: 95,
                     color: Helper.brandColors[8],
                     onPressed: () {
                       widget.propietario == null
@@ -191,7 +191,7 @@ class _FormState extends State<_Form> {
                     },
                     text: 'Grabar'),
                 SecondaryButton(
-                    width: 100,
+                    width: 95,
                     color: Helper.brandColors[0],
                     onPressed: () {
                       Navigator.pop(context);

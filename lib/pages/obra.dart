@@ -25,6 +25,7 @@ import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 class ObraPage extends StatelessWidget {
   static const String routeName = 'obra';
@@ -589,8 +590,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         titulo: 'Anotaciones',
         values: [].toList(),
         accion: () {
-          Navigator.pushNamed(context, AnotacionesPage.routeName,
-              arguments: {"obraId": obra.id});
+          Navigator.push(context, MaterialPageRoute(builder: (c) =>  AnotacionesPage(obraId: obra.id)));
         },
       );
       items.add(anotaciones);
@@ -698,7 +698,9 @@ class CaracteristicaButton extends StatelessWidget {
               children: [
                 tieneNovedad(_obraService.obra.id, listItem, _socketService)
                     ? badges.Badge(
-                        badgeColor: Helper.brandColors[8],
+                        badgeStyle: badges.BadgeStyle(
+                          badgeColor: Helper.brandColors[8],
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(0),
                           // child: Text(badgeData.toString()),
@@ -798,25 +800,41 @@ class _ObraBigrafy extends StatelessWidget {
         SizedBox(
           height: 10,
         ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Helper.textGradient([
-              Helper.brandColors[8],
-              Helper.brandColors[9]
-            ], this.obra.nombre, fontsize: 42.0),
 
-            Container(
-              margin: EdgeInsets.only(left: 20),
-              child: Text(this.obra.lote,
-                  style: TextStyle(
-                      color: Helper.brandColors[5],
-                      fontSize: 20,
-                      fontWeight: FontWeight.w100)),
-            ) // Lote del proyecto
-          ],
+Row(
+  crossAxisAlignment: CrossAxisAlignment.baseline,
+  textBaseline: TextBaseline.alphabetic,
+  children: [
+    Expanded(
+      child: AutoSizeText(
+        this.obra.nombre,
+        style: TextStyle(
+          fontSize: 42.0,
+          fontWeight: FontWeight.bold,
+          foreground: Paint()
+            ..shader = LinearGradient(
+              colors: [Helper.brandColors[8], Helper.brandColors[9]],
+            ).createShader(Rect.fromLTWH(0, 0, 200, 70)),
         ),
+        maxLines: 1, // Se ajustará en una sola línea
+        minFontSize: 16, // Tamaño mínimo al que puede reducirse
+        overflow: TextOverflow.ellipsis, // Muestra "..." si no cabe
+      ),
+    ),
+    Container(
+      margin: EdgeInsets.only(left: 20),
+      child: Text(
+        this.obra.lote,
+        style: TextStyle(
+          color: Helper.brandColors[5],
+          fontSize: 20,
+          fontWeight: FontWeight.w100,
+        ),
+      ),
+    ),
+  ],
+)
+,
         Divider(
           color: Helper.brandColors[8],
           thickness: 1,

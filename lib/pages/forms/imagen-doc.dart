@@ -171,7 +171,7 @@ class _FormState extends State<_Form> {
                     Navigator.pop(context);
                   },
                   text: 'Cancelar',
-                  width: 100,
+                  width: 95,
                   color: Helper.brandColors[2]),
             ],
           )

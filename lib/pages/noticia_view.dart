@@ -33,7 +33,7 @@ class NoticiaView extends StatelessWidget {
                     child: CachedNetworkImage(
                       imageUrl: post['coverMedia']['image'] == null
                           ? ''
-                          : post['coverMedia']['image']['id'],
+                          : post['coverMedia']['image']['url'],
                       imageBuilder: (context, imageProvider) => Container(
                         decoration: BoxDecoration(
                           image: DecorationImage(

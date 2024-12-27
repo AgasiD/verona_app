@@ -19,6 +19,7 @@ class PersonalADM extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context);
+    final _pref = Preferences();
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
@@ -31,7 +32,7 @@ class PersonalADM extends StatelessWidget {
                 } else {
                   var personal = snapshot.data as List<Miembro>;
                   personal =
-                      personal.where((miembro) => miembro.role != 1).toList();
+                      personal.where((miembro) =>  _pref.role == 1 ? true : miembro.role != 1).toList();
                   if (personal.length > 0) {
                     final dataTile = personal.map((e) => {
                           'title': '${e.nombre + ' ' + e.apellido}',
@@ -172,9 +173,8 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                       itemCount: widget.dataFiltrada.length,
                       itemBuilder: ((context, index) {
                         final esPar = index % 2 == 0;
-                        final arg = {
-                          'usuarioId': widget.dataFiltrada[index]['id'],
-                        };
+                       
+
                         return FadeInRight(
                           delay: Duration(milliseconds: index * 50),
                           child: CustomListTile(
@@ -185,10 +185,10 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                                 widget.dataFiltrada[index]['avatar'].toString(),
                             fontSize: 18,
                             onTap: true,
-                            actionOnTap: () => Navigator.pushNamed(
-                                context, PerfilPage.routeName,
-                                arguments: arg),
-                          ),
+                            actionOnTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => PerfilPage(usuarioId: widget.dataFiltrada[index]['id'])),
+                          ))
                         );
                       })),
                 )

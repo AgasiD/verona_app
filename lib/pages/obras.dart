@@ -143,87 +143,84 @@ class _ObrasPageState extends State<ObrasPage> {
       {
         'icon': Icons.person_pin_rounded,
         'name': 'Mi perfil',
-        'route': PerfilPage.routeName,
-        'args': {'usuarioId': _pref.id},
+        'route': PerfilPage(usuarioId: _pref.id,),
         'roles': []
       },
       {
         'icon': Icons.holiday_village,
         'name': 'Propietarios',
-        'route': PropietariosADM.routeName,
+        'route': PropietariosADM(),
         'roles': [1]
       },
       {
         'icon': Icons.person_add_alt_sharp,
         'name': 'Nuevo propietario',
-        'route': PropietarioForm.routeName,
+        'route': PropietarioForm(),
         'roles': [1],
         'args': {'pageFrom': 'menu'}
       },
       {
         'icon': Icons.group_sharp,
         'name': 'Personal',
-        'route': PersonalADM.routeName,
+        'route': PersonalADM(),
         'roles': [1]
       },
-      {
-        'icon': Icons.account_tree,
-        'name': 'Control de obras',
-        'route': TareasSemanarias.routeName,
-        'roles': [1],
-        'args': {'single': false, 'obras': obras}
-      },
+      // {
+      //   'icon': Icons.account_tree,
+      //   'name': 'Control de obras',
+      //   'route': TareasSemanarias(),
+      //   'roles': [1],
+      //   'args': {'single': false, 'obras': obras}
+      // },
       {
         'icon': Icons.request_page,
         'name': 'Pedidos',
-        'route': PedidosPanelControl.routeName,
-        'roles': [1, 2, 5 ],
+        'route': PedidosPanelControl(),
+        'roles': [1, 2, 5],
       },
       {
         'icon': Icons.work_off,
         'name': 'Control inactividades',
-        'route': InactividadesABM.routeName,
+        'route': InactividadesABM(),
         'roles': [1, 2, 7],
       },
       {
         'icon': Icons.notification_add,
         'name': 'Envío de notificaciones',
-        'route': NotificacionesForm.routeName,
+        'route': NotificacionesForm(),
         'roles': [1, 2, 7],
       },
       {
         'icon': Icons.notification_important_rounded,
         'name': 'Centro de autorización',
-        'route': NotificacionesABM.routeName,
+        'route': NotificacionesABM(),
         'roles': [1],
       },
       {
         'icon': FontAwesomeIcons.solidNewspaper,
         'name': 'Noticias',
-        'route': NotificacionesABM.routeName,
+        'route': NotificacionesABM(),
         'roles': [1, 2, 3, 4, 5, 6, 7, 8],
         'navega': false,
-        'action': () => Navigator.pushNamed(context, NoticiasPage.routeName)
-        // Helper.launchWeb(
-        //     'https://www.veronaconstrucciones.com.ar/noticias', context)
+        'action': () => Navigator.push(context, MaterialPageRoute(builder: (c) =>  NoticiasPage()))
       },
       {
         'icon': Icons.edit_note_rounded,
         'name': 'Mis anotaciones',
-        'route': AnotacionesGeneralPage.routeName,
+        'route': AnotacionesGeneralPage(),
         'roles': [1, 2, 3, 7],
         'args': {'obraId': null},
       },
       {
         'icon': Icons.send,
         'name': 'Envío de reportes',
-        'route': EnvioReporteSemanal.routeName,
+        'route': EnvioReporteSemanal(),
         'roles': [1],
       },
       {
         'icon': Icons.settings,
         'name': 'Configuraciones',
-        'route': SettingsPage.routeName,
+        'route': SettingsPage(),
         'roles': [1],
       },
     ];
@@ -323,8 +320,7 @@ class __SearchListViewState extends State<_SearchListView> {
                     );
                   }
                 } catch (err) {
-                  return ErrorPage(
-                      errorMsg: err.toString(), page: false);
+                  return ErrorPage(errorMsg: err.toString(), page: false);
                 }
               }
             }));
@@ -467,11 +463,11 @@ class _CustomObrasState extends State<_CustomObras> {
                 textController: obrasTxtController,
                 onChange: (text) {
                   widget.obrasFiltradas = widget.obras
-                      .where((obra) => obra.nombre
-                          .toLowerCase()
-                          .contains(text.toLowerCase()) || obra.lote
-                          .toLowerCase()
-                          .contains(text.toLowerCase()))
+                      .where((obra) =>
+                          obra.nombre
+                              .toLowerCase()
+                              .contains(text.toLowerCase()) ||
+                          obra.lote.toLowerCase().contains(text.toLowerCase()))
                       .toList();
                   setState(() {});
                 },
@@ -641,7 +637,9 @@ class View_ObraCard extends StatelessWidget {
                           top: 10,
                           left: 10,
                           child: badges.Badge(
-                            badgeColor: Helper.brandColors[8],
+                            badgeStyle: badges.BadgeStyle(
+                              badgeColor: Helper.brandColors[8],
+                            ),
                             badgeContent: Padding(
                               padding: const EdgeInsets.all(0),
                               // child: Text(badgeData.toString()),
@@ -706,7 +704,6 @@ class View_ObraCard extends StatelessWidget {
         : Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-             
               Container(
                 padding: EdgeInsets.symmetric(vertical: 10),
                 width: MediaQuery.of(context).size.width * .47,
@@ -716,7 +713,9 @@ class View_ObraCard extends StatelessWidget {
                           top: 10,
                           left: 10,
                           child: badges.Badge(
-                            badgeColor: Helper.brandColors[8],
+                            badgeStyle: badges.BadgeStyle(
+                              badgeColor: Helper.brandColors[8],
+                            ),
                             badgeContent: Padding(
                               padding: const EdgeInsets.all(0),
                               // child: Text(badgeData.toString()),
@@ -727,7 +726,6 @@ class View_ObraCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -777,7 +775,7 @@ class View_ObraCard extends StatelessWidget {
                       )
                 ]),
               ),
-               Expanded(
+              Expanded(
                   child: CachedNetworkImage(
                 imageUrl: obra.imageURL,
                 imageBuilder: (context, imageProvider) => Container(

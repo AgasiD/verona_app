@@ -17,14 +17,11 @@ import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/models/message.dart';
 import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/pages/chat.dart';
-
-import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/noticias.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/chat_service.dart';
-import 'package:verona_app/services/notificaciones_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -131,7 +128,10 @@ class _NotificationButtonState extends State<_NotificationButton> {
         child: badges.Badge(
           showBadge: false, // _socketService.unreadNotifications > 0,
           badgeContent: Text(_socketService.unreadNotifications.toString()),
-          badgeColor: Colors.red.shade100,
+          badgeStyle: badges.BadgeStyle(
+            badgeColor: Colors.red.shade100,
+          ),
+
           child: IconButton(
             padding: EdgeInsets.zero,
             icon: Icon(
@@ -167,24 +167,20 @@ class CustomDrawer extends StatelessWidget {
               visible: (e["roles"] as List<dynamic>).contains(_pref.role) ||
                   (e['roles'] as List).isEmpty,
               child: TextButton(
-                child: Row(children: [
-                  Icon(e['icon'], color: Helper.brandColors[8]),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                    child: Text(
-                      '${e["name"]}',
-                      style: textStyle,
+                  child: Row(children: [
+                    Icon(e['icon'], color: Helper.brandColors[8]),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Text(
+                        '${e["name"]}',
+                        style: textStyle,
+                      ),
                     ),
-                  ),
-                ]),
-                onPressed: 
-
-                  e['navega'] ?? true 
-                  ? () => Navigator.pushNamed(context, e["route"].toString(),
-                      arguments: e['args'] ?? null)
-                  : e['action']
-              
-              ),
+                  ]),
+                  onPressed: e['navega'] ?? true
+                      ? () => Navigator.push(
+                          context, MaterialPageRoute(builder: (c) =>  e["route"]))
+                      : e['action']),
             ))
         .toList();
     return Drawer(
@@ -232,7 +228,10 @@ class CustomDrawer extends StatelessWidget {
                           : false;
                     },
                   ),
-                  Text('v.${Helper.version}', style: TextStyle(color: Helper.brandColors[5]),)
+                  Text(
+                    'v.${Helper.version}',
+                    style: TextStyle(color: Helper.brandColors[5]),
+                  )
                 ],
               ),
             ),
@@ -455,7 +454,8 @@ class _CustomInputState extends State<CustomInput> {
               onChanged: (text) {
                 inputValid = widget.validarInput(text) == null
                     ? ValidInput()
-                    : ValidInput(error: widget.validarInput(text)!, value: false);
+                    : ValidInput(
+                        error: widget.validarInput(text)!, value: false);
                 widget.onChange(text);
                 setState(() {});
               },
@@ -1157,8 +1157,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != ObrasPage.routeName) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
-                    ObrasPage.routeName,
-                    (Route<dynamic> route) => false);
+                    ObrasPage.routeName, (Route<dynamic> route) => false);
                 // Navigator.pushNamed(context, ObrasPage.routeName);
               }
             },
@@ -1223,7 +1222,9 @@ class CustomNavigatorButton extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(size / 2))),
         child: badges.Badge(
           showBadge: showNotif,
-          badgeColor: Helper.brandColors[8],
+          badgeStyle: badges.BadgeStyle(
+            badgeColor: Helper.brandColors[8],
+          ),
           child: IconButton(
             onPressed: accion,
             icon: Icon(
@@ -1646,7 +1647,9 @@ class CustomListTileMessage extends StatelessWidget {
                   children: [
                     badgeData > 0
                         ? badges.Badge(
-                            badgeColor: Helper.brandColors[8],
+                            badgeStyle: badges.BadgeStyle(
+                              badgeColor: Helper.brandColors[8],
+                            ),
                             badgeContent: Padding(
                               padding: const EdgeInsets.all(2.0),
                               child: Text(badgeData.toString()),
@@ -1654,9 +1657,11 @@ class CustomListTileMessage extends StatelessWidget {
                           )
                         : Container(),
                     badges.Badge(
-                      badgeColor: isConnected
-                          ? Color.fromARGB(255, 163, 255, 167)!
-                          : Color.fromARGB(255, 182, 43, 57)!,
+                      badgeStyle: badges.BadgeStyle(
+                        badgeColor: isConnected
+                            ? Color.fromARGB(255, 163, 255, 167)!
+                            : Color.fromARGB(255, 182, 43, 57)!,
+                      ),
                     ),
                     Icon(
                       Icons.arrow_forward_ios_rounded,
@@ -2104,7 +2109,7 @@ class CalendarInput extends StatelessWidget {
         closeDialogOnCancelTapped: true,
       ),
       dialogSize: Size(width, height),
-      initialValue: [selectedDate],
+      value: [selectedDate],
       borderRadius: BorderRadius.circular(5),
     );
 
@@ -2116,8 +2121,6 @@ class CalendarInput extends StatelessWidget {
     }
   }
 }
-
-
 
 // class Custom_Flip_Counter extends StatefulWidget {
 //   Custom_Flip_Counter(

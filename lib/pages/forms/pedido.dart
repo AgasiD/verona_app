@@ -5,7 +5,6 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:open_file_safe/open_file_safe.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
@@ -23,6 +22,7 @@ import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/pdf_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
+import 'package:open_file/open_file.dart';
 
 class PedidoForm extends StatelessWidget implements MyForm {
   static String nameForm = 'Nuevo pedido';
@@ -307,24 +307,9 @@ class _FormState extends State<_Form> {
                                 items: prioridades,
                                 style: TextStyle(
                                     color: Helper.brandColors[5], fontSize: 16),
-                                iconSize: 30,
-                                buttonHeight: 60,
-                                buttonPadding:
-                                    EdgeInsets.only(left: 20, right: 10),
                                 decoration: getDecoration(),
-                                hint: Text(
-                                  'Seleccione prioridad',
-                                  style:
-                                      TextStyle(fontSize: 16, color: colorHint),
-                                ),
-                                icon: Icon(
-                                  Icons.arrow_drop_down,
-                                  color: colorHint,
-                                ),
-                                dropdownDecoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  color: Helper.brandColors[2],
-                                ),
+                                dropdownStyleData: DropdownStyleData(
+                                    decoration: getDropdownDecoration()),
                                 onChanged: (habilitaEdicion())
                                     ? (value) {
                                         prioridad = value as int;
@@ -528,6 +513,8 @@ class _FormState extends State<_Form> {
                                             ],
                                           ),
                                         ),
+
+                                          
                                         permiteVerByRole([1, 5]) &&
                                                 permiteVerByEstado([1, 3, 2])
                                             ? DropdownButtonFormField2(
@@ -537,27 +524,32 @@ class _FormState extends State<_Form> {
                                                     color:
                                                         Helper.brandColors[5],
                                                     fontSize: 16),
-                                                iconSize: 30,
-                                                buttonHeight: 60,
-                                                buttonPadding: EdgeInsets.only(
-                                                    left: 20, right: 10),
                                                 decoration: getDecoration(),
+
+                                                dropdownStyleData:
+                                                    DropdownStyleData(
+                                                        decoration:
+                                                            getDropdownDecoration()),
+                                                // iconSize: 30,
+                                                // buttonHeight: 60,
+                                                // buttonPadding: EdgeInsets.only(
+                                                //     left: 20, right: 10),
                                                 hint: Text(
                                                   'Seleccione delivery',
                                                   style: TextStyle(
                                                       fontSize: 16,
                                                       color: colorHint),
                                                 ),
-                                                icon: Icon(
-                                                  Icons.arrow_drop_down,
-                                                  color: colorHint,
-                                                ),
-                                                dropdownDecoration:
-                                                    BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(15),
-                                                  color: Helper.brandColors[2],
-                                                ),
+                                                // icon: Icon(
+                                                //   Icons.arrow_drop_down,
+                                                //   color: colorHint,
+                                                // ),
+                                                // dropdownDecoration:
+                                                //     BoxDecoration(
+                                                //   borderRadius:
+                                                //       BorderRadius.circular(15),
+                                                //   color: Helper.brandColors[2],
+                                                // ),
                                                 onChanged: (value) {
                                                   if (value != '1') {
                                                     widget.pedido!
@@ -712,7 +704,7 @@ class _FormState extends State<_Form> {
                       permiteVerByEstado([0, 1]) && permiteVerByRole([4]) ||
                               !permiteVerByEstado([5]) && !permiteVerByRole([4])
                           ? MainButton(
-                              width: 120,
+                              width: 95,
                               fontSize: 18,
                               color: Helper.brandColors[8]
                                   .withOpacity(.5)
@@ -766,7 +758,7 @@ class _FormState extends State<_Form> {
                             )
                           : Container(),
                       SecondaryButton(
-                          width: 120,
+                          width: 95,
                           fontSize: 18,
                           color: Helper.brandColors[2],
                           text: 'Cancelar',
@@ -821,7 +813,7 @@ class _FormState extends State<_Form> {
   grabarPedido(obraId, areaTxtController, ObraService _obraService,
       GoogleDriveService _driveService) async {
     MyResponse response;
-      bool loading = false;
+    bool loading = false;
     try {
       switch (widget.pedido!.estado) {
         case 0: // PEDIDO NUEVO
@@ -888,7 +880,7 @@ class _FormState extends State<_Form> {
         case 4:
           widget.pedido!.nota = areaTxtController.text;
           widget.pedido!.prioridad = prioridad;
-       
+
           if (tieneImagen) {
             final idDrive = _obraService.obra.folderPedidoImages == ''
                 ? _obraService.obra.driveFolderId
@@ -897,7 +889,9 @@ class _FormState extends State<_Form> {
             int index = 1;
             for (var img in _driveService.imgsPedido!) {
               loading = true;
-              openLoadingDialog(context,mensaje: 'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
+              openLoadingDialog(context,
+                  mensaje:
+                      'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
               final idImagen = await _driveService.grabarImagenPedido(
                   'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)',
                   idDrive!,
@@ -905,7 +899,8 @@ class _FormState extends State<_Form> {
               idsImagenes.add(idImagen);
               index++;
               closeLoadingDialog(context);
-            };
+            }
+            ;
             loading = false;
 
             widget.pedido!.imagenId = idsImagenes;
@@ -946,6 +941,13 @@ class _FormState extends State<_Form> {
         filled: true);
   }
 
+  getDropdownDecoration() {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(15),
+      color: Helper.brandColors[2],
+    );
+  }
+
   void selectDate(context, txtCtrlDate, selectedDate) async {
     double width = MediaQuery.of(context).size.width * .8;
     double height = MediaQuery.of(context).size.height * .5;
@@ -958,7 +960,7 @@ class _FormState extends State<_Form> {
         closeDialogOnCancelTapped: true,
       ),
       dialogSize: Size(width, height),
-      initialValue: [selectedDate],
+      value: [selectedDate],
       borderRadius: BorderRadius.circular(5),
     );
 
@@ -984,7 +986,7 @@ class _FormState extends State<_Form> {
         closeDialogOnCancelTapped: true,
       ),
       dialogSize: Size(width, height),
-      initialValue: [selectedDate],
+      value: [selectedDate],
       borderRadius: BorderRadius.circular(5),
     );
 

@@ -1,0 +1,2 @@
+/Users/damianagasi/Desktop/e-Drex/Verona/verona_app/android/app/.cxx/RelWithDebInfo/j3a48603/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/damianagasi/Desktop/e-Drex/Verona/verona_app/android/app/.cxx/RelWithDebInfo/j3a48603/armeabi-v7a/CMakeFiles/rebuild_cache.dir

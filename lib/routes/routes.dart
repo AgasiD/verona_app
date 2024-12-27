@@ -66,7 +66,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'prueba': (_) => ReorderableApp(),
   AgregarPropietariosPage.routeName: (_) => AgregarPropietariosPage(),
   AnotacionesGeneralPage.routeName: (_) => AnotacionesGeneralPage(),
-  AnotacionesPage.routeName: (_) => AnotacionesPage(),
   AsignarEquipoPage.routeName: (_) => AsignarEquipoPage(),
   ChatList.routeName: (_) => ChatList(),
   ChatPage.routeName: (_) => ChatPage(),

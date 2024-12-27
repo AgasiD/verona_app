@@ -331,7 +331,7 @@ class _FormState extends State<_Form> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     MainButton(
-                      width: 120,
+                      width: 95,
                       fontSize: 18,
                       color:
                           Helper.brandColors[8].withOpacity(.5).withAlpha(150),
@@ -344,7 +344,7 @@ class _FormState extends State<_Form> {
                       },
                     ),
                     SecondaryButton(
-                        width: 120,
+                        width: 95,
                         fontSize: 18,
                         color: Helper.brandColors[2],
                         text: 'Cancelar',
@@ -371,7 +371,7 @@ class _FormState extends State<_Form> {
         //shouldCloseDialogAfterCancelTapped: true,
       ),
       dialogSize: Size(width, height),
-      initialValue: [selectedDate],
+      value: [selectedDate],
       borderRadius: BorderRadius.circular(5),
     );
 

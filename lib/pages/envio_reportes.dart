@@ -108,7 +108,7 @@ class _MultiSelect_ObraState extends State<MultiSelect_Obra> {
                 textAlign: TextAlign.right,
                 style: TextStyle(color: Helper.brandColors[5], fontSize: 17),
               )),
-          selected_values_style: TextStyle(color: Colors.white),
+          selectedValuesStyle: TextStyle(color: Colors.white),
           options: values,
           selectedValues: selected,
           whenEmpty: 'Sin obras seleccionadas',

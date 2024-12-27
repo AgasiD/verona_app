@@ -39,7 +39,7 @@ class _Form extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wsService = Provider.of<WSService>(context, listen: false);
-    List<DropdownMenuItem<String>> grupos =[];
+    List<DropdownMenuItem<String>> grupos = [];
     return FutureBuilder(
         future: wsService.obtenerGrupos(),
         builder: (context, snapshot) {
@@ -49,9 +49,12 @@ class _Form extends StatelessWidget {
             );
           }
           final response = snapshot.data! as MyResponse;
-          (response.data as List).sort((a, b) => a['name'].toString().compareTo(b['name'].toString())) ;
-          grupos = (response.data as List).map((e) => DropdownMenuItem<String>(
-          child: Text(e['name'] ?? ' Sin nombre'), value: e['id'])).toList();
+          (response.data as List).sort(
+              (a, b) => a['name'].toString().compareTo(b['name'].toString()));
+          grupos = (response.data as List)
+              .map((e) => DropdownMenuItem<String>(
+                  child: Text(e['name'] ?? ' Sin nombre'), value: e['id']))
+              .toList();
           return Form(
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -63,25 +66,12 @@ class _Form extends StatelessWidget {
                         items: grupos,
                         style: TextStyle(
                             color: Helper.brandColors[5], fontSize: 16),
-                        iconSize: 30,
-                        buttonHeight: 60,
-                        buttonPadding: EdgeInsets.only(left: 20, right: 10),
-                        decoration: Helper.getDecoration(),
-                        icon: Icon(
-                          Icons.arrow_drop_down,
-                          color: Helper.brandColors[3],
-                        ),
-                        dropdownMaxHeight:
-                            MediaQuery.of(context).size.height * .4,
-                        dropdownWidth: 250,
-                        dropdownDecoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Helper.brandColors[2],
-                        ),
+                        decoration: getDecoration(),
+                        dropdownStyleData: DropdownStyleData(
+                            decoration: getDropdownDecoration()),
                         onChanged: (value) {
                           selectedGroup = value as String;
                         })),
-               
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CustomInput(
@@ -107,7 +97,7 @@ class _Form extends StatelessWidget {
       openLoadingDialog(context, mensaje: 'Enviando mensaje...');
       final text = txtMessage.text;
       final phone = txtPhone.text;
-      if(text.trim().isEmpty){
+      if (text.trim().isEmpty) {
         throw new Exception(['No se ingresó mensaje']);
       }
       await wsService.enviarMensajeGrupo(selectedGroup, text);
@@ -118,4 +108,31 @@ class _Form extends StatelessWidget {
       openAlertDialog(context, err.toString());
     }
   }
+}
+
+getDecoration() {
+  return InputDecoration(
+      focusColor: Helper.brandColors[9],
+      contentPadding: EdgeInsets.zero,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+      ),
+      fillColor: Helper.brandColors[1],
+      filled: true);
+}
+
+getDropdownDecoration() {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(15),
+    color: Helper.brandColors[2],
+  );
 }

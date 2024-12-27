@@ -18,7 +18,7 @@ class ImageService extends ChangeNotifier {
     if (_img != null) {
       final response = await this._http.cargarImagen(_img!, "api.imgbb.com",
           "/1/upload", {"key": _apiKey, "name": fileName}); //name=${fileName}&
-      final data = json.decode(response);
+      final data = response;
       return data;
     } else {
       print('No se asigno imagen');

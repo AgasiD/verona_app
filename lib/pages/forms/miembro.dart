@@ -59,8 +59,7 @@ class _MiembroFormState extends State<MiembroForm> {
                         mensaje: 'Recuperando información',
                       );
                     } else {
-                      final response =
-                          snapshot.data as MyResponse;
+                      final response = snapshot.data as MyResponse;
                       if (!response.fallo) {
                         final usuario = Miembro.fromJson(response.data);
                         setForm(usuario);
@@ -77,12 +76,12 @@ class _MiembroFormState extends State<MiembroForm> {
                             // height: MediaQuery.of(context).size.height - 140,
                             // width: MediaQuery.of(context).size.width,
                             child: Center(
-                              child: Text(
-                                'Error al recuperar la información',
-                                style: TextStyle(
-                                    fontSize: 18, color: Helper.brandColors[4]),
-                              ),
-                            ));
+                          child: Text(
+                            'Error al recuperar la información',
+                            style: TextStyle(
+                                fontSize: 18, color: Helper.brandColors[4]),
+                          ),
+                        ));
                       }
                     }
                   })),
@@ -167,10 +166,11 @@ class _Form extends StatelessWidget {
                       height: 15,
                     ),
                     Text(
-                      edit ? 'Actualizar personal'.toUpperCase() : 'NUEVO MIEMBRO',
-                      style: TextStyle(
-                         color:Helper.brandColors[8],
-                          fontSize: 23),
+                      edit
+                          ? 'Actualizar personal'.toUpperCase()
+                          : 'NUEVO MIEMBRO',
+                      style:
+                          TextStyle(color: Helper.brandColors[8], fontSize: 23),
                     ),
                     SizedBox(
                       height: 15,
@@ -185,14 +185,16 @@ class _Form extends StatelessWidget {
                             textController: txtNombreCtrl,
                             teclado: TextInputType.text,
                             validaError: true,
-                            validarInput: (value) => Helper.campoObligatorio(value),
+                            validarInput: (value) =>
+                                Helper.campoObligatorio(value),
                           ),
                           CustomInput(
                               hintText: 'Apellido ',
                               icono: Icons.person,
                               textController: txtApellidoCtrl,
                               validaError: true,
-                              validarInput: (value) => Helper.campoObligatorio(value),
+                              validarInput: (value) =>
+                                  Helper.campoObligatorio(value),
                               teclado: TextInputType.text),
                           CustomInput(
                             hintText: 'DNI',
@@ -235,41 +237,36 @@ class _Form extends StatelessWidget {
                               value: personalSelected,
                               style: TextStyle(
                                   color: Helper.brandColors[5], fontSize: 16),
-                              iconSize: 30,
-                              buttonHeight: 60,
-                              buttonPadding: EdgeInsets.only(left: 20, right: 10),
                               decoration: InputDecoration(
                                   focusColor: Helper.brandColors[9],
                                   contentPadding: EdgeInsets.zero,
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(7),
                                     borderSide: BorderSide(
-                                        color: Helper.brandColors[9], width: .2),
+                                        color: Helper.brandColors[9],
+                                        width: .2),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(7),
                                     borderSide: BorderSide(
-                                        color: Helper.brandColors[9], width: .5),
+                                        color: Helper.brandColors[9],
+                                        width: .5),
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(7),
                                     borderSide: BorderSide(
-                                        color: Helper.brandColors[9], width: 2.0),
+                                        color: Helper.brandColors[9],
+                                        width: 2.0),
                                   ),
                                   fillColor: Helper.brandColors[1],
                                   filled: true),
                               hint: Text(
                                 'Seleccione puesto',
-                                style: TextStyle(fontSize: 16, color: colorHint),
+                                style:
+                                    TextStyle(fontSize: 16, color: colorHint),
                               ),
-                              icon: Icon(
-                                Icons.arrow_drop_down,
-                                color: colorHint,
-                              ),
-                              dropdownDecoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Helper.brandColors[2],
-                              ),
+                              dropdownStyleData: DropdownStyleData(
+                                  decoration: getDropdownDecoration()),
                               onChanged: (value) {
                                 personalSelected = value.toString();
                                 //Do something when changing the item if you want.
@@ -281,7 +278,7 @@ class _Form extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               MainButton(
-                                width: 120,
+                                width: 95,
                                 fontSize: 18,
                                 color: Helper.brandColors[8]
                                     .withOpacity(.5)
@@ -292,13 +289,13 @@ class _Form extends StatelessWidget {
                                 },
                               ),
                               SecondaryButton(
-                                  width: 120,
+                                  width: 95,
                                   fontSize: 18,
                                   color: Helper.brandColors[2],
                                   text: 'Cancelar',
                                   onPressed: () {
                                     resetForm();
-            
+
                                     Navigator.pop(context);
                                   }),
                             ],
@@ -319,56 +316,61 @@ class _Form extends StatelessWidget {
   _grabarMiembro(BuildContext context) async {
     bool isValid = true;
     final _service = Provider.of<UsuarioService>(context, listen: false);
-    final actionText = edit ? 'Actualizando... esto puede demorar' : 'Guardando datos...';
+    final actionText =
+        edit ? 'Actualizando... esto puede demorar' : 'Guardando datos...';
     openLoadingDialog(context, mensaje: actionText);
     bool loading = true;
-    try{
-    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-    txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
-    txtDNICtrl.text == '' ? isValid = false : true;
-    txtTelefonoCtrl.text == '' ? isValid = false : true;
-    txtMailCtrl.text == '' ? isValid = false : true;
+    try {
+      txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+      txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
+      txtDNICtrl.text == '' ? isValid = false : true;
+      txtTelefonoCtrl.text == '' ? isValid = false : true;
+      txtMailCtrl.text == '' ? isValid = false : true;
 
-    if ( isValid) {
-      final miembro = Miembro(
-          id: edit ? usuarioId! : '',
-          nombre: txtNombreCtrl.text,
-          apellido: txtApellidoCtrl.text,
-          dni: txtDNICtrl.text,
-          telefono: txtTelefonoCtrl.text,
-          email: txtMailCtrl.text,
-          role: int.parse(personalSelected));
-      late MyResponse response;
-      edit
-          ? response = await _service.modificarUsuario(miembro)
-          : response = await _service.grabarUsuario(miembro);
-
-      closeLoadingDialog(context);
-      loading = false;
-      if (response.fallo) {
+      if (isValid) {
+        final miembro = Miembro(
+            id: edit ? usuarioId! : '',
+            nombre: txtNombreCtrl.text,
+            apellido: txtApellidoCtrl.text,
+            dni: txtDNICtrl.text,
+            telefono: txtTelefonoCtrl.text,
+            email: txtMailCtrl.text,
+            role: int.parse(personalSelected));
+        late MyResponse response;
         edit
-            ? openAlertDialog(context, 'No se pudo actualizar el personal',
-                subMensaje: response.error)
-            : openAlertDialog(context, 'No se pudo crear el personal',
-                subMensaje: response.error);
+            ? response = await _service.modificarUsuario(miembro)
+            : response = await _service.grabarUsuario(miembro);
+
+        closeLoadingDialog(context);
+        loading = false;
+        if (response.fallo) {
+          edit
+              ? openAlertDialog(context, 'No se pudo actualizar el personal',
+                  subMensaje: response.error)
+              : openAlertDialog(context, 'No se pudo crear el personal',
+                  subMensaje: response.error);
+        } else {
+          final _obraService = Provider.of<ObraService>(context, listen: false);
+          _obraService.notifyListeners();
+          edit
+              ? await openAlertDialogReturn(context, 'Personal actualizado')
+              : await openAlertDialogReturn(context, 'Personal creado');
+          resetForm();
+
+          edit
+              ? Navigator.pop(context)
+              : Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        PerfilPage(usuarioId: response.data['id']),
+                  ));
+        }
       } else {
-        final _obraService = Provider.of<ObraService>(context, listen: false);
-        _obraService.notifyListeners();
-        edit
-            ? await openAlertDialogReturn(context, 'Personal actualizado')
-            : await openAlertDialogReturn(context, 'Personal creado');
-        resetForm();
-
-      edit 
-      ? Navigator.pop(context) 
-      : Navigator.pushReplacementNamed(context, PerfilPage.routeName,
-            arguments: {"usuarioId": response.data['id']});
+        closeLoadingDialog(context);
+        openAlertDialog(context, 'Formulario invalido');
       }
-    } else {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Formulario invalido');
-    }
-    } catch ( err ){
+    } catch (err) {
       loading ? closeLoadingDialog(context) : false;
       openAlertDialog(context, 'Error al grabar', subMensaje: err.toString());
     }
@@ -381,4 +383,31 @@ class _Form extends StatelessWidget {
     txtTelefonoCtrl.text = '';
     txtMailCtrl.text = '';
   }
+}
+
+getDecoration() {
+  return InputDecoration(
+      focusColor: Helper.brandColors[9],
+      contentPadding: EdgeInsets.zero,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(7),
+        borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+      ),
+      fillColor: Helper.brandColors[1],
+      filled: true);
+}
+
+getDropdownDecoration() {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(15),
+    color: Helper.brandColors[2],
+  );
 }
