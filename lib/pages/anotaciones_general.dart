@@ -83,8 +83,10 @@ class AnotacionesGenerales extends StatelessWidget {
 
  @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as Map;
-    String? obraId = args['obraId'];
+    // final args = ModalRoute.of(context)!.settings.arguments as Map;
+    // String? obraId = args['obraId'];
+        String? obraId = '';
+
     final _pref = new Preferences();
     final _usuarioService = Provider.of<UsuarioService>(context);
     return Container(

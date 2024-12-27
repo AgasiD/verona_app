@@ -17,14 +17,11 @@ import 'package:verona_app/models/form%20copy.dart';
 import 'package:verona_app/models/message.dart';
 import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/pages/chat.dart';
-
-import 'package:verona_app/pages/listas/chats.dart';
 import 'package:verona_app/pages/login.dart';
 import 'package:verona_app/pages/noticias.dart';
 import 'package:verona_app/pages/notificaciones.dart';
 import 'package:verona_app/pages/obras.dart';
 import 'package:verona_app/services/chat_service.dart';
-import 'package:verona_app/services/notificaciones_service.dart';
 import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -181,9 +178,8 @@ class CustomDrawer extends StatelessWidget {
                     ),
                   ]),
                   onPressed: e['navega'] ?? true
-                      ? () => Navigator.pushNamed(
-                          context, e["route"].toString(),
-                          arguments: e['args'] ?? null)
+                      ? () => Navigator.push(
+                          context, MaterialPageRoute(builder: (c) =>  e["route"]))
                       : e['action']),
             ))
         .toList();

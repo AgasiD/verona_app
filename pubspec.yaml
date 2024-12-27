@@ -45,26 +45,25 @@ dependencies:
   flutter_spinkit: ^5.1.0
   image_picker: ^1.1.2
   socket_io_client: ^3.0.1
-  shared_preferences: ^2.0.8
+  shared_preferences: ^2.3.4
   vibration: ^2.0.1
   floating_action_bubble: ^1.1.4
   intl: ^0.19.0
   firebase_core: ^3.9.0
   firebase_messaging: ^15.1.6
-  flutter_app_badger: ^1.4.0
+  flutter_app_badger: ^1.5.0
   # flutter_local_notifications: ^9.6.0
   file_picker: ^8.1.6
   dropdown_button2: ^2.0.0
   photo_view: ^0.15.0
-  url_launcher: ^6.1.4
-  image_gallery_saver: ^2.0.3
+  url_launcher: ^6.3.1
+  url_launcher_android: ^6.3.14
   dio: ^5.7.0
   flutter_dotenv: ^5.0.2
   font_awesome_flutter: ^10.2.1
   path_provider: ^2.0.11
   image_fade: ^0.6.1
   calendar_date_picker2: ^1.1.8
-  external_app_launcher: ^4.0.1
   animate_do: ^3.0.2
   animated_flip_counter: ^0.3.4
   uuid: ^4.4.2
@@ -79,7 +78,7 @@ dependencies:
   open_file: ^3.5.10
   archive: ^3.6.1
   pdf: ^3.11.1
-
+  gal: ^2.3.1
 
 dependency_overrides:
   firebase_core_platform_interface: ^5.4.0

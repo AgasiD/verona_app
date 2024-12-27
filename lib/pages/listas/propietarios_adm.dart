@@ -172,24 +172,23 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                       itemCount: widget.dataFiltrada.length,
                       itemBuilder: ((context, index) {
                         final esPar = index % 2 == 0;
-                        final arg = {
-                          'usuarioId': widget.dataFiltrada[index]['id'],
-                        };
                         return FadeInRight(
-                          delay: Duration(milliseconds: index * 50),
-                          child: CustomListTile(
-                            esPar: esPar,
-                            title: widget.dataFiltrada[index]['title'],
-                            subtitle: widget.dataFiltrada[index]['subtitle'],
-                            avatar:
-                                widget.dataFiltrada[index]['avatar'].toString(),
-                            fontSize: 18,
-                            onTap: true,
-                            actionOnTap: () => Navigator.pushNamed(
-                                context, PerfilPage.routeName,
-                                arguments: arg),
-                          ),
-                        );
+                            delay: Duration(milliseconds: index * 50),
+                            child: CustomListTile(
+                                esPar: esPar,
+                                title: widget.dataFiltrada[index]['title'],
+                                subtitle: widget.dataFiltrada[index]
+                                    ['subtitle'],
+                                avatar: widget.dataFiltrada[index]['avatar']
+                                    .toString(),
+                                fontSize: 18,
+                                onTap: true,
+                                actionOnTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => PerfilPage(
+                                            usuarioId: widget
+                                                .dataFiltrada[index]['id'])))));
                       })),
                 )
         ],

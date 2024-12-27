@@ -18,25 +18,25 @@ import 'package:verona_app/widgets/custom_widgets.dart';
 import '../services/image_service.dart';
 
 class PerfilPage extends StatelessWidget {
-  PerfilPage({Key? key}) : super(key: key);
+  PerfilPage({Key? key, this.usuarioId = null}) : super(key: key);
   static final routeName = 'perfil';
-  late String _usuarioId;
+  String? usuarioId;
   late GlobalKey<ScaffoldState> _scaffoldKey;
   late bool perfilPropio = true;
+  
 
   bool esPhone = true;
   @override
   Widget build(BuildContext context) {
     _scaffoldKey = GlobalKey<ScaffoldState>();
-    final _usuarioService = Provider.of<UsuarioService>(context);
+    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
     final _imageService = Provider.of<ImageService>(context);
     final _obraService = Provider.of<ObraService>(context, listen: false);
-    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    // final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final _pref = new Preferences();
-    _usuarioId = arguments['usuarioId'];
     String textoImg = 'Cambiar imagen';
     bool sinImg = false;
-    if (_usuarioId != _pref.id) {
+    if (usuarioId != _pref.id) {
       perfilPropio = false;
     }
 
@@ -47,7 +47,7 @@ class PerfilPage extends StatelessWidget {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-            future: _usuarioService.obtenerUsuario(_usuarioId),
+            future: _usuarioService.obtenerUsuario(usuarioId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Loading(
@@ -205,7 +205,7 @@ class PerfilPage extends StatelessWidget {
                                           openLoadingDialog(context,
                                               mensaje: 'Sincronizando...');
                                           final response = await _usuarioService
-                                              .setTokenDevice(_usuarioId,
+                                              .setTokenDevice(usuarioId!,
                                                   NotificationService.token!);
                                           closeLoadingDialog(context);
                                           if (response.fallo) {
@@ -235,7 +235,7 @@ class PerfilPage extends StatelessWidget {
                                               mensaje:
                                                   'Desasociando dispositivos...');
                                           final response = await _usuarioService
-                                              .deleteAllDevice(_usuarioId);
+                                              .deleteAllDevice(usuarioId!);
                                           // closeLoadingDialog(context);
                                           Navigator.pop(
                                               _scaffoldKey.currentContext!);
@@ -315,7 +315,7 @@ class PerfilPage extends StatelessWidget {
       context,
       mensaje: 'Eliminando personal, puede demorar...',
     );
-    final response = await _usuarioService.deleteUsuario(_usuarioId);
+    final response = await _usuarioService.deleteUsuario(usuarioId!);
 
     closeLoadingDialog(context);
     if (response.fallo) {

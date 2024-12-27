@@ -161,6 +161,8 @@ class _PendientesViewState extends State<_PendientesView> {
                           physics: ClampingScrollPhysics(),
                           shrinkWrap: true,
                           itemBuilder: (BuildContext context, int index) {
+                            late Color colorPrioridad;
+
                             final esPar = index % 2 == 0;
                             final arg = {
                               'pedidoId': obra['pedidos'][index]['id'],
@@ -173,6 +175,18 @@ class _PendientesViewState extends State<_PendientesView> {
                                     ''
                                 ? "${("Fecha deseada").toUpperCase()} ${obra['pedidos'][index]['fechaDeseada']}"
                                 : "${("Fecha de entrega").toUpperCase()} ${obra['pedidos'][index]['fechaEstimada']}";
+
+                            switch (obra['pedidos'][index]['prioridad']) {
+                              case 1:
+                                colorPrioridad = Colors.green;
+                                break;
+                              case 2:
+                                colorPrioridad = Colors.yellow;
+                                break;
+                              case 3:
+                                colorPrioridad = Colors.red;
+                                break;
+                            }
                             return Column(
                               children: [
                                 _CustomListTile(
@@ -185,6 +199,34 @@ class _PendientesViewState extends State<_PendientesView> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'PRIORIDAD ' +
+                                                Helper.toTextPrioridad(
+                                                        obra['pedidos'][index]
+                                                            ['prioridad'])
+                                                    .toString()
+                                                    .toUpperCase(),
+                                            style: TextStyle(
+                                                color: Helper.brandColors[8]
+                                                    .withOpacity(.8)),
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          badges.Badge(
+                                            badgeStyle: badges.BadgeStyle(
+                                                // padding: EdgeInsets.symmetric(horizontal: 2)
+                                                badgeColor: colorPrioridad,
+                                                ),
+                                            badgeContent: Padding(
+                                              padding: const EdgeInsets.all(0),
+                                              // child: Text(badgeData.toString()),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                       Text(
                                         txtFecha.toUpperCase(),
                                         style: TextStyle(
@@ -286,17 +328,7 @@ class _CustomListTile extends StatelessWidget {
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
     Color colorPrioridad = Colors.green.shade100;
     ;
-    switch (int.parse(avatar)) {
-      case 1:
-        colorPrioridad = Colors.green.shade200;
-        break;
-      case 2:
-        colorPrioridad = Colors.yellow.shade200;
-        break;
-      case 3:
-        colorPrioridad = Colors.red.shade200;
-        break;
-    }
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 0),
       child: Column(
@@ -305,50 +337,36 @@ class _CustomListTile extends StatelessWidget {
             decoration: BoxDecoration(
                 color: _color, borderRadius: BorderRadius.circular(10)),
             child: ListTile(
-              title: Text(title,
-                  style: TextStyle(
-                      color: Helper.brandColors[5], fontSize: fontSize)),
-              subtitle: subtitle,
-              trailing: onTap
-                  ? Container(
-                      alignment: Alignment.centerRight,
-                      width: 55,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          esNovedad
-                              ? badges.Badge(
-                                  badgeStyle: badges.BadgeStyle(
-                                    badgeColor: Helper.brandColors[8],
-                                  ),
-                                  badgeContent: Padding(
-                                    padding: const EdgeInsets.all(0),
-                                    // child: Text(badgeData.toString()),
-                                  ),
-                                )
-                              : Container(),
-                          Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            color: Helper.brandColors[3],
-                          ),
-                        ],
-                      ))
-                  : null,
-              onTap: actionOnTap,
-              leading: Chip(
-                label: Container(
-                  width: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(Helper.toTextPrioridad(int.parse(avatar))
-                          .toUpperCase()),
-                    ],
-                  ),
-                ),
-                backgroundColor: colorPrioridad,
-              ),
-            ),
+                title: Text(title,
+                    style: TextStyle(
+                        color: Helper.brandColors[5], fontSize: fontSize)),
+                subtitle: subtitle,
+                trailing: onTap
+                    ? Container(
+                        alignment: Alignment.centerRight,
+                        width: 55,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            esNovedad
+                                ? badges.Badge(
+                                    badgeStyle: badges.BadgeStyle(
+                                      badgeColor: Helper.brandColors[8],
+                                    ),
+                                    badgeContent: Padding(
+                                      padding: const EdgeInsets.all(0),
+                                      // child: Text(badgeData.toString()),
+                                    ),
+                                  )
+                                : Container(),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              color: Helper.brandColors[3],
+                            ),
+                          ],
+                        ))
+                    : null,
+                onTap: actionOnTap),
           ),
         ],
       ),

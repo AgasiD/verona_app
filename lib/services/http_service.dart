@@ -187,32 +187,31 @@ class HttpService extends ChangeNotifier {
     // return imgId;
   }
 
-  cargarImagen(XFile imageFile, String baseUrl, String endpoint,
-      Map<String, dynamic> parameters) async {
-    String imgId = '';
-    // open a bytestream
-    var stream =
-        new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
-    var length = await imageFile.length();
-    url = Uri.https(baseUrl, endpoint, parameters);
+Future<Map<String, dynamic>> cargarImagen(
+    XFile imageFile, String baseUrl, String endpoint, Map<String, dynamic> parameters) async {
+  // Abrir el archivo como un flujo de bytes
+  var stream = http.ByteStream(imageFile.openRead());
+  var length = await imageFile.length();
+  Uri url = Uri.https(baseUrl, endpoint, parameters);
 
-    var request = new http.MultipartRequest("POST", url);
+  // Crear una solicitud de tipo multipart
+  var request = http.MultipartRequest("POST", url);
+  var multipartFile = http.MultipartFile('image', stream, length,
+      filename: basename(imageFile.path));
 
-    var multipartFile = http.MultipartFile('image', stream, length,
-        filename: basename('fileName'));
+  // Agregar archivo a la solicitud
+  request.files.add(multipartFile);
 
-    // add file to multipart
-    request.files.add(multipartFile);
+  // Enviar la solicitud
+  var response = await request.send();
 
-    // send
-    final a = await request.send();
-    // listen for response
-    final b = a.stream.transform(utf8.decoder);
-    final c = b.listen((value) {
-      imgId = value;
-    }).asFuture();
+  // Leer el cuerpo completo de la respuesta como cadena
+  var responseBody = await response.stream.bytesToString();
 
-    await c;
-    return imgId;
-  }
+  // Convertir la cadena en un JSON
+  Map<String, dynamic> jsonResponse = jsonDecode(responseBody);
+
+  return jsonResponse;
+}
+
 }

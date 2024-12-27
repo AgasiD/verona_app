@@ -143,87 +143,84 @@ class _ObrasPageState extends State<ObrasPage> {
       {
         'icon': Icons.person_pin_rounded,
         'name': 'Mi perfil',
-        'route': PerfilPage.routeName,
-        'args': {'usuarioId': _pref.id},
+        'route': PerfilPage(usuarioId: _pref.id,),
         'roles': []
       },
       {
         'icon': Icons.holiday_village,
         'name': 'Propietarios',
-        'route': PropietariosADM.routeName,
+        'route': PropietariosADM(),
         'roles': [1]
       },
       {
         'icon': Icons.person_add_alt_sharp,
         'name': 'Nuevo propietario',
-        'route': PropietarioForm.routeName,
+        'route': PropietarioForm(),
         'roles': [1],
         'args': {'pageFrom': 'menu'}
       },
       {
         'icon': Icons.group_sharp,
         'name': 'Personal',
-        'route': PersonalADM.routeName,
+        'route': PersonalADM(),
         'roles': [1]
       },
-      {
-        'icon': Icons.account_tree,
-        'name': 'Control de obras',
-        'route': TareasSemanarias.routeName,
-        'roles': [1],
-        'args': {'single': false, 'obras': obras}
-      },
+      // {
+      //   'icon': Icons.account_tree,
+      //   'name': 'Control de obras',
+      //   'route': TareasSemanarias(),
+      //   'roles': [1],
+      //   'args': {'single': false, 'obras': obras}
+      // },
       {
         'icon': Icons.request_page,
         'name': 'Pedidos',
-        'route': PedidosPanelControl.routeName,
+        'route': PedidosPanelControl(),
         'roles': [1, 2, 5],
       },
       {
         'icon': Icons.work_off,
         'name': 'Control inactividades',
-        'route': InactividadesABM.routeName,
+        'route': InactividadesABM(),
         'roles': [1, 2, 7],
       },
       {
         'icon': Icons.notification_add,
         'name': 'Envío de notificaciones',
-        'route': NotificacionesForm.routeName,
+        'route': NotificacionesForm(),
         'roles': [1, 2, 7],
       },
       {
         'icon': Icons.notification_important_rounded,
         'name': 'Centro de autorización',
-        'route': NotificacionesABM.routeName,
+        'route': NotificacionesABM(),
         'roles': [1],
       },
       {
         'icon': FontAwesomeIcons.solidNewspaper,
         'name': 'Noticias',
-        'route': NotificacionesABM.routeName,
+        'route': NotificacionesABM(),
         'roles': [1, 2, 3, 4, 5, 6, 7, 8],
         'navega': false,
-        'action': () => Navigator.pushNamed(context, NoticiasPage.routeName)
-        // Helper.launchWeb(
-        //     'https://www.veronaconstrucciones.com.ar/noticias', context)
+        'action': () => Navigator.push(context, MaterialPageRoute(builder: (c) =>  NoticiasPage()))
       },
       {
         'icon': Icons.edit_note_rounded,
         'name': 'Mis anotaciones',
-        'route': AnotacionesGeneralPage.routeName,
+        'route': AnotacionesGeneralPage(),
         'roles': [1, 2, 3, 7],
         'args': {'obraId': null},
       },
       {
         'icon': Icons.send,
         'name': 'Envío de reportes',
-        'route': EnvioReporteSemanal.routeName,
+        'route': EnvioReporteSemanal(),
         'roles': [1],
       },
       {
         'icon': Icons.settings,
         'name': 'Configuraciones',
-        'route': SettingsPage.routeName,
+        'route': SettingsPage(),
         'roles': [1],
       },
     ];
