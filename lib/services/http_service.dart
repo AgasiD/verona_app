@@ -167,7 +167,7 @@ class HttpService extends ChangeNotifier {
     //   url = Uri.http(_baseUrl, endpoint);
     // }
     // // create multipart request
-    // var request = new http.MultipartRequest("POST", url);
+    // var request = new http.MultipartRequest("POST", url);2
 
     // // multipart that takes file
     // var multipartFile = http.MultipartFile('image', stream, length,
