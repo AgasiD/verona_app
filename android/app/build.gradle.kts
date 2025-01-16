@@ -29,8 +29,8 @@ android {
         minSdk = flutter.minSdkVersion
         applicationId = "com.edrex.veronaapp"
         targetSdk = flutter.targetSdkVersion
-        versionCode = 1311
-        versionName = "1.31.1"
+        versionCode = 1312
+        versionName = "1.31.2"
     }
 
     signingConfigs {
