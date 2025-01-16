@@ -94,81 +94,7 @@ class _Form extends StatefulWidget {
 }
 
 class _FormState extends State<_Form> {
-  @override
-  void initState() {
-    super.initState();
-    cargarObra();
-    final _obraService = Provider.of<ObraService>(context, listen: false);
-    txtCtrlDate.text = formattedDate.toString();
-    txtCtrlDateDeseada.text = formattedDate.toString();
-    if (widget.pedido!.estado == 0) {
-      widget.pedido!.fechaDeseada = txtCtrlDateDeseada.text;
-      titleTxtController.text = _obraService.obra.lote + ' - ';
-    } else if (widget.pedido!.estado >= 0) {
-      //Editar pedido (Asignar atributos)
-      titleTxtController.text = widget.pedido!.titulo;
-      areaTxtController.text = widget.pedido!.nota;
-      title = 'editar pedido';
-      prioridad = widget.pedido!.prioridad;
-      txtCtrlDate.text = widget.pedido!.fechaEstimada == ''
-          ? txtCtrlDate.text
-          : widget.pedido!.fechaEstimada;
-      txtCtrlDateDeseada.text = widget.pedido!.fechaDeseada == ''
-          ? txtCtrlDateDeseada.text
-          : widget.pedido!.fechaDeseada;
-
-      repartidores = obtenerRepartidoresAsignados(_obraService.obra.equipo);
-      repartidoId = repartidores[0].value.toString();
-
-      pedidoConfirmado = false;
-      if (widget.pedido!.estado == 1) {
-        // ESTADO: Pedido sin confirmar
-      }
-      if (widget.pedido!.estado == 2) {
-        // ESTADO: Pedido Pendiente de compra
-        pedidoConfirmado = true;
-      }
-      if (widget.pedido!.estado == 3) {
-        // ESTADO: Pedido Asignado
-        pedidoEnStock = true;
-        pedidoConfirmado = true;
-        tieneImagen = widget.pedido!.imagenId.isEmpty ? false : true;
-        tieneImagen ? imgButtonText = 'Ver evidencia' : false;
-        indicacionesTxtController.text = widget.pedido!.indicaciones;
-        repartidoId = widget.pedido!.usuarioAsignado == ''
-            ? repartidores.first.value.toString()
-            : widget.pedido!.usuarioAsignado;
-
-        entregaExterna = widget.pedido!.entregaExterna;
-      }
-
-      if (widget.pedido!.estado == 5) {
-        // ESTADO: Pedido cerrado
-        tieneImagen = widget.pedido!.imagenId.isEmpty ? false : true;
-        imgButtonText = tieneImagen ? 'Ver evidencia' : 'Foto/Eviden cia';
-        pedidoConfirmado = true;
-        pedidoEnStock = true;
-        repartidoId = widget.pedido!.usuarioAsignado == ''
-            ? repartidores.first.value.toString()
-            : widget.pedido!.usuarioAsignado;
-        indicacionesTxtController.text = widget.pedido!.indicaciones;
-        txtCtrlDate.text = widget.pedido!.fechaEstimada;
-        prioridad = widget.pedido!.prioridad;
-        entregaExterna = widget.pedido!.entregaExterna;
-      }
-    }
-  }
-
-  Future cargarObra() async {
-    final _obraService = Provider.of<ObraService>(context, listen: false);
-    if (_obraService.obra.id == '') {
-      final obra = await _obraService.obtenerObra(widget.pedido!.idObra);
-      _obraService.obra = obra;
-    }
-  }
-
   late List<DropdownMenuItem<String>> repartidores;
-
   Color colorHint = Helper.brandColors[3];
   Preferences _pref = new Preferences();
   TextEditingController titleTxtController = new TextEditingController();
@@ -178,14 +104,24 @@ class _FormState extends State<_Form> {
   TextEditingController txtCtrlDateDeseada = new TextEditingController();
 
   int prioridad = 1;
+  int estadoPedido = 0;
+  int tsAsignado = 0;
 
   DateTime selectedDate = DateTime.now();
-  String repartidoId = '1',
-      title = 'nuevo pedido',
-      usuarioAsignado = '1',
-      imgButtonText = 'Foto/Evidencia',
+  String repartidoId = '0',
       formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.now()),
-      nombreUsuario = 'Sin nombre';
+      fechaEntrega = DateFormat('dd/MM/yyyy').format(DateTime.now()),
+      fechaDeseada = DateFormat('dd/MM/yyyy').format(DateTime.now()),
+      title = 'nuevo pedido',
+      usuarioAsignado = '0',
+      imgButtonText = 'Foto/Evidencia',
+      nombreUsuario = 'Sin nombre',
+      detallePedido = '',
+      indicacionesPedido = '';
+
+  late String tituloPedido;
+  late String repartidorAsignado;
+
   bool enable = true,
       pedidoEnStock = false,
       pedidoConfirmado = false,
@@ -194,7 +130,7 @@ class _FormState extends State<_Form> {
       tieneImagen = false,
       entregaExterna = false;
 
-  List<DropdownMenuItem<int>> prioridades = <DropdownMenuItem<int>>[
+  List<DropdownMenuItem<int>> PRIORIDADES = <DropdownMenuItem<int>>[
     DropdownMenuItem(
       value: 1,
       child: Text('Prioridad baja'.toUpperCase()),
@@ -208,6 +144,89 @@ class _FormState extends State<_Form> {
       child: Text('Prioridad alta'.toUpperCase()),
     )
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    cargarObra();
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+    estadoPedido = widget.pedido!.estado;
+    if (estadoPedido == 0) {
+      tituloPedido = _obraService.obra.lote + ' - ';
+    } else if (estadoPedido >= 0) {
+      //Editar pedido (Asignar atributos)
+      tituloPedido = widget.pedido!.titulo;
+      detallePedido = widget.pedido!.nota;
+      title = 'editar pedido';
+      prioridad = widget.pedido!.prioridad;
+      fechaEntrega = widget.pedido!.fechaEstimada == ''
+          ? formattedDate
+          : widget.pedido!.fechaEstimada;
+      fechaDeseada = widget.pedido!.fechaDeseada == ''
+          ? formattedDate
+          : widget.pedido!.fechaDeseada;
+
+      repartidores = obtenerRepartidoresAsignados(_obraService.obra.equipo);
+      repartidoId = repartidores[0].value.toString();
+
+      pedidoConfirmado = false;
+      switch (estadoPedido) {
+        case 1:
+          // ESTADO: Pedido sin confirmar
+          break;
+        case 2:
+          // ESTADO: Pedido Pendiente de compra
+          pedidoConfirmado = true;
+          break;
+        case 3:
+          // ESTADO: Pedido Asignado
+          pedidoEnStock = true;
+          pedidoConfirmado = true;
+          tieneImagen = widget.pedido!.imagenId.isEmpty ? false : true;
+          tieneImagen ? imgButtonText = 'Ver evidencia' : false;
+          indicacionesPedido = widget.pedido!.indicaciones;
+          repartidoId = widget.pedido!.usuarioAsignado == ''
+              ? repartidores.first.value.toString()
+              : widget.pedido!.usuarioAsignado;
+          entregaExterna = widget.pedido!.entregaExterna;
+          break;
+        case 5:
+          // ESTADO: Pedido cerrado
+          tieneImagen = widget.pedido!.imagenId.isEmpty ? false : true;
+          imgButtonText = tieneImagen ? 'Ver evidencia' : 'Foto/Evidencia';
+          pedidoConfirmado = true;
+          pedidoEnStock = true;
+          repartidoId = widget.pedido!.usuarioAsignado == ''
+              ? repartidores.first.value.toString()
+              : widget.pedido!.usuarioAsignado;
+          indicacionesPedido = widget.pedido!.indicaciones;
+          fechaEntrega = widget.pedido!.fechaEstimada;
+          prioridad = widget.pedido!.prioridad;
+          entregaExterna = widget.pedido!.entregaExterna;
+          break;
+      }
+
+      if (entregaExterna) {
+        repartidoId = '9999';
+        repartidorAsignado = 'Entrega Externa';
+      }
+    }
+    areaTxtController.text = detallePedido;
+    txtCtrlDate.text = fechaEntrega;
+    txtCtrlDateDeseada.text = fechaDeseada;
+    titleTxtController.text = tituloPedido;
+    indicacionesTxtController.text = indicacionesPedido;
+  }
+
+  inicializaDatos() {}
+
+  Future cargarObra() async {
+    final _obraService = Provider.of<ObraService>(context, listen: false);
+    if (_obraService.obra.id == '') {
+      final obra = await _obraService.obtenerObra(widget.pedido!.idObra);
+      _obraService.obra = obra;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -263,40 +282,10 @@ class _FormState extends State<_Form> {
                             textController: areaTxtController,
                             lines: 8,
                           ),
-                          widget.pedido!.estado != 0
+                          estadoPedido != 0
                               ? TextButton(
-                                  onPressed: () async {
-                                    openLoadingDialog(context,
-                                        mensaje: 'Descargando archivo...');
-                                    try {
-                                      final genero =
-                                          await PDFService.generarPDFPedido(
-                                              widget.pedido!);
-                                      if (!genero[0]) {
-                                        throw Exception(genero[1]);
-                                      }
-                                      closeLoadingDialog(context);
-                                      var downloadsDirectory =
-                                          await getTemporaryDirectory();
-
-                                      Helper.showSnackBar(
-                                          context,
-                                          'Archivo descargado',
-                                          null,
-                                          Duration(seconds: 4),
-                                          SnackBarAction(
-                                            label: 'Ver PDF',
-                                            onPressed: () {
-                                              OpenFile.open(genero[1]);
-                                            },
-                                          ));
-                                    } catch (err) {
-                                      closeLoadingDialog(context);
-                                      openAlertDialog(context,
-                                          'No se pudo descargar archivo',
-                                          subMensaje: err.toString());
-                                    }
-                                  },
+                                  onPressed: () async =>
+                                      await descargarPDF(context),
                                   child: Text('Exportar PDF detalle'))
                               : Container(),
                           Theme(
@@ -304,7 +293,7 @@ class _FormState extends State<_Form> {
                                   disabledColor: Helper.brandColors[3]),
                               child: DropdownButtonFormField2(
                                 value: prioridad,
-                                items: prioridades,
+                                items: PRIORIDADES,
                                 style: TextStyle(
                                     color: Helper.brandColors[5], fontSize: 16),
                                 decoration: getDecoration(),
@@ -357,34 +346,34 @@ class _FormState extends State<_Form> {
                               : Container(),
                           Column(
                             children: [
-                              permiteVerByEstado([1]) &&
-                                      permiteVerByRole([1, 5])
-                                  ? TextButton(
-                                      style: ButtonStyle(
-                                          padding: MaterialStateProperty.all(
-                                              EdgeInsets.zero)),
-                                      onPressed: abrirChat,
-                                      child: Row(
-                                        children: [
-                                          SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  100,
-                                              child: Text(
-                                                'Consultar a ${widget.pedido!.nombreUsuario}'
-                                                    .toUpperCase(),
-                                                overflow: TextOverflow.clip,
-                                                style: TextStyle(
-                                                    color:
-                                                        Helper.brandColors[8]),
-                                              )),
-                                          Icon(Icons.chat,
-                                              color: Helper.brandColors[8]),
-                                        ],
-                                      ),
-                                    )
-                                  : Container(),
+                              // permiteVerByEstado([1]) &&
+                              //         permiteVerByRole([1, 5])
+                              //     ? TextButton(
+                              //         style: ButtonStyle(
+                              //             padding: MaterialStateProperty.all(
+                              //                 EdgeInsets.zero)),
+                              //         onPressed: abrirChat,
+                              //         child: Row(
+                              //           children: [
+                              //             SizedBox(
+                              //                 width: MediaQuery.of(context)
+                              //                         .size
+                              //                         .width -
+                              //                     100,
+                              //                 child: Text(
+                              //                   'Consultar a ${widget.pedido!.nombreUsuario}'
+                              //                       .toUpperCase(),
+                              //                   overflow: TextOverflow.clip,
+                              //                   style: TextStyle(
+                              //                       color:
+                              //                           Helper.brandColors[8]),
+                              //                 )),
+                              //             Icon(Icons.chat,
+                              //                 color: Helper.brandColors[8]),
+                              //           ],
+                              //         ),
+                              //       )
+                              //     : Container(),
                               permiteVerByEstado([1, 2, 3, 5]) &&
                                       permiteVerByRole([1, 2, 5])
                                   ? Row(children: [
@@ -396,7 +385,7 @@ class _FormState extends State<_Form> {
                                             color: Helper.brandColors[5]),
                                       ),
                                       Switch(
-                                        value: widget.pedido!.estado >= 2,
+                                        value: estadoPedido >= 2,
                                         activeColor: Helper.brandColors[3],
                                         activeTrackColor: Helper.brandColors[8],
                                         inactiveTrackColor:
@@ -406,11 +395,9 @@ class _FormState extends State<_Form> {
                                                 ? (confirmar) {
                                                     setState(() {
                                                       if (!confirmar) {
-                                                        widget.pedido!.estado =
-                                                            1;
+                                                        estadoPedido = 1;
                                                       } else {
-                                                        widget.pedido!.estado =
-                                                            2;
+                                                        estadoPedido = 2;
                                                       }
                                                       pedidoConfirmado =
                                                           confirmar;
@@ -452,11 +439,9 @@ class _FormState extends State<_Form> {
                                                       ? (enStock) {
                                                           setState(() {
                                                             if (!enStock) {
-                                                              widget.pedido!
-                                                                  .estado = 2;
+                                                              estadoPedido = 2;
                                                             } else {
-                                                              widget.pedido!
-                                                                  .estado = 3;
+                                                              estadoPedido = 3;
                                                             }
                                                             pedidoEnStock =
                                                                 enStock;
@@ -513,75 +498,13 @@ class _FormState extends State<_Form> {
                                             ],
                                           ),
                                         ),
-
-                                          
                                         permiteVerByRole([1, 5]) &&
                                                 permiteVerByEstado([1, 3, 2])
-                                            ? DropdownButtonFormField2(
-                                                value: repartidoId,
-                                                items: repartidores,
-                                                style: TextStyle(
-                                                    color:
-                                                        Helper.brandColors[5],
-                                                    fontSize: 16),
-                                                decoration: getDecoration(),
-
-                                                dropdownStyleData:
-                                                    DropdownStyleData(
-                                                        decoration:
-                                                            getDropdownDecoration()),
-                                                // iconSize: 30,
-                                                // buttonHeight: 60,
-                                                // buttonPadding: EdgeInsets.only(
-                                                //     left: 20, right: 10),
-                                                hint: Text(
-                                                  'Seleccione delivery',
-                                                  style: TextStyle(
-                                                      fontSize: 16,
-                                                      color: colorHint),
-                                                ),
-                                                // icon: Icon(
-                                                //   Icons.arrow_drop_down,
-                                                //   color: colorHint,
-                                                // ),
-                                                // dropdownDecoration:
-                                                //     BoxDecoration(
-                                                //   borderRadius:
-                                                //       BorderRadius.circular(15),
-                                                //   color: Helper.brandColors[2],
-                                                // ),
-                                                onChanged: (value) {
-                                                  if (value != '1') {
-                                                    widget.pedido!
-                                                        .tsAsignado = DateTime
-                                                            .now()
-                                                        .millisecondsSinceEpoch;
-                                                    widget.pedido!
-                                                            .usuarioAsignado =
-                                                        value.toString();
-
-                                                    if (value == '9999') {
-                                                      widget.pedido!
-                                                              .entregaExterna =
-                                                          true;
-                                                      entregaExterna = true;
-                                                    } else {
-                                                      widget.pedido!
-                                                              .entregaExterna =
-                                                          false;
-                                                      entregaExterna = false;
-                                                    }
-                                                  } else {
-                                                    widget.pedido!.tsAsignado =
-                                                        0;
-                                                    widget.pedido!
-                                                        .usuarioAsignado = '';
-                                                    widget.pedido!
-                                                        .entregaExterna = false;
-                                                    entregaExterna = false;
-                                                  }
-                                                },
-                                                onSaved: (value) {},
+                                            ? _Custom_Dropdown(
+                                                actionOnChange: ((a) =>
+                                                    asignaEntrega(a)),
+                                                valores: repartidores,
+                                                valorId: repartidoId,
                                               )
                                             : Container(),
                                         SizedBox(
@@ -611,8 +534,8 @@ class _FormState extends State<_Form> {
                                           color: Helper.brandColors[5]),
                                     ),
                                     Switch(
-                                        value: widget.pedido!.estado == 4 ||
-                                            widget.pedido!.estado == 5,
+                                        value: estadoPedido == 4 ||
+                                            estadoPedido == 5,
                                         activeColor: Helper.brandColors[3],
                                         activeTrackColor: Helper.brandColors[8],
                                         inactiveTrackColor:
@@ -622,15 +545,13 @@ class _FormState extends State<_Form> {
                                                 ? (cerrado) {
                                                     setState(() {
                                                       if (cerrado) {
-                                                        widget.pedido!.estado =
-                                                            4;
+                                                        estadoPedido = 4;
                                                         widget.pedido!
                                                             .tsCerrado = DateTime
                                                                 .now()
                                                             .millisecondsSinceEpoch;
                                                       } else {
-                                                        widget.pedido!.estado =
-                                                            3;
+                                                        estadoPedido = 3;
                                                         widget.pedido!
                                                             .tsCerrado = 0;
                                                       }
@@ -695,8 +616,7 @@ class _FormState extends State<_Form> {
                   margin: EdgeInsets.only(top: 45),
                   child: Row(
                     mainAxisAlignment: widget.pedido != null
-                        ? widget.pedido!.estado == 3 ||
-                                widget.pedido!.estado == 5
+                        ? estadoPedido == 3 || estadoPedido == 5
                             ? MainAxisAlignment.center
                             : MainAxisAlignment.spaceAround
                         : MainAxisAlignment.spaceAround,
@@ -774,6 +694,25 @@ class _FormState extends State<_Form> {
         ));
   }
 
+  void asignaEntrega(String value) {
+    if (value != '0') {
+      entregaExterna = false;
+      tsAsignado = DateTime.now().millisecondsSinceEpoch;
+
+      if (value == '9999') {
+        entregaExterna = true;
+        repartidorAsignado = 'Entrega Externa';
+      } else {
+        entregaExterna = false;
+      }
+    } else {
+      tsAsignado = 0;
+      repartidorAsignado = '';
+      entregaExterna = false;
+    }
+    repartidoId = value.toString();
+  }
+
   guardarImagen(bool entregaExterna) async {
     final _driveService =
         Provider.of<GoogleDriveService>(context, listen: false);
@@ -815,19 +754,28 @@ class _FormState extends State<_Form> {
     MyResponse response;
     bool loading = false;
     try {
-      switch (widget.pedido!.estado) {
+      if (estadoPedido > 0) {
+        widget.pedido!.titulo = titleTxtController.text;
+        widget.pedido!.nota = areaTxtController.text;
+        widget.pedido!.prioridad = prioridad;
+        widget.pedido!.fechaDeseada = txtCtrlDateDeseada.text;
+        widget.pedido!.fechaEstimada = txtCtrlDate.text;
+        widget.pedido!.usuarioAsignado = repartidoId;
+        widget.pedido!.indicaciones = indicacionesTxtController.text;
+        widget.pedido!.estado = estadoPedido;
+        widget.pedido!.entregaExterna = entregaExterna;
+        
+      }
+      switch (estadoPedido) {
         case 0: // PEDIDO NUEVO
           final ped = new Pedido(
               idObra: obraId,
               idUsuario: _pref.id,
-              nota: areaTxtController.text,
+              nota: detallePedido,
               prioridad: prioridad,
-              fechaDeseada: widget.pedido!.fechaDeseada,
-              titulo: titleTxtController.text
-              /*
-          notificar a  
-        */
-              );
+              fechaDeseada: fechaDeseada,
+              titulo: tituloPedido,
+              estado: estadoPedido);
 
           response = await _obraService.nuevoPedido(ped);
           if (response.fallo) {
@@ -837,9 +785,7 @@ class _FormState extends State<_Form> {
           }
           break;
         case 1: // PEDIDO SIN CONFIRMAR
-          widget.pedido!.nota = areaTxtController.text;
-          widget.pedido!.prioridad = prioridad;
-          widget.pedido!.titulo = titleTxtController.text;
+          
           response = await _obraService.editPedido(widget.pedido!);
 
           if (response.fallo) {
@@ -847,11 +793,9 @@ class _FormState extends State<_Form> {
           } else {
             return [false, response.data];
           }
-          break;
         case 2: // PEDIDO CONFIRMADO. PENDIENTE DE COMPRA
-          widget.pedido!.nota = areaTxtController.text;
-          widget.pedido!.prioridad = prioridad;
-          widget.pedido!.titulo = titleTxtController.text;
+
+
           response = await _obraService.editPedido(widget.pedido!);
           if (response.fallo) {
             return [true, response.error];
@@ -859,13 +803,11 @@ class _FormState extends State<_Form> {
             return [false, response.data];
           }
         case 3:
-          if (widget.pedido!.usuarioAsignado == '') {
+          if (repartidoId == '0') {
             return [true, 'No se ha seleccionado repartidor'];
           }
-          widget.pedido!.indicaciones = indicacionesTxtController.text;
-          widget.pedido!.nota = areaTxtController.text;
-          widget.pedido!.prioridad = prioridad;
-          widget.pedido!.fechaEstimada = txtCtrlDate.text;
+        
+
           if (widget.pedido!.usuarioAsignado == '9999') {
             widget.pedido!.entregaExterna = true;
           }
@@ -878,33 +820,31 @@ class _FormState extends State<_Form> {
           }
 
         case 4:
-          widget.pedido!.nota = areaTxtController.text;
-          widget.pedido!.prioridad = prioridad;
 
-          if (tieneImagen) {
-            final idDrive = _obraService.obra.folderPedidoImages == ''
-                ? _obraService.obra.driveFolderId
-                : _obraService.obra.folderPedidoImages;
-            List<String> idsImagenes = [];
-            int index = 1;
-            for (var img in _driveService.imgsPedido!) {
-              loading = true;
-              openLoadingDialog(context,
-                  mensaje:
-                      'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
-              final idImagen = await _driveService.grabarImagenPedido(
-                  'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)',
-                  idDrive!,
-                  img!);
-              idsImagenes.add(idImagen);
-              index++;
-              closeLoadingDialog(context);
-            }
-            ;
-            loading = false;
+          // if (tieneImagen) {
+          //   final idDrive = _obraService.obra.folderPedidoImages == ''
+          //       ? _obraService.obra.driveFolderId
+          //       : _obraService.obra.folderPedidoImages;
+          //   List<String> idsImagenes = [];
+          //   int index = 1;
+          //   for (var img in _driveService.imgsPedido!) {
+          //     loading = true;
+          //     openLoadingDialog(context,
+          //         mensaje:
+          //             'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
+          //     final idImagen = await _driveService.grabarImagenPedido(
+          //         'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)',
+          //         idDrive!,
+          //         img!);
+          //     idsImagenes.add(idImagen);
+          //     index++;
+          //     closeLoadingDialog(context);
+          //   }
+          //   ;
+          //   loading = false;
 
-            widget.pedido!.imagenId = idsImagenes;
-          }
+          //   widget.pedido!.imagenId = idsImagenes;
+          // }
           response = await _obraService.editPedido(widget.pedido!);
           if (response.fallo) {
             return [true, response.error];
@@ -1012,7 +952,7 @@ class _FormState extends State<_Form> {
 
   bool permiteVerByEstado(List<int> lista) {
     if (widget.pedido != null) {
-      return lista.contains(widget.pedido!.estado);
+      return lista.contains(estadoPedido);
     } else {
       return lista.contains(0);
     }
@@ -1020,7 +960,7 @@ class _FormState extends State<_Form> {
 
   bool editableByEstado(int estadoVisible) {
     if (widget.pedido != null) {
-      return widget.pedido!.estado == estadoVisible;
+      return estadoPedido == estadoVisible;
     } else {
       return true;
     }
@@ -1112,5 +1052,95 @@ class _FormState extends State<_Form> {
         imgButtonText = 'Imagen selecciona';
       });
     }
+  }
+
+  descargarPDF(BuildContext context) async {
+    openLoadingDialog(context, mensaje: 'Descargando archivo...');
+    try {
+      final genero = await PDFService.generarPDFPedido(widget.pedido!);
+      if (!genero[0]) {
+        throw Exception(genero[1]);
+      }
+      closeLoadingDialog(context);
+      var downloadsDirectory = await getTemporaryDirectory();
+
+      Helper.showSnackBar(
+          context,
+          'Archivo descargado',
+          null,
+          Duration(seconds: 4),
+          SnackBarAction(
+            label: 'Ver PDF',
+            onPressed: () {
+              OpenFile.open(genero[1]);
+            },
+          ));
+    } catch (err) {
+      closeLoadingDialog(context);
+      openAlertDialog(context, 'No se pudo descargar archivo',
+          subMensaje: err.toString());
+    }
+  }
+}
+
+class _Custom_Dropdown extends StatelessWidget {
+  _Custom_Dropdown(
+      {Key? key,
+      required this.valores,
+      this.valorId = '',
+      required this.actionOnChange})
+      : super(key: key);
+  List<DropdownMenuItem<String>> valores;
+  String valorId;
+  List<DropdownMenuItem<int>> lista_valores = [];
+  Color colorHint = Helper.brandColors[3];
+  void Function(String) actionOnChange;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField2(
+      value: valorId,
+      items: valores,
+      style: TextStyle(color: Helper.brandColors[5], fontSize: 16),
+      decoration: getDecoration(),
+      dropdownStyleData: DropdownStyleData(decoration: getDropdownDecoration()),
+      hint: Text(
+        'Seleccione delivery',
+        style: TextStyle(fontSize: 16, color: colorHint),
+      ),
+      onChanged: (value) {
+        actionOnChange(value.toString());
+      },
+      onSaved: (value) {
+        print('dsabes');
+      },
+    );
+  }
+
+  getDecoration() {
+    return InputDecoration(
+        focusColor: Helper.brandColors[9],
+        contentPadding: EdgeInsets.zero,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7),
+          borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7),
+          borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7),
+          borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+        ),
+        fillColor: Helper.brandColors[1],
+        filled: true);
+  }
+
+  getDropdownDecoration() {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(15),
+      color: Helper.brandColors[2],
+    );
   }
 }
