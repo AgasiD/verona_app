@@ -754,9 +754,11 @@ class _FormState extends State<_Form> {
     MyResponse response;
     bool loading = false;
     try {
+      detallePedido = areaTxtController.text;
+      tituloPedido = titleTxtController.text;
       if (estadoPedido > 0) {
-        widget.pedido!.titulo = titleTxtController.text;
-        widget.pedido!.nota = areaTxtController.text;
+        widget.pedido!.titulo = tituloPedido;
+        widget.pedido!.nota = detallePedido;
         widget.pedido!.prioridad = prioridad;
         widget.pedido!.fechaDeseada = txtCtrlDateDeseada.text;
         widget.pedido!.fechaEstimada = txtCtrlDate.text;
@@ -764,7 +766,6 @@ class _FormState extends State<_Form> {
         widget.pedido!.indicaciones = indicacionesTxtController.text;
         widget.pedido!.estado = estadoPedido;
         widget.pedido!.entregaExterna = entregaExterna;
-        
       }
       switch (estadoPedido) {
         case 0: // PEDIDO NUEVO
@@ -785,7 +786,7 @@ class _FormState extends State<_Form> {
           }
           break;
         case 1: // PEDIDO SIN CONFIRMAR
-          
+
           response = await _obraService.editPedido(widget.pedido!);
 
           if (response.fallo) {
@@ -794,7 +795,6 @@ class _FormState extends State<_Form> {
             return [false, response.data];
           }
         case 2: // PEDIDO CONFIRMADO. PENDIENTE DE COMPRA
-
 
           response = await _obraService.editPedido(widget.pedido!);
           if (response.fallo) {
@@ -806,7 +806,6 @@ class _FormState extends State<_Form> {
           if (repartidoId == '0') {
             return [true, 'No se ha seleccionado repartidor'];
           }
-        
 
           if (widget.pedido!.usuarioAsignado == '9999') {
             widget.pedido!.entregaExterna = true;
