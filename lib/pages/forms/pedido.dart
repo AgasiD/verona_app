@@ -819,31 +819,34 @@ class _FormState extends State<_Form> {
           }
 
         case 4:
-
-          // if (tieneImagen) {
-          //   final idDrive = _obraService.obra.folderPedidoImages == ''
-          //       ? _obraService.obra.driveFolderId
-          //       : _obraService.obra.folderPedidoImages;
-          //   List<String> idsImagenes = [];
-          //   int index = 1;
-          //   for (var img in _driveService.imgsPedido!) {
-          //     loading = true;
-          //     openLoadingDialog(context,
-          //         mensaje:
-          //             'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
-          //     final idImagen = await _driveService.grabarImagenPedido(
-          //         'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)',
-          //         idDrive!,
-          //         img!);
-          //     idsImagenes.add(idImagen);
-          //     index++;
-          //     closeLoadingDialog(context);
-          //   }
-          //   ;
-          //   loading = false;
-
-          //   widget.pedido!.imagenId = idsImagenes;
-          // }
+          if (tieneImagen) {
+            final idDrive = _obraService.obra.folderPedidoImages == ''
+                ? _obraService.obra.driveFolderId
+                : _obraService.obra.folderPedidoImages;
+            List<String> idsImagenes = [];
+            int index = 1;
+            loading = true;
+            final pedido_aux = widget.pedido!;
+            if (_driveService.imgsPedido!.length > 0) {
+              for (var img in _driveService.imgsPedido!) {
+                openLoadingDialog(context,
+                    mensaje:
+                        'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
+                final idImagen = await _driveService.grabarImagenPedido(
+                    'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)',
+                    idDrive!,
+                    img!);
+                idsImagenes.add(idImagen);
+                index++;
+                closeLoadingDialog(context);
+              }
+              ;
+              loading = false;
+              widget.pedido = pedido_aux;
+              widget.pedido!.imagenId = idsImagenes;
+            }
+            
+          }
           response = await _obraService.editPedido(widget.pedido!);
           if (response.fallo) {
             return [true, response.error];

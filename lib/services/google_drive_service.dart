@@ -32,11 +32,11 @@ class GoogleDriveService extends ChangeNotifier {
 
   grabarImagenPedido(String fileName, String driveFolderId, XFile image) async {
     if (imgsPedido != null) {
-    final idFolder = driveFolderId;
+      final idFolder = driveFolderId;
       final datos = await this
           ._http
           .uploadImage(image, _endpoint + "/$fileName/jpg/$idFolder");
-      final autorizar = await setPermisosToFile(datos);
+      await setPermisosToFile(datos);
 
       return datos;
     } else {
@@ -110,7 +110,8 @@ class GoogleDriveService extends ChangeNotifier {
 
   obtenerDocumentos(String usuarioId, String folderId) async {
     folderId = folderId == '' ? 'SinID' : folderId;
-    final datos = await this._http.get('$_endpoint/inFolder/$usuarioId/$folderId');
+    final datos =
+        await this._http.get('$_endpoint/inFolder/$usuarioId/$folderId');
     final response = MyResponse.fromJson(datos['response']);
 
     return response;
