@@ -27,12 +27,12 @@ class ImgGalleryPage extends StatelessWidget {
 
     return Scaffold(
       bottomNavigationBar: CustomNavigatorFooter(),
-      floatingActionButton: CustomNavigatorButton(
-        accion: () => Navigator.pushNamed(context, DocumentoForm.routeName,
-            arguments: {'driveId': _driveId}),
-        icono: Icons.add,
-        showNotif: false,
-      ),
+      // floatingActionButton: CustomNavigatorButton(
+      //   accion: () => Navigator.pushNamed(context, DocumentoForm.routeName,
+      //       arguments: {'driveId': _driveId}),
+      //   icono: Icons.add,
+      //   showNotif: false,
+      // ),
       body: Container(
           color: Helper.brandColors[1],
           child: _driveId == ''
@@ -50,7 +50,7 @@ class ImgGalleryPage extends StatelessWidget {
                       return Loading(mensaje: 'Recuperando imagenes');
                     } else {
                       final response = snapshot.data as MyResponse;
-                      var files = response.data['files'] as List<dynamic>;
+                      var files = response.data as List<dynamic>;
 
                       // Filtro por habilitados para cliente
                       if (_pref.role == 3) {

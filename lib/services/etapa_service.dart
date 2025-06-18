@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/etapa.dart';
@@ -5,36 +7,48 @@ import 'package:verona_app/services/http_service.dart';
 
 class EtapaService extends ChangeNotifier {
   HttpService _http = new HttpService();
-  final _endpoint = 'api/etapa';
+  final _endpoint = 'api/controles';
 
-  Future<MyResponse> obtenerEtapasExtras() async {
-    final datos = await this._http.get('$_endpoint/extras');
-    final response = datos["response"];
+  Future<dynamic> obtenerEtapasExtras() async {
+    final response = await this._http.get('$_endpoint/etapas/extras');
+    ;
     final resp = MyResponse.fromJson(response);
     return resp;
   }
 
-  Future<MyResponse> grabar(Map<String, dynamic> data) async {
-    final datos = await this._http.post('$_endpoint/nuevaEtapa', data);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> grabar(Map<String, dynamic> etapa) async {
+    final response = await this._http.post('$_endpoint/nuevaEtapa', etapa);
+    ;
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> eliminarEtapa(etapaId) async {
-    final datos = await this._http.delete('$_endpoint/eliminarEtapa/$etapaId');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    // notifyListeners();
-    return resp;
+  Future<dynamic> eliminarEtapa(etapaId) async {
+    final response =
+        await this._http.delete('$_endpoint/eliminarEtapa/$etapaId');
+    ;
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    } // notifyListeners();
+    return data;
   }
 
-  Future<MyResponse> actualizarEtapa(Etapa etapa) async{
-      final datos = await this._http.put('$_endpoint', etapa.toJson());
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+  Future<dynamic> actualizarEtapa(Etapa etapa) async {
+    final response = await this._http.put('$_endpoint', etapa.toJson());
+    ;
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 }

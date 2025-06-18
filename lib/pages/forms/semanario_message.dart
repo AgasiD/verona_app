@@ -130,7 +130,7 @@ class _Form extends StatelessWidget {
     subetapas_not_repeat.forEach((idSub) {
       final nombre = data.firstWhere((t) => t.subetapa == idSub).nombreSubetapa;
       subetapas_map.add({"subetapa": idSub, "nombre": nombre});
-    }); 
+    });
 
     /* INSERTO TAREAS FINALIZADAS */
     bool insert_title_finished = false;
@@ -183,11 +183,6 @@ class _Form extends StatelessWidget {
       final response = await _chatService.enviarMensajeChatGroup(
           _obraService.obra.id, _pref.id, txtCtrl.text);
       closeLoadingDialog(context);
-      if (response.fallo) {
-        openAlertDialog(context, 'Error al enviar mensaje',
-            subMensaje: response.error);
-        return;
-      }
       openAlertDialog(context, 'Mensaje enviado');
     } catch (err) {
       closeLoadingDialog(context);

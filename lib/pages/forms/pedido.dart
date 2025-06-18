@@ -9,11 +9,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/pedido.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/listas/pedidos.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/services/chat_service.dart';
@@ -44,17 +44,17 @@ class PedidoForm extends StatelessWidget implements MyForm {
               ? FutureBuilder(
                   future: _obraService.obtenerPedido(pedidoId),
                   builder: (context, snapshot) {
-                    if (snapshot.data == null) {
+                    if (snapshot.connectionState != ConnectionState.done) {
                       return Loading(
-                        mensaje: 'Cargando pedido',
+                        mensaje: 'Cargando pedido...',
                       );
+                    } else if (snapshot.connectionState ==
+                            ConnectionState.done &&
+                        snapshot.hasError) {
+                      return ErrorPage(errorMsg: snapshot.error.toString());
                     } else {
-                      MyResponse response = snapshot.data as MyResponse;
-                      if (response.fallo) {
-                        return Container();
-                      }
                       final pedido = Pedido.fromJson(
-                          response.data as Map<String, dynamic>);
+                          snapshot.data as Map<String, dynamic>);
                       return _Form(pedido: pedido);
                     }
                   },
@@ -192,10 +192,10 @@ class _FormState extends State<_Form> {
           break;
         case 5:
           // ESTADO: Pedido cerrado
+          pedidoEnStock = true;
+          pedidoConfirmado = true;
           tieneImagen = widget.pedido!.imagenId.isEmpty ? false : true;
           imgButtonText = tieneImagen ? 'Ver evidencia' : 'Foto/Evidencia';
-          pedidoConfirmado = true;
-          pedidoEnStock = true;
           repartidoId = widget.pedido!.usuarioAsignado == ''
               ? repartidores.first.value.toString()
               : widget.pedido!.usuarioAsignado;
@@ -346,34 +346,6 @@ class _FormState extends State<_Form> {
                               : Container(),
                           Column(
                             children: [
-                              // permiteVerByEstado([1]) &&
-                              //         permiteVerByRole([1, 5])
-                              //     ? TextButton(
-                              //         style: ButtonStyle(
-                              //             padding: MaterialStateProperty.all(
-                              //                 EdgeInsets.zero)),
-                              //         onPressed: abrirChat,
-                              //         child: Row(
-                              //           children: [
-                              //             SizedBox(
-                              //                 width: MediaQuery.of(context)
-                              //                         .size
-                              //                         .width -
-                              //                     100,
-                              //                 child: Text(
-                              //                   'Consultar a ${widget.pedido!.nombreUsuario}'
-                              //                       .toUpperCase(),
-                              //                   overflow: TextOverflow.clip,
-                              //                   style: TextStyle(
-                              //                       color:
-                              //                           Helper.brandColors[8]),
-                              //                 )),
-                              //             Icon(Icons.chat,
-                              //                 color: Helper.brandColors[8]),
-                              //           ],
-                              //         ),
-                              //       )
-                              //     : Container(),
                               permiteVerByEstado([1, 2, 3, 5]) &&
                                       permiteVerByRole([1, 2, 5])
                                   ? Row(children: [
@@ -641,7 +613,7 @@ class _FormState extends State<_Form> {
                                 }
                                 bool loading = true;
 
-                                openLoadingDialog(context, mensaje: mensaje1);
+                                // openLoadingDialog(context, mensaje: mensaje1);
                                 try {
                                   final response = await grabarPedido(
                                       _obraService.obra.id,
@@ -649,8 +621,8 @@ class _FormState extends State<_Form> {
                                       _obraService,
                                       _driveService);
 
-                                  closeLoadingDialog(context);
-                                  loading = false;
+                                  // closeLoadingDialog(context);
+                                  // loading = false;
                                   if (response[0]) {
                                     openAlertDialog(context, mensaje2,
                                         subMensaje: response[1]);
@@ -670,6 +642,7 @@ class _FormState extends State<_Form> {
                                   }
                                 } catch (err) {
                                   loading ? closeLoadingDialog(context) : false;
+
                                   openAlertDialog(
                                       context, 'Error al grabar pedido',
                                       subMensaje: err.toString());
@@ -751,115 +724,53 @@ class _FormState extends State<_Form> {
 
   grabarPedido(obraId, areaTxtController, ObraService _obraService,
       GoogleDriveService _driveService) async {
-    MyResponse response;
+    dynamic response;
     bool loading = false;
+    detallePedido = areaTxtController.text;
+    tituloPedido = titleTxtController.text;
+
+    if (estadoPedido > 0) {
+      widget.pedido!.titulo = tituloPedido;
+      widget.pedido!.nota = detallePedido;
+      widget.pedido!.prioridad = prioridad;
+      widget.pedido!.fechaDeseada = txtCtrlDateDeseada.text;
+      widget.pedido!.fechaEstimada = txtCtrlDate.text;
+      widget.pedido!.usuarioAsignado = repartidoId;
+      widget.pedido!.indicaciones = indicacionesTxtController.text;
+      widget.pedido!.estado = estadoPedido;
+      widget.pedido!.entregaExterna = entregaExterna;
+    }
+    loading = true;
     try {
-      detallePedido = areaTxtController.text;
-      tituloPedido = titleTxtController.text;
-      if (estadoPedido > 0) {
-        widget.pedido!.titulo = tituloPedido;
-        widget.pedido!.nota = detallePedido;
-        widget.pedido!.prioridad = prioridad;
-        widget.pedido!.fechaDeseada = txtCtrlDateDeseada.text;
-        widget.pedido!.fechaEstimada = txtCtrlDate.text;
-        widget.pedido!.usuarioAsignado = repartidoId;
-        widget.pedido!.indicaciones = indicacionesTxtController.text;
-        widget.pedido!.estado = estadoPedido;
-        widget.pedido!.entregaExterna = entregaExterna;
-      }
       switch (estadoPedido) {
         case 0: // PEDIDO NUEVO
-          final ped = new Pedido(
-              idObra: obraId,
-              idUsuario: _pref.id,
-              nota: detallePedido,
-              prioridad: prioridad,
-              fechaDeseada: fechaDeseada,
-              titulo: tituloPedido,
-              estado: estadoPedido);
-
-          response = await _obraService.nuevoPedido(ped);
-          if (response.fallo) {
-            return [true, response.error];
-          } else {
-            return [false, response.data];
-          }
-          break;
+          return nuevoPedido(_obraService, obraId);
         case 1: // PEDIDO SIN CONFIRMAR
-
           response = await _obraService.editPedido(widget.pedido!);
-
-          if (response.fallo) {
-            return [true, response.error];
-          } else {
-            return [false, response.data];
-          }
+          return [false, response];
         case 2: // PEDIDO CONFIRMADO. PENDIENTE DE COMPRA
 
           response = await _obraService.editPedido(widget.pedido!);
-          if (response.fallo) {
-            return [true, response.error];
-          } else {
-            return [false, response.data];
-          }
-        case 3:
-          if (repartidoId == '0') {
-            return [true, 'No se ha seleccionado repartidor'];
-          }
+          return [false, response];
 
-          if (widget.pedido!.usuarioAsignado == '9999') {
+        case 3:
+          if (repartidoId == '0')
+            return [true, 'No se ha seleccionado repartidor'];
+
+          if (widget.pedido!.usuarioAsignado == '9999')
             widget.pedido!.entregaExterna = true;
-          }
 
           response = await _obraService.editPedido(widget.pedido!);
-          if (response.fallo) {
-            return [true, response.error];
-          } else {
-            return [false, response.data];
-          }
+
+          return [false, response];
 
         case 4:
-          if (tieneImagen) {
-            final idDrive = _obraService.obra.folderPedidoImages == ''
-                ? _obraService.obra.driveFolderId
-                : _obraService.obra.folderPedidoImages;
-            List<String> idsImagenes = [];
-            int index = 1;
-            loading = true;
-            final pedido_aux = widget.pedido!;
-            if (_driveService.imgsPedido!.length > 0) {
-              for (var img in _driveService.imgsPedido!) {
-                openLoadingDialog(context,
-                    mensaje:
-                        'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
-                final idImagen = await _driveService.grabarImagenPedido(
-                    'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)',
-                    idDrive!,
-                    img!);
-                idsImagenes.add(idImagen);
-                index++;
-                closeLoadingDialog(context);
-              }
-              ;
-              loading = false;
-              widget.pedido = pedido_aux;
-              widget.pedido!.imagenId = idsImagenes;
-            }
-            
-          }
-          response = await _obraService.editPedido(widget.pedido!);
-          if (response.fallo) {
-            return [true, response.error];
-          } else {
-            return [false, response.data];
-          }
+          return cerrarPedido(_obraService, _driveService);
         default:
           break;
       }
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al grabar pedido',
-          subMensaje: err.toString());
+      return [true, err.toString()];
     }
   }
 
@@ -1000,16 +911,17 @@ class _FormState extends State<_Form> {
   abrirChat() async {
     final _chatService = Provider.of<ChatService>(context, listen: false);
     // Generar Chat
-    final response =
-        await _chatService.crearChat(_pref.id, widget.pedido!.idUsuario);
-    if (response.fallo) {
-      openAlertDialog(context, 'Error al crear el chat',
-          subMensaje: response.error);
-    } else {
+    try {
+      final response =
+          await _chatService.crearChat(_pref.id, widget.pedido!.idUsuario);
+
       Navigator.pushNamed(context, ChatPage.routeName, arguments: {
         'chatId': response.data['chatId'],
         'chatName': response.data['chatName'],
       });
+    } catch (err) {
+      openAlertDialog(context, 'Error al crear el chat',
+          subMensaje: err.toString());
     }
   }
 
@@ -1082,6 +994,68 @@ class _FormState extends State<_Form> {
       openAlertDialog(context, 'No se pudo descargar archivo',
           subMensaje: err.toString());
     }
+  }
+
+  nuevoPedido(ObraService _obraService, obraId) async {
+    final ped = new Pedido(
+        idObra: obraId,
+        idUsuario: _pref.id,
+        nota: detallePedido,
+        prioridad: prioridad,
+        fechaDeseada: fechaDeseada,
+        titulo: tituloPedido,
+        estado: 1);
+
+    try {
+      final response = await _obraService.nuevoPedido(ped);
+      return [false, response];
+    } catch (err) {
+      return [true, err.toString()];
+    }
+  }
+
+  cerrarPedido(_obraService, GoogleDriveService _driveService) async {
+    bool loading = false;
+    if (tieneImagen) {
+      final idDrive = _obraService.obra.folderPedidoImages == ''
+          ? _obraService.obra.driveFolderId
+          : _obraService.obra.folderPedidoImages;
+      loading = true;
+      final pedido_aux = widget.pedido!;
+      if (_driveService.imgsPedido!.length > 0) {
+        final idsImagenes =
+            await subirImagenesPedido(_driveService, _obraService, idDrive);
+        loading = false;
+        widget.pedido = pedido_aux;
+        widget.pedido!.imagenId = idsImagenes;
+      }
+    }
+
+    try {
+      final response = await _obraService.editPedido(widget.pedido!);
+      return [false, response];
+    } catch (err) {
+      return [true, err.toString()];
+    }
+  }
+
+  Future<List<String>> subirImagenesPedido(
+      GoogleDriveService _driveService, _obraService, idDrive) async {
+    int index = 1;
+    List<String> idsImagenes = [];
+    for (var img in _driveService.imgsPedido!) {
+      final tituloImg =
+          'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)';
+      openLoadingDialog(context,
+          mensaje:
+              'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
+      final idImagen =
+          await _driveService.grabarImagenPedido(tituloImg, idDrive!, img!);
+      idsImagenes.add(idImagen);
+      index++;
+      closeLoadingDialog(context);
+    }
+    return idsImagenes;
   }
 }
 

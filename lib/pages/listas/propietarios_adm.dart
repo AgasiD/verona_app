@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/perfil.dart';
@@ -27,9 +28,17 @@ class PropietariosADM extends StatelessWidget {
           child: FutureBuilder(
               future: _usuarioService.obtenerPropietariosMiembro(),
               builder: (context, snapshot) {
-                if (snapshot.data == null) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return Loading(mensaje: 'Cargando propietarios...');
-                } else {
+                } else if( snapshot.hasError ) {
+
+                  return ErrorPage(
+                    errorMsg: snapshot.error.toString(),
+                    page: false,
+                  );
+
+                }else
+                {
                   var propietarios = snapshot.data as List<Miembro>;
                   propietarios = propietarios
                       .where((miembro) => miembro.role != 1)

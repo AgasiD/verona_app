@@ -46,7 +46,10 @@ class _TareasCheckListState extends State<TareasCheckList> {
           title: Text('Tareas'),
           automaticallyImplyLeading: false,
           actions: [
-            _pref.role == 1 || _pref.role == 2 || _pref.role == 8 || _pref.role == 7
+            _pref.role == 1 ||
+                    _pref.role == 2 ||
+                    _pref.role == 8 ||
+                    _pref.role == 7
                 ? IconButton(
                     onPressed: () {
                       editOrder = !editOrder;
@@ -73,7 +76,7 @@ class _TareasCheckListState extends State<TareasCheckList> {
       bottomNavigationBar: CustomNavigatorFooter(),
       floatingActionButton: (_pref.role == 1 ||
               _pref.role == 2 ||
-              _pref.role == 8 || 
+              _pref.role == 8 ||
               _pref.role == 7)
           ? FloatingActionButton(
               onPressed: () => Navigator.pushNamed(
@@ -131,19 +134,18 @@ class _ListaTareaState extends State<ListaTarea> {
         if (oldIndex < newIndex) {
           newIndex -= 1;
         }
-        final Tarea item = widget.tareas.removeAt(oldIndex);
-        widget.tareas.insert(newIndex, item);
-        setState(() {});
-        final response = await _obraService.actualizarOrdenTareas(
-            _obraService.obra.id,
-            widget.etapaId,
-            widget.tareas[newIndex].subetapa,
-            widget.tareas);
-
-        if (response.fallo) {
+        try {
+          final response = await _obraService.actualizarOrdenTareas(
+              _obraService.obra.id,
+              widget.etapaId,
+              widget.tareas[newIndex].subetapa,
+              widget.tareas);
+          final Tarea item = widget.tareas.removeAt(oldIndex);
+          widget.tareas.insert(newIndex, item);
+          setState(() {});
+        } catch (err) {
           openAlertDialog(context, 'Error al ordenar',
-              subMensaje: response.error);
-          return;
+              subMensaje: err.toString());
         }
       },
     );
@@ -344,15 +346,17 @@ class _TareaTileState extends State<_TareaTile> {
       return;
     }
 
-    _obraService.obra.etapas[index].subetapas[indexSub].tareas
-        .removeAt(indexTarea);
     openLoadingDialog(context, mensaje: 'Eliminando tarea...');
-    final response =
-        await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
-    closeLoadingDialog(context);
-    if (response.fallo) {
+    try {
+      final response =
+          await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
+      _obraService.obra.etapas[index].subetapas[indexSub].tareas
+          .removeAt(indexTarea);
+      closeLoadingDialog(context);
+    } catch (err) {
+      closeLoadingDialog(context);
       openAlertDialog(context, 'Error al eliminar tarea',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
   }
 
@@ -374,86 +378,89 @@ class _TareaTileState extends State<_TareaTile> {
     openLoadingDialog(context, mensaje: 'Finalizando tarea...');
     final ts = DateTime.now().millisecondsSinceEpoch;
 
-    final response = await _obraService.actualizarTarea(
-      _obraService.obra.id,
-      widget.etapaId,
-      widget.tarea.subetapa,
-      widget.tarea.id,
-      tarea.iniciado,
-      true,
-      new Preferences().id,
-      ts,
-      tarea.tsIniciado,
-    );
-    closeLoadingDialog(context);
-    widget.tarea.realizado = true;
-    widget.tarea.iniciado = true;
-    widget.tarea.tsRealizado = ts;
+    try {
+      final response = await _obraService.actualizarTarea(
+        _obraService.obra.id,
+        widget.etapaId,
+        widget.tarea.subetapa,
+        widget.tarea.id,
+        tarea.iniciado,
+        true,
+        new Preferences().id,
+        ts,
+        tarea.tsIniciado,
+      );
+      closeLoadingDialog(context);
+      widget.tarea.realizado = true;
+      widget.tarea.iniciado = true;
+      widget.tarea.tsRealizado = ts;
 
-    _obraService.notifyListeners();
-
-    if (response.fallo) {
+      _obraService.notifyListeners();
+    } catch (err) {
+      closeLoadingDialog(context);
       openAlertDialog(context, 'Error al actualizar tarea',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
   }
 
   iniciarTarea(Tarea tarea) async {
     openLoadingDialog(context, mensaje: 'Iniciando tarea...');
     final ts = DateTime.now().millisecondsSinceEpoch;
-    final _pref =       new Preferences();
-    final response = await _obraService.actualizarTarea(
-      _obraService.obra.id,
-      widget.etapaId,
-      widget.tarea.subetapa,
-      widget.tarea.id,
-      true,
-      false,
-      _pref.id,
-      0,
-      ts,
-    );
-    closeLoadingDialog(context);
+    final _pref = new Preferences();
+    try {
+      final response = await _obraService.actualizarTarea(
+        _obraService.obra.id,
+        widget.etapaId,
+        widget.tarea.subetapa,
+        widget.tarea.id,
+        true,
+        false,
+        _pref.id,
+        0,
+        ts,
+      );
+      closeLoadingDialog(context);
 
-    widget.tarea.iniciado = true;
-    widget.tarea.realizado = false;
-    widget.tarea.tsIniciado = ts;
-    widget.tarea.idUsuario =       _pref.id;
-    _obraService.notifyListeners();
-
-    if (response.fallo) {
+      widget.tarea.iniciado = true;
+      widget.tarea.realizado = false;
+      widget.tarea.tsIniciado = ts;
+      widget.tarea.idUsuario = _pref.id;
+      _obraService.notifyListeners();
+    } catch (err) {
       openAlertDialog(context, 'Error al actualizar tarea',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
   }
 
   reiniciarTarea(Tarea tarea) async {
     final _pref = new Preferences();
     openLoadingDialog(context, mensaje: 'Reiniciando tarea...');
-    final response = await _obraService.actualizarTarea(
-      _obraService.obra.id,
-      widget.etapaId,
-      widget.tarea.subetapa,
-      widget.tarea.id,
-      false,
-      false,
-      _pref.id,
-      0,
-      0,
-    );
-    closeLoadingDialog(context);
-    widget.tarea.realizado = false;
-    widget.tarea.iniciado = false;
-    widget.tarea.tsIniciado = 0;
-    widget.tarea.tsRealizado = 0;
-    widget.tarea.idUsuario = _pref.id;
-    widget.tarea.nombreUsuario = _pref.nombre ;
 
-    _obraService.notifyListeners();
+    try {
+      final response = await _obraService.actualizarTarea(
+        _obraService.obra.id,
+        widget.etapaId,
+        widget.tarea.subetapa,
+        widget.tarea.id,
+        false,
+        false,
+        _pref.id,
+        0,
+        0,
+      );
+      closeLoadingDialog(context);
+      widget.tarea.realizado = false;
+      widget.tarea.iniciado = false;
+      widget.tarea.tsIniciado = 0;
+      widget.tarea.tsRealizado = 0;
+      widget.tarea.idUsuario = _pref.id;
+      widget.tarea.nombreUsuario = _pref.nombre;
 
-    if (response.fallo) {
+      _obraService.notifyListeners();
+    } catch (err) {
+      closeLoadingDialog(context);
       openAlertDialog(context, 'Error al actualizar tarea',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
   }
 }

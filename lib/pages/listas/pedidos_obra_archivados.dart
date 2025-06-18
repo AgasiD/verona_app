@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -16,9 +17,11 @@ class PedidosArchivadosList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    final pedidos = arguments['archivados'];
+    final obraId = arguments['obraId'];
+    final _obraService = Provider.of<ObraService>(context);
 
-    final agrupado = getPedidosAgrupadosxEstado(pedidos);
+    List pedidos = [];
+
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],
@@ -27,13 +30,33 @@ class PedidosArchivadosList extends StatelessWidget {
                 height: MediaQuery.of(context).size.height,
                 child: Column(children: [
                   Expanded(
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: agrupado.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return _PedidosByEstado(
-                              estado: agrupado[index]["estado"],
-                              pedidos: agrupado[index]['data']);
+                    child: FutureBuilder(
+                        future: _obraService.obtenerPedidosCerrados(obraId),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState !=
+                              ConnectionState.done) {
+                            return Loading(
+                              mensaje: 'Recuperando pedidos...',
+                            );
+                          } else if (snapshot.connectionState ==
+                                  ConnectionState.done &&
+                              snapshot.hasError) {
+                            return ErrorPage(
+                              errorMsg: snapshot.error.toString(),
+                            );
+                          }
+
+                          pedidos = snapshot.data as List;
+                          final agrupado = getPedidosAgrupadosxEstado(pedidos);
+
+                          return ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: agrupado.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return _PedidosByEstado(
+                                    estado: agrupado[index]["estado"],
+                                    pedidos: agrupado[index]['data']);
+                              });
                         }),
                   ),
                 ]))),
@@ -51,7 +74,7 @@ class PedidosArchivadosList extends StatelessWidget {
           pedidos.where((element) => element['estado'] == estado).toList();
       agrupados.add({"estado": Helper.getEstadoPedido(5), "data": agrupacion});
     });
-    
+
     return agrupados;
   }
 }
@@ -120,7 +143,7 @@ class _PedidosByEstado extends StatelessWidget {
                                   color: Helper.brandColors[8].withOpacity(.8)),
                             ),
                             Text(
-                              ('Por: ${pedidos[index]['usuario']['nombre']??'Sin nombre'} ${pedidos[index]['usuario']['apellido']??''}')
+                              ('Por: ${pedidos[index]['usuario']['nombre'] ?? 'Sin nombre'} ${pedidos[index]['usuario']['apellido'] ?? ''}')
                                   .toUpperCase(),
                               style: TextStyle(
                                   color: Helper.brandColors[8].withOpacity(.8)),
@@ -164,7 +187,7 @@ class _PedidosByEstado extends StatelessWidget {
 
   leerNovedad(context) {
     final _pref = Preferences();
- 
+
     var dato = [];
     pedidos.forEach((pedido) => {
           dato.addAll((_socketService.novedades ?? []).where((novedad) =>
@@ -244,10 +267,9 @@ class _CustomListTile extends StatelessWidget {
                         children: [
                           esNovedad
                               ? badges.Badge(
-                                badgeStyle: badges.BadgeStyle(
-                                  badgeColor: Helper.brandColors[8],
-                                  
-                                ),
+                                  badgeStyle: badges.BadgeStyle(
+                                    badgeColor: Helper.brandColors[8],
+                                  ),
                                   badgeContent: Padding(
                                     padding: const EdgeInsets.all(0),
                                     // child: Text(badgeData.toString()),

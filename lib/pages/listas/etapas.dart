@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/etapa.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/listas/asigna_etapas_extras.dart';
 import 'package:verona_app/pages/listas/subetapas.dart';
 import 'package:verona_app/pages/listas/tareas_semanaria.dart';
@@ -20,32 +21,47 @@ class EtapasObra extends StatelessWidget {
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context);
     final _pref = new Preferences();
-    // _obraService.obra.etapas.sort(( a,b){
-    //   return b.orden.compareTo(a.orden);
-    // });
     return Scaffold(
-      
-      appBar: AppBar(title: Text('${_obraService.obra.nombre} - ${_obraService.obra.barrio}${_obraService.obra.lote}'), backgroundColor: Helper.brandColors[2], automaticallyImplyLeading: false),
-            extendBodyBehindAppBar: true,
-
+      appBar: AppBar(
+          title: Text(
+              '${_obraService.obra.nombre} - ${_obraService.obra.barrio}${_obraService.obra.lote}'),
+          backgroundColor: Helper.brandColors[2],
+          automaticallyImplyLeading: false),
+      extendBodyBehindAppBar: true,
       backgroundColor: Helper.brandColors[1],
       body: Column(
         children: [
           Expanded(child: _Etapas(etapas: _obraService.obra.etapas)),
-          _pref.role == 1 || _pref.role == 2 || _pref.role == 8 ? MainButton(onPressed: ()=> Navigator.pushNamed(context, TareasSemanarias.routeName, arguments: { 'obras': [_obraService.obra] }), text: 'Resumen semanal' , width: 150, height: 30, color: Helper.brandColors[8], fontSize: 15,) : Container()
+          _pref.role == 1 || _pref.role == 2 || _pref.role == 8
+              ? MainButton(
+                  onPressed: () => Navigator.pushNamed(
+                      context, TareasSemanarias.routeName,
+                      arguments: {
+                        'obras': [_obraService.obra]
+                      }),
+                  text: 'Resumen semanal',
+                  width: 150,
+                  height: 30,
+                  color: Helper.brandColors[8],
+                  fontSize: 15,
+                )
+              : Container()
         ],
       ),
-      floatingActionButton:
-          (_pref.role == 1 || _pref.role == 2 || _pref.role == 8 || _pref.role == 7)
-              ? FloatingActionButton(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, EtapasExtrasPage.routeName, arguments: {'obra': _obraService.obra}),
-                  backgroundColor: Helper.brandColors[8],
-                  mini: true,
-                  child: Icon(Icons.add),
-                  splashColor: null,
-                )
-              : null,
+      floatingActionButton: (_pref.role == 1 ||
+              _pref.role == 2 ||
+              _pref.role == 8 ||
+              _pref.role == 7)
+          ? FloatingActionButton(
+              onPressed: () => Navigator.pushNamed(
+                  context, EtapasExtrasPage.routeName,
+                  arguments: {'obra': _obraService.obra}),
+              backgroundColor: Helper.brandColors[8],
+              mini: true,
+              child: Icon(Icons.add),
+              splashColor: null,
+            )
+          : null,
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
@@ -57,16 +73,34 @@ class _Etapas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _obraService = Provider.of<ObraService>(context);
+
     return SingleChildScrollView(
       child: Container(
-        height: MediaQuery.of(context).size.height - 100,
-        child: ListView.builder(
-          itemCount: etapas.length,
-          itemBuilder: (context, index) {
-            return _EtapaCard(etapa: etapas[index] as Etapa, index: index);
-          },
-        ),
-      ),
+          height: MediaQuery.of(context).size.height - 100,
+          child: FutureBuilder(
+              future: _obraService.obtenerControlObra(_obraService.obra.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return Loading(
+                    mensaje: 'Recupernado etapas...',
+                  );
+                } else if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasError) {
+                  return ErrorPage(
+                    errorMsg: snapshot.error.toString(),
+                  );
+                }
+                etapas = snapshot.data as List<Etapa>;
+                _obraService.obra.etapas = etapas;
+                return ListView.builder(
+                  itemCount: etapas.length,
+                  itemBuilder: (context, index) {
+                    return _EtapaCard(
+                        etapa: etapas[index] as Etapa, index: index);
+                  },
+                );
+              })),
     );
   }
 }
@@ -208,13 +242,15 @@ class _EtapaCard extends StatelessWidget {
   eliminarEtapa(context, obraId, etapaId) async {
     final index =
         _obraService.obra.etapas.indexWhere((element) => element.id == etapaId);
-    _obraService.obra.quitarEtapa(etapaId);
     openLoadingDialog(context, mensaje: 'Eliminando etapa...');
-    final response = await _obraService.quitarEtapa(etapaId, obraId);
-    closeLoadingDialog(context);
-    if (response.fallo) {
+    try {
+      await _obraService.quitarEtapa(etapaId, obraId);
+      _obraService.obra.quitarEtapa(etapaId);
+      closeLoadingDialog(context);
+    } catch (err) {
+      closeLoadingDialog(context);
       openAlertDialog(context, 'Error al eliminar etapa',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
   }
 }

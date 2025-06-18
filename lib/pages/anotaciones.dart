@@ -7,6 +7,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/anotacion.dart';
 import 'package:verona_app/models/miembro.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -38,14 +39,14 @@ class AnotacionesPage extends StatelessWidget {
             child: FutureBuilder(
               future: _usuarioService.obtenerUsuario(_pref.id),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting)
+                if (snapshot.connectionState != ConnectionState.done)
                   return Loading(mensaje: 'Cargando...');
-                final response = snapshot.data as MyResponse;
-                if (response.fallo)
-                  return Center(
-                    child: Text('Error al cargar datos'),
-                  );
-                usuario = Miembro.fromJson(response.data);
+                if (snapshot.connectionState == ConnectionState.done && snapshot.hasError){
+                  return ErrorPage(errorMsg: snapshot.error.toString());
+                }
+                final response = snapshot.data as Map<String,dynamic>;
+              
+                usuario = Miembro.fromJson(response);
 
                 return Action_Form(
                     usuario: usuario, txtTarea: txtTarea, obraId: obraId);
@@ -118,11 +119,7 @@ class _Action_FormState extends State<Action_Form> {
       final anotacion = Anotacion(widget.txtTarea.text,
           id: Uuid().v4(), obraId: widget.obraId);
       _usuarioService.agregarAnotacion(_pref.id, anotacion).then((response) {
-        if (response.fallo) {
-          openAlertDialog(context, 'Error al crear anotacion',
-              subMensaje: response.error);
-          return;
-        }
+        return;
       });
       widget.usuario.agregarAnotacion(anotacion);
       widget.txtTarea.clear();

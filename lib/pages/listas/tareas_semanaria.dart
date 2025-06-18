@@ -13,6 +13,7 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/tarea.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/semanario_message.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -44,29 +45,20 @@ class TareasSemanarias extends StatelessWidget {
               : FutureBuilder(
                   future: _obraService.obtenerObrasByUser(_pref.id),
                   builder: (context, snapshot) {
-                    try {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Loading(
-                          mensaje: 'Cargando obras...',
-                        );
-                      }
-                      final response = snapshot.data as MyResponse;
-                      if (response.fallo) {
-                        debugPrint(response.error);
-                        return Container(
-                            child:
-                                Center(child: Text('Error al buscar obras')));
-                      }
-                      obras = (response.data as List)
-                          .map((json) => Obra.fromMap(json))
-                          .toList();
-                      return _Semanario(
-                          obras: obras,
-                          selectedTask: selectedTask,
-                          esSingle: esSingle);
-                    } catch (err) {
-                      return CustomCenterText(text: err.toString());
+                    if (snapshot.connectionState != ConnectionState.done)
+                      return Loading(mensaje: 'Cargando documentos...');
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.hasError) {
+                      return ErrorPage(errorMsg: snapshot.error.toString());
                     }
+
+                    obras = (snapshot.data as List)
+                        .map((json) => Obra.fromMap(json))
+                        .toList();
+                    return _Semanario(
+                        obras: obras,
+                        selectedTask: selectedTask,
+                        esSingle: esSingle);
                   })),
       floatingActionButton: esSingle
           ? FloatingActionButton(
@@ -157,8 +149,7 @@ class _SemanarioState extends State<_Semanario> {
                       value: miembro.id,
                       child: AutoSizeText(
                         '${miembro.nombre} ${miembro.apellido}'.toUpperCase(),
-                        maxFontSize: 12
-                        ,
+                        maxFontSize: 12,
                         minFontSize: 10,
                       )),
                 ));
@@ -200,7 +191,6 @@ class _SemanarioState extends State<_Semanario> {
       {DateTime? paramDesde = null,
       DateTime? paramHasta = null,
       listener = true}) async {
-
     openLoadingDialog(context, mensaje: 'Buscando tareas...');
 
     obrasTareas.clear();
@@ -266,7 +256,6 @@ class _SemanarioState extends State<_Semanario> {
     closeLoadingDialog(context);
     _tareasStream.add(obrasTareas);
     // setState(() {});
-    
   }
 
   void _matchWithName(List<Miembro> usuarios) {
@@ -413,11 +402,9 @@ class _FilterBarState extends State<FilterBar> {
                               items: widget.personal,
                               style: TextStyle(
                                   color: Helper.brandColors[5], fontSize: 16),
-                          
                               decoration: Helper.getDecoration(),
                               hint: FittedBox(
                                 child: Text(
-
                                   'Todo el personal',
                                   style: TextStyle(
                                       fontSize: 12,
@@ -461,8 +448,8 @@ class _FilterBarState extends State<FilterBar> {
                                       color: Helper.brandColors[3]),
                                 ),
                               ),
-                        dropdownStyleData: DropdownStyleData(
-                            decoration: getDropdownDecoration()),
+                              dropdownStyleData: DropdownStyleData(
+                                  decoration: getDropdownDecoration()),
                               onChanged: (value) {
                                 obraSelected = value as String;
                               }),
@@ -522,7 +509,8 @@ class __ListTaskState extends State<_ListTask> {
         initialData: [],
         stream: widget.tareasStream,
         builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.active && !snapshot.hasData) {
+          if (snapshot.connectionState != ConnectionState.active &&
+              !snapshot.hasData) {
             return Loading(mensaje: 'Cargando tareas...');
           }
 
@@ -677,7 +665,9 @@ class _TaskTileState extends State<_TaskTile> {
     _obraService = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
 
-    String user_text = widget.tarea.iniciado && !widget.tarea.realizado ? 'Iniciado por: ${widget.tarea.nombreUsuario} | ${Helper.getFechaHoraFromTS(widget.tarea.tsIniciado)}' : 'Realizado por: ${widget.tarea.nombreUsuario} | ${Helper.getFechaHoraFromTS(widget.tarea.tsRealizado)}';
+    String user_text = widget.tarea.iniciado && !widget.tarea.realizado
+        ? 'Iniciado por: ${widget.tarea.nombreUsuario} | ${Helper.getFechaHoraFromTS(widget.tarea.tsIniciado)}'
+        : 'Realizado por: ${widget.tarea.nombreUsuario} | ${Helper.getFechaHoraFromTS(widget.tarea.tsRealizado)}';
 
     final checkboxTile = Container(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
@@ -690,8 +680,14 @@ class _TaskTileState extends State<_TaskTile> {
                 ? CheckboxListTile(
                     enabled: [1, 2, 7].contains(_pref.role),
                     tileColor: Helper.brandColors[2],
-                    checkColor: (widget.tarea.iniciado && !widget.tarea.realizado) ?  Helper.brandColors[8] : Helper.brandColors[5] ,
-                    activeColor: (widget.tarea.iniciado && !widget.tarea.realizado) ?  Helper.brandColors[5] : Helper.brandColors[8] ,
+                    checkColor:
+                        (widget.tarea.iniciado && !widget.tarea.realizado)
+                            ? Helper.brandColors[8]
+                            : Helper.brandColors[5],
+                    activeColor:
+                        (widget.tarea.iniciado && !widget.tarea.realizado)
+                            ? Helper.brandColors[5]
+                            : Helper.brandColors[8],
                     contentPadding: EdgeInsets.zero,
                     title: Wrap(children: [
                       Text(
@@ -710,7 +706,6 @@ class _TaskTileState extends State<_TaskTile> {
                                   fontWeight: FontWeight.bold),
                             )
                           : Container(),
-      
                     ]),
                     onChanged: (value) async {
                       widget.onCheck(widget.tarea);
@@ -734,7 +729,8 @@ class _TaskTileState extends State<_TaskTile> {
                             color: Helper.brandColors[3], fontSize: 15),
                       ),
                       widget.tarea.idUsuario.isNotEmpty
-                          ? Text(user_text,
+                          ? Text(
+                              user_text,
                               style: TextStyle(
                                   color: Colors.white30,
                                   fontSize: 15,
@@ -815,23 +811,24 @@ class _TaskTileState extends State<_TaskTile> {
 
   Future<void> actualizaTareaBD(BuildContext context, bool? value) async {
     openLoadingDialog(context, mensaje: 'Actualizando...');
-    final response = await _obraService.actualizarTarea(
-        _obraService.obra.id,
-        widget.etapaId,
-        widget.tarea.subetapa,
-        widget.tarea.id,
-        value!,
-        false,
-        new Preferences().id,
-        0,
-        DateTime.now().millisecondsSinceEpoch);
-    closeLoadingDialog(context);
-    widget.tarea.realizado = value!;
-    _obraService.notifyListeners();
-
-    if (response.fallo) {
+    try {
+      final response = await _obraService.actualizarTarea(
+          _obraService.obra.id,
+          widget.etapaId,
+          widget.tarea.subetapa,
+          widget.tarea.id,
+          value!,
+          false,
+          new Preferences().id,
+          0,
+          DateTime.now().millisecondsSinceEpoch);
+      closeLoadingDialog(context);
+      widget.tarea.realizado = value!;
+      _obraService.notifyListeners();
+    } catch (err) {
+      closeLoadingDialog(context);
       openAlertDialog(context, 'Error al actualizar tarea',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
 
     setState(() {});
@@ -840,26 +837,31 @@ class _TaskTileState extends State<_TaskTile> {
   eliminarTarea(context, obraId, etapaId, subetapaId, tareaId) async {
     final index =
         _obraService.obra.etapas.indexWhere((etapa) => etapa.id == etapaId);
+
     final indexSub = _obraService.obra.etapas[index].subetapas
         .indexWhere((subetapa) => subetapa.id == subetapaId);
+
     final indexTarea = _obraService
         .obra.etapas[index].subetapas[indexSub].tareas
         .indexWhere((tarea) => tarea.id == tareaId);
+
     if (_obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
         1) {
       openAlertDialog(context, 'No se puede dejar sin tareas');
       return;
     }
 
-    _obraService.obra.etapas[index].subetapas[indexSub].tareas
-        .removeAt(indexTarea);
-    openLoadingDialog(context, mensaje: 'Eliminando tarea...');
-    final response =
-        await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
-    closeLoadingDialog(context);
-    if (response.fallo) {
+    try {
+      final response =
+          await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
+      _obraService.obra.etapas[index].subetapas[indexSub].tareas
+          .removeAt(indexTarea);
+      openLoadingDialog(context, mensaje: 'Eliminando tarea...');
+      closeLoadingDialog(context);
+    } catch (err) {
+      closeLoadingDialog(context);
       openAlertDialog(context, 'Error al eliminar tarea',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
   }
 
@@ -877,7 +879,6 @@ class _TaskTileState extends State<_TaskTile> {
         1;
   }
 }
-
 
 getDecoration() {
   return InputDecoration(

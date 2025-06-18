@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -63,12 +64,13 @@ class _PedidosPanelControlState extends State<PedidosPanelControl>
           body: FutureBuilder(
               future: _obraService.obtenerPedidosPorObra(_pref.id),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting)
-                  return Loading(mensaje: 'Cargando pedidos...');
-
+                if (snapshot.connectionState != ConnectionState.done)
+                  return Loading(mensaje: 'Cargando información...');
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasError) {
+                  return ErrorPage(errorMsg: snapshot.error.toString());
+                }
                 final response = snapshot.data as MyResponse;
-                if (response.fallo)
-                  return CustomCenterText(text: response.error);
 
                 final obras = response.data;
 
@@ -163,20 +165,19 @@ class _PendientesViewState extends State<_PendientesView> {
                           itemBuilder: (BuildContext context, int index) {
                             late Color colorPrioridad;
 
+                            final pedido = obra['pedidos'][index];
                             final esPar = index % 2 == 0;
                             final arg = {
-                              'pedidoId': obra['pedidos'][index]['id'],
+                              'pedidoId': pedido['id'],
                               'obraId': obra['obraId']
                             };
                             final txtFecha =
-                                'Fecha Pedido ${Helper.getFechaFromTS(obra['pedidos'][index]['ts'])}';
-                            final textSubtitle = obra['pedidos'][index]
-                                        ['fechaEstimada'] ==
-                                    ''
-                                ? "${("Fecha deseada").toUpperCase()} ${obra['pedidos'][index]['fechaDeseada']}"
-                                : "${("Fecha de entrega").toUpperCase()} ${obra['pedidos'][index]['fechaEstimada']}";
+                                'Fecha Pedido ${Helper.getFechaFromTS(pedido['ts'])}';
+                            final textSubtitle = pedido['fechaEstimada'] == ''
+                                ? "${("Fecha deseada").toUpperCase()} ${pedido['fechaDeseada']}"
+                                : "${("Fecha de entrega").toUpperCase()} ${pedido['fechaEstimada']}";
 
-                            switch (obra['pedidos'][index]['prioridad']) {
+                            switch (pedido['prioridad']) {
                               case 1:
                                 colorPrioridad = Colors.green;
                                 break;
@@ -190,11 +191,11 @@ class _PendientesViewState extends State<_PendientesView> {
                             return Column(
                               children: [
                                 _CustomListTile(
-                                  esNovedad: _tieneNovedad(obra['obraId'],
-                                      obra['pedidos'][index]['id']),
+                                  esNovedad: _tieneNovedad(
+                                      obra['obraId'], pedido['id']),
                                   esPar: false,
                                   title:
-                                      "${obra['pedidos'][index]['titulo'].toString().toUpperCase()}",
+                                      "${pedido['titulo'].toString().toUpperCase()}",
                                   subtitle: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -204,8 +205,7 @@ class _PendientesViewState extends State<_PendientesView> {
                                           Text(
                                             'PRIORIDAD ' +
                                                 Helper.toTextPrioridad(
-                                                        obra['pedidos'][index]
-                                                            ['prioridad'])
+                                                        pedido['prioridad'])
                                                     .toString()
                                                     .toUpperCase(),
                                             style: TextStyle(
@@ -217,9 +217,9 @@ class _PendientesViewState extends State<_PendientesView> {
                                           ),
                                           badges.Badge(
                                             badgeStyle: badges.BadgeStyle(
-                                                // padding: EdgeInsets.symmetric(horizontal: 2)
-                                                badgeColor: colorPrioridad,
-                                                ),
+                                              // padding: EdgeInsets.symmetric(horizontal: 2)
+                                              badgeColor: colorPrioridad,
+                                            ),
                                             badgeContent: Padding(
                                               padding: const EdgeInsets.all(0),
                                               // child: Text(badgeData.toString()),
@@ -239,17 +239,16 @@ class _PendientesViewState extends State<_PendientesView> {
                                             color: Helper.brandColors[8]
                                                 .withOpacity(.8)),
                                       ),
-                                      Text(
-                                        ('Por: ${obra['pedidos'][index]['usuario']['nombre']} ${obra['pedidos'][index]['usuario']['apellido']}')
-                                            .toUpperCase(),
-                                        style: TextStyle(
-                                            color: Helper.brandColors[8]
-                                                .withOpacity(.8)),
-                                      ),
+                                      // Text(
+                                      //   ('Por: ${pedido['usuario']} ${pedido['usuario']}')
+                                      //       .toUpperCase(),
+                                      //   style: TextStyle(
+                                      //       color: Helper.brandColors[8]
+                                      //           .withOpacity(.8)),
+                                      // ),
                                     ],
                                   ),
-                                  avatar: obra['pedidos'][index]['prioridad']
-                                      .toString(),
+                                  avatar: pedido['prioridad'].toString(),
                                   fontSize: 18,
                                   onTap: true,
                                   actionOnTap: () => Navigator.pushNamed(

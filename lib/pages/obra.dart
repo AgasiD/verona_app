@@ -216,19 +216,14 @@ class ObraPage extends StatelessWidget {
       openLoadingDialog(context,
           mensaje: 'Eliminando obra... esto puede demorar');
       loading = true;
-      final response = await _obraService.eliminarObra(obraId);
+      await _obraService.eliminarObra(obraId);
       closeLoadingDialog(context);
       loading = false;
-      if (response.fallo) {
-        openAlertDialog(context, 'Error al elimiar obra',
-            subMensaje: response.error);
-      } else {
-        await openAlertDialogReturn(context, 'Obra eliminada con éxito');
-        Navigator.pushReplacementNamed(
-          context,
-          ObrasPage.routeName,
-        );
-      }
+      await openAlertDialogReturn(context, 'Obra eliminada con éxito');
+      Navigator.pushReplacementNamed(
+        context,
+        ObrasPage.routeName,
+      );
     } catch (err) {
       loading ? closeLoadingDialog(context) : false;
       openAlertDialog(context, 'Error al eliminar obra',
@@ -508,46 +503,42 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
       // items.add(certificados);
 
       final certificados = Item(
-        icon: Icons.format_list_numbered_outlined,
-        rolesAcceso: [1, 2, 3, 4, 5, 6, 7],
-        list: 5,
-        titulo: 'Artículos de obra',
-        values: [].toList(),
-        accion: () async {
-          if (obra.articulosId == '') {
-            openAlertDialog(context, 'No hay documento asignado');
-          } else {
-            openLoadingDialog(context, mensaje: 'Cargando archivo...');
-            final _obraService =
-                Provider.of<ObraService>(context, listen: false);
-            final response = await _obraService.obtenerObraArticuloFile(obra.id)
-                as MyResponse;
-            closeLoadingDialog(context);
-
-            if (response.fallo) {
+          icon: Icons.format_list_numbered_outlined,
+          rolesAcceso: [1, 2, 3, 4, 5, 6, 7],
+          list: 5,
+          titulo: 'Artículos de obra',
+          values: [].toList(),
+          accion: () async {
+            try {
+              if (obra.articulosId == '') {
+                openAlertDialog(context, 'No hay documento asignado');
+                return;
+              }
+              openLoadingDialog(context, mensaje: 'Cargando archivo...');
+              final _obraService =
+                  Provider.of<ObraService>(context, listen: false);
+              final response = await _obraService
+                  .obtenerObraArticuloFile(obra.id) as MyResponse;
+              closeLoadingDialog(context);
+              final file = response.data;
+              Uri _url;
+              switch (file["mimeType"]) {
+                case "application/vnd.google-apps.document":
+                  _url = Uri.parse(
+                      'https://docs.google.com/document/d/${obra.articulosId}');
+                  break;
+                default:
+                  _url = Uri.parse(
+                      'https://docs.google.com/spreadsheets/d/${obra.articulosId}');
+                  break;
+              }
+              await lanzarUrl(_url);
+            } catch (err) {
               openAlertDialog(context, 'Hubo en error al cargar el archivo.',
-                  subMensaje: response.error);
+                  subMensaje: err.toString());
               return;
             }
-            final file = response.data;
-            Uri _url;
-            switch (file["mimeType"]) {
-              case "application/vnd.google-apps.document":
-                _url = Uri.parse(
-                    'https://docs.google.com/document/d/${obra.articulosId}');
-                break;
-              default:
-                _url = Uri.parse(
-                    'https://docs.google.com/spreadsheets/d/${obra.articulosId}');
-                break;
-            }
-            if (await canLaunchUrl(_url))
-              await launchUrl(_url, mode: LaunchMode.externalApplication);
-            else
-              openAlertDialog(context, 'No se puede visualizar el documento');
-          }
-        },
-      );
+          });
       items.add(certificados);
 
       final estado_planos = Item(
@@ -590,7 +581,10 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
         titulo: 'Anotaciones',
         values: [].toList(),
         accion: () {
-          Navigator.push(context, MaterialPageRoute(builder: (c) =>  AnotacionesPage(obraId: obra.id)));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (c) => AnotacionesPage(obraId: obra.id)));
         },
       );
       items.add(anotaciones);
@@ -605,10 +599,17 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
           Navigator.pushNamed(context, PedidoList.routeName,
               arguments: {'deliveryId': _pref.id});
         },
-      );  
+      );
       items.add(pedidos);
     }
     return items;
+  }
+
+  Future<void> lanzarUrl(Uri _url) async {
+    if (await canLaunchUrl(_url))
+      await launchUrl(_url, mode: LaunchMode.externalApplication);
+    else
+      openAlertDialog(context, 'No se puede visualizar el documento');
   }
 }
 
@@ -800,41 +801,39 @@ class _ObraBigrafy extends StatelessWidget {
         SizedBox(
           height: 10,
         ),
-
-Row(
-  crossAxisAlignment: CrossAxisAlignment.baseline,
-  textBaseline: TextBaseline.alphabetic,
-  children: [
-    Expanded(
-      child: AutoSizeText(
-        this.obra.nombre,
-        style: TextStyle(
-          fontSize: 42.0,
-          fontWeight: FontWeight.bold,
-          foreground: Paint()
-            ..shader = LinearGradient(
-              colors: [Helper.brandColors[8], Helper.brandColors[9]],
-            ).createShader(Rect.fromLTWH(0, 0, 200, 70)),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Expanded(
+              child: AutoSizeText(
+                this.obra.nombre,
+                style: TextStyle(
+                  fontSize: 42.0,
+                  fontWeight: FontWeight.bold,
+                  foreground: Paint()
+                    ..shader = LinearGradient(
+                      colors: [Helper.brandColors[8], Helper.brandColors[9]],
+                    ).createShader(Rect.fromLTWH(0, 0, 200, 70)),
+                ),
+                maxLines: 1, // Se ajustará en una sola línea
+                minFontSize: 16, // Tamaño mínimo al que puede reducirse
+                overflow: TextOverflow.ellipsis, // Muestra "..." si no cabe
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 20),
+              child: Text(
+                this.obra.lote,
+                style: TextStyle(
+                  color: Helper.brandColors[5],
+                  fontSize: 20,
+                  fontWeight: FontWeight.w100,
+                ),
+              ),
+            ),
+          ],
         ),
-        maxLines: 1, // Se ajustará en una sola línea
-        minFontSize: 16, // Tamaño mínimo al que puede reducirse
-        overflow: TextOverflow.ellipsis, // Muestra "..." si no cabe
-      ),
-    ),
-    Container(
-      margin: EdgeInsets.only(left: 20),
-      child: Text(
-        this.obra.lote,
-        style: TextStyle(
-          color: Helper.brandColors[5],
-          fontSize: 20,
-          fontWeight: FontWeight.w100,
-        ),
-      ),
-    ),
-  ],
-)
-,
         Divider(
           color: Helper.brandColors[8],
           thickness: 1,

@@ -6,6 +6,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/anotacion.dart';
 import 'package:verona_app/models/miembro.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -60,14 +61,12 @@ class AnotacionForm extends StatelessWidget {
                   child: FutureBuilder(
                 future: _usuarioService.obtenerUsuario(_pref.id),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting)
+                  if (snapshot.connectionState != ConnectionState.done)
                     return Loading(mensaje: 'Cargando...');
-                  final response = snapshot.data as MyResponse;
-                  if (response.fallo)
-                    return Center(
-                      child: Text('Error al cargar datos'),
-                    );
-                  usuario = Miembro.fromJson(response.data);
+                  if(snapshot.connectionState == ConnectionState.done && snapshot.hasError){
+                    return ErrorPage(errorMsg: snapshot.error.toString());
+                  }
+                  usuario = Miembro.fromJson(snapshot.data as Map<String,dynamic>);
                   return Action_Form(
                     txtTarea: txtTarea,
                   );

@@ -15,7 +15,7 @@ class WSService extends ChangeNotifier {
   //   this.chatId = chatId;
   //   final datos =
   //       await this._http.get('$_endpoint/$chatId/$offset/$limit/$fromTS');
-  //   final data = MyResponse.fromJson(datos['response']);
+  //   final data = MyResponse.fromJson(datos);
 
   //   chat = Chat.fromMap(data.data);
   //   return data;
@@ -26,7 +26,7 @@ class WSService extends ChangeNotifier {
   //     "idTo": to,
   //   };
   //   final data = await this._http.post('$_endpoint', body);
-  //   final response = MyResponse.fromJson(data['response']);
+  //   final response = MyResponse.fromJson(data);
 
   //   notifyListeners();
   //   return response;
@@ -36,7 +36,7 @@ class WSService extends ChangeNotifier {
   //   final body = {"text": text};
   //   final data =
   //       await this._http.post('$_endpoint/buscarMensajes/$chatId', body);
-  //   final response = MyResponse.fromJson(data['response']);
+  //   final response = MyResponse.fromJson(data);
   //   return response;
   // }
 
@@ -44,14 +44,14 @@ class WSService extends ChangeNotifier {
   //   final body = {"obraId": obraId, "idFrom": id, "mensaje": text};
   //   final data =
   //       await this._http.post('$_endpoint/messageToGroup', body);
-  //   final response = MyResponse.fromJson(data['response']);
+  //   final response = MyResponse.fromJson(data);
   //   return response;
   // }
 
   Future<MyResponse> enviarMensaje(String phone, String mensaje) async {
     final body = {"telefono": phone, "mensaje": mensaje};
     final data = await this._http.post('$_endpoint', body);
-    final response = MyResponse.fromJson(data['response']);
+    final response = MyResponse.fromJson(data);
     return response;
   }
 

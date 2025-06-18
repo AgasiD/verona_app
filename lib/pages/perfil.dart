@@ -7,6 +7,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/password.dart';
@@ -23,14 +24,12 @@ class PerfilPage extends StatelessWidget {
   String? usuarioId;
   late GlobalKey<ScaffoldState> _scaffoldKey;
   late bool perfilPropio = true;
-  
 
   bool esPhone = true;
   @override
   Widget build(BuildContext context) {
     _scaffoldKey = GlobalKey<ScaffoldState>();
-    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
-    final _imageService = Provider.of<ImageService>(context);
+    final _usuarioService = Provider.of<UsuarioService>(context);
     final _obraService = Provider.of<ObraService>(context, listen: false);
     // final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final _pref = new Preferences();
@@ -49,254 +48,165 @@ class PerfilPage extends StatelessWidget {
           child: FutureBuilder(
             future: _usuarioService.obtenerUsuario(usuarioId),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Loading(
-                  mensaje: 'Cargando datos...',
-                );
-              } else {
-                MyResponse response = snapshot.data as MyResponse;
-                if (response.fallo) {
-                  print('Error al cargar datos');
-                  return Container();
-                } else {
-                  Miembro usuario = Miembro.fromJson(response.data);
+              if (snapshot.connectionState != ConnectionState.done)
+                return Loading(mensaje: 'Cargando...');
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasError) {
+                return ErrorPage(errorMsg: snapshot.error.toString());
+              }
 
-                  if (usuario.profileURL == '') {
-                    textoImg = 'Subir imagen de perfil';
-                    sinImg = true;
-                  }
-                  return Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                              // color: _color,
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Container(
-                            padding: EdgeInsets.all(1),
-                            decoration: BoxDecoration(
-                                color: Helper.brandColors[8].withOpacity(.8),
-                                borderRadius: BorderRadius.circular(100)),
-                            child: CircleAvatar(
-                                radius: 70,
-                                backgroundColor: Helper.brandColors[0],
-                                backgroundImage: sinImg
-                                    ? null
-                                    : NetworkImage(usuario.profileURL),
-                                child: sinImg
-                                    ? FittedBox(
-                                        child: Text(
-                                          '${usuario.nombre[0].toUpperCase()} ${usuario.apellido[0].toUpperCase()}',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: Helper.brandColors[5],
-                                          ),
-                                        ),
-                                      )
-                                    : Container()),
-                          ),
-                        ),
-                        TextButton(
-                            onPressed: () async {
-                              final ImagePicker _picker = ImagePicker();
-                              final image = await _picker.pickImage(
-                                  source: ImageSource.gallery);
+              Miembro usuario =
+                  Miembro.fromJson(snapshot.data as Map<String, dynamic>);
 
-                              if (image != null) {
-                                openLoadingDialog(context,
-                                    mensaje: 'Subiendo imagen...');
-                                try {
-                                  _imageService.guardarImagen(image);
-                                  final dataImage =
-                                      await _imageService.grabarImagen(
-                                          '${usuario.nombre} ${usuario.apellido}');
-
-                                  if (!dataImage['success']) {
-                                    closeLoadingDialog(context);
-                                    openAlertDialog(
-                                        context, 'No se pudo cargar imagen');
-                                    return;
-                                  }
-
-                                  final imageUrl = dataImage['data']['url'];
-
-                                  usuario.profileURL = imageUrl;
-                                  await _usuarioService
-                                      .modificarUsuario(usuario);
-                                  closeLoadingDialog(context);
-                                  openAlertDialog(
-                                      context, 'Imagen subida con éxito');
-                                } catch (err) {
-                                  closeLoadingDialog(context);
-                                  openAlertDialog(
-                                      context, 'Error al subir imagen',
-                                      subMensaje: err.toString());
-                                }
-                              }
-                            },
-                            child: Text(textoImg,
-                                style:
-                                    TextStyle(color: Helper.brandColors[8]))),
-                        Text(
-                          '${usuario.nombre.toUpperCase()} ${usuario.apellido.toUpperCase()}',
-                          style: TextStyle(
-                              overflow: TextOverflow.clip,
-                              color: Helper.brandColors[5],
-                              fontSize: 25),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: paddingLeft),
-                          child: Column(children: [
-                            DataRow(
-                                text: '${usuario.username.toUpperCase()}',
-                                icon: FontAwesomeIcons.solidUser),
-                            DataRow(
-                                icon: FontAwesomeIcons.briefcase,
-                                text:
-                                    '${Helper.getProfesion(usuario.role).toUpperCase()}'),
-                            DataRow(
-                                icon: FontAwesomeIcons.idCard,
-                                text: '${usuario.dni.toUpperCase()}'),
-                            DataRow(
-                                icon: FontAwesomeIcons.at,
-                                text: '${usuario.email.toUpperCase()}'),
-                            DataRow(
-                                icon: FontAwesomeIcons.phone,
-                                text: '${usuario.telefono.toUpperCase()}'),
-                          ]),
-                        ),
-                        _pref.role == 1
-                            ? TextButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                      context,
-                                      usuario.role == 3
-                                          ? PropietarioForm.routeName
-                                          : MiembroForm.routeName,
-                                      arguments: {
-                                        "usuarioId": usuario.id,
-                                        "pageFrom": 'profile'
-                                      });
-                                },
-                                child: Text('Editar usuario',
-                                    style: TextStyle(
-                                        fontSize: 17,
-                                        color: Helper.brandColors[8])))
-                            : Container(),
-                        TextButton(
+              if (usuario.profileURL == '') {
+                textoImg = 'Subir imagen de perfil';
+                sinImg = true;
+              }
+              return Container(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                          // color: _color,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Container(
+                        padding: EdgeInsets.all(1),
+                        decoration: BoxDecoration(
+                            color: Helper.brandColors[8].withOpacity(.8),
+                            borderRadius: BorderRadius.circular(100)),
+                        child: CircleAvatar(
+                            radius: 70,
+                            backgroundColor: Helper.brandColors[0],
+                            backgroundImage: sinImg
+                                ? null
+                                : NetworkImage(usuario.profileURL),
+                            child: sinImg
+                                ? FittedBox(
+                                    child: Text(
+                                      '${usuario.nombre[0].toUpperCase()} ${usuario.apellido[0].toUpperCase()}',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Helper.brandColors[5],
+                                      ),
+                                    ),
+                                  )
+                                : Container()),
+                      ),
+                    ),
+                    TextButton(
+                        onPressed: uploadProfileImage(
+                            context, usuario, _usuarioService),
+                        child: Text(textoImg,
+                            style: TextStyle(color: Helper.brandColors[8]))),
+                    Text(
+                      '${usuario.nombre.toUpperCase()} ${usuario.apellido.toUpperCase()}',
+                      style: TextStyle(
+                          overflow: TextOverflow.clip,
+                          color: Helper.brandColors[5],
+                          fontSize: 25),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: paddingLeft),
+                      child: Column(children: [
+                        DataRow(
+                            text: '${usuario.username.toUpperCase()}',
+                            icon: FontAwesomeIcons.solidUser),
+                        DataRow(
+                            icon: FontAwesomeIcons.briefcase,
+                            text:
+                                '${Helper.getProfesion(usuario.role).toUpperCase()}'),
+                        DataRow(
+                            icon: FontAwesomeIcons.idCard,
+                            text: '${usuario.dni}'),
+                        DataRow(
+                            icon: FontAwesomeIcons.at,
+                            text: '${usuario.email.toUpperCase()}'),
+                        DataRow(
+                            icon: FontAwesomeIcons.phone,
+                            text: '${usuario.telefono.toUpperCase()}'),
+                      ]),
+                    ),
+                    _pref.role == 1
+                        ? TextButton(
                             onPressed: () {
                               Navigator.pushNamed(
-                                  context, PasswordPage.routeName,
-                                  arguments: {"usuarioId": usuario.id});
+                                  context,
+                                  usuario.role == 3
+                                      ? PropietarioForm.routeName
+                                      : MiembroForm.routeName,
+                                  arguments: {
+                                    "usuarioId": usuario.id,
+                                    "pageFrom": 'profile'
+                                  });
                             },
-                            child: Text('Cambiar contraseña',
+                            child: Text('Editar usuario',
                                 style: TextStyle(
                                     fontSize: 17,
-                                    color: Helper.brandColors[8]))),
-                        perfilPropio
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  MainButton(
-                                      onPressed: () async {
-                                        try {
-                                          openLoadingDialog(context,
-                                              mensaje: 'Sincronizando...');
-                                          final response = await _usuarioService
-                                              .setTokenDevice(usuarioId!,
-                                                  NotificationService.token!);
-                                          closeLoadingDialog(context);
-                                          if (response.fallo) {
-                                            openAlertDialog(context,
-                                                'Error al sincronizar dispositivo',
-                                                subMensaje: response.error);
-                                            return;
-                                          }
-                                          openAlertDialog(context,
-                                              'Dispositivo sincronizado con éxito');
-                                        } catch (err) {
-                                          closeLoadingDialog(context);
-                                          openAlertDialog(context,
-                                              'Error al sincronizar dispositivo',
-                                              subMensaje: err.toString());
-                                        }
-                                      },
-                                      width: 250,
-                                      height: 35,
-                                      fontSize: 15,
-                                      color: Helper.brandColors[8],
-                                      text: 'Sincronizar notificaciones'),
-                                  MainButton(
-                                      onPressed: () {
-                                        final deleteDevices = (context) async {
-                                          openLoadingDialog(context,
-                                              mensaje:
-                                                  'Desasociando dispositivos...');
-                                          final response = await _usuarioService
-                                              .deleteAllDevice(usuarioId!);
-                                          // closeLoadingDialog(context);
-                                          Navigator.pop(
-                                              _scaffoldKey.currentContext!);
-                                          if (response.fallo) {
-                                            openAlertDialog(
-                                                _scaffoldKey.currentContext!,
-                                                'Error al sincronizar dispositivo',
-                                                subMensaje: response.error);
-                                            return;
-                                          }
-                                          openAlertDialog(
-                                              _scaffoldKey.currentContext!,
-                                              'Dispositivo sincronizado con éxito');
-                                        };
-                                        openDialogConfirmation(
-                                            _scaffoldKey.currentContext!,
-                                            deleteDevices,
-                                            'Confirmar desasociacion');
-                                      },
-                                      width: 250,
-                                      height: 35,
-                                      fontSize: 15,
-                                      color: Helper.brandColors[8],
-                                      text: 'Eliminar dispositivos asociados')
-                                ],
-                              )
-                            : Container(),
-                        !perfilPropio && _pref.role == 1
-                            ? TextButton(
-                                style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
-                                        Color.fromARGB(255, 122, 9, 1))),
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  width: 270,
-                                  child: Text(
-                                    'Eliminar usuario',
-                                    style:
-                                        TextStyle(color: Helper.brandColors[5]),
-                                  ),
-                                ),
-                                onPressed: () async => await eliminarUsuario(
-                                    context, _usuarioService, _obraService))
-                            : Container(),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                                    color: Helper.brandColors[8])))
+                        : Container(),
+                    TextButton(
+                        onPressed: () => Navigator.pushNamed(
+                            context, PasswordPage.routeName,
+                            arguments: {"usuarioId": usuario.id}),
+                        child: Text('Cambiar contraseña',
+                            style: TextStyle(
+                                fontSize: 17, color: Helper.brandColors[8]))),
+                    perfilPropio
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              CustomNavigatorButton(
-                                  icono: Icons.mobile_screen_share_sharp,
-                                  accion: () => compartirUsuario(usuario),
-                                  showNotif: false),
+                              MainButton(
+                                  onPressed: sincNotifications(
+                                      context, _usuarioService),
+                                  width: 250,
+                                  height: 35,
+                                  fontSize: 15,
+                                  color: Helper.brandColors[8],
+                                  text: 'Sincronizar notificaciones'),
+                              MainButton(
+                                  onPressed:
+                                      deleteDevices(context, _usuarioService),
+                                  width: 250,
+                                  height: 35,
+                                  fontSize: 15,
+                                  color: Helper.brandColors[8],
+                                  text: 'Eliminar dispositivos asociados')
                             ],
-                          ),
-                        ),
-                      ],
+                          )
+                        : Container(),
+                    !perfilPropio && _pref.role == 1
+                        ? TextButton(
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                    Color.fromARGB(255, 122, 9, 1))),
+                            child: Container(
+                              alignment: Alignment.center,
+                              width: 270,
+                              child: Text(
+                                'Eliminar usuario',
+                                style: TextStyle(color: Helper.brandColors[5]),
+                              ),
+                            ),
+                            onPressed: () async => await eliminarUsuario(
+                                context, _usuarioService, _obraService))
+                        : Container(),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CustomNavigatorButton(
+                              icono: Icons.mobile_screen_share_sharp,
+                              accion: () => compartirUsuario(usuario),
+                              showNotif: false),
+                        ],
+                      ),
                     ),
-                  );
-                }
-              }
+                  ],
+                ),
+              );
             },
           ),
         ),
@@ -305,28 +215,95 @@ class PerfilPage extends StatelessWidget {
     );
   }
 
+  deleteDevices(context, _usuarioService) async {
+    final deleteDevices = () async {
+      openLoadingDialog(context, mensaje: 'Desasociando dispositivos...');
+      try {
+        final response = await _usuarioService.deleteAllDevice(usuarioId!);
+        Navigator.pop(_scaffoldKey.currentContext!);
+        openAlertDialog(
+            _scaffoldKey.currentContext!, 'Dispositivo sincronizado con éxito');
+      } catch (err) {
+        openAlertDialog(
+            _scaffoldKey.currentContext!, 'Error al sincronizar dispositivo',
+            subMensaje: err.toString());
+        return;
+      }
+    };
+
+    final confirm = openDialogConfirmation(
+        _scaffoldKey.currentContext!, deleteDevices, 'Confirmar desasociacion');
+  }
+
+  sincNotifications(context, _usuarioService) async {
+    try {
+      openLoadingDialog(context, mensaje: 'Sincronizando...');
+      final response = await _usuarioService.setTokenDevice(
+          usuarioId!, NotificationService.token!);
+      closeLoadingDialog(context);
+      openAlertDialog(context, 'Dispositivo sincronizado con éxito');
+    } catch (err) {
+      closeLoadingDialog(context);
+      openAlertDialog(context, 'Error al sincronizar dispositivo',
+          subMensaje: err.toString());
+      return;
+    }
+  }
+
+  uploadProfileImage(context, usuario, _usuarioService) async {
+    final _imageService = Provider.of<ImageService>(context);
+
+    final ImagePicker _picker = ImagePicker();
+    final image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      openLoadingDialog(context, mensaje: 'Subiendo imagen...');
+      try {
+        _imageService.guardarImagen(image);
+        final dataImage = await _imageService
+            .grabarImagen('${usuario.nombre} ${usuario.apellido}');
+
+        if (!dataImage['success']) {
+          closeLoadingDialog(context);
+          openAlertDialog(context, 'No se pudo cargar imagen');
+          return;
+        }
+
+        final imageUrl = dataImage['data']['url'];
+
+        usuario.profileURL = imageUrl;
+        await _usuarioService.modificarUsuario(usuario);
+        closeLoadingDialog(context);
+        openAlertDialog(context, 'Imagen subida con éxito');
+      } catch (err) {
+        closeLoadingDialog(context);
+        openAlertDialog(context, 'Error al subir imagen',
+            subMensaje: err.toString());
+      }
+    }
+  }
+
   Future<void> eliminarUsuario(
       context, UsuarioService _usuarioService, ObraService _obraService) async {
-    if (!await openDialogConfirmationReturn(
-        context, 'Confirmar para eliminar personal')) return;
+    try {
+      if (!await openDialogConfirmationReturn(
+          context, 'Confirmar para eliminar personal')) return;
 
-    // eliminar obra
-    openLoadingDialog(
-      context,
-      mensaje: 'Eliminando personal, puede demorar...',
-    );
-    final response = await _usuarioService.deleteUsuario(usuarioId!);
-
-    closeLoadingDialog(context);
-    if (response.fallo) {
-      openAlertDialog(context, 'Error al desactivar usuario',
-          subMensaje: response.error);
-      return;
-    } else {
+      openLoadingDialog(
+        context,
+        mensaje: 'Eliminando personal, puede demorar...',
+      );
+      
+      final response = await _usuarioService.deleteUsuario(usuarioId!);
+      closeLoadingDialog(context);
       await openAlertDialogReturn(context, 'Usuario desactivado con éxito');
       _obraService.notifyListeners();
 
       Navigator.pop(context);
+    } catch (err) {
+      openAlertDialog(context, 'Error al desactivar usuario',
+          subMensaje: err.toString());
+      return;
     }
   }
 

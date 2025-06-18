@@ -9,7 +9,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/propietario.dart';
-import 'package:verona_app/pages/forms/inactividades_masiva.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/services/notificaciones_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -28,24 +28,27 @@ class NotificacionesForm extends StatelessWidget {
           body: FutureBuilder(
               future: _usuariService.obtenerPropietariosAdmin(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting &&
-                    !snapshot.hasData) {
-                  return Loading(mensaje: 'Cargando información');
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error al recuperar información'),
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return Loading(
+                    mensaje: 'Recuperando pedidos...',
+                  );
+                } else if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasError) {
+                  return ErrorPage(
+                    errorMsg: snapshot.error.toString(),
                   );
                 }
-                final response = snapshot.data as MyResponse;
-                if (response.fallo)
-                  return Center(child: Text('Error al recuperar información'));
-                final propietarios = (response.data['prop'] as List)
+
+                final propietarios = (snapshot.data as List)
+                    .where((prop) => prop['role'] == 3)
                     .map((e) => Propietario.fromJson(e))
                     .toList();
-                final admin = (response.data['admin'] as List)
+                final admin = (snapshot.data as List)
+                    .where((prop) => prop['role'] == 1)
                     .map((e) => Miembro.fromJson(e))
                     .toList();
-                final personal = (response.data['personal'] as List)
+                final personal = (snapshot.data as List)
+                    .where((prop) => prop['role'] != 3 && prop['role'] != 1)
                     .where((element) => element['id'] != _pref.id)
                     .map((e) => Miembro.fromJson(e))
                     .toList();
@@ -173,7 +176,7 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                     selectedValuesStyle: TextStyle(color: Colors.white),
                     options: propietariosItems,
                     selectedValues: idPropietariosSelected,
-                    whenEmpty: 'Sin obras seleccionadas',
+                    whenEmpty: 'Sin propietarios seleccionados',
                     icon: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Icon(
@@ -245,10 +248,10 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                           value: adminSelected,
                           items: administradoresItem,
                           style: TextStyle(
-                              color: Helper.brandColors[5], fontSize: 16),                    
+                              color: Helper.brandColors[5], fontSize: 16),
                           decoration: getDecoration(),
-                        dropdownStyleData: DropdownStyleData(
-                            decoration: getDropdownDecoration()),
+                          dropdownStyleData: DropdownStyleData(
+                              decoration: getDropdownDecoration()),
                           onChanged: (value) {
                             adminSelected = value as String;
                           },
@@ -260,7 +263,7 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top:15.0),
+                    padding: const EdgeInsets.only(top: 15.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -272,12 +275,15 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                           height: 10,
                         ),
                         RadioListTile(
-                          
                           contentPadding: EdgeInsets.zero,
                           splashRadius: 0,
-                          title: Text('Notificación', style: TextStyle(color: Helper.brandColors[4]),),
+                          title: Text(
+                            'Notificación',
+                            style: TextStyle(color: Helper.brandColors[4]),
+                          ),
                           value: NotificationType.notification,
-                          fillColor: MaterialStateColor.resolveWith((states) => Helper.brandColors[8]),
+                          fillColor: MaterialStateColor.resolveWith(
+                              (states) => Helper.brandColors[8]),
                           groupValue: _notificationType,
                           onChanged: (NotificationType? value) {
                             setState(() {
@@ -288,9 +294,13 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                         RadioListTile(
                           contentPadding: EdgeInsets.zero,
                           splashRadius: 0,
-                          title: Text('Obra', style: TextStyle(color: Helper.brandColors[4]),),
+                          title: Text(
+                            'Obra',
+                            style: TextStyle(color: Helper.brandColors[4]),
+                          ),
                           value: NotificationType.obra,
-                          fillColor: MaterialStateColor.resolveWith((states) => Helper.brandColors[8]),
+                          fillColor: MaterialStateColor.resolveWith(
+                              (states) => Helper.brandColors[8]),
                           groupValue: _notificationType,
                           onChanged: (NotificationType? value) {
                             setState(() {
@@ -301,9 +311,13 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
                         RadioListTile(
                           contentPadding: EdgeInsets.zero,
                           splashRadius: 0,
-                          title: Text('Actualización App', style: TextStyle(color: Helper.brandColors[4]),),
+                          title: Text(
+                            'Actualización App',
+                            style: TextStyle(color: Helper.brandColors[4]),
+                          ),
                           value: NotificationType.update_app,
-                          fillColor: MaterialStateColor.resolveWith((states) => Helper.brandColors[8]),
+                          fillColor: MaterialStateColor.resolveWith(
+                              (states) => Helper.brandColors[8]),
                           groupValue: _notificationType,
                           onChanged: (NotificationType? value) {
                             setState(() {
@@ -336,34 +350,28 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
 
   enviarNotificacion(context) async {
     bool loading = false;
+    final result = validaForm();
+    if (!result[0]) {
+      await openAlertDialogReturn(context, result[1]);
+      return;
+    }
+
+    if (!await openDialogConfirmationReturn(
+        context, 'Confirme para enviar notificación')) return;
+
+    loading = true;
+    openLoadingDialog(context, mensaje: 'Enviando notificación...');
+    final _notifService =
+        Provider.of<NotificacionesService>(context, listen: false);
+    String title = txtTitle.text.trim();
+    String msg = txtMsg.text.trim();
+    List<String> ids = obtenerIdByDni();
+    String idAuth = adminSelected;
+    final _pref = new Preferences();
     try {
-      final result = validaForm();
-      if (!result[0]) {
-        await openAlertDialogReturn(context, result[1]);
-        return;
-      }
-
-      if (!await openDialogConfirmationReturn(
-          context, 'Confirme para enviar notificación')) return;
-
-      loading = true;
-      openLoadingDialog(context, mensaje: 'Enviando notificación...');
-      final _notifService =
-          Provider.of<NotificacionesService>(context, listen: false);
-      String title = txtTitle.text.trim();
-      String msg = txtMsg.text.trim();
-      List<String> ids = obtenerIdByDni();
-      // ids.addAll(obtenerByNombre());
-      String idAuth = adminSelected;
-      final _pref = new Preferences();
       final response = await _notifService.enviarNotificacion(
           _pref.id, title, msg, ids, idAuth, _notificationType.name);
       closeLoadingDialog(context);
-      if (response.fallo) {
-        openAlertDialog(context, 'Error al enviar notificación',
-            subMensaje: response.error);
-        return;
-      }
       openAlertDialog(context, 'Mensaje enviando con éxito');
     } catch (err) {
       closeLoadingDialog(context);
@@ -385,15 +393,14 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
       });
       idPersonalSelected.forEach((item) {
         final dni = item.split(' ').last;
-        print(dni);
         final id =
             widget.personal.where((prop) => prop.dni == dni).toList()[0].id;
         ids.add(id);
       });
       return ids;
     } catch (err) {
-      
-      throw new Exception('Error al buscar ID de usuario seleccionado: ${err.toString()}');
+      throw new Exception(
+          'Error al buscar ID de usuario seleccionado: ${err.toString()}');
     }
   }
 
@@ -404,21 +411,24 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
         final id = widget.personal
             .where((personal) =>
                 item ==
-            '${personal.nombre.trim().toUpperCase()} ${personal.apellido.trim().toUpperCase()}: ${personal.dni}').toList()[0]
+                '${personal.nombre.trim().toUpperCase()} ${personal.apellido.trim().toUpperCase()}: ${personal.dni}')
+            .toList()[0]
             .id;
         ids.add(id);
       });
-       idPropietariosSelected.forEach((item) {
+      idPropietariosSelected.forEach((item) {
         final id = widget.propietarios
             .where((prop) =>
                 item ==
-            '${prop.nombre.trim().toUpperCase()} ${prop.apellido.trim().toUpperCase()}: ${prop.dni}').toList()[0]
+                '${prop.nombre.trim().toUpperCase()} ${prop.apellido.trim().toUpperCase()}: ${prop.dni}')
+            .toList()[0]
             .id;
         ids.add(id);
       });
       return ids;
     } catch (err) {
-      throw new Exception('Error al buscar ID de usuario seleccionado: ${err.toString()}');
+      throw new Exception(
+          'Error al buscar ID de usuario seleccionado: ${err.toString()}');
     }
   }
 
@@ -467,11 +477,9 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
   }
 }
 
-
-
 getDecoration() {
   return InputDecoration(
-      focusColor: Helper.brandColors[9],
+      focusColor: Helper.brandColors[1],
       contentPadding: EdgeInsets.zero,
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(7),

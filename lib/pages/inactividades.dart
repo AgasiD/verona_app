@@ -10,20 +10,20 @@ import 'package:verona_app/widgets/custom_widgets.dart';
 
 class InactividadesPage extends StatefulWidget {
   static final routeName = 'inactividades';
-   InactividadesPage({Key? key}) : super(key: key);
+  InactividadesPage({Key? key}) : super(key: key);
 
   @override
   State<InactividadesPage> createState() => _InactividadesPageState();
 }
 
 class _InactividadesPageState extends State<InactividadesPage> {
-late ObraService  _obraService;
+  late ObraService _obraService;
 
   @override
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final obraId = arguments['obraId'];
-     _obraService = Provider.of<ObraService>(context, listen: false);
+    _obraService = Provider.of<ObraService>(context, listen: false);
     final _pref = new Preferences();
 
     return Scaffold(
@@ -56,26 +56,24 @@ late ObraService  _obraService;
                         obraId: obraId,
                         inactividad: Inactividad.fromMap(
                             _obraService.obra.diasInactivos[index]),
-                            deleteFunction: eliminarInactividad 
-                            );
+                        deleteFunction: eliminarInactividad);
                   })),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
 
-eliminarInactividad(int index, String id, String obraId) async {
-
-    _obraService.obra.diasInactivos.removeAt(index);
-    final response = await _obraService.eliminarInactividad(obraId,id) as MyResponse;
-    if(response.fallo){
-      Helper.showSnackBar(context, "Error al eliminar inactividad", TextStyle(color: Colors.red
-      [100]), null, null);
+  eliminarInactividad(int index, String id, String obraId) async {
+    try {
+      _obraService.obra.diasInactivos.removeAt(index);
+      final response = await _obraService.eliminarInactividad(obraId, id);
+      Helper.showSnackBar(context, "Inactividad eliminada",
+          TextStyle(color: Helper.brandColors[8]), null, null);
+    } catch (err) {
+      Helper.showSnackBar(context, "Error al eliminar inactividad",
+          TextStyle(color: Colors.red[100]), null, null);
       return;
     }
-      Helper.showSnackBar(context, "Inactividad eliminada", TextStyle(color: Helper.brandColors[8]), null, null);
-
- 
-}
+  }
 }
 
 ordenaInactividad(diasInactivos) {
@@ -99,8 +97,7 @@ class _InactividadTile extends StatefulWidget {
       required this.inactividad,
       required this.obraId,
       required this.index,
-      required this.deleteFunction
-      })
+      required this.deleteFunction})
       : super(key: key);
   Inactividad inactividad;
   String obraId;
@@ -139,10 +136,10 @@ class __InactividadTileState extends State<_InactividadTile> {
         color: Colors.red,
       ),
       key: ValueKey<int>(widget.index),
-      confirmDismiss: (direction) async =>  await openDialogConfirmationReturn(context, 'Confirme para eliminar inactividad'),
-      onDismissed: (direction) async => widget.deleteFunction(widget.index, widget.inactividad.id, widget.obraId),
-      
-
+      confirmDismiss: (direction) async => await openDialogConfirmationReturn(
+          context, 'Confirme para eliminar inactividad'),
+      onDismissed: (direction) async => widget.deleteFunction(
+          widget.index, widget.inactividad.id, widget.obraId),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: Column(
@@ -187,8 +184,7 @@ class __InactividadTileState extends State<_InactividadTile> {
       ),
     );
   }
-  
-  eliminarInactividad(Inactividad inactividad, int index, String obraId) async{
-    
-  }
+
+  eliminarInactividad(
+      Inactividad inactividad, int index, String obraId) async {}
 }

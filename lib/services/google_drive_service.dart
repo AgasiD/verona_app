@@ -6,7 +6,7 @@ import 'package:verona_app/services/http_service.dart';
 
 class GoogleDriveService extends ChangeNotifier {
   HttpService _http = new HttpService();
-  final _endpoint = 'api/drive';
+  final _endpoint = 'api/files';
   late XFile _img;
   late List<XFile> _imgs;
   late List<XFile?>? imgsPedido;
@@ -36,8 +36,6 @@ class GoogleDriveService extends ChangeNotifier {
       final datos = await this
           ._http
           .uploadImage(image, _endpoint + "/$fileName/jpg/$idFolder");
-      await setPermisosToFile(datos);
-
       return datos;
     } else {
       print('No se asigno imagen');
@@ -48,9 +46,9 @@ class GoogleDriveService extends ChangeNotifier {
     try {
       if (_document != null) {
         final to = _endpoint + "/$fileName/$extension/$parent";
-        final datos = await this._http.uploadDocument(_document, to);
+        final response = await this._http.uploadDocument(_document, to);
         notifyListeners();
-        return datos;
+        return response;
       } else {
         print('No ha asignado imagen');
       }
@@ -60,8 +58,8 @@ class GoogleDriveService extends ChangeNotifier {
   }
 
   setPermisosToFile(String fileId) async {
-    final datos = await this._http.post('$_endpoint/setPermisos/$fileId', {});
-    // final response = MyResponse.fromJson(datos['response']);
+    final response = await this._http.post('$_endpoint/setPermisos/$fileId', {});
+    // final response = MyResponse.fromJson(datos);
   }
 
   getExtension() {
@@ -110,9 +108,10 @@ class GoogleDriveService extends ChangeNotifier {
 
   obtenerDocumentos(String usuarioId, String folderId) async {
     folderId = folderId == '' ? 'SinID' : folderId;
-    final datos =
-        await this._http.get('$_endpoint/inFolder/$usuarioId/$folderId');
-    final response = MyResponse.fromJson(datos['response']);
+    final datos = await this
+        ._http
+        .get('$_endpoint/obtenerDocumentos/$usuarioId/$folderId');
+    final response = MyResponse.fromJson(datos);
 
     return response;
   }
@@ -127,7 +126,7 @@ class GoogleDriveService extends ChangeNotifier {
       "driveId": driveId,
     };
     final data = await this._http.post('$_endpoint/folder', body);
-    final response = MyResponse.fromJson(data['response']);
+    final response = MyResponse.fromJson(data);
     notifyListeners();
     return response;
   }

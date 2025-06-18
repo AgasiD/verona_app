@@ -6,6 +6,7 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/models/tarea.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
 import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -73,41 +74,19 @@ class _ControlObraABMState extends State<ControlObraABM>
             ),
           ),
           body: FutureBuilder(
-              future: _obraService.obtenerControlObra(),
+              future: _obraService.obtenerControlesObra(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData)
-                  return Loading(
-                    mensaje: 'Cargando etapas...',
-                  );
-                final response = snapshot.data as MyResponse;
-                if (response.fallo)
-                  return Center(
-                    child: Text(
-                      response.error,
-                      style: TextStyle(color: Helper.brandColors[3]),
-                    ),
-                  );
-
-                etapas = (response.data['etapas'] as List)
-                    .map((e) => Etapa.fromJson(e))
-                    .toList();
-                etapas.sort(
-                  (a, b) => a.orden.compareTo(b.orden),
-                );
-
-                subetapas = (response.data['subetapas'] as List)
-                    .map((e) => Subetapa.fromJson(e))
-                    .toList();
-                subetapas.sort((a, b) {
-                  if (a.etapa.compareTo(b.etapa) != 0) {
-                    return a.etapa.compareTo(b.etapa);
-                  }
-                  return a.orden.compareTo(b.orden);
-                });
-
-                tareas = (response.data['tareas'] as List)
-                    .map((e) => Tarea.fromJson(e))
-                    .toList();
+                if (snapshot.connectionState != ConnectionState.done)
+                  return Loading(mensaje: 'Cargando...');
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasError) {
+                  return ErrorPage(errorMsg: snapshot.error.toString());
+                }
+                final data = snapshot.data as Map<String, dynamic>;
+                final controles = getControles(data);
+                final etapas = controles[0];
+                final subetapas = controles[1];
+                final tareas = controles[2];
 
                 return TabBarView(
                   controller: _tabCtrl,
@@ -127,6 +106,26 @@ class _ControlObraABMState extends State<ControlObraABM>
             showNotif: false,
           ),
         ));
+  }
+
+  getControles(Map<String, dynamic> data) {
+    etapas = (data['etapas'] as List).map((e) => Etapa.fromJson(e)).toList();
+    etapas.sort(
+      (a, b) => a.orden.compareTo(b.orden),
+    );
+
+    subetapas =
+        (data['subetapas'] as List).map((e) => Subetapa.fromJson(e)).toList();
+    subetapas.sort((a, b) {
+      if (a.etapa.compareTo(b.etapa) != 0) {
+        return a.etapa.compareTo(b.etapa);
+      }
+      return a.orden.compareTo(b.orden);
+    });
+
+    tareas = (data['tareas'] as List).map((e) => Tarea.fromJson(e)).toList();
+
+    return [etapas, subetapas, tareas];
   }
 
   agregarItem(int i) async {
@@ -297,12 +296,14 @@ class _EtapasViewState extends State<_EtapasView> {
   }
 
   actualizaEtapa(int i) async {
-    openAlertDialog(context, 'Actualizando etapa...');
-    final response = await _etapaService.actualizarEtapa(widget.etapas[i]);
-    closeLoadingDialog(context);
-    if (response.fallo) {
+    try {
+      openAlertDialog(context, 'Actualizando etapa...');
+      final response = await _etapaService.actualizarEtapa(widget.etapas[i]);
+      closeLoadingDialog(context);
+    } catch (err) {
+      closeLoadingDialog(context);
       openAlertDialog(context, 'Error al actualizar etapa',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
   }
 
@@ -419,9 +420,9 @@ class _SubetapasViewState extends State<_SubetapasView> {
                   value: widget.subetapas[i].etapa.toString(),
                   items: etapas,
                   style: TextStyle(color: Helper.brandColors[5], fontSize: 14),
-                 decoration: getDecoration(),
-                        dropdownStyleData: DropdownStyleData(
-                            decoration: getDropdownDecoration()),
+                  decoration: getDecoration(),
+                  dropdownStyleData:
+                      DropdownStyleData(decoration: getDropdownDecoration()),
                 )),
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
@@ -480,13 +481,16 @@ class _SubetapasViewState extends State<_SubetapasView> {
   }
 
   actualizarSubetapa(int i) async {
-    openAlertDialog(context, 'Actualizando etapa...');
-    final response =
-        await _subetapaService.actualizarSubetapa(widget.subetapas[i]);
-    closeLoadingDialog(context);
-    if (response.fallo) {
+    try {
+      openAlertDialog(context, 'Actualizando etapa...');
+      final response =
+          await _subetapaService.actualizarSubetapa(widget.subetapas[i]);
+      closeLoadingDialog(context);
+    } catch (err) {
+      closeLoadingDialog(context);
+
       openAlertDialog(context, 'Error al actualizar etapa',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
   }
 
@@ -512,7 +516,7 @@ class _TareasView extends StatefulWidget {
 }
 
 class _TareasViewState extends State<_TareasView> {
-  int valueSelect = 1;  
+  int valueSelect = 1;
   int cantRegistros = 10;
   List<Tarea> tareasAux = [];
   TextEditingController searchCtrl = TextEditingController();
@@ -524,7 +528,7 @@ class _TareasViewState extends State<_TareasView> {
     // TODO: implement initState
     super.initState();
     _tareaService = Provider.of<TareaService>(context, listen: false);
-    busquedaActiva  = false;
+    busquedaActiva = false;
     tareasAux = widget.tareas;
   }
 
@@ -546,9 +550,9 @@ class _TareasViewState extends State<_TareasView> {
     };
 
     widget.tareas.sort((a, b) {
-      if (a.subetapa.compareTo(b.subetapa) != 0) 
+      if (a.subetapa.compareTo(b.subetapa) != 0)
         return a.subetapa.compareTo(b.subetapa);
-      
+
       return a.orden.compareTo(b.orden);
     });
 
@@ -627,9 +631,9 @@ class _TareasViewState extends State<_TareasView> {
                         color: Helper.brandColors[5],
                         fontSize: 14,
                         overflow: TextOverflow.ellipsis),
-                   decoration: getDecoration(),
-                        dropdownStyleData: DropdownStyleData(
-                            decoration: getDropdownDecoration()),
+                    decoration: getDecoration(),
+                    dropdownStyleData:
+                        DropdownStyleData(decoration: getDropdownDecoration()),
                   ),
                 )),
             Padding(
@@ -759,21 +763,22 @@ class _TareasViewState extends State<_TareasView> {
   }
 
   actualizarTarea(int index) async {
-    int largoCadena = 35;
-    // openLoadingDialog(context, mensaje: 'Actualizando tarea...');
-    final response = await _tareaService.actualizarTarea(widget.tareas[index]);
-    //  closeLoadingDialog(context);
-    if (response.fallo) {
+    try {
+      int largoCadena = 35;
+      final response =
+          await _tareaService.actualizarTarea(widget.tareas[index]);
+
+      Helper.showSnackBar(
+          context,
+          'Tarea "${widget.tareas[index].descripcion.length > largoCadena ? widget.tareas[index].descripcion.substring(0, largoCadena).toUpperCase() + '..."' : widget.tareas[index].descripcion.toUpperCase()} actualizada',
+          TextStyle(color: Helper.brandColors[8]),
+          null,
+          null);
+    } catch (err) {
       openAlertDialog(context, 'Error al actualizar tarea',
-          subMensaje: response.error);
+          subMensaje: err.toString());
       return;
     }
-    Helper.showSnackBar(
-        context,
-        'Tarea "${widget.tareas[index].descripcion.length > largoCadena ? widget.tareas[index].descripcion.substring(0, largoCadena).toUpperCase() + '..."' : widget.tareas[index].descripcion.toUpperCase()} actualizada',
-        TextStyle(color: Helper.brandColors[8]),
-        null,
-        null);
   }
 
   refreshTable(int value) {
@@ -924,21 +929,41 @@ class _ItemPaginator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = TextStyle(
-                    color: isSelect
-                        ? Helper.brandColors[2]
-                        : Helper.brandColors[3],
-                    fontWeight: isSelect ? FontWeight.bold : FontWeight.normal);
+        color: isSelect ? Helper.brandColors[2] : Helper.brandColors[3],
+        fontWeight: isSelect ? FontWeight.bold : FontWeight.normal);
     Widget text = first
-        ? Icon(Icons.first_page_outlined, size: 17,color: Helper.brandColors[3],)
+        ? Icon(
+            Icons.first_page_outlined,
+            size: 17,
+            color: Helper.brandColors[3],
+          )
         : back
-            ?  Icon(Icons.navigate_before_rounded, size: 17,color: Helper.brandColors[3],)
+            ? Icon(
+                Icons.navigate_before_rounded,
+                size: 17,
+                color: Helper.brandColors[3],
+              )
             : next
-                ?  Icon(Icons.navigate_next_rounded, size: 17,color: Helper.brandColors[3],)
+                ? Icon(
+                    Icons.navigate_next_rounded,
+                    size: 17,
+                    color: Helper.brandColors[3],
+                  )
                 : last
-                    ?  Icon(Icons.last_page_rounded, size: 17,color: Helper.brandColors[3],)
+                    ? Icon(
+                        Icons.last_page_rounded,
+                        size: 17,
+                        color: Helper.brandColors[3],
+                      )
                     : ellipsis
-                        ? Text('...', style: textStyle,)
-                        : Text(number.toString(), style: textStyle,);
+                        ? Text(
+                            '...',
+                            style: textStyle,
+                          )
+                        : Text(
+                            number.toString(),
+                            style: textStyle,
+                          );
 
     return GestureDetector(
       onTap: () => ellipsis ? null : move(value),
@@ -950,6 +975,7 @@ class _ItemPaginator extends StatelessWidget {
     );
   }
 }
+
 getDecoration() {
   return InputDecoration(
       focusColor: Helper.brandColors[9],

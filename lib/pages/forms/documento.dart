@@ -95,7 +95,6 @@ class _FormState extends State<_Form> {
             openDialogConfirmation(context, (context) async {
               String msg = 'Subiendo imagenes...';
               openLoadingDialog(context, mensaje: msg);
-              MyResponse response;
               try {
                 final res = await _driveService.grabarImagenes(
                     driveId, txtCtrlName.text == '' ? null : txtCtrlName.text);
@@ -106,10 +105,6 @@ class _FormState extends State<_Form> {
                       res, _obraService.obra.id);
                   _obraService.obra.enabledFiles
                       .insertAll(_obraService.obra.enabledFiles.length, res);
-                  if (response.fallo) {
-                    closeLoadingDialog(context);
-                    openAlertDialog(context, response.message);
-                  }
                 }
                 closeLoadingDialog(context);
                 openAlertDialog(context, 'Imagenes subidas');
@@ -213,18 +208,16 @@ class _FormState extends State<_Form> {
               height: 40,
             ),
             DropdownButtonFormField2(
-              
               value: fileType,
               items: formato,
               style: TextStyle(color: Helper.brandColors[5], fontSize: 16),
-          
               decoration: getDecoration(),
               hint: Text(
                 '',
                 style: TextStyle(fontSize: 16, color: Helper.brandColors[3]),
               ),
-                        dropdownStyleData: DropdownStyleData(
-                            decoration: getDropdownDecoration()),
+              dropdownStyleData:
+                  DropdownStyleData(decoration: getDropdownDecoration()),
               onChanged: (value) {
                 setState(() {
                   fileType = value.toString();

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/etapa.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
 import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -36,9 +37,14 @@ class EtapasExtrasPage extends StatelessWidget {
           child: FutureBuilder(
             future: _etapasService.obtenerEtapasExtras(),
             builder: (context, snapshot) {
-              if (snapshot.data == null) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return Loading(
                   mensaje: 'Cargando etapas...',
+                );
+              } else if (snapshot.hasError) {
+                return ErrorPage(
+                  errorMsg: snapshot.error.toString(),
+                  page: false,
                 );
               } else {
                 final response = snapshot.data as MyResponse;
@@ -124,18 +130,17 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
   eliminarEtapa(etapaId, index) async {
     final _etapasService = Provider.of<EtapaService>(context, listen: false);
     openLoadingDialog(context, mensaje: 'Eliminando subetapa...');
-    final etapa = widget.etapas[index];
-    widget.etapas.removeAt(index);
 
-    final response = await _etapasService.eliminarEtapa(etapaId);
-    closeLoadingDialog(context);
-    if (response.fallo) {
-      widget.etapas.insert(index, etapa);
+    try {
+      final response = await _etapasService.eliminarEtapa(etapaId);
+      widget.etapas.removeAt(index);
+      closeLoadingDialog(context);
+
+      setState(() {});
+    } catch (err) {
       openAlertDialog(context, 'Error al eliminar subetapa',
-          subMensaje: response.error);
-      return;
+          subMensaje: err.toString());
     }
-    setState(() {});
   }
 
   @override
@@ -207,46 +212,42 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
   }
 
   asignar(ObraService _obraService, snackText) async {
-    if (!widget.asignado) {
-      // Agregar tarea
-      openLoadingDialog(context, mensaje: 'Adjuntando etapa...');
-      final response = await _obraService.asignarEtapa(
-          widget.etapa.id, _obraService.obra.id);
-      if (response.fallo) {
-        closeLoadingDialog(context);
-        openAlertDialog(context, 'Error al asignar etapa',
-            subMensaje: response.error);
-      } else {
-        _obraService.obra.sumarEtapa(Etapa.fromJson(response.data));
+    bool loading = true;
+    try {
+      if (!widget.asignado) {
+        // Agregar tarea
+        openLoadingDialog(context, mensaje: 'Adjuntando etapa...');
+        final response = await _obraService.asignarEtapa(
+            widget.etapa.id, _obraService.obra.id);
+
+        _obraService.obra.sumarEtapa(Etapa.fromJson(response.data['data']));
         widget.asignado = true;
         closeLoadingDialog(context);
+        loading = false;
         snackText = 'Tarea asignada';
         Helper.showSnackBar(
             context, snackText, null, Duration(milliseconds: 700), null);
-      }
-    } else {
-      //Quitar tarea
-      openLoadingDialog(context, mensaje: 'Quitando etapa...');
-
-      final response =
-          await _obraService.quitarEtapa(widget.etapa.id, _obraService.obra.id);
-
-      if (response.fallo) {
-        closeLoadingDialog(context);
-        openAlertDialog(context, 'Error al quitar etapa',
-            subMensaje: response.error);
       } else {
+        //Quitar tarea
+        openLoadingDialog(context, mensaje: 'Quitando etapa...');
+
+        final response = await _obraService.quitarEtapa(
+            widget.etapa.id, _obraService.obra.id);
+
         _obraService.obra.quitarEtapa(widget.etapa.id);
         widget.asignado = false;
         closeLoadingDialog(context);
+        loading = false;
         Helper.showSnackBar(
             context, snackText, null, Duration(milliseconds: 700), null);
+        setState(
+          () {},
+        );
       }
+    } catch (err) {
+      loading == true ? closeLoadingDialog(context) : false;
+      openAlertDialog(context, err.toString());
     }
-
-    setState(
-      () {},
-    );
   }
 
   tareaAsingada(String id) {

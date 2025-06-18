@@ -86,7 +86,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   InactividadesForm.routeName: (_) => InactividadesForm(),
   InactividadesBDForm.routeName: (_) => InactividadesBDForm(),
   InactividadesPage.routeName: (_) => InactividadesPage(),
-  InactividadesMasivaForm.routeName : (_) => InactividadesMasivaForm(),
   LoginPage.routeName: (_) => LoginPage(),
   MapCoordenates .routeName: (_) =>MapCoordenates(),
   MiembroForm.routeName: (_) => MiembroForm(),

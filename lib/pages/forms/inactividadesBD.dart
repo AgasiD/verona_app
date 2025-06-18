@@ -64,29 +64,26 @@ class _FormState extends State<_Form> {
       inactividadId = arguments['id'];
       edit = true;
       textAction = 'Editar inactividad';
-
-      // inactividad = InactividadBD.fromMap(_obraService.obra.diasInactivos[index]);
       txtCtrlName.text = inactividad.nombre;
-      // txtCtrlDate.text = inactividad.diasInactivos;
 
-      //Accion al grabar
       submitAction = () async {
-        // inactividad.dias = txtCtrlDate.text;
         inactividad.nombre = txtCtrlName.text;
         bool confirm = await openDialogConfirmationReturn(
             context, '¿Seguro que desea actualizar la inactividad?');
         if (!confirm) return;
         openLoadingDialog(context, mensaje: 'Actualizando inactividad...');
-        MyResponse response;
-        response = await _inactividadService.grabar(inactividad.toMap());
-        closeLoadingDialog(context);
 
-        if (response.fallo) {
-          openAlertDialog(context, 'No se pudo grabar la inactividad',
-              subMensaje: response.error);
-        } else {
+        try {
+          final response =
+              await _inactividadService.grabar(inactividad.toMap());
+          closeLoadingDialog(context);
+
           await openAlertDialogReturn(context, 'Inactividad actualizada');
           Navigator.pop(context);
+        } catch (err) {
+          closeLoadingDialog(context);
+          openAlertDialog(context, 'No se pudo grabar la inactividad',
+              subMensaje: err.toString());
         }
       };
       // fin accion al grabar
@@ -104,16 +101,17 @@ class _FormState extends State<_Form> {
             nombre: txtCtrlName.text,
             diasInactivos: int.parse(txtCtrlDias.text),
             fecha: '');
-        MyResponse response;
-        response = await _inactividadService.grabar(inactividad.toMap());
-        closeLoadingDialog(context);
 
-        if (response.fallo) {
-          openAlertDialog(context, 'No se pudo grabar la inactividad',
-              subMensaje: response.error);
-        } else {
+        try {
+          final response =
+              await _inactividadService.grabar(inactividad.toMap());
+
           await openAlertDialogReturn(context, 'Inactividad generada');
           Navigator.pop(context, InactividadBD.fromMap(response.data));
+        } catch (err) {
+          closeLoadingDialog(context);
+          openAlertDialog(context, 'No se pudo grabar la inactividad',
+              subMensaje: err.toString());
         }
       };
     }
@@ -156,7 +154,8 @@ class _FormState extends State<_Form> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Visibility(
-                  visible: _pref.role == 1 || _pref.role == 2 || _pref.role == 8,
+                  visible:
+                      _pref.role == 1 || _pref.role == 2 || _pref.role == 8,
                   child: MainButton(
                     color: Helper.brandColors[8],
                     onPressed: submitAction,

@@ -1,3 +1,4 @@
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 
@@ -9,9 +10,12 @@ class WixService extends ChangeNotifier {
   final _endpoint = 'api/wix';
 
   Future<MyResponse> obtenerPosts() async {
-    final datos = await this._http.get('$_endpoint');
-    final resp = MyResponse.fromJson(datos);
+    final response = await this._http.get('$_endpoint');
+    final data = json.decode(response.body);
 
-    return resp;
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 }

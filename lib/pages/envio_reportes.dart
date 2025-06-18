@@ -58,9 +58,7 @@ class EnvioReporteSemanal extends StatelessWidget {
       openLoadingDialog(context, mensaje:'Enviando reportes, esto puede demorar');
       loading = true;
       final response = await _obraService.enviarReportes(ids);
-      if(response.fallo){
-        throw new Exception([response.error]);
-      }
+
       closeLoadingDialog(context);
       await openAlertDialogReturn(context, 'Reportes enviados');
 

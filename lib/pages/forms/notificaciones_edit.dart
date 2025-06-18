@@ -1,9 +1,8 @@
-import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/services/notificaciones_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
@@ -12,7 +11,8 @@ class NotificacionesEditForm extends StatelessWidget {
   static final routeName = 'NotificacionesEditForm';
   @override
   Widget build(BuildContext context) {
-    final _notificacionService = Provider.of<NotificacionesService>(context, listen: false);
+    final _notificacionService =
+        Provider.of<NotificacionesService>(context, listen: false);
     final args = ModalRoute.of(context)!.settings.arguments as Map;
     final notifId = args['idNotif'];
     return GestureDetector(
@@ -22,18 +22,18 @@ class NotificacionesEditForm extends StatelessWidget {
           body: FutureBuilder(
               future: _notificacionService.obtenerNotificacionData(notifId),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting &&
-                    !snapshot.hasData) {
-                  return Loading(mensaje: 'Cargando información');
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error al recuperar información', style: TextStyle(color: Helper.brandColors[4], fontSize: 18)),
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return Loading(
+                    mensaje: 'Recuperando información...',
+                  );
+                } else if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasError) {
+                  return ErrorPage(
+                    errorMsg: snapshot.error.toString(),
                   );
                 }
-                final response = snapshot.data as MyResponse;
-                if (response.fallo)
-                  return Center(child: Text('Error al recuperar información'));
-                return _FormNotificaciones(notif: response.data);
+                return _FormNotificaciones(
+                    notif: snapshot.data as Map<String, dynamic>);
               }),
           bottomNavigationBar: CustomNavigatorFooter(),
         ));
@@ -81,7 +81,7 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
             Container(
               margin: EdgeInsets.symmetric(vertical: 20),
               child: CustomInput(
-enable: !autorizado,
+                enable: !autorizado,
                 hintText: 'Título',
                 textController: txtTitle,
                 icono: Icons.title,
@@ -116,17 +116,18 @@ enable: !autorizado,
                 },
               ),
             ),
-              TextButton(
-                onPressed: () => eliminarNotificacion(widget.notif['id']),
-                child: Text('Eliminar', style: TextStyle(color: Colors.red[400], fontSize: 17),),
-                
+            TextButton(
+              onPressed: () => eliminarNotificacion(widget.notif['id']),
+              child: Text(
+                'Eliminar',
+                style: TextStyle(color: Colors.red[400], fontSize: 17),
               ),
-              MainButton(
-                onPressed: () => enviarNotificacion(context),
-                text: !autorizado ? 'Autorizar' : 'Reenviar',
-                color: Helper.brandColors[8],
-              ),
-            
+            ),
+            MainButton(
+              onPressed: () => enviarNotificacion(context),
+              text: !autorizado ? 'Autorizar' : 'Reenviar',
+              color: Helper.brandColors[8],
+            ),
           ],
         ),
       ),
@@ -135,29 +136,22 @@ enable: !autorizado,
 
   enviarNotificacion(context) async {
     bool loading = false;
+
+    if (!await openDialogConfirmationReturn(
+        context, 'Confirme para enviar notificación')) return;
+
+    openLoadingDialog(context, mensaje: 'Enviando notificación...');
+    loading = true;
+    final _notifService =
+        Provider.of<NotificacionesService>(context, listen: false);
+    String title = txtTitle.text.trim();
+    String msg = txtMsg.text.trim();
+
+    final _pref = new Preferences();
     try {
-      // final result = validaForm();
-      // if(!result[0]) {
-      //   await openAlertDialogReturn(context, result[1]);
-      //   return;
-      // }
-
-      if (!await openDialogConfirmationReturn(
-          context, 'Confirme para enviar notificación')) return;
-
-      openLoadingDialog(context, mensaje: 'Enviando notificación...');
-      loading = true;
-      final _notifService = Provider.of<NotificacionesService>(context, listen: false);
-      String title = txtTitle.text.trim();
-      String msg = txtMsg.text.trim();
-    
-      final _pref = new Preferences();
-      final response = await _notifService.autorizarNotificacion(_pref.id,title, msg, widget.notif['id']);
+      final response = await _notifService.autorizarNotificacion(
+          _pref.id, title, msg, widget.notif['id']);
       closeLoadingDialog(context);
-      if(response.fallo){
-        openAlertDialog(context, 'Error al enviar notificación', subMensaje: response.error);
-      return  ;
-      }
       await openAlertDialogReturn(context, 'Mensaje enviando con éxito');
       Navigator.pop(context);
     } catch (err) {
@@ -168,23 +162,22 @@ enable: !autorizado,
       return;
     }
   }
-  
-  eliminarNotificacion(notif) async{
-    if(!await openDialogConfirmationReturn(context, 'Confirme para eliminar notificación')) return;
+
+  eliminarNotificacion(notif) async {
+    if (!await openDialogConfirmationReturn(
+        context, 'Confirme para eliminar notificación')) return;
 
     bool loading = true;
-    try{
       openLoadingDialog(context, mensaje: 'Eliminando...');
-      final _notifService = Provider.of<NotificacionesService>(context, listen: false);
+      final _notifService =
+          Provider.of<NotificacionesService>(context, listen: false);
+    try { 
       final response = await _notifService.eliminarNotificacion(notif);
-      if(response.fallo){
-        throw Exception(response.error);
-      }
       closeLoadingDialog(context);
       loading = false;
       await openAlertDialogReturn(context, 'Eliminada con éxito');
       Navigator.pop(context);
-    }catch ( err ){
+    } catch (err) {
       loading ? closeLoadingDialog(context) : false;
       openAlertDialog(context, 'Error al eliminar', subMensaje: err.toString());
       return;

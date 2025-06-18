@@ -1,8 +1,5 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:verona_app/models/MyResponse.dart';
-import 'package:verona_app/models/inactividad.dart';
-import 'package:verona_app/models/obra.dart';
-import 'package:verona_app/models/pedido.dart';
 import 'package:verona_app/models/tarea.dart';
 import 'package:verona_app/services/http_service.dart';
 
@@ -10,24 +7,34 @@ class TareaService extends ChangeNotifier {
   HttpService _http = new HttpService();
   final _endpoint = 'api/tarea';
 
-  Future<MyResponse> obtenerTareasExtras(etapaId, subetapaId, obraId) async {
-    final datos = await this._http.get('$_endpoint/extras/$etapaId/$subetapaId/$obraId');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+  Future<dynamic> obtenerTareasExtras(etapaId, subetapaId, obraId) async {
+    final response =
+        await this._http.get('$_endpoint/extras/$etapaId/$subetapaId/$obraId');
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 
-  Future<MyResponse> grabar(Map<String, dynamic> data) async {
-    final datos = await this._http.post('$_endpoint/nuevaTarea', data);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+  Future<dynamic> grabar(Map<String, dynamic> tarea) async {
+    final response = await this._http.post('$_endpoint/nuevaTarea', tarea);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 
-  Future<MyResponse> actualizarTarea(Tarea tarea) async {
-    final datos = await this._http.put('$_endpoint', tarea.toJson());
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+  Future<dynamic> actualizarTarea(Tarea tarea) async {
+    final response = await this._http.put('$_endpoint', tarea.toJson());
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 }

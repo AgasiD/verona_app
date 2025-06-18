@@ -5,6 +5,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/pages/chat.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/documento.dart';
 import 'package:verona_app/pages/visor_imagen.dart';
 import 'package:verona_app/services/google_drive_service.dart';
@@ -23,12 +24,12 @@ class DocumentosPage extends StatelessWidget {
       body: Container(
           color: Helper.brandColors[1],
           child: SafeArea(child: _DocumentosList())),
-      floatingActionButton: CustomNavigatorButton(
-        accion: () => Navigator.pushNamed(context, DocumentoForm.routeName,
-            arguments: {"driveId": driveId}),
-        icono: Icons.add,
-        showNotif: false,
-      ),
+      // floatingActionButton: CustomNavigatorButton(
+      //   accion: () => Navigator.pushNamed(context, DocumentoForm.routeName,
+      //       arguments: {"driveId": driveId}),
+      //   icono: Icons.add,
+      //   showNotif: false,
+      // ),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
@@ -39,7 +40,6 @@ class _DocumentosList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _obraService = Provider.of<ObraService>(context, listen: false);
     final _driveService = Provider.of<GoogleDriveService>(context);
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     String driveId = arguments['driveId'] ?? '';
@@ -48,38 +48,29 @@ class _DocumentosList extends StatelessWidget {
     return FutureBuilder(
         future: _driveService.obtenerDocumentos(_pref.id, driveId),
         builder: (context, snapshot) {
-          if (snapshot.data == null) {
-            return Loading(mensaje: 'Recuperando documentos');
+          if (snapshot.connectionState != ConnectionState.done)
+            return Loading(mensaje: 'Cargando documentos...');
+          if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.hasError) {
+            return ErrorPage(errorMsg: snapshot.error.toString());
+          }
+          final response = snapshot.data as MyResponse;
+          List<dynamic> documentos = response.data;
+          if (documentos.length > 0) {
+            return Container(
+                margin: EdgeInsets.only(top: 15),
+                child: _CustomListView(
+                  data: documentos,
+                ));
           } else {
-            final response = snapshot.data as MyResponse;
-            if (response.fallo) {
-              return Container(
-                child: Center(
-                  child: Text(
-                    'Error al recuperar documentos',
-                    style: TextStyle(fontSize: 20, color: Colors.grey[400]),
-                  ),
+            return Container(
+              child: Center(
+                child: Text(
+                  'Aún no existen documentos',
+                  style: TextStyle(fontSize: 20, color: Colors.grey[400]),
                 ),
-              );
-            } else {
-              final documentos = response.data['files'];
-              if (documentos.length > 0) {
-                return Container(
-                    margin: EdgeInsets.only(top: 15),
-                    child: _CustomListView(
-                      data: documentos,
-                    ));
-              } else {
-                return Container(
-                  child: Center(
-                    child: Text(
-                      'Aún no existen documentos',
-                      style: TextStyle(fontSize: 20, color: Colors.grey[400]),
-                    ),
-                  ),
-                );
-              }
-            }
+              ),
+            );
           }
         });
   }
@@ -128,16 +119,17 @@ class _CustomListViewState extends State<_CustomListView> {
                     (context), ImagenViewer.routeName,
                     arguments: {'imagenId': widget.data[i]['id']});
               } else if (getType(widget.data[i]['mimeType']).toLowerCase() ==
-                      'Carpeta'.toLowerCase()) {
+                  'Carpeta'.toLowerCase()) {
                 actionOnTap = () => Navigator.pushNamed(
                     (context), DocumentosPage.routeName,
                     arguments: {'driveId': widget.data[i]['id']});
-
-                  }else if (widget.data[i]['mimeType'].toString().contains('shortcut')){
-                    actionOnTap = () => Navigator.pushNamed(
-                    (context), DocumentosPage.routeName,
-                    arguments: {'driveId': widget.data[i]['shortcutDetails']['targetId']});
-
+              } else if (widget.data[i]['mimeType']
+                  .toString()
+                  .contains('shortcut')) {
+                actionOnTap = () => Navigator.pushNamed(
+                        (context), DocumentosPage.routeName, arguments: {
+                      'driveId': widget.data[i]['shortcutDetails']['targetId']
+                    });
               } else {
                 actionOnTap = () async {
                   final Uri _url = Uri.parse(

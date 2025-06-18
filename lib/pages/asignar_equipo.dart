@@ -28,9 +28,12 @@ class AsignarEquipoPage extends StatelessWidget {
                 final profesionales = snapshot.data as List<Miembro>;
                 Map<String, List<Miembro>> profesiones;
 
-                final arq = profesionales.where((e) => e.role == 2 && e.role == 8).toList();
-                final obreros =
-                    profesionales.where((e) => e.role == 4 && !e.externo).toList();
+                final arq = profesionales
+                    .where((e) => e.role == 2 || e.role == 8)
+                    .toList();
+                final obreros = profesionales
+                    .where((e) => e.role == 4 && !e.externo)
+                    .toList();
                 final comp = profesionales.where((e) => e.role == 5).toList();
                 final delivery =
                     profesionales.where((e) => e.role == 6).toList();
@@ -284,7 +287,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
     final _obraService = Provider.of<ObraService>(context);
 
     bool asignado = _obraService.obra.equipo
-            .where((element) => element.dni == widget.personal.dni)
+            .where((element) => element.id == widget.personal.id)
             .length >
         0;
     String snackText =
@@ -311,35 +314,21 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
           if (!asignado) {
             // ASOCIAR PERSONAL
             openLoadingDialog(context, mensaje: 'Asignando usuario...');
-
             final response = await _obraService.agregarUsuario(
                 _obraService.obra.id, widget.personal.id);
-            if (response.fallo) {
-              closeLoadingDialog(context);
-              openAlertDialog(context, 'Error al agregar personal',
-                  subMensaje: response.error);
-            } else {
-              closeLoadingDialog(context);
-              _obraService.obra.sumarPersonal(widget.personal);
-              snackText =
-                  '${widget.personal.nombre} ${widget.personal.apellido} fue asignado al equipo';
-            }
+            closeLoadingDialog(context);
+            _obraService.obra.sumarPersonal(widget.personal);
+            snackText =
+                '${widget.personal.nombre} ${widget.personal.apellido} fue asignado al equipo';
           } else {
             //DESASOCIAR PERSONAL
             openLoadingDialog(context, mensaje: 'Desasociando...');
-
             final response = await _obraService.quitarUsuario(
-                _obraService.obra.id, widget.personal.dni);
-            if (response.fallo) {
-              closeLoadingDialog(context);
-              openAlertDialog(context, 'Error al quitar personal',
-                  subMensaje: response.error);
-            } else {
-              _obraService.obra.quitarPersonal(widget.personal);
-              closeLoadingDialog(context);
-              Helper.showSnackBar(
-                  context, snackText, null, Duration(milliseconds: 700), null);
-            }
+                _obraService.obra.id, widget.personal.id);
+            _obraService.obra.quitarPersonal(widget.personal);
+            closeLoadingDialog(context);
+            Helper.showSnackBar(
+                context, snackText, null, Duration(milliseconds: 700), null);
           }
 
           setState(

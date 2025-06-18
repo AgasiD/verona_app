@@ -188,9 +188,7 @@ class __customTileAddedState extends State<_customTileAdded> {
         mensaje = 'Propietario quitado';
         final response = await _ObraService.quitarUsuario(
             widget.obra.id, widget.propietario.id);
-        if (response.fallo) {
-          throw Exception(response.error);
-        }
+        
         widget.asignados
             .removeWhere((element) => element == widget.propietario.dni);
         widget.agregado = !widget.agregado;
@@ -201,9 +199,7 @@ class __customTileAddedState extends State<_customTileAdded> {
         mensaje = 'Propietario asignado';
         final response = await _ObraService.agregarUsuario(
             widget.obra.id, widget.propietario.id);
-        if (response.fallo) {
-          throw Exception(response.error);
-        }
+      
         widget.asignados.add(widget.propietario.dni);
         widget.agregado = !widget.agregado;
         widget.obra.sumarPropietario(widget.propietario);

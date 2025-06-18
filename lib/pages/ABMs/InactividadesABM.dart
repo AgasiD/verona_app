@@ -6,6 +6,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/inactividadBD.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/inactividadesBD.dart';
 import 'package:verona_app/pages/forms/inactividades_masiva.dart';
 import 'package:verona_app/pages/obra.dart';
@@ -42,38 +43,35 @@ class _InactividadesABMState extends State<InactividadesABM>
           appBar: AppBar(
             title: Text('Control de inactividades'),
             backgroundColor: Helper.brandColors[2],
-            bottom: TabBar(
-              controller: _tabCtrl,
-              splashFactory: NoSplash.splashFactory,
-              dividerColor: Helper.brandColors[8],
-              indicatorColor: Helper.brandColors[8],
-              tabs: [
-                Tab(
-                    child: Text(
-                  'Por obras',
-                  style: TextStyle(color: Helper.brandColors[8]),
-                )),
-                Tab(
-                    child: Text(
-                  'Inactividades',
-                  style: TextStyle(color: Helper.brandColors[8]),
-                )),
-              ],
-            ),
+            // bottom: TabBar(
+            //   controller: _tabCtrl,
+            //   splashFactory: NoSplash.splashFactory,
+            //   dividerColor: Helper.brandColors[8],
+            //   indicatorColor: Helper.brandColors[8],
+            //   tabs: [
+            //     Tab(
+            //         child: Text(
+            //       'Por obras',
+            //       style: TextStyle(color: Helper.brandColors[8]),
+            //     )),
+            //     //   Tab(
+            //     //       child: Text(
+            //     //     'Inactividades',
+            //     //     style: TextStyle(color: Helper.brandColors[8]),
+            //     //   )),
+            //   ],
+            // ),
           ),
           body: FutureBuilder(
               future: _obraService.obtenerControlInactividades(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting)
-                  return Loading(mensaje: 'Cargando obras...');
-
-                final response = snapshot.data as MyResponse;
-                if (response.fallo)
-                  return Center(
-                    child: Text(response.error),
-                  );
-
-                final obras = response.data;
+                if (snapshot.connectionState != ConnectionState.done)
+                  return Loading(mensaje: 'Cargando información...');
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasError) {
+                  return ErrorPage(errorMsg: snapshot.error.toString());
+                }
+                final obras = snapshot.data;
                 (obras as List)
                     .sort((a, b) => a['nombre'].compareTo(b['nombre']));
                 return TabBarView(
@@ -83,19 +81,18 @@ class _InactividadesABMState extends State<InactividadesABM>
                       obras: obras,
                     ),
                     FutureBuilder(
-                        future: _inactividadService.obtenerInactividades(),
+                        // future:
+                        future: Future.delayed(Duration(milliseconds: 1)),
                         builder: (context, snapshot) {
+                          if (snapshot.connectionState != ConnectionState.done)
+                            return Loading(mensaje: 'Cargando información...');
                           if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Loading(
-                              mensaje: "Cargando información...",
-                            );
+                                  ConnectionState.done &&
+                              snapshot.hasError) {
+                            return ErrorPage(
+                                errorMsg: snapshot.error.toString());
                           }
-                          final response = snapshot.data as MyResponse;
-                          if (response.fallo)
-                            return ErrorWidget(response.error);
-
-                          final obras = (response.data as List)
+                          final obras = (snapshot.data as List)
                               .map((a) => InactividadBD.fromMap(a))
                               .toList();
                           // return Container();
@@ -132,7 +129,9 @@ class _PendientesViewState extends State<_InactividadesView> {
                   final obra = widget.obras[i];
                   int cantTotalDias = 0;
                   (obra['inactividades'] as List).forEach((element) {
-                    cantTotalDias += element['diasInactivos'] == null ? 1 : element['diasInactivos'] as int ;
+                    cantTotalDias += element['diasInactivos'] == null
+                        ? 1
+                        : element['diasInactivos'] as int;
                   });
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +146,6 @@ class _PendientesViewState extends State<_InactividadesView> {
                         ),
                         child: ListTile(
                           onTap: () {
-                            
                             //  Navigator.pushNamed(context, ObraPage.routeName, arguments: {"obraId": obra['id']});
                           },
                           title: Text(
@@ -190,8 +188,9 @@ class _PendientesViewState extends State<_InactividadesView> {
                                                 color: Helper.brandColors[8]
                                                     .withOpacity(.8)),
                                           ),
-                                           Text(
-                                            obra['inactividades'][index]['nombreUsuario'],
+                                          Text(
+                                            obra['inactividades'][index]
+                                                ['nombreUsuario'],
                                             style: TextStyle(
                                                 color: Helper.brandColors[8]
                                                     .withOpacity(.8)),
@@ -201,9 +200,12 @@ class _PendientesViewState extends State<_InactividadesView> {
                                       avatar: "1",
                                       fontSize: 18,
                                       trailing: Text(
-                                        (obra["inactividades"][index]['diasInactivos'] == null ? 1 : obra["inactividades"][index]['diasInactivos'] )
-
-
+                                        (obra["inactividades"][index]
+                                                        ['diasInactivos'] ==
+                                                    null
+                                                ? 1
+                                                : obra["inactividades"][index]
+                                                    ['diasInactivos'])
                                             .toString(),
                                         style: TextStyle(
                                             color: Helper.brandColors[3],
@@ -232,22 +234,22 @@ class _PendientesViewState extends State<_InactividadesView> {
                     ],
                   );
                 }),
-            floatingActionButton: 
-            CustomNavigatorButton(
-            accion: () {
-                Navigator.pushNamed(context, InactividadesMasivaForm.routeName,
-                    arguments: {
-                      "obras": widget.obras
+            floatingActionButton: CustomNavigatorButton(
+              accion: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InactividadesMasivaForm(
+                      obras: widget.obras
                           .map((e) => {"nombre": e['nombre'], "id": e['id']})
-                          .toList()
-                    });
+                          .toList(),
+                    ),
+                  ),
+                );
               },
-            icono: Icons.add,
-            showNotif: false,
-          )
-            
-          
-          )
+              icono: Icons.add,
+              showNotif: false,
+            ))
         : Container(
             height: MediaQuery.of(context).size.height,
             child: Center(
@@ -327,9 +329,9 @@ class _CustomListTile extends StatelessWidget {
                         children: [
                           esNovedad
                               ? badges.Badge(
-                                badgeStyle: badges.BadgeStyle(
-                                  badgeColor: Helper.brandColors[8],
-                                ),
+                                  badgeStyle: badges.BadgeStyle(
+                                    badgeColor: Helper.brandColors[8],
+                                  ),
                                   badgeContent: Padding(
                                     padding: const EdgeInsets.all(0),
                                     // child: Text(badgeData.toString()),
@@ -378,13 +380,16 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
 
     final _pref = new Preferences();
 
-    Map<int, FlexColumnWidth> columnWidths = _pref.role == 2 || _pref.role == 8 ? {
-      0: FlexColumnWidth(3),
-      1: FlexColumnWidth(1),
-      2: FlexColumnWidth(1),
-    } : 
-    { 0: FlexColumnWidth(3),
-      1: FlexColumnWidth(1),};
+    Map<int, FlexColumnWidth> columnWidths = _pref.role == 2 || _pref.role == 8
+        ? {
+            0: FlexColumnWidth(3),
+            1: FlexColumnWidth(1),
+            2: FlexColumnWidth(1),
+          }
+        : {
+            0: FlexColumnWidth(3),
+            1: FlexColumnWidth(1),
+          };
 
     var textTitleStyle = TextStyle(
         color: Helper.brandColors[5],
@@ -451,21 +456,21 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
               onChanged: (text) => widget.inactividades[i].nombre = text,
               decoration: InputDecoration(border: InputBorder.none),
             ),
-            
-             _pref.role == 2 || _pref.role == 8 ? 
-               IconButton(
-                  onPressed: editar
-                      ? () => guardarInactividad()
-                      : () => borrarInactividad(i),
-                  icon: editar
-                      ? Icon(
-                          Icons.check,
-                          color: Colors.green[100],
-                        )
-                      : Icon(
-                          Icons.highlight_remove_sharp,
-                          color: Colors.red[500],
-                        )) : Container(),
+            _pref.role == 2 || _pref.role == 8
+                ? IconButton(
+                    onPressed: editar
+                        ? () => guardarInactividad()
+                        : () => borrarInactividad(i),
+                    icon: editar
+                        ? Icon(
+                            Icons.check,
+                            color: Colors.green[100],
+                          )
+                        : Icon(
+                            Icons.highlight_remove_sharp,
+                            color: Colors.red[500],
+                          ))
+                : Container(),
           ]);
       datos.add(row);
     }
@@ -478,16 +483,16 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
           child: Table(columnWidths: columnWidths, children: datos)),
       floatingActionButton: Visibility(
           child: CustomNavigatorButton(
-            accion: () async {
-                InactividadBD? inactividadResponse = await Navigator.pushNamed(
-                        context, InactividadesBDForm.routeName, arguments: {})
-                    as InactividadBD?;
-                widget.inactividades.add(inactividadResponse!);
-                setState(() {});
-              },
-            icono: Icons.add,
-            showNotif: false,
-          )),
+        accion: () async {
+          InactividadBD? inactividadResponse = await Navigator.pushNamed(
+                  context, InactividadesBDForm.routeName, arguments: {})
+              as InactividadBD?;
+          widget.inactividades.add(inactividadResponse!);
+          setState(() {});
+        },
+        icono: Icons.add,
+        showNotif: false,
+      )),
     );
   }
 
@@ -496,21 +501,16 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
     bool confirm =
         await openDialogConfirmationReturn(context, "Seguro que quiere borrar");
     if (!confirm) return;
-    try{
-
-    final response =
-        await _inactividadService.borrar(widget.inactividades[index].id);
-    if (response.fallo) {
-      openAlertDialog(context, response.error);
-      return;
-    }
-    Helper.showSnackBar(context, 'Inactividad borrada: $nombre', null,
-        Duration(milliseconds: 1300), null);
-    widget.inactividades.removeAt(index);
-    setState(() {});
-    }
-    catch ( err ){
-      openAlertDialog(context, 'Error al borrar inactividad', subMensaje: err.toString());
+    try {
+      final response =
+          await _inactividadService.borrar(widget.inactividades[index].id);
+      Helper.showSnackBar(context, 'Inactividad borrada: $nombre', null,
+          Duration(milliseconds: 1300), null);
+      widget.inactividades.removeAt(index);
+      setState(() {});
+    } catch (err) {
+      openAlertDialog(context, 'Error al borrar inactividad',
+          subMensaje: err.toString());
     }
   }
 

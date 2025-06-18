@@ -149,17 +149,18 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
         Provider.of<SubetapaService>(context, listen: false);
     openLoadingDialog(context, mensaje: 'Eliminando subetapa...');
     final subetapa = widget.subetapas[index];
-    widget.subetapas.removeAt(index);
+    try {
+      final response = await _subetapasService.eliminarSubetapa(subetapaId);
+      widget.subetapas.removeAt(index);
+      closeLoadingDialog(context);
 
-    final response = await _subetapasService.eliminarSubetapa(subetapaId);
-    closeLoadingDialog(context);
-    if (response.fallo) {
-      widget.subetapas.insert(index, subetapa);
+      setState(() {});
+    } catch (err) {
+      closeLoadingDialog(context);
+
       openAlertDialog(context, 'Error al eliminar subetapa',
-          subMensaje: response.error);
-      return;
+          subMensaje: err.toString());
     }
-    setState(() {});
   }
 
   @override
@@ -243,13 +244,10 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
     if (!widget.asignado) {
       // Agregar tarea
       openLoadingDialog(context, mensaje: 'Adjuntando subetapa...');
-      final response = await _obraService.asignarSubEtapa(
-          widget.etapaId, subetapa.id, _obraService.obra.id);
-      if (response.fallo) {
-        closeLoadingDialog(context);
-        openAlertDialog(context, 'Error al asignar subetapa',
-            subMensaje: response.error);
-      } else {
+      try {
+        final response = await _obraService.asignarSubEtapa(
+            widget.etapaId, subetapa.id, _obraService.obra.id);
+
         final indexEtapa = _obraService.obra.etapas
             .indexWhere((element) => element.id == widget.etapaId);
         _obraService.obra.etapas[indexEtapa]
@@ -259,27 +257,32 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
         snackText = 'Subetapa asignada';
         Helper.showSnackBar(
             context, snackText, null, Duration(milliseconds: 700), null);
-      }
-    } else {
-      //Quitar tarea
-      openLoadingDialog(context, mensaje: 'Quitando etapa...');
 
+        return;
+      } catch (err) {
+        closeLoadingDialog(context);
+        openAlertDialog(context, 'Error al asignar subetapa',
+            subMensaje: err.toString());
+      }
+    }
+    //Quitar tarea
+    openLoadingDialog(context, mensaje: 'Quitando etapa...');
+
+    try {
       final response = await _obraService.quitarSubetapa(
           widget.etapaId, subetapa.id, _obraService.obra.id);
 
-      if (response.fallo) {
-        closeLoadingDialog(context);
-        openAlertDialog(context, 'Error al quitar etapa',
-            subMensaje: response.error);
-      } else {
-        final indexEtapa = _obraService.obra.etapas
-            .indexWhere((element) => element.id == widget.etapaId);
-        _obraService.obra.etapas[indexEtapa].quitarSubEtapa(subetapa.id);
-        widget.asignado = false;
-        closeLoadingDialog(context);
-        Helper.showSnackBar(
-            context, snackText, null, Duration(milliseconds: 700), null);
-      }
+      final indexEtapa = _obraService.obra.etapas
+          .indexWhere((element) => element.id == widget.etapaId);
+      _obraService.obra.etapas[indexEtapa].quitarSubEtapa(subetapa.id);
+      widget.asignado = false;
+      closeLoadingDialog(context);
+      Helper.showSnackBar(
+          context, snackText, null, Duration(milliseconds: 700), null);
+    } catch (err) {
+      closeLoadingDialog(context);
+      openAlertDialog(context, 'Error al quitar etapa',
+          subMensaje: err.toString());
     }
 
     // setState(() {});

@@ -106,13 +106,13 @@ class Obra {
       chatE: json["chatE"] ?? '',
       chatI: json["chatI"] ?? '',
       diasEstimados: json["diasEstimados"] ?? -1,
-      diasInactivos: json["diasInactivos"] ?? -1,
+      diasInactivos: json["diasInactivos"] ?? [],
       diaInicio: json["diaInicio"] ?? 0,
       docs: [],
       driveFolderId: json["driveFolderId"] ?? '',
       imgFolderId: json["imgFolderId"] ?? '',
       descripcion: json['descripcion'] ?? 'Sin descripción',
-      equipo: (json["equipo"] as List<dynamic>)
+      equipo: json["equipo"] == null ? [] : (json["equipo"] as List<dynamic>)
           .map((e) => Miembro.fromJson(e))
           .toList(),
       etapas: (json["etapas"] as List).map((e) => Etapa.fromJson(e)).toList(),
@@ -129,8 +129,8 @@ class Obra {
       folderImages: json['folderImages'] ?? 'SinDato',
       rootDriveCliente: json['rootDriveCliente'] ?? 'SinDato',
       folderImagesCliente: json['folderImagesCliente'] ?? 'SinDato',
-      latitud: json['latitud'] ?? 0.00,
-      longitud: json['longitud'] ?? 0.00,
+      latitud: (json['latitud'] == 0 ? 0.00 : json['latitud'])  ?? 0.00,
+      longitud: (json['longitud'] == 0 ? 0.00 : json['longitud']) ?? 0.00,
       folderPedidoImages: json['folderPedidoImages'] ?? 'SinDato',
       articulosId: json['articulosId'] ?? '',
       imageURL: json['imageURL'] ?? 'SinDato');
@@ -215,16 +215,16 @@ class Obra {
   }
 
   estaPersonal(usuarioId) {
-    return equipo.indexWhere((element) => element.dni == usuarioId) > -1;
+    return equipo.indexWhere((element) => element.id == usuarioId) > -1;
   }
 
   sumarPersonal(Miembro miembro) {
-    !estaPersonal(miembro.dni) ? this.equipo.add(miembro) : false;
+    !estaPersonal(miembro.id) ? this.equipo.add(miembro) : false;
   }
 
   quitarPersonal(Miembro miembro) {
-    if (estaPersonal(miembro.dni)) {
-      equipo.removeWhere((element) => element.dni == miembro.dni);
+    if (estaPersonal(miembro.id)) {
+      equipo.removeWhere((element) => element.id == miembro.id);
     }
   }
 

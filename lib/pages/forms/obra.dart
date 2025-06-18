@@ -397,68 +397,61 @@ class _FormState extends State<_Form> {
   }
 
   grabarObra(BuildContext context) async {
-      bool loading = true;
-      bool isValid = true;
-      final _service = Provider.of<ObraService>(context, listen: false);
-      final _imageService = Provider.of<ImageService>(context, listen: false);
+    bool loading = true;
+    bool isValid = true;
+    final _service = Provider.of<ObraService>(context, listen: false);
+    final _imageService = Provider.of<ImageService>(context, listen: false);
     try {
-
       txtNombreCtrl.text.trim() == '' ? isValid = false : true;
       txtBarrioCtrl.text.trim() == '' ? isValid = false : true;
       txtLoteCtrl.text.trim() == '' ? isValid = false : true;
       int.tryParse(txtDuracionCtrl.text) == null ? isValid = false : true;
 
-      if (isValid) {
-        final obra = Obra(
-            nombre: txtNombreCtrl.text,
-            barrio: txtBarrioCtrl.text,
-            lote: txtLoteCtrl.text,
-            propietarios: [],
-            latitud: latitud ?? null,
-            longitud: longitud ?? null,
-            descripcion: txtDescripCtrl.text,
-            diasEstimados: int.parse(txtDuracionCtrl.text),
-            diaInicio: new DateFormat("dd/MM/yyyy")
-                .parse(txtDiaInicio.text)
-                .millisecondsSinceEpoch);
+      if (!isValid) throw new Exception('Formulario invalido');
 
-        if (_imageService.imagenValida()) {
-          openLoadingDialog(context, mensaje: 'Subiendo imagen');
-          final dataImage = await _imageService.grabarImagen(obra.nombre);
-          if (!dataImage['success']) {
-            closeLoadingDialog(context);
-            loading = false;
-            openAlertDialog(context, 'No se pudo cargar imagen');
-            return;
-          }
-          final imageUrl = dataImage['data']['url'];
+      final obra = Obra(
+          nombre: txtNombreCtrl.text,
+          barrio: txtBarrioCtrl.text,
+          lote: txtLoteCtrl.text,
+          propietarios: [],
+          latitud: latitud ?? null,
+          longitud: longitud ?? null,
+          descripcion: txtDescripCtrl.text,
+          diasEstimados: int.parse(txtDuracionCtrl.text),
+          diaInicio: new DateFormat("dd/MM/yyyy")
+              .parse(txtDiaInicio.text)
+              .millisecondsSinceEpoch);
 
-          obra.imageURL = imageUrl;
-          loading = false;
-          closeLoadingDialog(context);
-        }
-        openLoadingDialog(context, mensaje: 'Grabando obra...');
-        MyResponse response = await _service.grabarObra(obra, crearDrive);
-        if (response.fallo) throw new Exception(response.error);
-        final obraResponse = Obra.fromMap(response.data);
-        txtNombreCtrl.clear();
-        txtBarrioCtrl.clear();
-        txtLoteCtrl.clear();
-        txtDuracionCtrl.clear();
-        txtDescripCtrl.clear();
-        txtCoordenadas.clear();
-        _imageService.descartarImagen();
+      if (_imageService.imagenValida()) {
+        openLoadingDialog(context, mensaje: 'Subiendo imagen');
+        final dataImage = await _imageService.grabarImagen(obra.nombre);
+        if (!dataImage['success'])
+          throw new Exception('No se pudo cargar imagen');
 
+        final imageUrl = dataImage['data']['url'];
+        obra.imageURL = imageUrl;
+        loading = false;
         closeLoadingDialog(context);
-
-        _service.obra = obraResponse;
-
-        await openAlertDialogReturn(context, 'Obra creada con éxito');
-        Navigator.pushReplacementNamed(context, ObraPage.routeName,
-            arguments: {"obraId": obraResponse.id});
-      } else {
-        openAlertDialog(context, 'Formulario invalido');
       }
+
+      openLoadingDialog(context, mensaje: 'Grabando obra...');
+      dynamic obra_response = await _service.grabarObra(obra, crearDrive);
+      final obraResponse = Obra.fromMap(obra_response as Map<String, dynamic>);
+      txtNombreCtrl.clear();
+      txtBarrioCtrl.clear();
+      txtLoteCtrl.clear();
+      txtDuracionCtrl.clear();
+      txtDescripCtrl.clear();
+      txtCoordenadas.clear();
+      _imageService.descartarImagen();
+
+      closeLoadingDialog(context);
+
+      _service.obra = obraResponse;
+
+      await openAlertDialogReturn(context, 'Obra creada con éxito');
+      Navigator.pushReplacementNamed(context, ObraPage.routeName,
+          arguments: {"obraId": obraResponse.id});
     } catch (err) {
       loading ? closeLoadingDialog(context) : false;
 
@@ -506,20 +499,19 @@ class _FormState extends State<_Form> {
         }
         openLoadingDialog(context, mensaje: 'Actualizando obra...');
         loading = true;
-        Map<String, dynamic> response =
-            await _service.actualizarObra({
-              'id': widget.obra!.id,
-              'nombre': widget.obra!.nombre,
-              'barrio': widget.obra!.barrio,
-              'lote': widget.obra!.lote,
-              'diaInicio': widget.obra!.diaInicio,
-              'diasEstimados': widget.obra!.diasEstimados,
-              'descripcion': widget.obra!.descripcion,
-              'latitud': widget.obra!.latitud,
-              'longitud': widget.obra!.longitud,
-              'driveFolderId': widget.obra!.driveFolderId,
-              'imageURL': widget.obra!.imageURL,
-            });
+        Map<String, dynamic> response = await _service.actualizarObra({
+          'id': widget.obra!.id,
+          'nombre': widget.obra!.nombre,
+          'barrio': widget.obra!.barrio,
+          'lote': widget.obra!.lote,
+          'diaInicio': widget.obra!.diaInicio,
+          'diasEstimados': widget.obra!.diasEstimados,
+          'descripcion': widget.obra!.descripcion,
+          'latitud': widget.obra!.latitud,
+          'longitud': widget.obra!.longitud,
+          'driveFolderId': widget.obra!.driveFolderId,
+          'imageURL': widget.obra!.imageURL,
+        });
         final obraResponse = Obra.fromMap(response["response"]);
         _imageService.descartarImagen();
         closeLoadingDialog(context);
@@ -539,28 +531,26 @@ class _FormState extends State<_Form> {
   }
 
   refreshDriveId() async {
-    if (txtIdDrive.text.isEmpty) {
-      openAlertDialog(context, 'Ingrese ID de carpeta para actualizar');
-      return;
-    }
+    if (txtIdDrive.text.isEmpty)
+      throw new Exception('Ingrese ID de carpeta para actualizar');
+
     openLoadingDialog(context, mensaje: "Actualizando carpetas de obra...");
     final _obraService = Provider.of<ObraService>(context, listen: false);
-    final response = await _obraService.actualizarIdDrive(txtIdDrive.text);
-    closeLoadingDialog(context);
-    if (response.fallo) {
-      openAlertDialog(context, "Error al actualizar carpetas",
-          subMensaje: response.error);
-      return;
-    }
+    try {
+      final response = await _obraService.actualizarIdDrive(txtIdDrive.text);
+      closeLoadingDialog(context);
+      await openAlertDialogReturn(context, "Carpetas actualizadas con éxito");
+      widget.obra!.driveFolderId = response.data["driveFolderId"];
+      widget.obra!.folderImages = response.data["folderImages"];
+      widget.obra!.rootDriveCliente = response.data["rootDriveCliente"];
+      widget.obra!.folderImagesCliente = response.data["folderImagesCliente"];
+      widget.obra!.articulosId = response.data["articulosId"] ?? '';
 
-    await openAlertDialogReturn(context, "Carpetas actualizadas con éxito");
-    widget.obra!.driveFolderId = response.data["driveFolderId"];
-    widget.obra!.folderImages = response.data["folderImages"];
-    widget.obra!.rootDriveCliente = response.data["rootDriveCliente"];
-    widget.obra!.folderImagesCliente = response.data["folderImagesCliente"];
-    widget.obra!.articulosId = response.data["articulosId"] ?? '';
-    
-    _obraService.notifyListeners();
+      _obraService.notifyListeners();
+    } catch (err) {
+      openAlertDialog(context, "Error al actualizar carpetas",
+          subMensaje: err.toString());
+    }
   }
 
   openMap() async {

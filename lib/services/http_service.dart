@@ -12,7 +12,10 @@ import 'package:verona_app/helpers/Preferences.dart';
 class HttpService extends ChangeNotifier {
   //bool loading = false;
   String _baseUrl = Environment.API_URL;
-  final headers = {"Content-Type": "application/json", 'Connection': 'keep-alive'};
+  final headers = {
+    "Content-Type": "application/json",
+    'Connection': 'keep-alive'
+  };
   late Uri url;
   HttpService() {}
 
@@ -22,14 +25,14 @@ class HttpService extends ChangeNotifier {
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
 
-    final response = await http.get(url, headers: {'x-token': _pref.token, 'Connection': 'keep-alive'});
-    Map<String, dynamic> data = json.decode(response.body);
-    return data;
+    final response = await http.get(url,
+        headers: {'x-token': _pref.token, 'Connection': 'keep-alive'});
+    return response;
   }
 
   post(String endpoint, Map<String, dynamic> body) async {
     final _pref = new Preferences();
-    headers.addAll({'x-token': _pref.token,'Connection': 'keep-alive'});
+    headers.addAll({'x-token': _pref.token, 'Connection': 'keep-alive'});
     Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
@@ -55,48 +58,38 @@ class HttpService extends ChangeNotifier {
     Environment.isProduction
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
-        final bodyReq =  json.encode(body);
-    final response =
-        await http.put(url, body: bodyReq, headers: headers);
+    final bodyReq = json.encode(body);
+    final response = await http.put(url, body: bodyReq, headers: headers);
     Map<String, dynamic> data = json.decode(response.body);
     return data;
   }
 
   uploadImage(XFile imageFile, String endpoint) async {
     String imgId = '';
-    // open a bytestream
-    var stream =
-        new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
-    // get file length
-    var length = await imageFile.length();
-    // string to uri
-    if (Environment.isProduction) {
-      url = Uri.https(_baseUrl, endpoint);
-    } else {
-      url = Uri.http(_baseUrl, endpoint);
-    }
-    // create multipart request
+    final url = Uri.parse(
+      Environment.isProduction
+          ? 'https://$_baseUrl/$endpoint'
+          : 'http://$_baseUrl/$endpoint',
+    );
     var request = new http.MultipartRequest("POST", url);
+    final file = await http.MultipartFile.fromPath(
+      'image',
+      imageFile.path,
+      filename: basename('filename'),
+    );
+    request.files.add(file);
 
-    // multipart that takes file
-    var multipartFile = http.MultipartFile('image', stream, length,
-        filename: basename('fileName'));
+    final response = await request.send();
 
-    // add file to multipart
-    request.files.add(multipartFile);
-
-    // send
-    final a = await request.send();
+    if (response.statusCode >= 300) {
+      throw new Exception('Error al subir imagen: ${response.statusCode}');
+    }
     // listen for response
-    final b = a.stream.transform(utf8.decoder);
-    final c = b.listen((value) {
-      imgId = value;
-    }).asFuture();
+    String responseBody = await response.stream.bytesToString();
+    var jsonData = json.decode(responseBody);
 
-    await c;
-    return imgId;
+    return jsonData['id'] ?? ''; // Assuming the response contains an 'id' field
   }
-
 
   uploadDocument(FilePickerResult file, String endpoint) async {
     String imgId = '';
@@ -188,31 +181,30 @@ class HttpService extends ChangeNotifier {
     // return imgId;
   }
 
-Future<Map<String, dynamic>> cargarImagen(
-    XFile imageFile, String baseUrl, String endpoint, Map<String, dynamic> parameters) async {
-  // Abrir el archivo como un flujo de bytes
-  var stream = http.ByteStream(imageFile.openRead());
-  var length = await imageFile.length();
-  Uri url = Uri.https(baseUrl, endpoint, parameters);
+  Future<Map<String, dynamic>> cargarImagen(XFile imageFile, String baseUrl,
+      String endpoint, Map<String, dynamic> parameters) async {
+    // Abrir el archivo como un flujo de bytes
+    var stream = http.ByteStream(imageFile.openRead());
+    var length = await imageFile.length();
+    Uri url = Uri.https(baseUrl, endpoint, parameters);
 
-  // Crear una solicitud de tipo multipart
-  var request = http.MultipartRequest("POST", url);
-  var multipartFile = http.MultipartFile('image', stream, length,
-      filename: basename(imageFile.path));
+    // Crear una solicitud de tipo multipart
+    var request = http.MultipartRequest("POST", url);
+    var multipartFile = http.MultipartFile('image', stream, length,
+        filename: basename(imageFile.path));
 
-  // Agregar archivo a la solicitud
-  request.files.add(multipartFile);
+    // Agregar archivo a la solicitud
+    request.files.add(multipartFile);
 
-  // Enviar la solicitud
-  var response = await request.send();
+    // Enviar la solicitud
+    var response = await request.send();
 
-  // Leer el cuerpo completo de la respuesta como cadena
-  var responseBody = await response.stream.bytesToString();
+    // Leer el cuerpo completo de la respuesta como cadena
+    var responseBody = await response.stream.bytesToString();
 
-  // Convertir la cadena en un JSON
-  Map<String, dynamic> jsonResponse = jsonDecode(responseBody);
+    // Convertir la cadena en un JSON
+    Map<String, dynamic> jsonResponse = jsonDecode(responseBody);
 
-  return jsonResponse;
-}
-
+    return jsonResponse;
+  }
 }

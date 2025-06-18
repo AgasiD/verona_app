@@ -1,49 +1,64 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/services/http_service.dart';
 
 class SubetapaService extends ChangeNotifier {
   HttpService _http = new HttpService();
-  final _endpoint = 'api/subetapa';
+  final _endpoint = 'api/controles/subetapas';
 
-  Future<MyResponse> obtenerEtapasExtras() async {
-    final datos = await this._http.get('$_endpoint/extras');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+  Future<dynamic> obtenerEtapasExtras() async {
+    final response = await this._http.get('$_endpoint/extras');
+
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 
-  Future<MyResponse> grabar(Map<String, dynamic> data) async {
-    final datos = await this._http.post('$_endpoint/nuevaSubetapa', data);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> grabar(Map<String, dynamic> subetapa) async {
+    final response =
+        await this._http.post('$_endpoint/nuevaSubetapa', subetapa);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
     notifyListeners();
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> obtenerExtras(etapaId, obraId) async {
-    final datos =
-        await this._http.get('$_endpoint/subetapasExtras/$etapaId/$obraId');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> obtenerExtras(etapaId, obraId) async {
+    final response = await this._http.get('$_endpoint/extras/$etapaId/$obraId');
+    final data = json.decode(response.body);
 
-    return resp;
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 
-  Future<MyResponse> eliminarSubetapa(subetapaId) async {
-    final datos =
+  Future<dynamic> eliminarSubetapa(subetapaId) async {
+    final response =
         await this._http.delete('$_endpoint/eliminarSubetapa/$subetapaId');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    // notifyListeners();
-    return resp;
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 
-   Future<MyResponse> actualizarSubetapa(Subetapa subetapa) async{
-      final datos = await this._http.put('$_endpoint', subetapa.toJson());
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+  Future<dynamic> actualizarSubetapa(Subetapa subetapa) async {
+    final response = await this._http.put('$_endpoint', subetapa.toJson());
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 }

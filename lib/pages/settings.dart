@@ -27,20 +27,15 @@ class _SettingsPageState extends State<SettingsPage> {
       body: FutureBuilder(
           future: _configService.obtener_config(),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Loading(
-                mensaje: 'Cargando información...',
-              );
-            }
-            final response = snapshot.data as MyResponse;
-            if (response.fallo) {
-              return ErrorPage(
-                page: false,
-                errorMsg: response.error,
-              );
+            if (snapshot.connectionState != ConnectionState.done)
+              return Loading(mensaje: 'Cargando información...');
+            if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.hasError) {
+              return ErrorPage(errorMsg: snapshot.error.toString());
             }
 
-            final config = Config.fromJson(response.data);
+            final config =
+                Config.fromJson(snapshot.data as Map<String, dynamic>);
             return Settings_Form(
               config: config,
             );
@@ -63,16 +58,13 @@ class _Settings_FormState extends State<Settings_Form> {
   double fontsize = 17;
   late bool habilita_reporte;
 
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-   habilita_reporte = widget.config.send_ws_reports;
-
-
+    habilita_reporte = widget.config.send_ws_reports;
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -134,19 +126,19 @@ class _Settings_FormState extends State<Settings_Form> {
 
   habilitar_reporte(habilitado) async {
     bool loading = false;
-   
-    try{
 
-    openLoadingDialog(context, mensaje: 'Actualizando...');
-    loading = true;
-    widget.config.send_ws_reports = habilitado;
-    final response = await _configService.actualizar(widget.config.toMap());
-    closeLoadingDialog(context);
-    habilita_reporte = widget.config.send_ws_reports;
-    setState(() {});
-    }catch( err ){
-      loading ?     closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al actualizar', subMensaje: err.toString());
+    try {
+      openLoadingDialog(context, mensaje: 'Actualizando...');
+      loading = true;
+      widget.config.send_ws_reports = habilitado;
+      final response = await _configService.actualizar(widget.config.toMap());
+      closeLoadingDialog(context);
+      habilita_reporte = widget.config.send_ws_reports;
+      setState(() {});
+    } catch (err) {
+      loading ? closeLoadingDialog(context) : false;
+      openAlertDialog(context, 'Error al actualizar',
+          subMensaje: err.toString());
     }
   }
 }

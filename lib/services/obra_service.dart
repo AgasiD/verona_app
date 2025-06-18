@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:verona_app/helpers/Preferences.dart';
-import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/pedido.dart';
@@ -8,56 +10,90 @@ import 'package:verona_app/services/http_service.dart';
 
 class ObraService extends ChangeNotifier {
   HttpService _http = new HttpService();
-  final _endpoint = 'api/obra';
+  final _endpoint = 'api/obras';
   Obra obra = Obra(nombre: '', barrio: '', diasEstimados: 0, lote: '');
 
   obtenerObras() async {
-    final datos = await this._http.get(_endpoint);
-    final lista = datos["obras"];
+    final response = await this._http.get(_endpoint);
+    final lista = response["obras"];
     final listObras =
         (lista as List<dynamic>).map((json) => Obra.fromMap(json)).toList();
     return listObras;
   }
 
-  Future<MyResponse> obtenerObrasByUser(String userId) async {
-    final datos = await this._http.get('$_endpoint/byuser/$userId');
-    final response = MyResponse.fromJson(datos['response']);
+  Future<dynamic> obtenerObrasByUser(String userId) async {
+    final uri = '$_endpoint/byuser/$userId';
+    final response = await this._http.get(uri);
+    final data = json.decode(response.body);
 
-    return response;
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    return data;
+  }
+
+  Future<dynamic> obtenerPedidosCerrados(String obraId) async {
+    final uri = '$_endpoint/pedidosCerrados/$obraId';
+    final response = await this._http.get(uri);
+    final data = json.decode(response.body);
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    return data;
   }
 
   Future<Obra> obtenerObra(String obraId) async {
     final body = {"propietario": new Preferences().role == 3};
-    final datos = await this._http.post('$_endpoint/obtenerObra/$obraId', body);
-    final data = Obra.fromMap(datos["obra"]);
+    final response =
+        await this._http.post('$_endpoint/obtenerObra/$obraId', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     this.obra = data;
     notifyListeners();
     return data;
   }
 
   Future<Obra> obtenerEquipo(String obraId) async {
-    final datos = await this._http.post('$_endpoint/$obraId', {});
-    final json = datos["obra"];
-    final data = Obra.fromMap(json);
-    this.obra = data;
+    final response = await this._http.post('$_endpoint/$obraId', {});
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    this.obra = Obra.fromMap(data);
     notifyListeners();
     return data;
   }
 
   Future addEnabledFiles(List<String> ids, String obraId) async {
     final body = {"ids": ids};
-    final datos = await this._http.put('$_endpoint/enabledFiles/$obraId', body);
+    final response =
+        await this._http.put('$_endpoint/enabledFiles/$obraId', body);
 
-    final response = MyResponse.fromJson(datos["response"]);
-    return response;
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 
   grabarObra(Obra obra, bool crearDrive) async {
     var body = obra.toMap();
     body.addAll({"crearDrive": crearDrive});
     final response = await this._http.post(_endpoint, body);
-        final data = MyResponse.fromJson(response["response"]);
+    final data = json.decode(response.body);
 
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
     notifyListeners();
     //this.obra = obra;
     return data;
@@ -65,114 +101,169 @@ class ObraService extends ChangeNotifier {
 
   actualizarObra(dynamic obra) async {
     final response = await this._http.put(_endpoint, obra);
-    notifyListeners();
-    return response;
-  }
+    final data = json.decode(response.body);
 
-  
-
-  Future<MyResponse> agregarUsuario(obraId, String dni) async {
-    final data =
-        await this._http.put('$_endpoint/agregarUsuario/$obraId/$dni', {});
-    final response = MyResponse.fromJson(data['response']);
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
 
     notifyListeners();
-    return response;
+    return data;
   }
 
-  Future<MyResponse> quitarUsuario(obraId, String dni) async {
-    final data =
-        await this._http.put('$_endpoint/quitarUsuario/$obraId/$dni', {});
+  Future<dynamic> agregarUsuario(obraId, String id) async {
+    final response =
+        await this._http.put('$_endpoint/agregarUsuario/$obraId/$id', {});
+    final data = json.decode(response.body);
 
-    final response = MyResponse.fromJson(data['response']);
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
 
     notifyListeners();
-    return response;
+    return data;
   }
 
-  Future<MyResponse> nuevaInactividad(
+  Future<dynamic> quitarUsuario(obraId, String id) async {
+    final response =
+        await this._http.put('$_endpoint/quitarUsuario/$obraId/$id', {});
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    notifyListeners();
+    return data;
+  }
+
+  Future<dynamic> nuevaInactividad(
       String obraId, Inactividad inactividad) async {
-    final datos = await this
+    final response = await this
         ._http
         .post('$_endpoint/inactividad/$obraId', inactividad.toMap());
-    final response = datos["response"];
-    final notificaciones = MyResponse.fromJson(response);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
 
     notifyListeners();
-    return notificaciones;
+    return data;
   }
 
-  Future<MyResponse> editInactividad(
+  Future<dynamic> editInactividad(
       String obraId, Inactividad inactividad) async {
-    final datos = await this
+    final response = await this
         ._http
         .put('$_endpoint/inactividad/$obraId', inactividad.toMap());
-    final response = datos["response"];
-    final notificaciones = MyResponse.fromJson(response);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
     notifyListeners();
-    return notificaciones;
+    return data;
   }
 
-  Future<MyResponse> obtenerPedidos(String obraId) async {
-    final datos = await this._http.get('$_endpoint/obtenerPedidos/$obraId');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+  Future<dynamic> obtenerPedidos(String obraId) async {
+    final response = await this._http.get('$_endpoint/pedidos/$obraId');
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 
-  Future<MyResponse> obtenerPedidosAsignadosDelivery(
+  Future<dynamic> obtenerControlObra(String obraId) async {
+    final response = await this._http.get('$_endpoint/controlObra/$obraId');
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    List<Etapa> etapas =
+        (data as List<dynamic>).map((etapa) => Etapa.fromJson(etapa)).toList();
+    return etapas;
+  }
+
+  Future<dynamic> obtenerPedidosAsignadosDelivery(
       String obraId, String deliveryId) async {
-    final datos = await this._http.post('$_endpoint/obtenerPedidosByDelivery',
+    final response = await this._http.post(
+        '$_endpoint/obtenerPedidosByDelivery',
         {'obraId': obraId, 'deliveryId': deliveryId});
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    return data;
   }
 
-  Future<MyResponse> obtenerPedidosById(
-      String obraId, String usuarioId) async {
-    final datos = await this._http.post('$_endpoint/obtenerPedidosById',
+  Future<dynamic> obtenerPedidosById(String obraId, String usuarioId) async {
+    final response = await this._http.post('$_endpoint/obtenerPedidosById',
         {'obraId': obraId, 'usuarioId': usuarioId});
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    return data;
   }
 
-  Future<MyResponse> obtenerPedido(String pedidoId) async {
-    final datos = await this._http.get('$_endpoint/obtenerPedido/$pedidoId');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+  Future<dynamic> obtenerPedido(String pedidoId) async {
+    final response = await this._http.get('$_endpoint/obtenerPedido/$pedidoId');
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    return data;
   }
 
-  Future<MyResponse> nuevoPedido(Pedido pedido) async {
-    final datos =
-        await this._http.post('$_endpoint/agregarPedido', pedido.toJson());
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> nuevoPedido(Pedido pedido) async {
+    final response =
+        await this._http.post('api/pedidos/agregarPedido', pedido.toJson());
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> editPedido(Pedido pedido) async {
-    final datos =
-        await this._http.put('$_endpoint/actualizarPedido/', pedido.toJson());
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> editPedido(Pedido pedido) async {
+    final response =
+        await this._http.put('api/pedidos/actualizarPedido/', pedido.toJson());
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> eliminarObra(String obraId) async {
-    final datos = await this._http.delete('$_endpoint/$obraId');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> eliminarObra(String obraId) async {
+    final response = await this._http.delete('$_endpoint/$obraId');
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     // notifyListeners();
-    return resp;
+    return data;
   }
 
-
-  Future<MyResponse> actualizarTarea(
+  Future<dynamic> actualizarTarea(
     String obraId,
     String etapaId,
     String subetapaId,
@@ -194,13 +285,17 @@ class ObraService extends ChangeNotifier {
       "usuarioId": usuarioId,
     };
     final cadena = '$_endpoint/actualizaTarea/$obraId';
-    final datos = await this._http.put(cadena, body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    return resp;
+    final response = await this._http.put(cadena, body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    return data;
   }
 
-  Future<MyResponse> asignarTarea(
+  Future<dynamic> asignarTarea(
       String etapaId, String subetapaId, String tareaId, String obraId) async {
     final body = {
       "tareaId": tareaId,
@@ -208,15 +303,19 @@ class ObraService extends ChangeNotifier {
       "etapaId": etapaId,
       "obraId": obraId
     };
-    final datos = await this._http.put('$_endpoint/asignarTarea', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    final response = await this._http.put('$_endpoint/asignarTarea', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> quitarTarea(
+  Future<dynamic> quitarTarea(
       String etapaId, String subetapa, String tareaId, String obraId) async {
     final body = {
       "subetapaId": subetapa,
@@ -224,43 +323,59 @@ class ObraService extends ChangeNotifier {
       "etapaId": etapaId,
       "obraId": obraId
     };
-    final datos = await this._http.put('$_endpoint/quitarTarea', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    final response = await this._http.put('$_endpoint/quitarTarea', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> asignarEtapa(String etapaId, String obraId) async {
+  Future<dynamic> asignarEtapa(String etapaId, String obraId) async {
     final body = {"etapaId": etapaId, "obraId": obraId};
-    final datos = await this._http.put('$_endpoint/asignarEtapa', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    final response = await this._http.put('$_endpoint/asignarEtapa', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> quitarEtapa(String etapaId, String obraId) async {
+  Future<dynamic> quitarEtapa(String etapaId, String obraId) async {
     final body = {"etapaId": etapaId, "obraId": obraId};
-    final datos = await this._http.put('$_endpoint/quitarEtapa', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    final response = await this._http.put('$_endpoint/quitarEtapa', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> eliminarEtapa(obraId, etapaId) async {
+  Future<dynamic> eliminarEtapa(obraId, etapaId) async {
     final body = {"etapaId": etapaId, "obraId": obraId};
-    final datos =
+    final response =
         await this._http.put('$_endpoint/eliminarEtapaFromObra', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
   quitarSubetapa(etapaId, subetapaId, obraId) async {
@@ -269,12 +384,16 @@ class ObraService extends ChangeNotifier {
       "subetapaId": subetapaId,
       "obraId": obraId
     };
-    final datos = await this._http.put('$_endpoint/quitarSubetapa', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    final response = await this._http.put('$_endpoint/quitarSubetapa', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
   asignarSubEtapa(String etapaId, String subetapaId, String obraId) async {
@@ -283,115 +402,151 @@ class ObraService extends ChangeNotifier {
       "subetapaId": subetapaId,
       "obraId": obraId
     };
-    final datos = await this._http.put('$_endpoint/asignarSubetapa', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    final response = await this._http.put('$_endpoint/asignarSubetapa', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> actualizarOrdenTareas(
+  Future<dynamic> actualizarOrdenTareas(
       obraId, etapaId, subetapaId, tareas) async {
     final body = {
       "etapaId": etapaId,
       "subetapaId": subetapaId,
       "tareas": tareas,
     };
-    final datos = await this
+    final response = await this
         ._http
         .put('$_endpoint/actualizarOrdenTareas/${obraId}', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     // notifyListeners();
-    return resp;
+    return data;
   }
 
   eliminarSubetapa(subetapaId) {}
 
-  Future<MyResponse> actualizarIdDrive(String text) async {
-      final body = {
-      "idDrive": text,
-      "obraId": obra.id
-    };
-    final datos = await this._http.put('$_endpoint/actualizarIdDrive', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> actualizarIdDrive(String text) async {
+    final body = {"idDrive": text, "obraId": obra.id};
+    final response = await this._http.put('$_endpoint/actualizarIdDrive', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
- Future<MyResponse> obtenerPedidosPorObra(String userId) async{
-       
-    final datos = await this._http.get('$_endpoint/obtenerPedidosObras/$userId');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> obtenerPedidosPorObra(String userId) async {
+    final response =
+        await this._http.get('$_endpoint/obtenerPedidosObras/$userId');
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     // notifyListeners();
 
-    return resp;
+    return data;
   }
 
-  
- Future<MyResponse> obtenerControlObra() async{
-       
-    final datos = await this._http.get('$_endpoint/obtenerControlObra');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> obtenerControlesObra() async {
+    final response = await this._http.get('$_endpoint/obtenerControlObra');
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     // notifyListeners();
 
-    return resp;
+    return data;
   }
 
+  Future<dynamic> obtenerControlInactividades() async {
+    final response =
+        await this._http.get('$_endpoint/obtenerInactividadesPorObras');
+    final data = json.decode(response.body);
 
- Future<MyResponse> obtenerControlInactividades() async{
-       
-    final datos = await this._http.get('$_endpoint/obtenerInactividadesPorObras');
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     // notifyListeners();
 
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> grabarInactividades(List<String> idsObras,Map map) async{
+  Future<dynamic> grabarInactividades(List<String> idsObras, Map map) async {
     final body = {
       "ids": idsObras,
       "inactividad": map,
     };
-    final datos = await this._http.post('$_endpoint/inactividadMasiva', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+    final response =
+        await this._http.post('$_endpoint/inactividadMasiva', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
 
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> eliminarInactividad(String obraId, String id) async{
-     final datos = await this._http.delete('$_endpoint/inactividad/$obraId/$id',);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> eliminarInactividad(String obraId, String id) async {
+    final response = await this._http.delete(
+          '$_endpoint/inactividad/$obraId/$id',
+        );
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     notifyListeners();
-    return resp;
+    return data;
   }
 
-  Future<MyResponse> obtenerObraArticuloFile(String obraId) async{
-        final datos = await this._http.get('$_endpoint/articuloobra/$obraId',);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
+  Future<dynamic> obtenerObraArticuloFile(String obraId) async {
+    final response = await this._http.get(
+          '$_endpoint/articuloobra/$obraId',
+        );
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
     // notifyListeners();
-    return resp;
-  }
-  
-  Future<MyResponse> enviarReportes( List<String> ids ) async {
-    final body = {
-      "ids": ids
-    };
-       final datos = await this._http.post('$_endpoint/envioreporte', body);
-    final response = datos["response"];
-    final resp = MyResponse.fromJson(response);
-    // notifyListeners();
-    return resp;
+    return data;
   }
 
+  Future<dynamic> enviarReportes(List<String> ids) async {
+    final body = {"ids": ids};
+    final response = await this._http.post('$_endpoint/envioreporte', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    // notifyListeners();
+    return data;
+  }
 }

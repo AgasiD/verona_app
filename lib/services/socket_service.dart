@@ -22,7 +22,6 @@ class SocketService with ChangeNotifier {
   bool conectando = false;
   List<dynamic> novedades = [];
 
-
   void connect(clientId) {
     if (clientId != null && clientId.toString().trim() != '' && !conectando) {
       conectando = true;
@@ -32,23 +31,19 @@ class SocketService with ChangeNotifier {
       if (this._serverStatus == ServerStatus.Offline) {
         this._serverStatus = ServerStatus.Connecting;
         this._socket = IO.io(url, {
-          'transports': ['websocket'],
-          'autoConnect': true,
-          'forceNew': true,
-          'extraHeaders': {'x-token': clientId}
+          "transports": ['websocket'],
+          "autoConnect": true,
+          "forceNew": true,
+          "auth": {"usuarioId": clientId}
         });
       }
 
+      escucharNovedad();
+      escucharUsuariosOnline();
       toConnect(clientId);
-      escucharNotificaciones();
-      pedirNotificaciones(clientId);
-      tieneChatsSinLeer();
-      escucharChats();
-      getUsuariosOnline();
+      // pedirNotificaciones(clientId);
       // Accion al desconectarse del servidor
       toDisconnect();
-      obtenerNovedad();
-
       conectando = false;
     }
   }
@@ -57,7 +52,7 @@ class SocketService with ChangeNotifier {
     this.socket.disconnect();
   }
 
-  obtenerNovedad() {
+  escucharNovedad() {
     socket.on('novedad', (data) {
       novedades = data ?? [];
       notifyListeners();
@@ -71,9 +66,9 @@ class SocketService with ChangeNotifier {
     });
   }
 
-  pedirChats(String clientID) {
-    socket.emit('chats', clientID);
-  }
+  // pedirChats(String clientID) {
+  //   socket.emit('chats', clientID);
+  // }
 
   void tieneChatsSinLeer() {
     socket.on('chatSinLeer', (data) {
@@ -82,7 +77,7 @@ class SocketService with ChangeNotifier {
     });
   }
 
-  void getUsuariosOnline() {
+  void escucharUsuariosOnline() {
     socket.on('usuarion-online', (data) {
       usuariosOnline = data;
       notifyListeners();
@@ -97,11 +92,10 @@ class SocketService with ChangeNotifier {
     // Accion al conectarse al servidor
 
     this._socket.onConnect((_) {
-      this._serverStatus = ServerStatus.Online;
       print('----------CONECTADO CON EL SERVIDOR----------');
-      obtenerNovedades(clientId);
-      conectando = false;
+      this._serverStatus = ServerStatus.Online;
       notifyListeners();
+      conectando = false;
     });
   }
 
@@ -121,48 +115,23 @@ class SocketService with ChangeNotifier {
         notifyListeners();
       }); */
 
-  void enviarMensaje(Message mensaje) async {
-    this._socket.emit('nuevo-mensaje', mensaje.toMap());
-  }
+  // void enviarMensaje(Message mensaje) async {
+  //   this._socket.emit('nuevo-mensaje', mensaje.toMap());
+  // }
 
-  void pedirNotificaciones(String userId) {
-    this._socket.emit('notifications-count', userId);
-  }
-
-  void obtenerNovedades(String userId) {
-    this._socket.emit('novedades', userId);
-  }
-
-  void leerNotificaciones(String userId) {
-    this._socket.emit('leerNotificaciones', userId);
-  }
-
-  Future agregarUsuario(String obraId, String usuarioId) async {
-    this
-        ._socket
-        .emit('nuevo-usuario', {'obraId': obraId, 'usuarioId': usuarioId});
-  }
-
-  Future quitarUsuario(String obraId, String usuarioId) async {
-    this
-        ._socket
-        .emit('quitar-usuario', {'obraId': obraId, 'usuarioId': usuarioId});
-  }
-
-  void agregarInactividad(Inactividad inactividad, String obraId) async {
-    this._socket.emit('nueva-inactividad', [inactividad.toMap(), obraId]);
-  }
 
   tieneNovedadesNotif() {
     // this._socket.emit('unread-notif', userId);
 
-    return novedades.where((novedad) => novedad['menu'] < 7 && novedad['leido'] != null ? !novedad['leido'] : false ).length > 0;
+    return novedades
+            .where((novedad) => novedad['menu'] < 7 && novedad['leido'] != null
+                ? !novedad['leido']
+                : false)
+            .length >
+        0;
     // return false;
   }
 
-  void escucharNotificaciones() {
-    socket.on('notifications-count', (data) {});
-  }
 }
 
 

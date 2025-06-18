@@ -41,42 +41,35 @@ class _NotificationsList extends StatelessWidget {
     return FutureBuilder(
         future: _usuarioService.obtenerNotificaciones(_pref.id),
         builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
+          if (snapshot.connectionState != ConnectionState.done) {
             return Loading(mensaje: 'Recuperando notificaciones');
-         } else if(snapshot.hasError){
-                return ErrorPage(errorMsg: snapshot.error.toString(), page: false);
-              }
-          else {
-            final response = snapshot.data as MyResponse;
-            if (response.fallo) {
-              openAlertDialog(context, response.error);
-              return Container();
-            } else {
-              final notificaciones = response.data;
-              if (notificaciones.length > 0) {
-                // dividir por por fechas entre hoy y el resto
-                return FutureBuilder(
-                  future: _usuarioService.leerNotificaciones(_pref.id),
-                  builder: (context, snapshot) 
-                  {
-                    // final _socketService = Provider.of<SocketService>(context, listen: false);
-                    // _socketService.notifyListeners();
-                    return Container(
+          } else if (snapshot.hasError) {
+            return ErrorPage(errorMsg: snapshot.error.toString(), page: false);
+          } else {
+            final notificaciones = snapshot.data as List;
+            if (notificaciones.length > 0) {
+              // dividir por por fechas entre hoy y el resto
+              return FutureBuilder(
+                future: _usuarioService.leerNotificaciones(_pref.id),
+                builder: (context, snapshot) {
+                  // final _socketService = Provider.of<SocketService>(context, listen: false);
+                  // _socketService.notifyListeners();
+                  return Container(
                       margin: EdgeInsets.only(top: 15),
                       child: _CustomListView(
                         data: notificaciones,
-                      ));},
-                );
-              } else {
-                return Container(
-                  child: Center(
-                    child: Text(
-                      'Aún no tiene notificaciones',
-                      style: TextStyle(fontSize: 20, color: Colors.grey[400]),
-                    ),
+                      ));
+                },
+              );
+            } else {
+              return Container(
+                child: Center(
+                  child: Text(
+                    'Aún no tiene notificaciones',
+                    style: TextStyle(fontSize: 20, color: Colors.grey[400]),
                   ),
-                );
-              }
+                ),
+              );
             }
           }
         });
@@ -105,7 +98,6 @@ class _CustomListViewState extends State<_CustomListView> {
     {'obra': Icons.house},
     {'notification': Icons.notifications_active},
     {'update_app': Icons.download},
-
   ];
   @override
   Widget build(BuildContext context) {
@@ -127,9 +119,9 @@ class _CustomListViewState extends State<_CustomListView> {
                 }
                 final notificacion = notificaciones[i];
                 iconAvatar = iconos
-                    .where(
-                        (element) => element.containsKey(notificacion['type']??'notification'))
-                    .first[notificacion['type']??'notification'];
+                    .where((element) => element
+                        .containsKey(notificacion['type'] ?? 'notification'))
+                    .first[notificacion['type'] ?? 'notification'];
 
                 String route = '';
                 Map<String, dynamic> arg = {};
@@ -153,14 +145,16 @@ class _CustomListViewState extends State<_CustomListView> {
                     }
                     break;
                   case 'update_app':
-                  route = 'update';
-                  actionOnTap = () async {
-                    await Helper.launchWeb(Helper.getURLByPlatform(), context);
+                    route = 'update';
+                    actionOnTap = () async {
+                      await Helper.launchWeb(
+                          Helper.getURLByPlatform(), context);
                     };
                 }
                 if (route == '' && notificacion['type'] != 'update_app') {
                   actionOnTap = null;
-                } else if(route != '' && notificacion['type'] != 'update_app') {
+                } else if (route != '' &&
+                    notificacion['type'] != 'update_app') {
                   actionOnTap = () =>
                       Navigator.pushNamed((context), route, arguments: arg);
                 }
@@ -362,8 +356,6 @@ class _CustomListTile extends StatelessWidget {
     ;
   }
 }
-
-
 
 // ListView.builder(
 //                       itemCount: notificaciones.length,

@@ -178,8 +178,8 @@ class CustomDrawer extends StatelessWidget {
                     ),
                   ]),
                   onPressed: e['navega'] ?? true
-                      ? () => Navigator.push(
-                          context, MaterialPageRoute(builder: (c) =>  e["route"]))
+                      ? () => Navigator.push(context,
+                          MaterialPageRoute(builder: (c) => e["route"]))
                       : e['action']),
             ))
         .toList();
@@ -247,11 +247,12 @@ class CustomDrawer extends StatelessWidget {
 
   Future<void> cerrarSesion(UsuarioService _usuarioService, Preferences _pref,
       BuildContext context, SocketService _socketService) async {
-    final response = await _usuarioService.deleteDevice(
-        _pref.id, NotificationService.token!);
-    if (response.fallo) {
+    try {
+      final response = await _usuarioService.deleteDevice(
+          _pref.id, NotificationService.token!);
+    } catch (err) {
       openAlertDialog(context, 'No se ha desasociado el dispositivo',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
     _pref.logged = false;
     _socketService.disconnect();
@@ -1818,18 +1819,19 @@ class _ListaTareaState extends State<ListaTarea> {
         if (oldIndex < newIndex) {
           newIndex -= 1;
         }
-        final Tarea item = widget.tareas.removeAt(oldIndex);
-        widget.tareas.insert(newIndex, item);
-        setState(() {});
-        final response = await _obraService.actualizarOrdenTareas(
-            _obraService.obra.id,
-            widget.etapaId,
-            widget.tareas[newIndex].subetapa,
-            widget.tareas);
+        try {
+          final response = await _obraService.actualizarOrdenTareas(
+              _obraService.obra.id,
+              widget.etapaId,
+              widget.tareas[newIndex].subetapa,
+              widget.tareas);
 
-        if (response.fallo) {
+          final Tarea item = widget.tareas.removeAt(oldIndex);
+          widget.tareas.insert(newIndex, item);
+          setState(() {});
+        } catch (err) {
           openAlertDialog(context, 'Error al ordenar',
-              subMensaje: response.error);
+              subMensaje: err.toString());
           return;
         }
       },
@@ -1978,24 +1980,24 @@ class _TareaTileState extends State<_TareaTile> {
   Future<void> actualizaTareaBD(BuildContext context, bool? value) async {
     openLoadingDialog(context, mensaje: 'Actualizando...');
     final ts = DateTime.now().millisecondsSinceEpoch;
-    final response = await _obraService.actualizarTarea(
-        _obraService.obra.id,
-        widget.etapaId,
-        widget.tarea.subetapa,
-        widget.tarea.id,
-        value!,
-        false,
-        new Preferences().id,
-        0,
-        ts);
-    closeLoadingDialog(context);
-    widget.tarea.realizado = value!;
-    widget.tarea.tsRealizado = ts;
-    _obraService.notifyListeners();
-
-    if (response.fallo) {
+    try {
+      final response = await _obraService.actualizarTarea(
+          _obraService.obra.id,
+          widget.etapaId,
+          widget.tarea.subetapa,
+          widget.tarea.id,
+          value!,
+          false,
+          new Preferences().id,
+          0,
+          ts);
+      closeLoadingDialog(context);
+      widget.tarea.realizado = value!;
+      widget.tarea.tsRealizado = ts;
+      _obraService.notifyListeners();
+    } catch (err) {
       openAlertDialog(context, 'Error al actualizar tarea',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
 
     setState(() {});
@@ -2017,15 +2019,18 @@ class _TareaTileState extends State<_TareaTile> {
       return;
     }
 
-    _obraService.obra.etapas[index].subetapas[indexSub].tareas
-        .removeAt(indexTarea);
     openLoadingDialog(context, mensaje: 'Eliminando tarea...');
-    final response =
-        await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
-    closeLoadingDialog(context);
-    if (response.fallo) {
+    try {
+      final response =
+          await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
+      _obraService.obra.etapas[index].subetapas[indexSub].tareas
+          .removeAt(indexTarea);
+
+      closeLoadingDialog(context);
+    } catch (err) {
+      closeLoadingDialog(context);
       openAlertDialog(context, 'Error al eliminar tarea',
-          subMensaje: response.error);
+          subMensaje: err.toString());
     }
   }
 

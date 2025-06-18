@@ -9,6 +9,7 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -67,21 +68,20 @@ class _PropietarioFormState extends State<PropietarioForm> {
                         ? FutureBuilder(
                             future: _usuarioService.obtenerUsuario(_usuarioId),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting)
+                              if (snapshot.connectionState !=
+                                  ConnectionState.done)
                                 return Loading(
-                                  mensaje: 'Cargando propietario',
-                                );
+                                    mensaje: 'Cargando información...');
+                              if (snapshot.connectionState ==
+                                      ConnectionState.done &&
+                                  snapshot.hasError) {
+                                return ErrorPage(
+                                    errorMsg: snapshot.error.toString());
+                              }
+                              final response =
+                                  snapshot.data as Map<String, dynamic>;
 
-                              final response = snapshot.data as MyResponse;
-                              if (response.fallo)
-                                return Center(
-                                  child: Text('Error al cargar datos ' +
-                                      response.error),
-                                );
-
-                              final propietario =
-                                  Miembro.fromJson(response.data);
+                              final propietario = Miembro.fromJson(response);
 
                               return _Form(
                                   from: _pageFrom, propietario: propietario);
@@ -232,15 +232,11 @@ class _FormState extends State<_Form> {
             dni: txtDNICtrl.text,
             telefono: txtTelefonoCtrl.text,
             email: txtMailCtrl.text);
-        final response = await _service.grabarUsuario(prop);
+
+        await _service.grabarUsuario(prop);
         closeLoadingDialog(context);
         loading = false;
 
-        if (response.fallo) {
-          await openAlertDialogReturn(context, 'Error al crear propietario',
-              subMensaje: response.error);
-          return;
-        }
         resetForm();
 
         await openAlertDialogReturn(context, 'Propietario creado');
@@ -266,42 +262,37 @@ class _FormState extends State<_Form> {
   editarPropietario(BuildContext context) async {
     bool isValid = true, loading = true;
     final _service = Provider.of<UsuarioService>(context, listen: false);
+    final navigator = Navigator.of(context);
+
     try {
       txtNombreCtrl.text.trim() == '' ? isValid = false : true;
       txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
       txtDNICtrl.text == '' ? isValid = false : true;
       txtTelefonoCtrl.text == '' ? isValid = false : true;
       txtMailCtrl.text == '' ? isValid = false : true;
+      if (!isValid) openAlertDialog(navigator.context, 'Formulario invalido');
 
-      if (isValid) {
-        openLoadingDialog(context, mensaje: 'Actualizando propietario...');
+      openLoadingDialog(navigator.context,
+          mensaje: 'Actualizando propietario...');
 
-        final prop = Miembro(
-            role: 3,
-            id: widget.propietario!.id,
-            nombre: txtNombreCtrl.text,
-            apellido: txtApellidoCtrl.text,
-            dni: txtDNICtrl.text,
-            telefono: txtTelefonoCtrl.text,
-            email: txtMailCtrl.text);
-        final response = await _service.modificarUsuario(prop) as MyResponse;
-        closeLoadingDialog(context);
-        loading = false;
-        if (response.fallo) {
-          await openAlertDialogReturn(
-              context, 'Error al actualizar propietario',
-              subMensaje: response.error);
-          return;
-        }
-        await openAlertDialogReturn(context, 'Propietario actualizado')
-            .then((value) => Navigator.pop(context));
-        resetForm();
-      } else {
-        openAlertDialog(context, 'Formulario invalido');
-      }
+      final prop = Miembro(
+          role: 3,
+          id: widget.propietario!.id,
+          nombre: txtNombreCtrl.text,
+          apellido: txtApellidoCtrl.text,
+          dni: txtDNICtrl.text,
+          telefono: txtTelefonoCtrl.text,
+          email: txtMailCtrl.text);
+          
+      final response = await _service.modificarUsuario(prop) as MyResponse;
+      closeLoadingDialog(navigator.context);
+      loading = false;
+      await openAlertDialogReturn(navigator.context, 'Propietario actualizado')
+          .then((value) => Navigator.pop(navigator.context));
+      resetForm();
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al grabar propietario',
+      loading ? closeLoadingDialog(navigator.context) : false;
+      openAlertDialog(navigator.context, 'Error al grabar propietario',
           subMensaje: err.toString());
     }
   }

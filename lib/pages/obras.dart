@@ -11,7 +11,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/ABMs/InactividadesABM.dart';
 import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
@@ -50,19 +49,17 @@ class _ObrasPageState extends State<ObrasPage> {
   final _pref = new Preferences();
 
   void _onRefresh(ObraService _obras) async {
-    final response = await _obras.obtenerObrasByUser(_pref.id);
-    if (response.fallo) {
-      _refreshController.loadFailed();
-      openAlertDialog(context, 'Error al actualizar obras');
-    } else {
+    try {
+      final response = await _obras.obtenerObrasByUser(_pref.id);
       this.obras =
           (response.data as List<dynamic>).map((e) => Obra.fromMap(e)).toList();
       this.obrasFiltradas = obras;
+      setState(() {});
+      _refreshController.refreshCompleted();
+    } catch (err) {
+      _refreshController.loadFailed();
+      openAlertDialog(context, 'Error al actualizar obras');
     }
-    setState(() {});
-    // if failed,use refreshFailed()
-    _refreshController.refreshCompleted();
-    // _obras.notifyListeners();
   }
 
   void _onLoading() async {
@@ -140,7 +137,9 @@ class _ObrasPageState extends State<ObrasPage> {
       {
         'icon': Icons.person_pin_rounded,
         'name': 'Mi perfil',
-        'route': PerfilPage(usuarioId: _pref.id,),
+        'route': PerfilPage(
+          usuarioId: _pref.id,
+        ),
         'roles': []
       },
       {
@@ -199,7 +198,8 @@ class _ObrasPageState extends State<ObrasPage> {
         'route': NotificacionesABM(),
         'roles': [1, 2, 3, 4, 5, 6, 7, 8],
         'navega': false,
-        'action': () => Navigator.push(context, MaterialPageRoute(builder: (c) =>  NoticiasPage()))
+        'action': () => Navigator.push(
+            context, MaterialPageRoute(builder: (c) => NoticiasPage()))
       },
       {
         'icon': Icons.edit_note_rounded,
@@ -293,29 +293,16 @@ class __SearchListViewState extends State<_SearchListView> {
                 );
               } else {
                 try {
-                  final response = snapshot.data as MyResponse;
-                  if (!response.fallo) {
-                    obras = (response.data as List<dynamic>)
-                        .map((e) => Obra.fromMap(e))
-                        .toList();
-                    obrasFiltradas = obras;
-                    return _CustomObras(
-                      obras: obras,
-                      obrasFiltradas: obras,
-                      openDrawer: widget.openDrawer,
-                    );
-                  } else {
-                    if (response.error == 'Usuario inactivo') {
-                      needReLogIn(response);
-                      return Container();
-                    }
-                    return Container(
-                      child: Text(
-                        response.error,
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    );
-                  }
+                  final response = snapshot.data;
+                  obras = (response as List<dynamic>)
+                      .map((e) => Obra.fromMap(e))
+                      .toList();
+                  obrasFiltradas = obras;
+                  return _CustomObras(
+                    obras: obras,
+                    obrasFiltradas: obras,
+                    openDrawer: widget.openDrawer,
+                  );
                 } catch (err) {
                   return ErrorPage(errorMsg: err.toString(), page: false);
                 }
@@ -323,7 +310,7 @@ class __SearchListViewState extends State<_SearchListView> {
             }));
   }
 
-  void needReLogIn(MyResponse response) {
+  void needReLogIn(dynamic response) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final _pref = new Preferences();
       _pref.deletePreferences();

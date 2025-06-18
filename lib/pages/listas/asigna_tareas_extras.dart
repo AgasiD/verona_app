@@ -38,7 +38,8 @@ class TareasExtrasPage extends StatelessWidget {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-            future: _tareaService.obtenerTareasExtras(etapaId, subetapaId, _obraService.obra.id),
+            future: _tareaService.obtenerTareasExtras(
+                etapaId, subetapaId, _obraService.obra.id),
             builder: (context, snapshot) {
               if (snapshot.data == null) {
                 return Loading(
@@ -176,48 +177,45 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
         ),
         subtitle: Text('', style: TextStyle(color: Helper.brandColors[3])),
         trailing: icono,
-        onTap: () async {
-          if (!widget.asignado) {
-            // Agregar tarea
-            openLoadingDialog(context, mensaje: 'Adjuntando tarea...');
-            final response = await _obraService.asignarTarea(widget.etapaId,
-                widget.tarea.subetapa, widget.tarea.id, _obraService.obra.id);
-            if (response.fallo) {
-              closeLoadingDialog(context);
-              openAlertDialog(context, 'Error al asignar tarea',
-                  subMensaje: response.error);
-            } else {
-              _obraService.obra.sumarTarea(widget.etapaId, widget.tarea);
-              widget.asignado = true;
-              closeLoadingDialog(context);
-              snackText = 'Tarea asignada';
-              Helper.showSnackBar(
-                  context, snackText, null, Duration(milliseconds: 700), null);
-            }
-          } else {
-            //Quitar tarea
-            openLoadingDialog(context, mensaje: 'Quitando tarea...');
+        onTap: asignarTarea(_obraService, snackText));
+  }
 
-            final response = await _obraService.quitarTarea(widget.etapaId,
-                widget.tarea.subetapa, widget.tarea.id, _obraService.obra.id);
+  asignarTarea(_obraService, snackText) async {
+    try {
+      if (widget.asignado) {
+        //Quitar tarea
+        openLoadingDialog(context, mensaje: 'Quitando tarea...');
 
-            if (response.fallo) {
-              closeLoadingDialog(context);
-              openAlertDialog(context, 'Error al quitar tarea',
-                  subMensaje: response.error);
-              return;
-            }
-            _obraService.obra.quitarTarea(widget.etapaId, widget.tarea);
-            widget.asignado = false;
-            closeLoadingDialog(context);
-            Helper.showSnackBar(
-                context, snackText, null, Duration(milliseconds: 700), null);
-          }
+        final response = await _obraService.quitarTarea(widget.etapaId,
+            widget.tarea.subetapa, widget.tarea.id, _obraService.obra.id);
 
-          setState(
-            () {},
-          );
-        });
+        _obraService.obra.quitarTarea(widget.etapaId, widget.tarea);
+        widget.asignado = false;
+        closeLoadingDialog(context);
+        Helper.showSnackBar(
+            context, snackText, null, Duration(milliseconds: 700), null);
+
+        return;
+      }
+      // Agregar tarea
+      openLoadingDialog(context, mensaje: 'Adjuntando tarea...');
+      final response = await _obraService.asignarTarea(widget.etapaId,
+          widget.tarea.subetapa, widget.tarea.id, _obraService.obra.id);
+      _obraService.obra.sumarTarea(widget.etapaId, widget.tarea);
+      widget.asignado = true;
+      closeLoadingDialog(context);
+      snackText = 'Tarea asignada';
+      Helper.showSnackBar(
+          context, snackText, null, Duration(milliseconds: 700), null);
+      setState(
+        () {},
+      );
+      return;
+    } catch (err) {
+      closeLoadingDialog(context);
+      openAlertDialog(context, 'Error al modificar tarea',
+          subMensaje: err.toString());
+    }
   }
 
   tareaAsingada(String id) {

@@ -75,7 +75,6 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
-    final _usuario = Provider.of<UsuarioService>(context);
     final _notification = Provider.of<NotificationService>(context);
 
     return Container(
@@ -101,34 +100,37 @@ class __FormState extends State<_Form> {
           MainButton(
             color: Helper.brandColors[8],
             text: text,
-            onPressed: () async {
-              text = 'Cargando...';
-              setState(() {});
-              final response =
-                  await _usuario.validarUsuario(emailCtrl.text, passCtrl.text);
-              if (response.fallo) {
-                openAlertDialog(context, response.error);
-              } else {
-                _usuario.usuario = Miembro.fromJson(response.data);
-                final token = '';
-                // response.data['token'];
-
-                guardarUserData(_usuario.usuario, token);
-                final tokenResponse = await _usuario.setTokenDevice(
-                    _usuario.usuario.id, NotificationService.token!);
-                if (tokenResponse.fallo) {
-                  openAlertDialog(context,
-                      'No fue posible guardar el dispositivo utilizado');
-                }
-                final _pref = new Preferences();
-                _pref.logged = true;
-                Navigator.pushReplacementNamed(context, ObrasPage.routeName);
-              }
-              text = 'Ingresar';
-              setState(() {});
-            },
+            onPressed: login,
           )
         ]));
+  }
+
+  login() async {
+    final _usuario = Provider.of<UsuarioService>(context);
+
+    text = 'Cargando...';
+    setState(() {});
+    final response =
+        await _usuario.validarUsuario(emailCtrl.text, passCtrl.text);
+
+    _usuario.usuario = Miembro.fromJson(response.data);
+    final token = '';
+    // response.data['token'];
+
+    guardarUserData(_usuario.usuario, token);
+    try {
+      final tokenResponse = await _usuario.setTokenDevice(
+          _usuario.usuario.id, NotificationService.token!);
+      final _pref = new Preferences();
+      _pref.logged = true;
+      Navigator.pushReplacementNamed(context, ObrasPage.routeName);
+
+      text = 'Ingresar';
+      setState(() {});
+    } catch (err) {
+      openAlertDialog(
+          context, 'No fue posible guardar el dispositivo utilizado');
+    }
   }
 
   void guardarUserData(Miembro usuario, String token) {

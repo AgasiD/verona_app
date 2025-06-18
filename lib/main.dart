@@ -177,13 +177,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         print(tokenResponse);
       }
 
-      //renovar token
-      // if (_pref.token != null && _pref.token != '') {
-      //   final response = await _authService.validarToken(_pref.token);
-      //   if (!response.fallo) {
-      //     _pref.token = response.data.toString();
-      //   }
-      // }
     }
     if (AppLifecycleState.inactive.name == 'inactive') {
       final _notService =

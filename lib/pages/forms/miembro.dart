@@ -11,6 +11,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -54,36 +55,29 @@ class _MiembroFormState extends State<MiembroForm> {
               : FutureBuilder(
                   future: _usuarioService.obtenerUsuario(usuarioId),
                   builder: (context, snapshot) {
-                    if (snapshot.data == null) {
+                    if (snapshot.connectionState != ConnectionState.done) {
                       return Loading(
-                        mensaje: 'Recuperando información',
+                        mensaje: 'Recuperando pedidos...',
                       );
-                    } else {
-                      final response = snapshot.data as MyResponse;
-                      if (!response.fallo) {
-                        final usuario = Miembro.fromJson(response.data);
-                        setForm(usuario);
-                        return _Form(
-                          txtNombreCtrl: _txtNombreCtrl,
-                          txtApellidoCtrl: _txtApellidoCtrl,
-                          txtDNICtrl: _txtDNICtrl,
-                          txtTelefonoCtrl: _txtTelefonoCtrl,
-                          txtMailCtrl: _txtMailCtrl,
-                          edit: true,
-                        );
-                      } else {
-                        return Container(
-                            // height: MediaQuery.of(context).size.height - 140,
-                            // width: MediaQuery.of(context).size.width,
-                            child: Center(
-                          child: Text(
-                            'Error al recuperar la información',
-                            style: TextStyle(
-                                fontSize: 18, color: Helper.brandColors[4]),
-                          ),
-                        ));
-                      }
+                    } else if (snapshot.connectionState ==
+                            ConnectionState.done &&
+                        snapshot.hasError) {
+                      return ErrorPage(
+                        errorMsg: snapshot.error.toString(),
+                      );
                     }
+
+                    final usuario =
+                        Miembro.fromJson(snapshot.data as Map<String, dynamic>);
+                    setForm(usuario);
+                    return _Form(
+                      txtNombreCtrl: _txtNombreCtrl,
+                      txtApellidoCtrl: _txtApellidoCtrl,
+                      txtDNICtrl: _txtDNICtrl,
+                      txtTelefonoCtrl: _txtTelefonoCtrl,
+                      txtMailCtrl: _txtMailCtrl,
+                      edit: true,
+                    );
                   })),
       bottomNavigationBar: CustomNavigatorFooter(),
     );
@@ -320,59 +314,57 @@ class _Form extends StatelessWidget {
         edit ? 'Actualizando... esto puede demorar' : 'Guardando datos...';
     openLoadingDialog(context, mensaje: actionText);
     bool loading = true;
+    txtNombreCtrl.text.trim() == '' ? isValid = false : true;
+    txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
+    txtDNICtrl.text == '' ? isValid = false : true;
+    txtTelefonoCtrl.text == '' ? isValid = false : true;
+    txtMailCtrl.text == '' ? isValid = false : true;
+
+    if (!isValid) {
+      closeLoadingDialog(context);
+      openAlertDialog(context, 'Formulario invalido');
+      return;
+    }
+
+    final miembro = Miembro(
+        id: edit ? usuarioId! : '',
+        nombre: txtNombreCtrl.text,
+        apellido: txtApellidoCtrl.text,
+        dni: txtDNICtrl.text,
+        telefono: txtTelefonoCtrl.text,
+        email: txtMailCtrl.text,
+        role: int.parse(personalSelected));
+
+    dynamic response;
     try {
-      txtNombreCtrl.text.trim() == '' ? isValid = false : true;
-      txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
-      txtDNICtrl.text == '' ? isValid = false : true;
-      txtTelefonoCtrl.text == '' ? isValid = false : true;
-      txtMailCtrl.text == '' ? isValid = false : true;
+      edit
+          ? response = await _service.modificarUsuario(miembro)
+          : response = await _service.grabarUsuario(miembro);
 
-      if (isValid) {
-        final miembro = Miembro(
-            id: edit ? usuarioId! : '',
-            nombre: txtNombreCtrl.text,
-            apellido: txtApellidoCtrl.text,
-            dni: txtDNICtrl.text,
-            telefono: txtTelefonoCtrl.text,
-            email: txtMailCtrl.text,
-            role: int.parse(personalSelected));
-        late MyResponse response;
-        edit
-            ? response = await _service.modificarUsuario(miembro)
-            : response = await _service.grabarUsuario(miembro);
+      closeLoadingDialog(context);
+      loading = false;
 
-        closeLoadingDialog(context);
-        loading = false;
-        if (response.fallo) {
-          edit
-              ? openAlertDialog(context, 'No se pudo actualizar el personal',
-                  subMensaje: response.error)
-              : openAlertDialog(context, 'No se pudo crear el personal',
-                  subMensaje: response.error);
-        } else {
-          final _obraService = Provider.of<ObraService>(context, listen: false);
-          _obraService.notifyListeners();
-          edit
-              ? await openAlertDialogReturn(context, 'Personal actualizado')
-              : await openAlertDialogReturn(context, 'Personal creado');
-          resetForm();
-
-          edit
-              ? Navigator.pop(context)
-              : Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        PerfilPage(usuarioId: response.data['id']),
-                  ));
-        }
-      } else {
-        closeLoadingDialog(context);
-        openAlertDialog(context, 'Formulario invalido');
-      }
+      final _obraService = Provider.of<ObraService>(context, listen: false);
+      _obraService.notifyListeners();
+      edit
+          ? await openAlertDialogReturn(context, 'Personal actualizado')
+          : await openAlertDialogReturn(context, 'Personal creado');
+      resetForm();
+      edit
+          ? Navigator.pop(context)
+          : Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    PerfilPage(usuarioId: response.data['id']),
+              ));
     } catch (err) {
       loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al grabar', subMensaje: err.toString());
+      edit
+          ? openAlertDialog(context, 'No se pudo actualizar el personal',
+              subMensaje: err.toString())
+          : openAlertDialog(context, 'No se pudo crear el personal',
+              subMensaje: err.toString());
     }
   }
 

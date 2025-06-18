@@ -9,13 +9,16 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/models/inactividadBD.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/services/inactividad_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
 
 class InactividadesMasivaForm extends StatelessWidget {
   static final routeName = 'InactividadesMasivaForm';
-  const InactividadesMasivaForm({Key? key}) : super(key: key);
+  InactividadesMasivaForm({Key? key, required this.obras}) : super(key: key);
+
+  List<Map<String, dynamic>> obras;
 
   @override
   Widget build(BuildContext context) {
@@ -23,23 +26,21 @@ class InactividadesMasivaForm extends StatelessWidget {
         backgroundColor: Helper.brandColors[1],
         body: GestureDetector(
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-          child: _Form(),
+          child: _Form(obras: this.obras),
         ),
         bottomNavigationBar: CustomNavigatorFooter());
   }
 }
 
 class _Form extends StatefulWidget {
-  _Form({Key? key}) : super(key: key);
+  _Form({Key? key, required this.obras}) : super(key: key);
+  List<Map<String, dynamic>> obras;
 
   @override
   State<_Form> createState() => _FormState();
 }
 
 class _FormState extends State<_Form> {
-
- 
-
   TextEditingController txtCtrlName = new TextEditingController();
   TextEditingController txtCtrlDias = new TextEditingController();
   Preferences _pref = new Preferences();
@@ -68,15 +69,9 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
-
-
-    
     //NUEVA INACTIVIDAD
-    _obraService = Provider.of<ObraService>(context);
+    _obraService = Provider.of<ObraService>(context, listen: false);
     Color colorHint = Helper.brandColors[3];
-    final arg = ModalRoute.of(context)!.settings.arguments as Map;
-    final obras = arg['obras'];
-
     submitAction = (idsObras, idInactividad, selectedFecha) async {
       final confirm = await openDialogConfirmationReturn(
           context, '¿Seguro que desea generar la inactividad?');
@@ -95,17 +90,15 @@ class _FormState extends State<_Form> {
         usuarioId: _pref.id,
       );
 
-      MyResponse response;
-      response =
-          await _obraService.grabarInactividades(idsObras, inactividad.toMap());
-      closeLoadingDialog(context);
-
-      if (response.fallo) {
-        openAlertDialog(context, 'No se pudo grabar la inactividad',
-            subMensaje: response.error);
-      } else {
+      try {
+        final response = await _obraService.grabarInactividades(
+            idsObras, inactividad.toMap());
+        closeLoadingDialog(context);
         await openAlertDialogReturn(context, 'Inactividad generada');
         Navigator.pop(context, true);
+      } catch (err) {
+        openAlertDialog(context, 'No se pudo grabar la inactividad',
+            subMensaje: err.toString());
       }
     };
 
@@ -116,18 +109,15 @@ class _FormState extends State<_Form> {
       child: FutureBuilder(
         future: _inactividadService.obtenerInactividades(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData)
-            return Loading(
-              mensaje: "Obteniendo información...",
-            );
+          if (snapshot.connectionState != ConnectionState.done)
+            return Loading(mensaje: 'Cargando información...');
+          if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.hasError) {
+            return ErrorPage(errorMsg: snapshot.error.toString());
+          }
+          ;
 
-          final response = snapshot.data as MyResponse;
-          if (response.fallo)
-            return Center(
-              child: Text(response.error),
-            );
-
-          inactividades = (response.data as List)
+          inactividades = (snapshot.data as List)
               .map((i) => InactividadBD.fromMap(i))
               .toList();
           inactividades.add(new InactividadBD(
@@ -150,7 +140,7 @@ class _FormState extends State<_Form> {
                 pref: _pref,
                 submitAction: submitAction,
                 inactividades: inactividades,
-                obras: obras),
+                obras: widget.obras),
           );
         },
       ),
@@ -205,17 +195,16 @@ class _FormularioState extends State<_Formulario> {
     super.initState();
     values = widget.obras.map((e) => e['nombre'] as String).toList();
     selected = widget.obras.map((e) => e['nombre'] as String).toList();
-     DateTime now = DateTime.now();
+    DateTime now = DateTime.now();
 
     String formattedDate = DateFormat('dd/MM/yyyy').format(now);
     txtCtrlDate.text = formattedDate.toString();
   }
-DateTime selectedDate = DateTime.now();
-  
+
+  DateTime selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
-   
     return Column(
       children: [
         Logo(),
@@ -241,17 +230,18 @@ DateTime selectedDate = DateTime.now();
               child: DropdownButtonFormField2(
                   value: widget.selectedInactividad,
                   items: widget.inactividadesItems,
-                  style: TextStyle(color: Helper.brandColors[5], fontSize: 16),
+                  style: TextStyle(
+                    color: Helper.brandColors[3],
+                    fontSize: 16,
+                  ),
                   decoration: getDecoration(),
                   hint: Text(
                     'Seleccione inactividad',
                     style: TextStyle(fontSize: 16, color: widget.colorHint),
                   ),
-               
                   onChanged: (value) {
-                    setState(() {
-                      setInactividad(value as String);
-                    });
+                    setInactividad(value as String);
+                    setState(() {});
                   })),
         ),
         Visibility(
@@ -283,7 +273,6 @@ DateTime selectedDate = DateTime.now();
               }),
         ),
         DropDownMultiSelect(
-          
           decoration: getDecoration(),
           childBuilder: (option) => Container(
               padding: EdgeInsets.symmetric(horizontal: 20),
@@ -317,12 +306,14 @@ DateTime selectedDate = DateTime.now();
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Visibility(
-              visible: widget._pref.role == 1 || widget._pref.role == 2 || widget._pref.role == 8,
+              visible: widget._pref.role == 1 ||
+                  widget._pref.role == 2 ||
+                  widget._pref.role == 8,
               child: MainButton(
                 color: Helper.brandColors[8],
                 onPressed: () {
-                  widget.submitAction(
-                      convertNombreToId(selected), widget.selectedInactividad, txtCtrlDate.text);
+                  widget.submitAction(convertNombreToId(selected),
+                      widget.selectedInactividad, txtCtrlDate.text);
                 },
                 text: 'Guardar',
                 width: 100,
@@ -353,7 +344,6 @@ DateTime selectedDate = DateTime.now();
         closeDialogOnCancelTapped: true,
       ),
       dialogSize: Size(width, height),
-
       value: [selectedDate],
       borderRadius: BorderRadius.circular(5),
     );
@@ -364,7 +354,6 @@ DateTime selectedDate = DateTime.now();
 
       txtCtrlDate.text = formattedDate.toString();
       selectedDate = date;
-    
     }
   }
 

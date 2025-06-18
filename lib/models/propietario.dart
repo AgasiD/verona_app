@@ -15,11 +15,11 @@ class Propietario {
   int role = 3;
 
   factory Propietario.fromJson(Map<String, dynamic> json) => Propietario(
-      nombre: json["nombre"],
-      apellido: json["apellido"],
-      email: json["email"],
+      nombre: json["nombre"] ?? '',
+      apellido: json["apellido"] ?? '',
+      email: json["email"] ?? '',
       telefono: json["telefono"] ?? '',
-      dni: json["dni"],
+      dni: json["dni"] ?? '',
       id: json["id"]);
 
   Map<String, dynamic> toJson() => {

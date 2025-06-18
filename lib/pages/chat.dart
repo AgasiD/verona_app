@@ -608,7 +608,7 @@ class __InputChatState extends State<_InputChat> {
         ts: DateTime.now().millisecondsSinceEpoch);
 
     widget.agregarMensaje(mensaje, true);
-    _socket.enviarMensaje(mensaje);
+    // _socket.enviarMensaje(mensaje);
     widget.txtCtrl.text = '';
   }
 }

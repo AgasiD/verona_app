@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -25,30 +27,20 @@ class NoticiasPage extends StatelessWidget {
       body: FutureBuilder(
           future: _wixService.obtenerPosts(),
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Loading(
-                mensaje: 'Cargando noticias...',
-              );
-            }
-            if (snapshot.hasError) {
-              return ErrorPage(
-                errorMsg: snapshot.error.toString(),
-              );
+            if (snapshot.connectionState != ConnectionState.done)
+              return Loading(mensaje: 'Cargando...');
+            if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.hasError) {
+              return ErrorPage(errorMsg: snapshot.error.toString());
             } else {
-              MyResponse response = snapshot.data as MyResponse;
-              if (response.fallo) {
-                return ErrorPage(
-                  errorMsg: response.error,
-                  page: false,
-                );
-              }
+              final noticia = snapshot.data as Map<String, dynamic>;
               // return Container(color: Colors.red,);
               return ListView.builder(
-                  itemCount: response.data['posts'].length,
+                  itemCount: noticia['posts'].length,
                   shrinkWrap: true,
                   itemBuilder: (BuildContext context, int index) {
                     return NoticiaCard(
-                      post: response.data['posts'][index],
+                      post: noticia['posts'][index],
                       esPar: index % 2 == 0,
                     );
                   });
@@ -70,12 +62,16 @@ class NoticiaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final widgets = [
       Hero(
-          tag: post['coverMedia']['image'] == null ? '' : post['coverMedia']['image']['id'],
+          tag: post['coverMedia']['image'] == null
+              ? ''
+              : post['coverMedia']['image']['id'],
           child: Container(
             width: 150,
             height: 150,
             child: CachedNetworkImage(
-              imageUrl: post['coverMedia']['image'] == null ? '' : post['coverMedia']['image']['url'],
+              imageUrl: post['coverMedia']['image'] == null
+                  ? ''
+                  : post['coverMedia']['image']['url'],
               imageBuilder: (context, imageProvider) => Container(
                 decoration: BoxDecoration(
                   image:
@@ -151,9 +147,12 @@ class WixService extends ChangeNotifier {
   final _endpoint = 'api/wix';
 
   Future<MyResponse> obtenerPosts() async {
-    final datos = await this._http.get('$_endpoint');
-    final resp = MyResponse.fromJson(datos);
+    final response = await this._http.get('$_endpoint');
+    final data = json.decode(response.body);
 
-    return resp;
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 }

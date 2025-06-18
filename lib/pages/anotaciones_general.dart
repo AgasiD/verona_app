@@ -8,6 +8,7 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/anotacion.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/obra.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/services/usuario_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -70,8 +71,14 @@ class _AnotacionesGeneralPageState extends State<AnotacionesGeneralPage>
                       ]),
                 ),
               )),
-      floatingActionButton: index == 0 ?  CustomNavigatorButton(icono: Icons.add, accion: () => Navigator.pushNamed(context, AnotacionForm.routeName, arguments: { "usuarioId": 0 }), showNotif: false) : null,
-
+          floatingActionButton: index == 0
+              ? CustomNavigatorButton(
+                  icono: Icons.add,
+                  accion: () => Navigator.pushNamed(
+                      context, AnotacionForm.routeName,
+                      arguments: {"usuarioId": 0}),
+                  showNotif: false)
+              : null,
         ));
   }
 }
@@ -79,18 +86,17 @@ class _AnotacionesGeneralPageState extends State<AnotacionesGeneralPage>
 class AnotacionesGenerales extends StatelessWidget {
   AnotacionesGenerales({Key? key}) : super(key: key);
   late Miembro usuario;
- TextEditingController txtTarea = new TextEditingController();
+  TextEditingController txtTarea = new TextEditingController();
 
- @override
+  @override
   Widget build(BuildContext context) {
     // final args = ModalRoute.of(context)!.settings.arguments as Map;
     // String? obraId = args['obraId'];
-        String? obraId = '';
+    String? obraId = '';
 
     final _pref = new Preferences();
     final _usuarioService = Provider.of<UsuarioService>(context);
     return Container(
-      
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: SafeArea(
@@ -98,14 +104,14 @@ class AnotacionesGenerales extends StatelessWidget {
             child: FutureBuilder(
               future: _usuarioService.obtenerUsuario(_pref.id),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting)
+                if (snapshot.connectionState != ConnectionState.done)
                   return Loading(mensaje: 'Cargando...');
-                final response = snapshot.data as MyResponse;
-                if (response.fallo)
-                  return Center(
-                    child: Text('Error al cargar datos'),
-                  );
-                usuario = Miembro.fromJson(response.data);
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasError) {
+                  return ErrorPage(errorMsg: snapshot.error.toString());
+                }
+                usuario =
+                    Miembro.fromJson(snapshot.data as Map<String, dynamic>);
 
                 return Action_Form(
                     usuario: usuario, txtTarea: txtTarea, obraId: obraId);
@@ -166,9 +172,9 @@ class _Action_FormState extends State<Action_Form> {
                     anota: anotaciones![index], action: eliminarAnotacion),
               ),
       ),
-    //   InputTarea(
-    //       focus: focus, action: agregarAnotacion, txtTarea: widget.txtTarea)
-    // ]);
+      //   InputTarea(
+      //       focus: focus, action: agregarAnotacion, txtTarea: widget.txtTarea)
+      // ]);
     ]);
   }
 
@@ -178,11 +184,7 @@ class _Action_FormState extends State<Action_Form> {
       final anotacion = Anotacion(widget.txtTarea.text,
           id: Uuid().v4(), obraId: widget.obraId);
       _usuarioService.agregarAnotacion(_pref.id, anotacion).then((response) {
-        if (response.fallo) {
-          openAlertDialog(context, 'Error al crear anotacion',
-              subMensaje: response.error);
-          return;
-        }
+        return;
       });
       widget.usuario.agregarAnotacion(anotacion);
       widget.txtTarea.clear();
@@ -201,7 +203,7 @@ class _Action_FormState extends State<Action_Form> {
     });
   }
 
-eliminarAnotacion(String id) {
+  eliminarAnotacion(String id) {
     final _pref = new Preferences();
     _usuarioService.eliminarAnotacion(_pref.id, id).then((value) {
       if (value.fallo) {
@@ -254,17 +256,18 @@ class _AnotacionTileState extends State<AnotacionTile> {
               data: ThemeData(unselectedWidgetColor: Helper.brandColors[4]),
               child: ListTile(
                 trailing: Icon(
-                  widget.anota.realizado 
-                  ?  Icons.check_box
-                   : Icons.check_box_outline_blank_rounded,
+                    widget.anota.realizado
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank_rounded,
                     color: Helper.brandColors[8]),
                 title: Text(
-                  
                   widget.anota.descripcion.replaceAll(RegExp(r'\n'), ' '),
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: Helper.brandColors[3]),
                 ),
-                onTap: () => Navigator.pushNamed(context, AnotacionForm.routeName, arguments: { "anotacion": widget.anota }),
+                onTap: () => Navigator.pushNamed(
+                    context, AnotacionForm.routeName,
+                    arguments: {"anotacion": widget.anota}),
               ),
               // child: CheckboxListTile(
               //   tileColor: Helper.brandColors[1],
@@ -324,14 +327,14 @@ class AnotacionesPorObra extends StatelessWidget {
     return FutureBuilder(
       future: _usuarioService.obtenerAnotacionesByObra(_pref.id),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting)
+        if (snapshot.connectionState != ConnectionState.done)
           return Loading(mensaje: 'Cargando...');
-        final response = snapshot.data as MyResponse;
-        if (response.fallo)
-          return Center(
-            child: Text('Error al cargar datos'),
-          );
-        final anotaciones_obra = response.data;
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasError) {
+          return ErrorPage(errorMsg: snapshot.error.toString());
+        }
+
+        final anotaciones_obra = snapshot.data as List<dynamic>;
 
         return Action_Obra_Form(anotaciones: anotaciones_obra);
       },
@@ -374,7 +377,11 @@ class _Action_Obra_FormState extends State<Action_Obra_Form> {
                   final anotacionesObra = widget.anotaciones
                       .where((anota) => anota['obraId'] == obrasId[index])
                       .toList();
-                  final obra = Obra.fromMap(anotacionesObra.first['obra']);
+                  final obra = {
+                    "nombre": anotacionesObra.first['obra']["nombre"],
+                    "barrio": anotacionesObra.first['obra']["barrio"],
+                    "lote": anotacionesObra.first['obra']["lote"]
+                  };
                   return Column(children: [
                     Container(
                       margin: EdgeInsets.symmetric(vertical: 10),
@@ -386,7 +393,7 @@ class _Action_Obra_FormState extends State<Action_Obra_Form> {
                       ),
                       child: ListTile(
                         title: Text(
-                            '${obra.nombre.toString().toUpperCase()} | ${obra.barrio.toString().toUpperCase()} | ${obra.lote.toString()} '),
+                            '${obra["nombre"].toString().toUpperCase()} | ${obra["barrio"].toString().toUpperCase()} | ${obra["lote"].toString()} '),
                         textColor: Helper.brandColors[5],
                       ),
                     ),
@@ -482,4 +489,3 @@ class _InputTareaState extends State<InputTarea> {
     );
   }
 }
-
