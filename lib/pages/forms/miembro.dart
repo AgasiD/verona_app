@@ -312,7 +312,7 @@ class _Form extends StatelessWidget {
     final _service = Provider.of<UsuarioService>(context, listen: false);
     final actionText =
         edit ? 'Actualizando... esto puede demorar' : 'Guardando datos...';
-    openLoadingDialog(context, mensaje: actionText);
+    openLoadingDialog(mensaje: actionText);
     bool loading = true;
     txtNombreCtrl.text.trim() == '' ? isValid = false : true;
     txtApellidoCtrl.text.trim() == '' ? isValid = false : true;
@@ -321,8 +321,8 @@ class _Form extends StatelessWidget {
     txtMailCtrl.text == '' ? isValid = false : true;
 
     if (!isValid) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Formulario invalido');
+      closeLoadingDialog();
+      openAlertDialog( 'Formulario invalido');
       return;
     }
 
@@ -341,14 +341,14 @@ class _Form extends StatelessWidget {
           ? response = await _service.modificarUsuario(miembro)
           : response = await _service.grabarUsuario(miembro);
 
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       loading = false;
 
       final _obraService = Provider.of<ObraService>(context, listen: false);
       _obraService.notifyListeners();
       edit
-          ? await openAlertDialogReturn(context, 'Personal actualizado')
-          : await openAlertDialogReturn(context, 'Personal creado');
+          ? await openAlertDialogReturn('Personal actualizado')
+          : await openAlertDialogReturn('Personal creado');
       resetForm();
       edit
           ? Navigator.pop(context)
@@ -359,11 +359,11 @@ class _Form extends StatelessWidget {
                     PerfilPage(usuarioId: response.data['id']),
               ));
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
+      closeLoadingDialog();
       edit
-          ? openAlertDialog(context, 'No se pudo actualizar el personal',
+          ? openAlertDialog( 'No se pudo actualizar el personal',
               subMensaje: err.toString())
-          : openAlertDialog(context, 'No se pudo crear el personal',
+          : openAlertDialog( 'No se pudo crear el personal',
               subMensaje: err.toString());
     }
   }

@@ -94,18 +94,18 @@ class _Form extends StatelessWidget {
   sendMessage(context) async {
     final wsService = Provider.of<WSService>(context, listen: false);
     try {
-      openLoadingDialog(context, mensaje: 'Enviando mensaje...');
+      openLoadingDialog(mensaje: 'Enviando mensaje...');
       final text = txtMessage.text;
       final phone = txtPhone.text;
       if (text.trim().isEmpty) {
         throw new Exception(['No se ingresó mensaje']);
       }
       await wsService.enviarMensajeGrupo(selectedGroup, text);
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Mensaje enviado con éxito');
+      closeLoadingDialog();
+      openAlertDialog('Mensaje enviado con éxito');
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, err.toString());
+      closeLoadingDialog();
+      openAlertDialog( err.toString());
     }
   }
 }

@@ -242,14 +242,14 @@ class _EtapaCard extends StatelessWidget {
   eliminarEtapa(context, obraId, etapaId) async {
     final index =
         _obraService.obra.etapas.indexWhere((element) => element.id == etapaId);
-    openLoadingDialog(context, mensaje: 'Eliminando etapa...');
+    openLoadingDialog(mensaje: 'Eliminando etapa...');
     try {
       await _obraService.quitarEtapa(etapaId, obraId);
       _obraService.obra.quitarEtapa(etapaId);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al eliminar etapa',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al eliminar etapa',
           subMensaje: err.toString());
     }
   }

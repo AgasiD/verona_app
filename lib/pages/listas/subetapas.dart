@@ -32,20 +32,20 @@ class SubEtapasObra extends StatelessWidget {
       body: _SubEtapas(
           etapaId: _obraService.obra.etapas[index].id,
           subetapas: _obraService.obra.etapas[index].subetapas),
-      floatingActionButton: (_pref.role == 1 ||
-              _pref.role == 2 ||
-              _pref.role == 8 ||
-              _pref.role == 7)
-          ? FloatingActionButton(
-              onPressed: () => Navigator.pushNamed(
-                  context, SubetapasExtrasPage.routeName,
-                  arguments: {'etapaId': _obraService.obra.etapas[index].id}),
-              backgroundColor: Helper.brandColors[8],
-              mini: true,
-              child: Icon(Icons.add),
-              splashColor: null,
-            )
-          : null,
+      // floatingActionButton: (_pref.role == 1 ||
+      //         _pref.role == 2 ||
+      //         _pref.role == 8 ||
+      //         _pref.role == 7)
+      //     ? FloatingActionButton(
+      //         onPressed: () => Navigator.pushNamed(
+      //             context, SubetapasExtrasPage.routeName,
+      //             arguments: {'etapaId': _obraService.obra.etapas[index].id}),
+      //         backgroundColor: Helper.brandColors[8],
+      //         mini: true,
+      //         child: Icon(Icons.add),
+      //         splashColor: null,
+      //       )
+      //     : null,
       bottomNavigationBar: CustomNavigatorFooter(),
     );
   }
@@ -158,7 +158,7 @@ class _SubEtapaCard extends StatelessWidget {
       return Dismissible(
           confirmDismiss: (DismissDirection direction) async {
             if (ultimaSubetapa(etapaId, subetapa.id)) {
-              openAlertDialog(context, 'No se puede dejar sin subetapas');
+              openAlertDialog( 'No se puede dejar sin subetapas');
 
               return false;
             }
@@ -228,16 +228,16 @@ class _SubEtapaCard extends StatelessWidget {
     final indexSub = _obraService.obra.etapas[index].subetapas
         .indexWhere((subetapa) => subetapa.id == subetapaId);
 
-    openLoadingDialog(context, mensaje: 'Eliminando subetapa...');
+    openLoadingDialog(mensaje: 'Eliminando subetapa...');
 
     try {
       final response =
           await _obraService.quitarSubetapa(etapaId, subetapaId, obraId);
       _obraService.obra.etapas[index].subetapas.removeAt(indexSub);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al eliminar subetapa',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al eliminar subetapa',
           subMensaje: err.toString());
     }
   }

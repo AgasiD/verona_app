@@ -236,21 +236,20 @@ class __ContactTileState extends State<_ContactTile> {
                 ],
               ),
               onTap: () async {
-                openLoadingDialog(context, mensaje: 'Creando chat...');
+                openLoadingDialog(mensaje: 'Creando chat...');
                 // Generar Chat
-                final response =
-                    await _chat.crearChat(_pref.id, widget.personal.id);
-                if (response.fallo) {
-                  openAlertDialog(context, 'Error al crear el chat',
-                      subMensaje: response.error);
-                } else {
-                  closeLoadingDialog(
-                    context,
-                  );
+                try {
+                  final response =
+                      await _chat.crearChat(_pref.id, widget.personal.id);
+                  closeLoadingDialog();
+
+                  closeLoadingDialog();
                   Navigator.pushNamed(context, ChatPage.routeName, arguments: {
                     'chatId': response.data['chatId'],
                     'chatName': response.data['chatName'],
                   });
+                } catch (err) {
+                  closeLoadingDialog();
                 }
               },
             ),

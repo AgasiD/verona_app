@@ -124,7 +124,7 @@ setInitialPosition(context, double? latitud, double? longitud) async {
 
   _serviceEnabled = await location.serviceEnabled();
   if (!_serviceEnabled) {
-    Platform.isAndroid ? await openAlertDialogReturn(context, 'Se require utilzar la ubicación para inicilizar la camara del mapa') : false;
+    Platform.isAndroid ? await openAlertDialogReturn('Se require utilzar la ubicación para inicilizar la camara del mapa') : false;
     _serviceEnabled = await location.requestService();
     if (!_serviceEnabled) {
       return LatLng(0, 0);
@@ -133,7 +133,7 @@ setInitialPosition(context, double? latitud, double? longitud) async {
 
   _permissionGranted = await location.hasPermission();
   if (_permissionGranted == PermissionStatus.denied) {
-        Platform.isAndroid ? await openAlertDialogReturn(context, 'Se require utilzar la ubicación para inicilizar la camara del mapa') : false;
+        Platform.isAndroid ? await openAlertDialogReturn('Se require utilzar la ubicación para inicilizar la camara del mapa') : false;
 
     _permissionGranted = await location.requestPermission();
     if (_permissionGranted != PermissionStatus.granted) {

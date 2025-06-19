@@ -4,6 +4,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/message.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/models/propietario.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -38,28 +39,29 @@ class _AgregarPropietariosPageState extends State<AgregarPropietariosPage> {
           child: FutureBuilder(
             future: _usuarioService.obtenerPropietarios(),
             builder: (context, snapshot) {
-              if (snapshot.data == null) {
-                return Loading();
-              } else {
-                final propietarios = snapshot.data as List<Propietario>;
-                return Column(children: [
-                  Expanded(
-                    child: _SearchListView(
-                        obra: _obraService.obra, propietarios: propietarios),
-                  ),
-                  Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      child: MainButton(
-                          color: Helper.brandColors[0],
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(
-                                context, ObraPage.routeName,
-                                arguments: {'obraId': _obraService.obra.id});
-                          },
-                          text: 'Aceptar'))
-                ]);
+              if (snapshot.connectionState != ConnectionState.done)
+                return Loading(mensaje: 'Cargando...');
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasError) {
+                return ErrorPage(errorMsg: snapshot.error.toString());
               }
+              final propietarios = snapshot.data as List<Propietario>;
+              return Column(children: [
+                Expanded(
+                  child: _SearchListView(
+                      obra: _obraService.obra, propietarios: propietarios),
+                ),
+                Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                    child: MainButton(
+                        color: Helper.brandColors[0],
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(
+                              context, ObraPage.routeName,
+                              arguments: {'obraId': _obraService.obra.id});
+                        },
+                        text: 'Aceptar'))
+              ]);
             },
           ),
         ),
@@ -180,42 +182,38 @@ class __customTileAddedState extends State<_customTileAdded> {
   Future<void> cambiarAsignacion(
       BuildContext context, ObraService _ObraService) async {
     String mensaje = '';
-    bool loading = false;
     try {
       if (widget.agregado) {
-        openLoadingDialog(context, mensaje: 'Quitando propietario');
-        loading = true;
+        openLoadingDialog(mensaje: 'Quitando propietario');
         mensaje = 'Propietario quitado';
         final response = await _ObraService.quitarUsuario(
             widget.obra.id, widget.propietario.id);
-        
+
         widget.asignados
             .removeWhere((element) => element == widget.propietario.dni);
         widget.agregado = !widget.agregado;
         widget.obra.quitarPropietario(widget.propietario);
       } else {
-        openLoadingDialog(context, mensaje: 'Asociando propietario...');
-        loading = true;
+        openLoadingDialog(mensaje: 'Asociando propietario...');
         mensaje = 'Propietario asignado';
         final response = await _ObraService.agregarUsuario(
             widget.obra.id, widget.propietario.id);
-      
+
         widget.asignados.add(widget.propietario.dni);
         widget.agregado = !widget.agregado;
         widget.obra.sumarPropietario(widget.propietario);
       }
       _ObraService.notifyListeners();
-      closeLoadingDialog(context);
-      loading = false;
+      closeLoadingDialog();
       Helper.showSnackBar(context, mensaje, TextStyle(fontSize: 15),
           Duration(milliseconds: 500), null);
       setState(() {});
+      
     } catch (err) {
-      if (loading) {
-        closeLoadingDialog(context);
-      }
-      final mensaje = 'Error al asignar propietario';
-      openAlertDialog(context, mensaje);
+      print(err.toString());
+      closeLoadingDialog();
+      final mensaje = 'Error al asignar propietario ';
+      openAlertDialog(mensaje);
     }
   }
 }

@@ -128,16 +128,16 @@ class _Settings_FormState extends State<Settings_Form> {
     bool loading = false;
 
     try {
-      openLoadingDialog(context, mensaje: 'Actualizando...');
+      openLoadingDialog(mensaje: 'Actualizando...');
       loading = true;
       widget.config.send_ws_reports = habilitado;
       final response = await _configService.actualizar(widget.config.toMap());
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       habilita_reporte = widget.config.send_ws_reports;
       setState(() {});
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al actualizar',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al actualizar',
           subMensaje: err.toString());
     }
   }

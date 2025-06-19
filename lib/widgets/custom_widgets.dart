@@ -221,8 +221,7 @@ class CustomDrawer extends StatelessWidget {
                           Icon(Icons.logout, color: Helper.brandColors[8])
                         ]),
                     onPressed: () async {
-                      final confirma = await openDialogConfirmationReturn(
-                          context, 'Confirme para cerrar sesión');
+                      final confirma = await openDialogConfirmationReturn('Confirme para cerrar sesión');
                       confirma
                           ? await cerrarSesion(
                               _usuarioService, _pref, context, _socketService)
@@ -252,7 +251,7 @@ class CustomDrawer extends StatelessWidget {
       final response = await _usuarioService.deleteDevice(
           _pref.id, NotificationService.token!);
     } catch (err) {
-      openAlertDialog(context, 'No se ha desasociado el dispositivo',
+      openAlertDialog('No se ha desasociado el dispositivo',
           subMensaje: err.toString());
     }
     _pref.logged = false;
@@ -899,46 +898,51 @@ void openDialogConfirmation(
   }
 }
 
-Future<bool> openDialogConfirmationReturn(BuildContext context, String mensaje,
-    {String? subMensaje = null}) async {
-  if (Platform.isAndroid) {
-    return await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text(mensaje),
-              content: subMensaje == null ? null : Text(subMensaje),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
-                ),
-                TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text('Confirmar')),
-              ],
-            ));
+Future<bool> openDialogConfirmationReturn(String mensaje,
+    {String? subMensaje}) async {
+  if (Platform.isIOS) {
+    return await Get.dialog(
+          CupertinoAlertDialog(
+            title: Text(mensaje),
+            content: subMensaje == null ? null : Text(subMensaje),
+            actions: [
+              CupertinoDialogAction(
+                child: Text('Confirmar'),
+                onPressed: () => Get.back(result: true),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                child: Text('Cancelar'),
+                onPressed: () => Get.back(result: false),
+              ),
+            ],
+          ),
+          barrierDismissible: false,
+        ) ??
+        false; // Si se cierra sin elegir
   } else {
-    return await showCupertinoDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(
-        title: Text(mensaje),
-        content: subMensaje == null ? null : Text(subMensaje),
-        actions: [
-          CupertinoDialogAction(
-              child: Text('Confirmar'),
-              onPressed: () async => Navigator.pop(context, true)),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: Text('Cancelar'),
-            onPressed: () => Navigator.pop(context, false),
-          )
-        ],
-      ),
-    );
+    return await Get.dialog(
+          AlertDialog(
+            title: Text(mensaje),
+            content: subMensaje == null ? null : Text(subMensaje),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
+              ),
+              TextButton(
+                onPressed: () => Get.back(result: true),
+                child: Text('Confirmar'),
+              ),
+            ],
+          ),
+          barrierDismissible: false,
+        ) ??
+        false;
   }
 }
 
-openLoadingDialog(BuildContext context, {String mensaje = ''}) {
+openLoadingDialog_dep(BuildContext context, {String mensaje = ''}) {
   if (Platform.isAndroid) {
     showDialog(
         context: context,
@@ -952,7 +956,7 @@ openLoadingDialog(BuildContext context, {String mensaje = ''}) {
   return context;
 }
 
-void openLoadingDialogG({String mensaje = ''}) {
+void openLoadingDialog({String mensaje = '', subMensaje = ''}) {
   if (Platform.isAndroid) {
     Get.dialog(
       LoadingDialog(mensaje: mensaje),
@@ -966,9 +970,7 @@ void openLoadingDialogG({String mensaje = ''}) {
   }
 }
 
-
-
-void closeLoadingDialog(BuildContext context) {
+void closeLoadingDialog_dep(BuildContext context) {
   if (Platform.isAndroid) {
     Navigator.of(context, rootNavigator: true).pop();
   } else {
@@ -976,13 +978,13 @@ void closeLoadingDialog(BuildContext context) {
   }
 }
 
-void closeLoadingDialogG() {
+void closeLoadingDialog() {
   if (Get.isDialogOpen ?? false) {
     Get.back(); // Cierra el diálogo activo
   }
 }
 
-Future<bool> openAlertDialogReturnG(String mensaje, {String? subMensaje}) async {
+Future<bool> openAlertDialogReturn(String mensaje, {String? subMensaje}) async {
   return await Get.dialog<bool>(
     Platform.isAndroid
         ? AlertDialog(
@@ -1013,7 +1015,7 @@ Future<bool> openAlertDialogReturnG(String mensaje, {String? subMensaje}) async 
   ).then((value) => value ?? false); // por si Get.back() no envía resultado
 }
 
-void openAlertDialogG(String mensaje, {String? subMensaje}) {
+void openAlertDialog(String mensaje, {String? subMensaje}) {
   Get.dialog(
     Platform.isAndroid
         ? AlertDialog(
@@ -1044,8 +1046,7 @@ void openAlertDialogG(String mensaje, {String? subMensaje}) {
   );
 }
 
-
-Future<bool> openAlertDialogReturn(BuildContext context, String mensaje,
+Future<bool> openAlertDialogReturn_dep(BuildContext context, String mensaje,
     {String? subMensaje}) async {
   if (Platform.isAndroid) {
     return await showDialog(
@@ -1082,7 +1083,7 @@ Future<bool> openAlertDialogReturn(BuildContext context, String mensaje,
   }
 }
 
-void openAlertDialog(BuildContext context, String mensaje,
+void openAlertDialog_dep(BuildContext context, String mensaje,
     {String? subMensaje}) {
   if (Platform.isAndroid) {
     showDialog(
@@ -1916,8 +1917,7 @@ class _ListaTareaState extends State<ListaTarea> {
           widget.tareas.insert(newIndex, item);
           setState(() {});
         } catch (err) {
-          openAlertDialog(context, 'Error al ordenar',
-              subMensaje: err.toString());
+          openAlertDialog('Error al ordenar', subMensaje: err.toString());
           return;
         }
       },
@@ -1956,7 +1956,7 @@ class _TareaTileState extends State<_TareaTile> {
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
         child: GestureDetector(
             onLongPress: () {
-              openAlertDialog(context, 'Descripción',
+              openAlertDialog('Descripción',
                   subMensaje: widget.tarea.descripcion);
             },
             child: widget.edit
@@ -1999,7 +1999,7 @@ class _TareaTileState extends State<_TareaTile> {
           confirmDismiss: (DismissDirection direction) async {
             if (ultimaTarea(
                 widget.etapaId, widget.tarea.subetapa, widget.tarea.id)) {
-              openAlertDialog(context, 'No se puede dejar sin tareas');
+              openAlertDialog('No se puede dejar sin tareas');
 
               return false;
             }
@@ -2064,7 +2064,7 @@ class _TareaTileState extends State<_TareaTile> {
   }
 
   Future<void> actualizaTareaBD(BuildContext context, bool? value) async {
-    openLoadingDialog(context, mensaje: 'Actualizando...');
+    openLoadingDialog(mensaje: 'Actualizando...');
     final ts = DateTime.now().millisecondsSinceEpoch;
     try {
       final response = await _obraService.actualizarTarea(
@@ -2077,13 +2077,14 @@ class _TareaTileState extends State<_TareaTile> {
           new Preferences().id,
           0,
           ts);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       widget.tarea.realizado = value!;
       widget.tarea.tsRealizado = ts;
       _obraService.notifyListeners();
     } catch (err) {
-      openAlertDialog(context, 'Error al actualizar tarea',
-          subMensaje: err.toString());
+      closeLoadingDialog();
+
+      openAlertDialog('Error al actualizar tarea', subMensaje: err.toString());
     }
 
     setState(() {});
@@ -2101,22 +2102,21 @@ class _TareaTileState extends State<_TareaTile> {
 
     if (_obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
         1) {
-      openAlertDialog(context, 'No se puede dejar sin tareas');
+      openAlertDialog('No se puede dejar sin tareas');
       return;
     }
 
-    openLoadingDialog(context, mensaje: 'Eliminando tarea...');
+    openLoadingDialog(mensaje: 'Eliminando tarea...');
     try {
       final response =
           await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
       _obraService.obra.etapas[index].subetapas[indexSub].tareas
           .removeAt(indexTarea);
 
-      closeLoadingDialog(context);
+      closeLoadingDialog();
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al eliminar tarea',
-          subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog('Error al eliminar tarea', subMensaje: err.toString());
     }
   }
 

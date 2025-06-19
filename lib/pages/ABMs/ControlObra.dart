@@ -297,19 +297,19 @@ class _EtapasViewState extends State<_EtapasView> {
 
   actualizaEtapa(int i) async {
     try {
-      openAlertDialog(context, 'Actualizando etapa...');
+      openLoadingDialog( mensaje: 'Actualizando etapa...');
       final response = await _etapaService.actualizarEtapa(widget.etapas[i]);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al actualizar etapa',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al actualizar etapa',
           subMensaje: err.toString());
     }
   }
 
   borrarEtapa(int index) async {
     bool confirm =
-        await openDialogConfirmationReturn(context, "Seguro que quiere borrar");
+        await openDialogConfirmationReturn("Seguro que quiere borrar");
     if (!confirm) return;
 
     widget.etapas.removeAt(index);
@@ -482,21 +482,21 @@ class _SubetapasViewState extends State<_SubetapasView> {
 
   actualizarSubetapa(int i) async {
     try {
-      openAlertDialog(context, 'Actualizando etapa...');
+      openLoadingDialog( mensaje: 'Actualizando etapa...');
       final response =
           await _subetapaService.actualizarSubetapa(widget.subetapas[i]);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
     } catch (err) {
-      closeLoadingDialog(context);
+      closeLoadingDialog();
 
-      openAlertDialog(context, 'Error al actualizar etapa',
+      openAlertDialog( 'Error al actualizar etapa',
           subMensaje: err.toString());
     }
   }
 
   borrarSubetapa(int index) async {
     bool confirm =
-        await openDialogConfirmationReturn(context, "Seguro que quiere borrar");
+        await openDialogConfirmationReturn("Seguro que quiere borrar");
     if (!confirm) return;
 
     widget.subetapas.removeAt(index);
@@ -775,7 +775,7 @@ class _TareasViewState extends State<_TareasView> {
           null,
           null);
     } catch (err) {
-      openAlertDialog(context, 'Error al actualizar tarea',
+      openAlertDialog('Error al actualizar tarea',
           subMensaje: err.toString());
       return;
     }
@@ -796,7 +796,7 @@ class _TareasViewState extends State<_TareasView> {
 
   borrarSubetapa(int index) async {
     bool confirm =
-        await openDialogConfirmationReturn(context, "Seguro que quiere borrar");
+        await openDialogConfirmationReturn("Seguro que quiere borrar");
     if (!confirm) return;
 
     widget.tareas.removeAt(index);

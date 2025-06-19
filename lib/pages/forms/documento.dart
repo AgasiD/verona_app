@@ -89,95 +89,91 @@ class _FormState extends State<_Form> {
     final driveId = arguments['driveId'];
 
     submitAction = () async {
-      if (fileType == '1') {
-        if (imagenSelected) {
-          if (txtCtrlName.text.trim() != '') {
-            openDialogConfirmation(context, (context) async {
-              String msg = 'Subiendo imagenes...';
-              openLoadingDialog(context, mensaje: msg);
-              try {
-                final res = await _driveService.grabarImagenes(
-                    driveId, txtCtrlName.text == '' ? null : txtCtrlName.text);
-                if ((habilitaPropietario && res.length > 0) ||
-                    _pref.role == 3) {
-                  // modificar obra
-                  final response = await _obraService.addEnabledFiles(
-                      res, _obraService.obra.id);
-                  _obraService.obra.enabledFiles
-                      .insertAll(_obraService.obra.enabledFiles.length, res);
+      try {
+        if (fileType == '1') {
+          if (imagenSelected) {
+            if (txtCtrlName.text.trim() != '') {
+              openDialogConfirmation(context, (context) async {
+                String msg = 'Subiendo imagenes...';
+                openLoadingDialog(mensaje: msg);
+                try {
+                  final res = await _driveService.grabarImagenes(driveId,
+                      txtCtrlName.text == '' ? null : txtCtrlName.text);
+                  if ((habilitaPropietario && res.length > 0) ||
+                      _pref.role == 3) {
+                    // modificar obra
+                    final response = await _obraService.addEnabledFiles(
+                        res, _obraService.obra.id);
+                    _obraService.obra.enabledFiles
+                        .insertAll(_obraService.obra.enabledFiles.length, res);
+                  }
+                  closeLoadingDialog();
+                  openAlertDialog('Imagenes subidas');
+                  Timer(Duration(milliseconds: 750),
+                      () => Navigator.pop(context));
+                  Timer(Duration(milliseconds: 750),
+                      () => Navigator.pop(context));
+                } catch (err) {
+                  closeLoadingDialog();
+                  openAlertDialog('Error al subir imagen',
+                      subMensaje: err.toString());
                 }
-                closeLoadingDialog(context);
-                openAlertDialog(context, 'Imagenes subidas');
-                Timer(
-                    Duration(milliseconds: 750), () => Navigator.pop(context));
-                Timer(
-                    Duration(milliseconds: 750), () => Navigator.pop(context));
-              } catch (err) {
-                closeLoadingDialog(context);
-                openAlertDialog(context, 'Error al subir imagen',
-                    subMensaje: err.toString());
-              }
-            }, '¿Seguro que desea subir este documento?');
+              }, '¿Seguro que desea subir este documento?');
+            } else {
+              openAlertDialog('Debe ingresar un nombre al documento');
+            }
           } else {
-            openAlertDialog(context, 'Debe ingresar un nombre al documento');
+            openAlertDialog('No se ha seleccionado ningun documento');
           }
-        } else {
-          openAlertDialog(context, 'No se ha seleccionado ningun documento');
+          ;
         }
-        ;
-      }
-      if (fileType == '2') {
-        if (documentSelected) {
-          if (txtCtrlName.text.trim() != '') {
-            openDialogConfirmation(context, (context) async {
-              openLoadingDialog(context, mensaje: 'Subiendo documento...');
-              MyResponse response;
-              try {
-                final res = await _driveService.grabarDocumento(
-                    txtCtrlName.text,
-                    _driveService.getExtension(),
-                    _obraService.obra.driveFolderId!);
+        if (fileType == '2') {
+          if (documentSelected) {
+            if (txtCtrlName.text.trim() != '') {
+              openDialogConfirmation(context, (context) async {
+                openLoadingDialog(mensaje: 'Subiendo documento...');
+                MyResponse response;
+                try {
+                  final res = await _driveService.grabarDocumento(
+                      txtCtrlName.text,
+                      _driveService.getExtension(),
+                      _obraService.obra.driveFolderId!);
 
-                closeLoadingDialog(context);
-                openAlertDialog(context, 'Documento subido');
-                Timer(
-                    Duration(milliseconds: 750),
-                    () => Navigator.pushReplacementNamed(
-                        context, DocumentosPage.routeName,
-                        arguments: {'driveId': driveId}));
-              } catch (err) {
-                closeLoadingDialog(context);
-                openAlertDialog(context, 'Error al subir imagen',
-                    subMensaje: err.toString());
-              }
-            }, '¿Seguro que desea subir este documento?');
+                  closeLoadingDialog();
+                  openAlertDialog('Documento subido');
+                  Timer(
+                      Duration(milliseconds: 750),
+                      () => Navigator.pushReplacementNamed(
+                          context, DocumentosPage.routeName,
+                          arguments: {'driveId': driveId}));
+                } catch (err) {
+                  closeLoadingDialog();
+                  openAlertDialog( 'Error al subir imagen',
+                      subMensaje: err.toString());
+                }
+              }, '¿Seguro que desea subir este documento?');
+            } else {
+              openAlertDialog('Debe ingresar un nombre al documento');
+            }
           } else {
-            openAlertDialog(context, 'Debe ingresar un nombre al documento');
+            openAlertDialog('No se ha seleccionado ningun documento');
           }
-        } else {
-          openAlertDialog(context, 'No se ha seleccionado ningun documento');
+        } else if (fileType == '3') {
+          if (txtCtrlName.text.trim() == '') {
+            openAlertDialog('No se ha asignado nombre a la carpeta');
+            return;
+          }
+          openLoadingDialog(mensaje: 'Creando carpeta...');
+          final res =
+              await _driveService.crearCarpeta(txtCtrlName.text, driveId);
+          closeLoadingDialog();
+          await openAlertDialogReturn('Carpeta generado con éxito');
+          Navigator.pushReplacementNamed(context, DocumentosPage.routeName,
+              arguments: {'driveId': driveId});
         }
-      } else if (fileType == '3') {
-        if (txtCtrlName.text.trim() == '') {
-          openAlertDialog(context, 'No se ha asignado nombre a la carpeta');
-          return;
-        }
-        openLoadingDialog(context, mensaje: 'Creando carpeta...');
-        final res = await _driveService.crearCarpeta(txtCtrlName.text, driveId);
-        closeLoadingDialog(context);
-
-        if (res.fallo) {
-          openAlertDialog(context, 'No se pudo crear la carpeta');
-        } else {
-          openLoadingDialog(context, mensaje: 'Carpeta generado con éxito');
-
-          Timer(Duration(milliseconds: 750), () => closeLoadingDialog(context));
-          Timer(
-              Duration(milliseconds: 750),
-              () => Navigator.pushReplacementNamed(
-                  context, DocumentosPage.routeName,
-                  arguments: {'driveId': driveId}));
-        }
+      } catch (err) {
+        closeLoadingDialog();
+        openAlertDialog(err.toString());
       }
     };
 
@@ -353,7 +349,7 @@ class _FormState extends State<_Form> {
                             openBottomSheet(context, 'Subir documento',
                                 'Seleccionar método', acciones);
                           } catch (e) {
-                            openAlertDialog(context, e.toString());
+                            openLoadingDialog(mensaje: e.toString());
                           }
                         }))
                 : Container(),

@@ -58,7 +58,7 @@ class _ObrasPageState extends State<ObrasPage> {
       _refreshController.refreshCompleted();
     } catch (err) {
       _refreshController.loadFailed();
-      openAlertDialog(context, 'Error al actualizar obras');
+      openAlertDialog('Error al actualizar obras');
     }
   }
 
@@ -278,7 +278,8 @@ class __SearchListViewState extends State<_SearchListView> {
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(mensaje: 'Recuperando obras');
-              } else if (snapshot.hasError) {
+              }
+              if (snapshot.hasError) {
                 return SizedBox(
                   height: 500,
                   child: Column(
@@ -291,21 +292,21 @@ class __SearchListViewState extends State<_SearchListView> {
                     ],
                   ),
                 );
-              } else {
-                try {
-                  final response = snapshot.data;
-                  obras = (response as List<dynamic>)
-                      .map((e) => Obra.fromMap(e))
-                      .toList();
-                  obrasFiltradas =  obras;
-                  return _CustomObras(
-                    obras: obras,
-                    obrasFiltradas: obras,
-                    openDrawer: widget.openDrawer,
-                  );
-                } catch (err) {
-                  return ErrorPage(errorMsg: err.toString(), page: false);
-                }
+              }
+
+              try {
+                final response = snapshot.data;
+                obras = (response as List<dynamic>)
+                    .map((e) => Obra.fromMap(e))
+                    .toList();
+                obrasFiltradas = obras;
+                return _CustomObras(
+                  obras: obras,
+                  obrasFiltradas: obras,
+                  openDrawer: widget.openDrawer,
+                );
+              } catch (err) {
+                return ErrorPage(errorMsg: err.toString(), page: false);
               }
             }));
   }

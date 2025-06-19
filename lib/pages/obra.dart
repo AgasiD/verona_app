@@ -206,27 +206,26 @@ class ObraPage extends StatelessWidget {
   eliminarObra(context, obraId) async {
     bool loading = true;
     final confirm = await openDialogConfirmationReturn(
-        context, 'Confirmar para eliminar obra');
+        'Confirmar para eliminar obra');
     if (!confirm) {
       loading = false;
       return;
     }
     try {
       final _obraService = Provider.of<ObraService>(context, listen: false);
-      openLoadingDialog(context,
+      openLoadingDialog(
           mensaje: 'Eliminando obra... esto puede demorar');
       loading = true;
       await _obraService.eliminarObra(obraId);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       loading = false;
-      await openAlertDialogReturn(context, 'Obra eliminada con éxito');
+      await openAlertDialogReturn('Obra eliminada con éxito');
       Navigator.pushReplacementNamed(
         context,
         ObrasPage.routeName,
       );
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al eliminar obra',
+      closeLoadingDialog();openAlertDialog('Error al eliminar obra',
           subMensaje: err.toString());
     }
   }
@@ -451,7 +450,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
             if (await canLaunchUrl(_url))
               await launchUrl(_url, mode: LaunchMode.externalApplication);
             else
-              openAlertDialog(context, 'No se puede visualizar el documento');
+              openAlertDialog('No se puede visualizar el documento');
           } else {
             Navigator.pushNamed(context, DocumentosPage.routeName,
                 arguments: {'driveId': obra.driveFolderId});
@@ -473,7 +472,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
             if (await canLaunchUrl(_url))
               await launchUrl(_url, mode: LaunchMode.externalApplication);
             else
-              openAlertDialog(context, 'No se puede visualizar el documento');
+              openAlertDialog( 'No se puede visualizar el documento');
           } else {
             Navigator.pushNamed(context, ImgGalleryPage.routeName,
                 arguments: {'driveId': obra.folderImages});
@@ -511,15 +510,15 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
           accion: () async {
             try {
               if (obra.articulosId == '') {
-                openAlertDialog(context, 'No hay documento asignado');
+                openAlertDialog( 'No hay documento asignado');
                 return;
               }
-              openLoadingDialog(context, mensaje: 'Cargando archivo...');
+              openLoadingDialog(mensaje: 'Cargando archivo...');
               final _obraService =
                   Provider.of<ObraService>(context, listen: false);
               final response = await _obraService
                   .obtenerObraArticuloFile(obra.id) as MyResponse;
-              closeLoadingDialog(context);
+              closeLoadingDialog();
               final file = response.data;
               Uri _url;
               switch (file["mimeType"]) {
@@ -534,7 +533,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
               }
               await lanzarUrl(_url);
             } catch (err) {
-              openAlertDialog(context, 'Hubo en error al cargar el archivo.',
+              openAlertDialog('Hubo en error al cargar el archivo.',
                   subMensaje: err.toString());
               return;
             }
@@ -554,7 +553,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
           if (await canLaunchUrl(_url))
             await launchUrl(_url, mode: LaunchMode.externalApplication);
           else
-            openAlertDialog(context, 'No se puede visualizar el documento');
+            openAlertDialog('No se puede visualizar el documento');
         },
       );
       items.add(estado_planos);
@@ -609,7 +608,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
     if (await canLaunchUrl(_url))
       await launchUrl(_url, mode: LaunchMode.externalApplication);
     else
-      openAlertDialog(context, 'No se puede visualizar el documento');
+      openAlertDialog('No se puede visualizar el documento');
   }
 }
 

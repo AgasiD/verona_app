@@ -497,7 +497,7 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
   borrarInactividad(int index) async {
     String nombre = widget.inactividades[index].nombre;
     bool confirm =
-        await openDialogConfirmationReturn(context, "Seguro que quiere borrar");
+        await openDialogConfirmationReturn("Seguro que quiere borrar");
     if (!confirm) return;
     try {
       final response =
@@ -507,7 +507,7 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
       widget.inactividades.removeAt(index);
       setState(() {});
     } catch (err) {
-      openAlertDialog(context, 'Error al borrar inactividad',
+      openAlertDialog('Error al borrar inactividad',
           subMensaje: err.toString());
     }
   }

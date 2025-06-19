@@ -137,8 +137,7 @@ class _CustomListViewState extends State<_CustomListView> {
                   if (await canLaunchUrl(_url))
                     await launchUrl(_url, mode: LaunchMode.externalApplication);
                   else
-                    openAlertDialog(
-                        context, 'No se puede visualizar el documento');
+                    openAlertDialog('No se puede visualizar el documento');
                 };
               }
               return _CustomListTile(

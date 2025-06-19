@@ -60,26 +60,26 @@ class _FormState extends State<_Form> {
         if (txtCtrlName.text.trim() != '') {
           openDialogConfirmation(context, (context) async {
             String msg = 'Subiendo imagenes...';
-            openLoadingDialog(context, mensaje: msg);
+            openLoadingDialog(mensaje: msg);
             MyResponse response;
             try {
               final res = await _driveService.grabarImagenes(
                   driveId, txtCtrlName.text == '' ? null : txtCtrlName.text);
-              closeLoadingDialog(context);
-              openAlertDialog(context, 'Imagenes subidas');
+              closeLoadingDialog();
+              openAlertDialog( 'Imagenes subidas');
               Timer(Duration(milliseconds: 750), () => Navigator.pop(context));
               Timer(Duration(milliseconds: 750), () => Navigator.pop(context));
             } catch (err) {
-              closeLoadingDialog(context);
-              openAlertDialog(context, 'Error al subir imagen',
+              closeLoadingDialog();
+              openAlertDialog('Error al subir imagen',
                   subMensaje: err.toString());
             }
           }, '¿Seguro que desea subir este documento?');
         } else {
-          openAlertDialog(context, 'Debe ingresar un nombre al documento');
+          openAlertDialog('Debe ingresar un nombre al documento');
         }
       } else {
-        openAlertDialog(context, 'No se ha seleccionado ningun documento');
+        openAlertDialog('No se ha seleccionado ningun documento');
       }
     };
 
@@ -150,7 +150,7 @@ class _FormState extends State<_Form> {
                       });
                     }
                   } catch (e) {
-                    openAlertDialog(context, e.toString());
+                    openLoadingDialog(mensaje: e.toString());
                   }
                 }),
           ),

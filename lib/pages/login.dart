@@ -128,8 +128,7 @@ class __FormState extends State<_Form> {
       text = 'Ingresar';
       setState(() {});
     } catch (err) {
-      openAlertDialog(
-          context, 'No fue posible guardar el dispositivo utilizado');
+      openAlertDialog('No fue posible guardar el dispositivo utilizado');
     }
   }
 

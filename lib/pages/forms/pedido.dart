@@ -627,20 +627,20 @@ class _FormState extends State<_Form> {
   Future<void> grabar(_obraService, _driveService) async {
     {
       try {
-        openLoadingDialogG(mensaje: 'Procesando pedido...');
+        openLoadingDialog(mensaje: 'Procesando pedido...');
         final response = await grabarPedido(_obraService.obra.id,
             areaTxtController, _obraService, _driveService);
-        closeLoadingDialogG();
+        closeLoadingDialog();
         if (response[0]) throw new Exception(response[1]);
 
-        await openAlertDialogReturnG('Pedido guardado con éxito');
+        await openAlertDialogReturn('Pedido guardado con éxito');
         Navigator.pop(
           context,
           PedidosPage.routeName,
         );
       } catch (err) {
-        closeLoadingDialogG();
-        openAlertDialogG('Error al grabar pedido',
+        closeLoadingDialog();
+        openAlertDialog('Error al grabar pedido',
             subMensaje: err.toString());
       }
     }
@@ -697,7 +697,7 @@ class _FormState extends State<_Form> {
             arguments: {'imagenId': widget.pedido!.imagenId[0]});
       }
     } catch (e) {
-      openAlertDialog(context, e.toString());
+      openAlertDialog( e.toString());
     }
   }
 
@@ -899,7 +899,7 @@ class _FormState extends State<_Form> {
         'chatName': response.data['chatName'],
       });
     } catch (err) {
-      openAlertDialog(context, 'Error al crear el chat',
+      openAlertDialog( 'Error al crear el chat',
           subMensaje: err.toString());
     }
   }
@@ -948,13 +948,13 @@ class _FormState extends State<_Form> {
   }
 
   descargarPDF(BuildContext context) async {
-    openLoadingDialog(context, mensaje: 'Descargando archivo...');
+    openLoadingDialog(mensaje: 'Descargando archivo...');
     try {
       final genero = await PDFService.generarPDFPedido(widget.pedido!);
       if (!genero[0]) {
         throw Exception(genero[1]);
       }
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       var downloadsDirectory = await getTemporaryDirectory();
 
       Helper.showSnackBar(
@@ -969,8 +969,8 @@ class _FormState extends State<_Form> {
             },
           ));
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'No se pudo descargar archivo',
+      closeLoadingDialog();
+      openAlertDialog( 'No se pudo descargar archivo',
           subMensaje: err.toString());
     }
   }
@@ -1025,14 +1025,14 @@ class _FormState extends State<_Form> {
     for (var img in _driveService.imgsPedido!) {
       final tituloImg =
           'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)';
-      openLoadingDialog(context,
+      openLoadingDialog(
           mensaje:
               'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
       final idImagen =
           await _driveService.grabarImagenPedido(tituloImg, idDrive!, img!);
       idsImagenes.add(idImagen);
       index++;
-      closeLoadingDialog(context);
+      closeLoadingDialog();
     }
     return idsImagenes;
   }

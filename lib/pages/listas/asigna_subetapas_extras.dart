@@ -5,6 +5,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/models/subetapa.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
 import 'package:verona_app/services/etapa_service.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -44,30 +45,34 @@ class SubetapasExtrasPage extends StatelessWidget {
             future:
                 _subetapasService.obtenerExtras(etapaId, _obraService.obra.id),
             builder: (context, snapshot) {
-              if (snapshot.data == null) {
+              if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(
-                  mensaje: 'Cargando subetapas...',
+                  mensaje: 'Recuperando subetapas...',
                 );
-              } else {
-                final response = snapshot.data as MyResponse;
-                final lista = response.data as List<dynamic>;
-                subetapas = lista.map((e) => Subetapa.fromJson(e)).toList();
-                subetapas
-                    .sort(((a, b) => a.descripcion.compareTo(b.descripcion)));
-                ordenSug = subetapas.length;
-                final indexEtapa = _obraService.obra.etapas
-                    .indexWhere((element) => element.id == etapaId);
-                _obraService.obra.etapas[indexEtapa];
-                final subetapasAsignadas = _obraService
-                    .obra.etapas[indexEtapa].subetapas
-                    .map((etapa) => etapa.id)
-                    .toList();
-
-                return _SearchListGroupView(
-                    etapaId: etapaId,
-                    subetapas: subetapas,
-                    subetapasAsignadas: subetapasAsignadas);
+              } else if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasError) {
+                return ErrorPage(
+                  errorMsg: snapshot.error.toString(),
+                );
               }
+              final response = snapshot.data as MyResponse;
+              final lista = response.data as List<dynamic>;
+              subetapas = lista.map((e) => Subetapa.fromJson(e)).toList();
+              subetapas
+                  .sort(((a, b) => a.descripcion.compareTo(b.descripcion)));
+              ordenSug = subetapas.length;
+              final indexEtapa = _obraService.obra.etapas
+                  .indexWhere((element) => element.id == etapaId);
+              _obraService.obra.etapas[indexEtapa];
+              final subetapasAsignadas = _obraService
+                  .obra.etapas[indexEtapa].subetapas
+                  .map((etapa) => etapa.id)
+                  .toList();
+
+              return _SearchListGroupView(
+                  etapaId: etapaId,
+                  subetapas: subetapas,
+                  subetapasAsignadas: subetapasAsignadas);
             },
           ),
         ),
@@ -147,19 +152,18 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
   eliminarSubetapa(obraId, etapaId, subetapaId, index) async {
     final _subetapasService =
         Provider.of<SubetapaService>(context, listen: false);
-    openLoadingDialog(context, mensaje: 'Eliminando subetapa...');
+    openLoadingDialog(mensaje: 'Eliminando subetapa...');
     final subetapa = widget.subetapas[index];
     try {
       final response = await _subetapasService.eliminarSubetapa(subetapaId);
       widget.subetapas.removeAt(index);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
 
       setState(() {});
     } catch (err) {
-      closeLoadingDialog(context);
+      closeLoadingDialog();
 
-      openAlertDialog(context, 'Error al eliminar subetapa',
-          subMensaje: err.toString());
+      openAlertDialog('Error al eliminar subetapa', subMensaje: err.toString());
     }
   }
 
@@ -220,7 +224,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
 
     return Dismissible(
         confirmDismiss: (direction) {
-          return openDialogConfirmationReturn(context, 'Confirme para borrar',
+          return openDialogConfirmationReturn('Confirme para borrar',
               subMensaje: 'Se borrará permanentemente de la base de datos');
         },
         background: Container(
@@ -243,7 +247,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
   asignar(snackText) async {
     if (!widget.asignado) {
       // Agregar tarea
-      openLoadingDialog(context, mensaje: 'Adjuntando subetapa...');
+      openLoadingDialog(mensaje: 'Adjuntando subetapa...');
       try {
         final response = await _obraService.asignarSubEtapa(
             widget.etapaId, subetapa.id, _obraService.obra.id);
@@ -253,20 +257,19 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
         _obraService.obra.etapas[indexEtapa]
             .sumarSubetapa(Subetapa.fromJson(response.data));
         widget.asignado = true;
-        closeLoadingDialog(context);
+        closeLoadingDialog();
         snackText = 'Subetapa asignada';
         Helper.showSnackBar(
             context, snackText, null, Duration(milliseconds: 700), null);
 
         return;
       } catch (err) {
-        closeLoadingDialog(context);
-        openAlertDialog(context, 'Error al asignar subetapa',
-            subMensaje: err.toString());
+        closeLoadingDialog();
+        openAlertDialog('Error al asignar subetapa', subMensaje: err.toString());
       }
     }
     //Quitar tarea
-    openLoadingDialog(context, mensaje: 'Quitando etapa...');
+    openLoadingDialog(mensaje: 'Quitando etapa...');
 
     try {
       final response = await _obraService.quitarSubetapa(
@@ -276,13 +279,12 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
           .indexWhere((element) => element.id == widget.etapaId);
       _obraService.obra.etapas[indexEtapa].quitarSubEtapa(subetapa.id);
       widget.asignado = false;
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       Helper.showSnackBar(
           context, snackText, null, Duration(milliseconds: 700), null);
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al quitar etapa',
-          subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog('Error al quitar etapa', subMensaje: err.toString());
     }
 
     // setState(() {});

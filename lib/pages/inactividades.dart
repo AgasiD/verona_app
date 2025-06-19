@@ -137,7 +137,7 @@ class __InactividadTileState extends State<_InactividadTile> {
       ),
       key: ValueKey<int>(widget.index),
       confirmDismiss: (direction) async => await openDialogConfirmationReturn(
-          context, 'Confirme para eliminar inactividad'),
+          'Confirme para eliminar inactividad'),
       onDismissed: (direction) async => widget.deleteFunction(
           widget.index, widget.inactividad.id, widget.obraId),
       child: Padding(

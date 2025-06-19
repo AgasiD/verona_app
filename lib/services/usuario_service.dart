@@ -12,9 +12,14 @@ class UsuarioService extends ChangeNotifier {
   late Miembro usuario;
   // late List<Map<String, dynamic>> novedades;
   obtenerPropietarios() async {
-    final response = await this._http.get('$_endpoint/propietario');
-    final lista = response["data"];
-    final list = (lista as List<dynamic>)
+    final response = await this._http.get('$_endpoint/propietarios');
+
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    final list = (data as List<dynamic>)
         .map((json) => Propietario.fromJson(json))
         .toList();
     return list;
@@ -43,7 +48,7 @@ class UsuarioService extends ChangeNotifier {
     return list;
   }
 
-    obtenerPersonal({roles = null}) async {
+  obtenerPersonal({roles = null}) async {
     final body = {'roles': roles};
     final response = await this._http.post('$_endpoint/profesionales', body);
     final data = json.decode(response.body);
@@ -144,8 +149,7 @@ class UsuarioService extends ChangeNotifier {
         throw new Exception('Error ${data['message']} ${response.statusCode}');
       }
       return data;
-    } catch (err) {
-    }
+    } catch (err) {}
   }
 
   setTokenDevice(String usuarioId, String tokenDevice) async {

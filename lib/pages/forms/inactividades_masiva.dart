@@ -74,11 +74,11 @@ class _FormState extends State<_Form> {
     Color colorHint = Helper.brandColors[3];
     submitAction = (idsObras, idInactividad, selectedFecha) async {
       final confirm = await openDialogConfirmationReturn(
-          context, '¿Seguro que desea generar la inactividad?');
+          '¿Seguro que desea generar la inactividad?');
 
       if (!confirm) return;
 
-      openLoadingDialog(context,
+      openLoadingDialog(
           mensaje: 'Guardando inactividad... Esta acción puede demorar');
 
       final inactividad = new Inactividad(
@@ -93,11 +93,11 @@ class _FormState extends State<_Form> {
       try {
         final response = await _obraService.grabarInactividades(
             idsObras, inactividad.toMap());
-        closeLoadingDialog(context);
-        await openAlertDialogReturn(context, 'Inactividad generada');
+        closeLoadingDialog();
+        await openAlertDialogReturn('Inactividad generada');
         Navigator.pop(context, true);
       } catch (err) {
-        openAlertDialog(context, 'No se pudo grabar la inactividad',
+        openAlertDialog('No se pudo grabar la inactividad',
             subMensaje: err.toString());
       }
     };

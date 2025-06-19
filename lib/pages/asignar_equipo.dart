@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -22,45 +23,50 @@ class AsignarEquipoPage extends StatelessWidget {
           child: FutureBuilder(
             future: _usuarioService.obtenerPersonal(),
             builder: (context, snapshot) {
-              if (snapshot.data == null) {
-                return Loading();
-              } else {
-                final profesionales = snapshot.data as List<Miembro>;
-                Map<String, List<Miembro>> profesiones;
-
-                final arq = profesionales
-                    .where((e) => e.role == 2 || e.role == 8)
-                    .toList();
-                final obreros = profesionales
-                    .where((e) => e.role == 4 && !e.externo)
-                    .toList();
-                final comp = profesionales.where((e) => e.role == 5).toList();
-                final delivery =
-                    profesionales.where((e) => e.role == 6).toList();
-                profesiones = {
-                  'Arquitectos': arq,
-                  'Contratistas': obreros,
-                  'Compradores': comp,
-                  'Repartidor': delivery
-                }; //Contratistas
-
-                final grupos = [
-                  'Arquitectos',
-                  'Contratistas',
-                  'Compradores',
-                  'Repartidor'
-                ];
-
-                final icons = {
-                  'Arquitectos': Icons.architecture_rounded,
-                  'Contratistas': Icons.construction_outlined,
-                  'Compradores': Icons.card_travel,
-                  'Repartidor': Icons.delivery_dining_rounded,
-                };
-
-                return _SearchListGroupView(
-                    grupos: grupos, datos: profesiones, icons: icons);
+              if (snapshot.connectionState != ConnectionState.done) {
+                return Loading(
+                  mensaje: 'Recupernado etapas...',
+                );
+              } else if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasError) {
+                return ErrorPage(
+                  errorMsg: snapshot.error.toString(),
+                );
               }
+              final profesionales = snapshot.data as List<Miembro>;
+              Map<String, List<Miembro>> profesiones;
+
+              final arq = profesionales
+                  .where((e) => e.role == 2 || e.role == 8)
+                  .toList();
+              final obreros = profesionales
+                  .where((e) => e.role == 4 && !e.externo)
+                  .toList();
+              final comp = profesionales.where((e) => e.role == 5).toList();
+              final delivery = profesionales.where((e) => e.role == 6).toList();
+              profesiones = {
+                'Arquitectos': arq,
+                'Contratistas': obreros,
+                'Compradores': comp,
+                'Repartidor': delivery
+              }; //Contratistas
+
+              final grupos = [
+                'Arquitectos',
+                'Contratistas',
+                'Compradores',
+                'Repartidor'
+              ];
+
+              final icons = {
+                'Arquitectos': Icons.architecture_rounded,
+                'Contratistas': Icons.construction_outlined,
+                'Compradores': Icons.card_travel,
+                'Repartidor': Icons.delivery_dining_rounded,
+              };
+
+              return _SearchListGroupView(
+                  grupos: grupos, datos: profesiones, icons: icons);
             },
           ),
         ),
@@ -313,20 +319,20 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
         onTap: () async {
           if (!asignado) {
             // ASOCIAR PERSONAL
-            openLoadingDialog(context, mensaje: 'Asignando usuario...');
+            openLoadingDialog(mensaje: 'Asignando usuario...');
             final response = await _obraService.agregarUsuario(
                 _obraService.obra.id, widget.personal.id);
-            closeLoadingDialog(context);
+            closeLoadingDialog();
             _obraService.obra.sumarPersonal(widget.personal);
             snackText =
                 '${widget.personal.nombre} ${widget.personal.apellido} fue asignado al equipo';
           } else {
             //DESASOCIAR PERSONAL
-            openLoadingDialog(context, mensaje: 'Desasociando...');
+            openLoadingDialog(mensaje: 'Desasociando...');
             final response = await _obraService.quitarUsuario(
                 _obraService.obra.id, widget.personal.id);
             _obraService.obra.quitarPersonal(widget.personal);
-            closeLoadingDialog(context);
+            closeLoadingDialog();
             Helper.showSnackBar(
                 context, snackText, null, Duration(milliseconds: 700), null);
           }

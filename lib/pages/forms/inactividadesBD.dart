@@ -69,20 +69,20 @@ class _FormState extends State<_Form> {
       submitAction = () async {
         inactividad.nombre = txtCtrlName.text;
         bool confirm = await openDialogConfirmationReturn(
-            context, '¿Seguro que desea actualizar la inactividad?');
+            '¿Seguro que desea actualizar la inactividad?');
         if (!confirm) return;
-        openLoadingDialog(context, mensaje: 'Actualizando inactividad...');
+        openLoadingDialog(mensaje: 'Actualizando inactividad...');
 
         try {
           final response =
               await _inactividadService.grabar(inactividad.toMap());
-          closeLoadingDialog(context);
+          closeLoadingDialog();
 
-          await openAlertDialogReturn(context, 'Inactividad actualizada');
+          await openAlertDialogReturn('Inactividad actualizada');
           Navigator.pop(context);
         } catch (err) {
-          closeLoadingDialog(context);
-          openAlertDialog(context, 'No se pudo grabar la inactividad',
+          closeLoadingDialog();
+          openAlertDialog('No se pudo grabar la inactividad',
               subMensaje: err.toString());
         }
       };
@@ -92,10 +92,10 @@ class _FormState extends State<_Form> {
 
       submitAction = () async {
         final confirm = await openDialogConfirmationReturn(
-            context, '¿Seguro que desea generar la inactividad?');
+             '¿Seguro que desea generar la inactividad?');
         if (!confirm) return;
 
-        openLoadingDialog(context, mensaje: 'Guardando inactividad...');
+        openLoadingDialog(mensaje: 'Guardando inactividad...');
 
         final inactividad = new InactividadBD(
             nombre: txtCtrlName.text,
@@ -106,11 +106,11 @@ class _FormState extends State<_Form> {
           final response =
               await _inactividadService.grabar(inactividad.toMap());
 
-          await openAlertDialogReturn(context, 'Inactividad generada');
+          await openAlertDialogReturn('Inactividad generada');
           Navigator.pop(context, InactividadBD.fromMap(response.data));
         } catch (err) {
-          closeLoadingDialog(context);
-          openAlertDialog(context, 'No se pudo grabar la inactividad',
+          closeLoadingDialog();
+          openAlertDialog('No se pudo grabar la inactividad',
               subMensaje: err.toString());
         }
       };

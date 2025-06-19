@@ -41,11 +41,12 @@ class AnotacionesPage extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done)
                   return Loading(mensaje: 'Cargando...');
-                if (snapshot.connectionState == ConnectionState.done && snapshot.hasError){
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasError) {
                   return ErrorPage(errorMsg: snapshot.error.toString());
                 }
-                final response = snapshot.data as Map<String,dynamic>;
-              
+                final response = snapshot.data as Map<String, dynamic>;
+
                 usuario = Miembro.fromJson(response);
 
                 return Action_Form(
@@ -140,12 +141,13 @@ class _Action_FormState extends State<Action_Form> {
 
   eliminarAnotacion(String id) async {
     final _pref = new Preferences();
-    final value = await _usuarioService.eliminarAnotacion(_pref.id, id);
-    if (value.fallo) {
-      openAlertDialog(context, 'Error al eliminar anotacion',
-          subMensaje: value.error);
+    try {
+      final value = await _usuarioService.eliminarAnotacion(_pref.id, id);
+      widget.usuario.eliminarAnotacion(id);
+    } catch (err) {
+      openLoadingDialog(
+          mensaje: 'Error al eliminar anotacion', subMensaje: err.toString());
     }
-    widget.usuario.eliminarAnotacion(id);
     //  setState(() {});
   }
 }
@@ -170,7 +172,7 @@ class _AnotacionTileState extends State<AnotacionTile> {
       duration: Duration(milliseconds: 500),
       child: Dismissible(
         confirmDismiss: (direction) {
-          return openDialogConfirmationReturn(context, 'Confirme para borrar');
+          return openDialogConfirmationReturn('Confirme para borrar');
         },
         background: Container(
             alignment: Alignment.centerRight,
@@ -230,19 +232,19 @@ class _AnotacionTileState extends State<AnotacionTile> {
   actualizarAnota(Anotacion anota) async {
     // final response = await _usuarioService.actualizarAnotacion();
     // if (response.fallo)
-    //   openAlertDialog(context, 'Error al actualizar anotación');
+    //   openAlertDialog( mensaje: 'Error al actualizar anotación');
   }
 
   cambiarEstado(bool value) {
     final _pref = new Preferences();
     widget.anota.cambioEstado(value);
-    _usuarioService.modificarAnotacion(_pref.id, widget.anota).then((value) {
-      if (value.fallo) {
-        openAlertDialog(context, 'Error al actualizar tarea',
-            subMensaje: value.error);
-        return;
-      }
-    });
+    _usuarioService
+        .modificarAnotacion(_pref.id, widget.anota)
+        .then((value) {})
+        .catchError((err) => {
+              openAlertDialog('Error al actualizar tarea',
+                  subMensaje: err.toString())
+            });
     setState(() {});
   }
 }

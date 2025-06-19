@@ -34,14 +34,13 @@ class ImagenViewer extends StatelessWidget {
           actions: [
             IconButton(
                 onPressed: () async {
-                  openLoadingDialog(context, mensaje: 'Descargando imagen...');
+                  openLoadingDialog(mensaje: 'Descargando imagen...');
                   final success = await guardarArchivo();
-                  closeLoadingDialog(context);
-                  if (success) {
-                    openAlertDialog(context, 'Imagen descargada');
-                  } else {
-                    openAlertDialog(context, 'No se pudo descargar la imagen');
-                  }
+                  String mensaje = 'Imagen descargada';
+                  closeLoadingDialog();
+                  if (!success) mensaje = 'No se pudo descargar la imagen';
+
+                  openAlertDialog(mensaje);
                 },
                 icon: Icon(Icons.download))
           ],
@@ -62,9 +61,8 @@ class ImagenViewer extends StatelessWidget {
       //   Uint8List.fromList(response.data),
       // );
 
-
       final imagePath = '${Directory.systemTemp.path}/image.jpg';
-      await Dio().download('$url',imagePath);
+      await Dio().download('$url', imagePath);
       await Gal.putImage(imagePath);
 
       return true;

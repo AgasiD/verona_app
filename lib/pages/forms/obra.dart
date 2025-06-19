@@ -20,6 +20,7 @@ import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
+import 'package:verona_app/pages/error.dart';
 
 import 'package:verona_app/pages/form.dart';
 import 'package:verona_app/pages/forms/propietario.dart';
@@ -59,17 +60,23 @@ class ObraForm extends StatelessWidget {
                       : FutureBuilder(
                           future: _obraService.obtenerObra(obraId),
                           builder: (context, snapshot) {
-                            if (snapshot.data == null) {
+                            if (snapshot.connectionState !=
+                                ConnectionState.done) {
                               return Loading(
-                                mensaje: 'Cargando obra',
+                                mensaje: 'Recuperando obra...',
                               );
-                            } else {
-                              final obra = snapshot.data as Obra;
-
-                              return _Form(
-                                obra: snapshot.data as Obra,
+                            } else if (snapshot.connectionState ==
+                                    ConnectionState.done &&
+                                snapshot.hasError) {
+                              return ErrorPage(
+                                errorMsg: snapshot.error.toString(),
                               );
                             }
+                            final obra = snapshot.data as Obra;
+
+                            return _Form(
+                              obra: snapshot.data as Obra,
+                            );
                           }))),
         ),
       ),
@@ -286,14 +293,13 @@ class _FormState extends State<_Form> {
                     onPressed: () async {
                       final ImagePicker _picker = ImagePicker();
                       // Pick an image
-                      openLoadingDialog(context, mensaje: 'Seleccionar imagen');
+                      openAlertDialog('Seleccionar imagen');
                       final image =
                           await _picker.pickImage(source: ImageSource.gallery);
-                      closeLoadingDialog(context);
+                      closeLoadingDialog();
                       if (image != null) {
                         if (await Helper.getWeigth(image!) >= 32.00) {
-                          openAlertDialog(
-                              context, 'Imagen debe ser menor a 32 MB.');
+                          openAlertDialog('Imagen debe ser menor a 32 MB.');
                           return;
                         }
                         _imageService.guardarImagen(image!);
@@ -423,7 +429,7 @@ class _FormState extends State<_Form> {
               .millisecondsSinceEpoch);
 
       if (_imageService.imagenValida()) {
-        openLoadingDialog(context, mensaje: 'Subiendo imagen');
+        openLoadingDialog(mensaje: 'Subiendo imagen');
         final dataImage = await _imageService.grabarImagen(obra.nombre);
         if (!dataImage['success'])
           throw new Exception('No se pudo cargar imagen');
@@ -431,10 +437,10 @@ class _FormState extends State<_Form> {
         final imageUrl = dataImage['data']['url'];
         obra.imageURL = imageUrl;
         loading = false;
-        closeLoadingDialog(context);
+        closeLoadingDialog();
       }
 
-      openLoadingDialog(context, mensaje: 'Grabando obra...');
+      openLoadingDialog(mensaje: 'Grabando obra...');
       dynamic obra_response = await _service.grabarObra(obra, crearDrive);
       final obraResponse = Obra.fromMap(obra_response as Map<String, dynamic>);
       txtNombreCtrl.clear();
@@ -445,18 +451,17 @@ class _FormState extends State<_Form> {
       txtCoordenadas.clear();
       _imageService.descartarImagen();
 
-      closeLoadingDialog(context);
+      closeLoadingDialog();
 
       _service.obra = obraResponse;
 
-      await openAlertDialogReturn(context, 'Obra creada con éxito');
+      await openAlertDialogReturn('Obra creada con éxito');
       Navigator.pushReplacementNamed(context, ObraPage.routeName,
           arguments: {"obraId": obraResponse.id});
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
+      closeLoadingDialog();
 
-      openAlertDialog(context, 'Error al grabar formulario',
-          subMensaje: err.toString());
+      openAlertDialog('Error al grabar formulario', subMensaje: err.toString());
     }
   }
 
@@ -482,22 +487,22 @@ class _FormState extends State<_Form> {
             .millisecondsSinceEpoch;
 
         if (_imageService.imagenValida()) {
-          openLoadingDialog(context, mensaje: 'Subiendo imagen');
+          openLoadingDialog(mensaje: 'Subiendo imagen');
           loading = true;
           final dataImage =
               await _imageService.grabarImagen(widget.obra!.nombre);
           if (!dataImage['success']) {
-            closeLoadingDialog(context);
-            openAlertDialog(context, 'No se pudo cargar imagen');
+            closeLoadingDialog();
+            openAlertDialog('No se pudo cargar imagen');
             return;
           }
           final imageUrl = dataImage['data']['url'];
 
           widget.obra!.imageURL = imageUrl;
-          closeLoadingDialog(context);
+          closeLoadingDialog();
           loading = false;
         }
-        openLoadingDialog(context, mensaje: 'Actualizando obra...');
+        openLoadingDialog(mensaje: 'Actualizando obra...');
         loading = true;
         Map<String, dynamic> response = await _service.actualizarObra({
           'id': widget.obra!.id,
@@ -514,18 +519,17 @@ class _FormState extends State<_Form> {
         });
         final obraResponse = Obra.fromMap(response["response"]);
         _imageService.descartarImagen();
-        closeLoadingDialog(context);
+        closeLoadingDialog();
         loading = true;
-        await openAlertDialogReturn(context, 'Obra modificada con éxito');
+        await openAlertDialogReturn('Obra modificada con éxito');
 
         Navigator.pop(context);
       } else {
-        openAlertDialog(context, 'Formulario invalido');
+        openAlertDialog('Formulario invalido');
       }
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al actualizar',
-          subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog('Error al actualizar', subMensaje: err.toString());
       return;
     }
   }
@@ -534,12 +538,12 @@ class _FormState extends State<_Form> {
     if (txtIdDrive.text.isEmpty)
       throw new Exception('Ingrese ID de carpeta para actualizar');
 
-    openLoadingDialog(context, mensaje: "Actualizando carpetas de obra...");
+    openLoadingDialog(mensaje: "Actualizando carpetas de obra...");
     final _obraService = Provider.of<ObraService>(context, listen: false);
     try {
       final response = await _obraService.actualizarIdDrive(txtIdDrive.text);
-      closeLoadingDialog(context);
-      await openAlertDialogReturn(context, "Carpetas actualizadas con éxito");
+      closeLoadingDialog();
+      await openAlertDialogReturn("Carpetas actualizadas con éxito");
       widget.obra!.driveFolderId = response.data["driveFolderId"];
       widget.obra!.folderImages = response.data["folderImages"];
       widget.obra!.rootDriveCliente = response.data["rootDriveCliente"];
@@ -548,8 +552,7 @@ class _FormState extends State<_Form> {
 
       _obraService.notifyListeners();
     } catch (err) {
-      openAlertDialog(context, "Error al actualizar carpetas",
-          subMensaje: err.toString());
+      openAlertDialog( "Error al actualizar carpetas", subMensaje: err.toString());
     }
   }
 

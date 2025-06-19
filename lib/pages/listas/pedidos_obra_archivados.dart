@@ -198,7 +198,7 @@ class _PedidosByEstado extends StatelessWidget {
     if (dato.length == 0) return;
     _socketService.quitarNovedad(_pref.id, dato.map((e) => e['id']).toList());
 
-    openAlertDialog(context, "Pedidos revisados");
+    openAlertDialog("Pedidos revisados");
   }
 }
 

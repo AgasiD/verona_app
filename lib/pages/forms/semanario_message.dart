@@ -79,7 +79,7 @@ class _Form extends StatelessWidget {
                           Helper.showSnackBar(context, 'Texto copiado', null,
                               Duration(seconds: 2), null);
                         } catch (err) {
-                          openAlertDialog(context, 'Error al copiar texto');
+                          openLoadingDialog( mensaje: 'Error al copiar texto');
                         }
                       },
                       showNotif: false,
@@ -97,7 +97,7 @@ class _Form extends StatelessWidget {
                       icono: Icons.send,
                       accion: () async {
                         final result = await openDialogConfirmationReturn(
-                            context,
+                            
                             'Confirmar envío de mensaje a grupo con propietarios');
                         if (result) await enviarMensaje(context);
                       },
@@ -176,17 +176,17 @@ class _Form extends StatelessWidget {
 
   enviarMensaje(context) async {
     try {
-      openLoadingDialog(context, mensaje: 'Enviando mensaje...');
+      openLoadingDialog(mensaje: 'Enviando mensaje...');
       final _chatService = Provider.of<ChatService>(context, listen: false);
       final _obraService = Provider.of<ObraService>(context, listen: false);
       final _pref = new Preferences();
       final response = await _chatService.enviarMensajeChatGroup(
           _obraService.obra.id, _pref.id, txtCtrl.text);
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Mensaje enviado');
+      closeLoadingDialog();
+      openAlertDialog('Mensaje enviado');
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al enviar mensaje',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al enviar mensaje',
           subMensaje: err.toString());
     }
   }

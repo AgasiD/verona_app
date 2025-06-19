@@ -157,15 +157,16 @@ class PerfilPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               MainButton(
-                                  onPressed: () async => await sincNotifications(
-                                      context, _usuarioService),
+                                  onPressed: () async =>
+                                      await sincNotifications(
+                                          context, _usuarioService),
                                   width: 250,
                                   height: 35,
                                   fontSize: 15,
                                   color: Helper.brandColors[8],
                                   text: 'Sincronizar notificaciones'),
                               MainButton(
-                                  onPressed: () async => 
+                                  onPressed: () async =>
                                       deleteDevices(context, _usuarioService),
                                   width: 250,
                                   height: 35,
@@ -216,15 +217,13 @@ class PerfilPage extends StatelessWidget {
 
   deleteDevices(context, _usuarioService) async {
     final deleteDevices = () async {
-      openLoadingDialog(context, mensaje: 'Desasociando dispositivos...');
+      openLoadingDialog(mensaje: 'Desasociando dispositivos...');
       try {
         final response = await _usuarioService.deleteAllDevice(usuarioId!);
         Navigator.pop(_scaffoldKey.currentContext!);
-        openAlertDialog(
-            _scaffoldKey.currentContext!, 'Dispositivo sincronizado con éxito');
+        openAlertDialog('Dispositivo sincronizado con éxito');
       } catch (err) {
-        openAlertDialog(
-            _scaffoldKey.currentContext!, 'Error al sincronizar dispositivo',
+        openAlertDialog('Error al sincronizar dispositivo',
             subMensaje: err.toString());
         return;
       }
@@ -236,14 +235,13 @@ class PerfilPage extends StatelessWidget {
 
   sincNotifications(context, _usuarioService) async {
     try {
-      openLoadingDialog(context, mensaje: 'Sincronizando...');
+      openLoadingDialog(mensaje: 'Sincronizando...');
       final response = await _usuarioService.setTokenDevice(
           usuarioId!, NotificationService.token!);
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Dispositivo sincronizado con éxito');
+      closeLoadingDialog();openAlertDialog('Dispositivo sincronizado con éxito');
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al sincronizar dispositivo',
+      closeLoadingDialog();
+  openAlertDialog('Error al sincronizar dispositivo',
           subMensaje: err.toString());
       return;
     }
@@ -256,15 +254,14 @@ class PerfilPage extends StatelessWidget {
     final image = await _picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      openLoadingDialog(context, mensaje: 'Subiendo imagen...');
+      openLoadingDialog(mensaje: 'Subiendo imagen...');
       try {
         _imageService.guardarImagen(image);
         final dataImage = await _imageService
             .grabarImagen('${usuario.nombre} ${usuario.apellido}');
 
         if (!dataImage['success']) {
-          closeLoadingDialog(context);
-          openAlertDialog(context, 'No se pudo cargar imagen');
+          closeLoadingDialog();openAlertDialog('No se pudo cargar imagen');
           return;
         }
 
@@ -272,12 +269,11 @@ class PerfilPage extends StatelessWidget {
 
         usuario.profileURL = imageUrl;
         await _usuarioService.modificarUsuario(usuario);
-        closeLoadingDialog(context);
-        openAlertDialog(context, 'Imagen subida con éxito');
+        closeLoadingDialog();
+        openAlertDialog('Imagen subida con éxito');
       } catch (err) {
-        closeLoadingDialog(context);
-        openAlertDialog(context, 'Error al subir imagen',
-            subMensaje: err.toString());
+        closeLoadingDialog();
+       openAlertDialog('Error al subir imagen', subMensaje: err.toString());
       }
     }
   }
@@ -286,22 +282,19 @@ class PerfilPage extends StatelessWidget {
       context, UsuarioService _usuarioService, ObraService _obraService) async {
     try {
       if (!await openDialogConfirmationReturn(
-          context, 'Confirmar para eliminar personal')) return;
+           'Confirmar para eliminar personal')) return;
 
-      openLoadingDialog(
-        context,
-        mensaje: 'Eliminando personal, puede demorar...',
+      openLoadingDialog(mensaje: 'Eliminando personal, puede demorar...',
       );
-      
+
       final response = await _usuarioService.deleteUsuario(usuarioId!);
-      closeLoadingDialog(context);
-      await openAlertDialogReturn(context, 'Usuario desactivado con éxito');
+      closeLoadingDialog();
+      await openAlertDialogReturn('Usuario desactivado con éxito');
       _obraService.notifyListeners();
 
       Navigator.pop(context);
     } catch (err) {
-      openAlertDialog(context, 'Error al desactivar usuario',
-          subMensaje: err.toString());
+      openAlertDialog('Error al desactivar usuario', subMensaje: err.toString());
       return;
     }
   }
@@ -321,7 +314,7 @@ class PerfilPage extends StatelessWidget {
     if (await canLaunchUrl(encoded))
       await launchUrl(encoded, mode: LaunchMode.externalApplication);
     else {
-      // openAlertDialog(context, 'No se puede visualizar el documento');
+      // openAlertDialog( mensaje: 'No se puede visualizar el documento');
     }
   }
 }

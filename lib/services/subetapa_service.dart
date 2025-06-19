@@ -8,7 +8,7 @@ class SubetapaService extends ChangeNotifier {
   HttpService _http = new HttpService();
   final _endpoint = 'api/controles/subetapas';
 
-  Future<dynamic> obtenerEtapasExtras() async {
+  Future<dynamic> obtenerSubetapasExtras() async {
     final response = await this._http.get('$_endpoint/extras');
 
     final data = json.decode(response.body);

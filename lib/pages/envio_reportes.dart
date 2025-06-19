@@ -55,19 +55,19 @@ class EnvioReporteSemanal extends StatelessWidget {
   enviar_reporte(context, ids) async {
     bool loading = false;
     try{
-      openLoadingDialog(context, mensaje:'Enviando reportes, esto puede demorar');
+      openLoadingDialog(mensaje:'Enviando reportes, esto puede demorar');
       loading = true;
       final response = await _obraService.enviarReportes(ids);
 
-      closeLoadingDialog(context);
-      await openAlertDialogReturn(context, 'Reportes enviados');
+      closeLoadingDialog();
+      await openAlertDialogReturn('Reportes enviados');
 
       Navigator.pop(context);
 
 
     }catch( err ){
-      loading ?       closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al cargar obras', subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog('Error al cargar obras', subMensaje: err.toString());
 
     }
   }

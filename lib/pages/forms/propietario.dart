@@ -224,7 +224,7 @@ class _FormState extends State<_Form> {
       txtMailCtrl.text == '' ? isValid = false : true;
 
       if (isValid) {
-        openLoadingDialog(context, mensaje: 'Guardando propietario...');
+        openLoadingDialog(mensaje: 'Guardando propietario...');
 
         final prop = Propietario(
             nombre: txtNombreCtrl.text,
@@ -234,19 +234,19 @@ class _FormState extends State<_Form> {
             email: txtMailCtrl.text);
 
         await _service.grabarUsuario(prop);
-        closeLoadingDialog(context);
+        closeLoadingDialog();
         loading = false;
 
         resetForm();
 
-        await openAlertDialogReturn(context, 'Propietario creado');
+        await openAlertDialogReturn('Propietario creado');
         leavePage(context);
       } else {
-        openAlertDialog(context, 'Formulario invalido');
+        openAlertDialog('Formulario invalido');
       }
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al grabar propietario',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al grabar propietario',
           subMensaje: err.toString());
     }
   }
@@ -270,10 +270,9 @@ class _FormState extends State<_Form> {
       txtDNICtrl.text == '' ? isValid = false : true;
       txtTelefonoCtrl.text == '' ? isValid = false : true;
       txtMailCtrl.text == '' ? isValid = false : true;
-      if (!isValid) openAlertDialog(navigator.context, 'Formulario invalido');
+      if (!isValid) openAlertDialog('Formulario invalido');
 
-      openLoadingDialog(navigator.context,
-          mensaje: 'Actualizando propietario...');
+      openLoadingDialog(mensaje: 'Actualizando propietario...');
 
       final prop = Miembro(
           role: 3,
@@ -285,14 +284,14 @@ class _FormState extends State<_Form> {
           email: txtMailCtrl.text);
           
       final response = await _service.modificarUsuario(prop) as MyResponse;
-      closeLoadingDialog(navigator.context);
+      closeLoadingDialog();
       loading = false;
-      await openAlertDialogReturn(navigator.context, 'Propietario actualizado')
+      await openAlertDialogReturn('Propietario actualizado')
           .then((value) => Navigator.pop(navigator.context));
       resetForm();
     } catch (err) {
-      loading ? closeLoadingDialog(navigator.context) : false;
-      openAlertDialog(navigator.context, 'Error al grabar propietario',
+      closeLoadingDialog();
+      openAlertDialog('Error al grabar propietario',
           subMensaje: err.toString());
     }
   }

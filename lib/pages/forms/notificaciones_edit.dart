@@ -138,9 +138,9 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
     bool loading = false;
 
     if (!await openDialogConfirmationReturn(
-        context, 'Confirme para enviar notificación')) return;
+         'Confirme para enviar notificación')) return;
 
-    openLoadingDialog(context, mensaje: 'Enviando notificación...');
+    openLoadingDialog(mensaje: 'Enviando notificación...');
     loading = true;
     final _notifService =
         Provider.of<NotificacionesService>(context, listen: false);
@@ -151,12 +151,12 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
     try {
       final response = await _notifService.autorizarNotificacion(
           _pref.id, title, msg, widget.notif['id']);
-      closeLoadingDialog(context);
-      await openAlertDialogReturn(context, 'Mensaje enviando con éxito');
+      closeLoadingDialog();
+      await openAlertDialogReturn('Mensaje enviando con éxito');
       Navigator.pop(context);
     } catch (err) {
-      if (loading) closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al enviar notificacion',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al enviar notificacion',
           subMensaje: err.toString());
     } finally {
       return;
@@ -165,21 +165,21 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
 
   eliminarNotificacion(notif) async {
     if (!await openDialogConfirmationReturn(
-        context, 'Confirme para eliminar notificación')) return;
+         'Confirme para eliminar notificación')) return;
 
     bool loading = true;
-      openLoadingDialog(context, mensaje: 'Eliminando...');
+      openLoadingDialog(mensaje: 'Eliminando...');
       final _notifService =
           Provider.of<NotificacionesService>(context, listen: false);
     try { 
       final response = await _notifService.eliminarNotificacion(notif);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       loading = false;
-      await openAlertDialogReturn(context, 'Eliminada con éxito');
+      await openAlertDialogReturn('Eliminada con éxito');
       Navigator.pop(context);
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al eliminar', subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog( 'Error al eliminar', subMensaje: err.toString());
       return;
     }
   }

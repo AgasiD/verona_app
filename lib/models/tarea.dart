@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 Tarea tareaFromJson(String str) => Tarea.fromJson(json.decode(str));
 
@@ -41,7 +42,7 @@ class Tarea {
         isDefault: json["isDefault"] ?? '',
         realizado: json["realizado"] ?? false,
         tsRealizado: json["tsRealizado"] ?? 0,
-        orden: json['orden'] ?? 0,
+        orden: int.parse(json['orden'].toString()) ?? 0,
         idUsuario: json['idUsuario'] ?? '',
         iniciado: json["iniciado"] ?? false,
         tsIniciado: json["tsIniciado"] ?? 0,

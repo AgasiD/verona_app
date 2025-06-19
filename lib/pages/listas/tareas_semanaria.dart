@@ -191,7 +191,7 @@ class _SemanarioState extends State<_Semanario> {
       {DateTime? paramDesde = null,
       DateTime? paramHasta = null,
       listener = true}) async {
-    openLoadingDialog(context, mensaje: 'Buscando tareas...');
+    openLoadingDialog(mensaje: 'Buscando tareas...');
 
     obrasTareas.clear();
 
@@ -253,7 +253,7 @@ class _SemanarioState extends State<_Semanario> {
     if (widget.esSingle) {
       _asignarTareas(obrasTareas);
     }
-    closeLoadingDialog(context);
+    closeLoadingDialog();
     _tareasStream.add(obrasTareas);
     // setState(() {});
   }
@@ -673,7 +673,7 @@ class _TaskTileState extends State<_TaskTile> {
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
         child: GestureDetector(
             onLongPress: () {
-              openAlertDialog(context, 'Descripción',
+              openAlertDialog('Descripción',
                   subMensaje: widget.tarea.descripcion);
             },
             child: widget.edit
@@ -745,7 +745,7 @@ class _TaskTileState extends State<_TaskTile> {
           confirmDismiss: (DismissDirection direction) async {
             if (ultimaTarea(
                 widget.etapaId, widget.tarea.subetapa, widget.tarea.id)) {
-              openAlertDialog(context, 'No se puede dejar sin tareas');
+              openAlertDialog('No se puede dejar sin tareas');
 
               return false;
             }
@@ -810,7 +810,7 @@ class _TaskTileState extends State<_TaskTile> {
   }
 
   Future<void> actualizaTareaBD(BuildContext context, bool? value) async {
-    openLoadingDialog(context, mensaje: 'Actualizando...');
+    openLoadingDialog(mensaje: 'Actualizando...');
     try {
       final response = await _obraService.actualizarTarea(
           _obraService.obra.id,
@@ -822,12 +822,12 @@ class _TaskTileState extends State<_TaskTile> {
           new Preferences().id,
           0,
           DateTime.now().millisecondsSinceEpoch);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       widget.tarea.realizado = value!;
       _obraService.notifyListeners();
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al actualizar tarea',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al actualizar tarea',
           subMensaje: err.toString());
     }
 
@@ -847,7 +847,7 @@ class _TaskTileState extends State<_TaskTile> {
 
     if (_obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
         1) {
-      openAlertDialog(context, 'No se puede dejar sin tareas');
+      openAlertDialog('No se puede dejar sin tareas');
       return;
     }
 
@@ -856,11 +856,11 @@ class _TaskTileState extends State<_TaskTile> {
           await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
       _obraService.obra.etapas[index].subetapas[indexSub].tareas
           .removeAt(indexTarea);
-      openLoadingDialog(context, mensaje: 'Eliminando tarea...');
-      closeLoadingDialog(context);
+      openLoadingDialog(mensaje: 'Eliminando tarea...');
+      closeLoadingDialog();
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al eliminar tarea',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al eliminar tarea',
           subMensaje: err.toString());
     }
   }

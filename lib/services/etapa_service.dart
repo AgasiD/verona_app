@@ -11,13 +11,16 @@ class EtapaService extends ChangeNotifier {
 
   Future<dynamic> obtenerEtapasExtras() async {
     final response = await this._http.get('$_endpoint/etapas/extras');
-    ;
-    final resp = MyResponse.fromJson(response);
-    return resp;
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+    return data;
   }
 
   Future<dynamic> grabar(Map<String, dynamic> etapa) async {
-    final response = await this._http.post('$_endpoint/nuevaEtapa', etapa);
+    final response = await this._http.post('api/obras/etapa/extra', etapa);
     ;
     final data = json.decode(response.body);
 

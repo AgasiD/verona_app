@@ -4,6 +4,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/models/tarea.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/Etapa_Sub_Tarea.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/tarea_service.dart';
@@ -41,28 +42,31 @@ class TareasExtrasPage extends StatelessWidget {
             future: _tareaService.obtenerTareasExtras(
                 etapaId, subetapaId, _obraService.obra.id),
             builder: (context, snapshot) {
-              if (snapshot.data == null) {
+              if (snapshot.connectionState != ConnectionState.done) {
                 return Loading(
-                  mensaje: 'Cargando tareas...',
+                  mensaje: 'Recuperando tareas...',
                 );
-              } else {
-                final response = snapshot.data as MyResponse;
-                final lista = response.data as List<dynamic>;
-                final tareas = lista.map((e) => Tarea.fromJson(e)).toList();
-                final indexEtapa = _obraService.obra.etapas
-                    .indexWhere((etapa) => etapa.id == etapaId);
-                final indexSubetapa = _obraService
-                    .obra.etapas[indexEtapa].subetapas
-                    .indexWhere((subetapa) => subetapa.id == subetapaId);
-                final tareasAsignadas = _obraService
-                    .obra.etapas[indexEtapa].subetapas[indexSubetapa].tareas;
-
-                return _SearchListGroupView(
-                  tareas: tareas,
-                  tareasAsignadas: tareasAsignadas,
-                  etapaId: etapaId,
+              } else if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasError) {
+                return ErrorPage(
+                  errorMsg: snapshot.error.toString(),
                 );
               }
+              final lista = snapshot.data as List<dynamic>;
+              final tareas = lista.map((e) => Tarea.fromJson(e)).toList();
+              final indexEtapa = _obraService.obra.etapas
+                  .indexWhere((etapa) => etapa.id == etapaId);
+              final indexSubetapa = _obraService
+                  .obra.etapas[indexEtapa].subetapas
+                  .indexWhere((subetapa) => subetapa.id == subetapaId);
+              final tareasAsignadas = _obraService
+                  .obra.etapas[indexEtapa].subetapas[indexSubetapa].tareas;
+
+              return _SearchListGroupView(
+                tareas: tareas,
+                tareasAsignadas: tareasAsignadas,
+                etapaId: etapaId,
+              );
             },
           ),
         ),
@@ -177,33 +181,33 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
         ),
         subtitle: Text('', style: TextStyle(color: Helper.brandColors[3])),
         trailing: icono,
-        onTap: asignarTarea(_obraService, snackText));
+        onTap: () async => await asignarTarea(_obraService, snackText));
   }
 
   asignarTarea(_obraService, snackText) async {
     try {
       if (widget.asignado) {
         //Quitar tarea
-        openLoadingDialog(context, mensaje: 'Quitando tarea...');
+        openLoadingDialog(mensaje: 'Quitando tarea...');
 
         final response = await _obraService.quitarTarea(widget.etapaId,
             widget.tarea.subetapa, widget.tarea.id, _obraService.obra.id);
 
         _obraService.obra.quitarTarea(widget.etapaId, widget.tarea);
         widget.asignado = false;
-        closeLoadingDialog(context);
+        closeLoadingDialog();
         Helper.showSnackBar(
             context, snackText, null, Duration(milliseconds: 700), null);
 
         return;
       }
       // Agregar tarea
-      openLoadingDialog(context, mensaje: 'Adjuntando tarea...');
+      openLoadingDialog(mensaje: 'Adjuntando tarea...');
       final response = await _obraService.asignarTarea(widget.etapaId,
           widget.tarea.subetapa, widget.tarea.id, _obraService.obra.id);
       _obraService.obra.sumarTarea(widget.etapaId, widget.tarea);
       widget.asignado = true;
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       snackText = 'Tarea asignada';
       Helper.showSnackBar(
           context, snackText, null, Duration(milliseconds: 700), null);
@@ -212,9 +216,8 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
       );
       return;
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al modificar tarea',
-          subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog('Error al modificar tarea', subMensaje: err.toString());
     }
   }
 

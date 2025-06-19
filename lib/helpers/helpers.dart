@@ -304,7 +304,7 @@ class Helper {
         throw Exception('No se pudo lanzar la web $_url');
       }
     } catch (err) {
-      openAlertDialog(context, err.toString());
+      openAlertDialog(err.toString());
     }
   }
 

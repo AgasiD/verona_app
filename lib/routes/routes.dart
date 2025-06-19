@@ -11,7 +11,7 @@ import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/envio_reportes.dart';
 import 'package:verona_app/pages/error.dart';
-import 'package:verona_app/pages/forms/etapa.dart';
+
 import 'package:verona_app/pages/forms/inactividades_masiva.dart';
 import 'package:verona_app/pages/forms/notificaciones.dart';
 import 'package:verona_app/pages/forms/notificaciones_edit.dart';
@@ -74,7 +74,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   DocumentoForm.routeName: (_) => DocumentoForm(),
   DocumentosPage.routeName: (_) => DocumentosPage(),
   EquipoList.routeName: (_) => EquipoList(),
-  Etapa_Form.routeName: (_) => Etapa_Form(),
+
   Etapa_Sub_Tarea_Form.routeName: (_) => Etapa_Sub_Tarea_Form(),
   EtapasExtrasPage.routeName: (_) => EtapasExtrasPage(),
   EtapasObra.routeName: (_) => EtapasObra(),

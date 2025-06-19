@@ -98,12 +98,12 @@ class _FormState extends State<_Form> {
               hintText: 'Descripción',
               icono: Icons.description,
               textController: txtTarea),
-              CustomInput(
-              hintText: 'Orden/posición',
-              icono: Icons.sort,
-              textController: txtOrden,
-              teclado: TextInputType.number,
-              ),
+          CustomInput(
+            hintText: 'Orden/posición',
+            icono: Icons.sort,
+            textController: txtOrden,
+            teclado: TextInputType.number,
+          ),
           Visibility(
               visible: !widget.sinObra,
               child: Row(
@@ -177,20 +177,22 @@ class _FormState extends State<_Form> {
     );
   }
 
-  grabar() {
+  grabar() async {
     if (txtTarea.text.trim().isEmpty) {
-      openAlertDialog(context, 'Falta descripción');
+      openLoadingDialog(mensaje: 'Falta descripción');
       return;
     }
+    final mensaje = 'Confirmar para grabar $tipo';
 
-    openDialogConfirmation(context, (context) => grabarElemento(context),
-        'Confirmar para grabar $tipo');
+    if(!await openDialogConfirmationReturn(mensaje)) return;
+
+    await grabarElemento(context);
   }
 
   grabarElemento(context) async {
     final toReturn;
     final loading = true;
-    openLoadingDialog(context, mensaje: 'Grabando $tipo');
+    openLoadingDialog(mensaje: 'Grabando $tipo');
     final _obraService = Provider.of<ObraService>(context, listen: false);
     try {
       final data = {
@@ -198,20 +200,15 @@ class _FormState extends State<_Form> {
         "isDefault": isDefault,
         "proximos": proximos,
         "obraId": _obraService.obra.id,
-        "orden": txtOrden.text,
+        "orden": txtOrden.text == '' ? null : txtOrden.text,
       };
       if (esEtapa) {
         // ETAPA
         final _service = Provider.of<EtapaService>(context, listen: false);
         final datos = await _service.grabar(data);
-        closeLoadingDialog(context);
+        closeLoadingDialog();
 
-        if (datos.fallo) {
-          openAlertDialog(context, 'Error al grabar $tipo',
-              subMensaje: datos.error);
-          return;
-        }
-        final etapa = Etapa.fromJson(datos.data);
+        final etapa = Etapa.fromJson(datos);
         toReturn = etapa;
         _obraService.obra.etapas.add(etapa);
         _obraService.notifyListeners();
@@ -220,20 +217,15 @@ class _FormState extends State<_Form> {
         data.addAll({"etapaId": widget.etapaId!});
         final _service = Provider.of<SubetapaService>(context, listen: false);
         final datos = await _service.grabar(data);
-        closeLoadingDialog(context);
+        closeLoadingDialog();
 
-        if (datos.fallo) {
-          openAlertDialog(context, 'Error al grabar $tipo',
-              subMensaje: datos.error);
-          return;
-        }
-        final subetapa = Subetapa.fromJson(datos.data);
+        final subetapa = Subetapa.fromJson(datos);
         toReturn = subetapa;
 
         _obraService.obra.etapas
             .singleWhere((etapa) => etapa.id == widget.etapaId)
             .subetapas
-            .insert(subetapa.orden-1, subetapa);
+            .insert(subetapa.orden - 1, subetapa);
         _obraService.notifyListeners();
       } else {
         // TAREA
@@ -242,14 +234,9 @@ class _FormState extends State<_Form> {
 
         final _service = Provider.of<TareaService>(context, listen: false);
         final datos = await _service.grabar(data);
-        closeLoadingDialog(context);
+        closeLoadingDialog();
 
-        if (datos.fallo) {
-          openAlertDialog(context, 'Error al grabar $tipo',
-              subMensaje: datos.error);
-          return;
-        }
-        final tarea = Tarea.fromJson(datos.data);
+        final tarea = Tarea.fromJson(datos);
         toReturn = tarea;
         _obraService.obra.etapas
             .singleWhere((etapa) => etapa.id == widget.etapaId)
@@ -261,11 +248,8 @@ class _FormState extends State<_Form> {
       }
       Navigator.pop(context, toReturn);
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(
-        context,
-        'Error al grabar $tipo',
-      );
+      closeLoadingDialog();
+      openAlertDialog('Error al grabar $tipo ' + err.toString());
     }
   }
 }

@@ -548,8 +548,7 @@ class __InputChatState extends State<_InputChat> {
               if (widget.txtCtrl.text.trim().length > 0) {
                 _socket.socket.connected
                     ? await enviarMensaje(_socket)
-                    : openAlertDialog(
-                        context, 'No hay conexión con el servidor');
+                    : openAlertDialog('No hay conexión con el servidor');
                 focusNode.requestFocus(); //para solicitar el foco
                 // widget.txtCtrl.clear();
               }
@@ -576,8 +575,7 @@ class __InputChatState extends State<_InputChat> {
                       onPressed: () {
                         _socket.socket.connected
                             ? enviarMensaje(_socket)
-                            : openAlertDialog(
-                                context, 'No hay conexión con el servidor');
+                            : openAlertDialog('No hay conexión con el servidor');
                       },
                     )
               : widget.txtCtrl.text == ''
@@ -590,8 +588,7 @@ class __InputChatState extends State<_InputChat> {
                       onPressed: () {
                         _socket.socket.connected
                             ? enviarMensaje(_socket)
-                            : openAlertDialog(
-                                context, 'No hay conexión con el servidor');
+                            : openAlertDialog('No hay conexión con el servidor');
                       })
         ],
       ),

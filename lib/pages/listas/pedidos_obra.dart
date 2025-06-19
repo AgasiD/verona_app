@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/listas/pedidos_obra_archivados.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -35,9 +36,18 @@ class PedidoList extends StatelessWidget {
           child: FutureBuilder(
               future: future,
               builder: (context, snapshot) {
-                if (snapshot.data == null) {
-                  return Loading(mensaje: 'Cargando pedidos');
-                } else {
+                  if (snapshot.connectionState !=
+                                ConnectionState.done) {
+                              return Loading(
+                                mensaje: 'Recuperando pedidos...',
+                              );
+                            } else if (snapshot.connectionState ==
+                                    ConnectionState.done &&
+                                snapshot.hasError) {
+                              return ErrorPage(
+                                errorMsg: snapshot.error.toString(),
+                              );
+                            }
                   final pedidos = snapshot.data as List<dynamic>;
                   final _pref = new Preferences();
                   if (pedidos.length > 0) {
@@ -150,7 +160,7 @@ class PedidoList extends StatelessWidget {
                   //         ),
                   //       ));
                   // }
-                }
+
               }),
         ),
       ),

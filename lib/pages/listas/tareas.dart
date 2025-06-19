@@ -30,7 +30,7 @@ class _TareasCheckListState extends State<TareasCheckList> {
     final subetapaId = arguments['subetapaId'];
     final etapaId = arguments['etapaId'];
     final _pref = new Preferences();
-    final _obraService = Provider.of<ObraService>(context);
+    final _obraService = Provider.of<ObraService>(context, listen: false);
     tareas = _obraService.obra.etapas
         .singleWhere((etapa) => etapa.id == etapaId)
         .subetapas
@@ -144,7 +144,7 @@ class _ListaTareaState extends State<ListaTarea> {
           widget.tareas.insert(newIndex, item);
           setState(() {});
         } catch (err) {
-          openAlertDialog(context, 'Error al ordenar',
+          openAlertDialog('Error al ordenar',
               subMensaje: err.toString());
         }
       },
@@ -238,25 +238,6 @@ class _TareaTileState extends State<_TareaTile> {
                         }
                       }
                       setState(() {});
-
-                      // openLoadingDialog(context, mensaje: 'Actualizando...');
-
-                      // final response = await _obraService.actualizarTarea(
-                      //     _obraService.obra.id,
-                      //     widget.etapaId,
-                      //     widget.tarea.subetapa,
-                      //     widget.tarea.id,
-                      //     value!,
-                      //     new Preferences().id,
-                      //     DateTime.now().millisecondsSinceEpoch);
-                      // closeLoadingDialog(context);
-                      // widget.tarea.realizado = value!;
-                      // _obraService.notifyListeners();
-
-                      // if (response.fallo) {
-                      //   openAlertDialog(context, 'Error al actualizar tarea',
-                      //       subMensaje: response.error);
-                      // }
                     },
                     value: widget.tarea.iniciado || widget.tarea.realizado,
                   )));
@@ -266,7 +247,7 @@ class _TareaTileState extends State<_TareaTile> {
           confirmDismiss: (DismissDirection direction) async {
             if (ultimaTarea(
                 widget.etapaId, widget.tarea.subetapa, widget.tarea.id)) {
-              openAlertDialog(context, 'No se puede dejar sin tareas');
+              openAlertDialog('No se puede dejar sin tareas');
 
               return false;
             }
@@ -342,20 +323,20 @@ class _TareaTileState extends State<_TareaTile> {
 
     if (_obraService.obra.etapas[index].subetapas[indexSub].tareas.length <=
         1) {
-      openAlertDialog(context, 'No se puede dejar sin tareas');
+      openAlertDialog('No se puede dejar sin tareas');
       return;
     }
 
-    openLoadingDialog(context, mensaje: 'Eliminando tarea...');
+    openLoadingDialog(mensaje: 'Eliminando tarea...');
     try {
       final response =
           await _obraService.quitarTarea(etapaId, subetapaId, tareaId, obraId);
       _obraService.obra.etapas[index].subetapas[indexSub].tareas
           .removeAt(indexTarea);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al eliminar tarea',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al eliminar tarea',
           subMensaje: err.toString());
     }
   }
@@ -375,7 +356,7 @@ class _TareaTileState extends State<_TareaTile> {
   }
 
   finalizarTarea(Tarea tarea) async {
-    openLoadingDialog(context, mensaje: 'Finalizando tarea...');
+    openLoadingDialog(mensaje: 'Finalizando tarea...');
     final ts = DateTime.now().millisecondsSinceEpoch;
 
     try {
@@ -390,21 +371,21 @@ class _TareaTileState extends State<_TareaTile> {
         ts,
         tarea.tsIniciado,
       );
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       widget.tarea.realizado = true;
       widget.tarea.iniciado = true;
       widget.tarea.tsRealizado = ts;
 
       _obraService.notifyListeners();
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al actualizar tarea',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al actualizar tarea',
           subMensaje: err.toString());
     }
   }
 
   iniciarTarea(Tarea tarea) async {
-    openLoadingDialog(context, mensaje: 'Iniciando tarea...');
+    openLoadingDialog(mensaje: 'Iniciando tarea...');
     final ts = DateTime.now().millisecondsSinceEpoch;
     final _pref = new Preferences();
     try {
@@ -419,7 +400,7 @@ class _TareaTileState extends State<_TareaTile> {
         0,
         ts,
       );
-      closeLoadingDialog(context);
+      closeLoadingDialog();
 
       widget.tarea.iniciado = true;
       widget.tarea.realizado = false;
@@ -427,14 +408,16 @@ class _TareaTileState extends State<_TareaTile> {
       widget.tarea.idUsuario = _pref.id;
       _obraService.notifyListeners();
     } catch (err) {
-      openAlertDialog(context, 'Error al actualizar tarea',
+            closeLoadingDialog();
+
+      openAlertDialog('Error al actualizar tarea',
           subMensaje: err.toString());
     }
   }
 
   reiniciarTarea(Tarea tarea) async {
     final _pref = new Preferences();
-    openLoadingDialog(context, mensaje: 'Reiniciando tarea...');
+    openLoadingDialog(mensaje: 'Reiniciando tarea...');
 
     try {
       final response = await _obraService.actualizarTarea(
@@ -448,7 +431,7 @@ class _TareaTileState extends State<_TareaTile> {
         0,
         0,
       );
-      closeLoadingDialog(context);
+      closeLoadingDialog();
       widget.tarea.realizado = false;
       widget.tarea.iniciado = false;
       widget.tarea.tsIniciado = 0;
@@ -458,8 +441,8 @@ class _TareaTileState extends State<_TareaTile> {
 
       _obraService.notifyListeners();
     } catch (err) {
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Error al actualizar tarea',
+      closeLoadingDialog();
+      openAlertDialog( 'Error al actualizar tarea',
           subMensaje: err.toString());
     }
   }

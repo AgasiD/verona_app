@@ -352,15 +352,15 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
     bool loading = false;
     final result = validaForm();
     if (!result[0]) {
-      await openAlertDialogReturn(context, result[1]);
+      await openAlertDialogReturn(result[1]);
       return;
     }
 
     if (!await openDialogConfirmationReturn(
-        context, 'Confirme para enviar notificación')) return;
+         'Confirme para enviar notificación')) return;
 
     loading = true;
-    openLoadingDialog(context, mensaje: 'Enviando notificación...');
+    openLoadingDialog(mensaje: 'Enviando notificación...');
     final _notifService =
         Provider.of<NotificacionesService>(context, listen: false);
     String title = txtTitle.text.trim();
@@ -371,11 +371,11 @@ class _FormNotificacionesState extends State<_FormNotificaciones> {
     try {
       final response = await _notifService.enviarNotificacion(
           _pref.id, title, msg, ids, idAuth, _notificationType.name);
-      closeLoadingDialog(context);
-      openAlertDialog(context, 'Mensaje enviando con éxito');
+      closeLoadingDialog();
+      openAlertDialog( 'Mensaje enviando con éxito');
     } catch (err) {
-      closeLoadingDialog(context);
-      await openAlertDialogReturn(context, 'Error al enviar notificacion',
+      closeLoadingDialog();
+      await openAlertDialogReturn('Error al enviar notificacion',
           subMensaje: err.toString());
     } finally {
       return;

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,10 +23,17 @@ class GoogleDriveService extends ChangeNotifier {
       _img = imagen;
     }
     if (_img != null) {
-      final datos = await this
+      final response = await this
           ._http
           .uploadImage(_img, _endpoint + "/$fileName/jpg/$rootDrive");
-      return datos;
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode >= 300) {
+        throw new Exception('Error ${data['message']} ${response.statusCode}');
+      }
+
+      return data;
     } else {
       print('No se asigno imagen');
     }
@@ -33,33 +42,36 @@ class GoogleDriveService extends ChangeNotifier {
   grabarImagenPedido(String fileName, String driveFolderId, XFile image) async {
     if (imgsPedido != null) {
       final idFolder = driveFolderId;
-      final datos = await this
+      final response = await this
           ._http
           .uploadImage(image, _endpoint + "/$fileName/jpg/$idFolder");
-      return datos;
+      final data = json.decode(response.body);
+
+      if (response.statusCode >= 300) {
+        throw new Exception('Error ${data['message']} ${response.statusCode}');
+      }
+
+      return data;
     } else {
       print('No se asigno imagen');
     }
   }
 
   grabarDocumento(String fileName, String extension, String parent) async {
-    try {
-      if (_document != null) {
-        final to = _endpoint + "/$fileName/$extension/$parent";
-        final response = await this._http.uploadDocument(_document, to);
-        notifyListeners();
-        return response;
-      } else {
-        print('No ha asignado imagen');
-      }
-    } catch (err) {
-      print('error');
-    }
-  }
+    if (_document != null) {
+      final to = _endpoint + "/$fileName/$extension/$parent";
+      final response = await this._http.uploadDocument(_document, to);
+      final data = json.decode(response.body);
 
-  setPermisosToFile(String fileId) async {
-    final response = await this._http.post('$_endpoint/setPermisos/$fileId', {});
-    // final response = MyResponse.fromJson(datos);
+      if (response.statusCode >= 300) {
+        throw new Exception('Error ${data['message']} ${response.statusCode}');
+      }
+
+      notifyListeners();
+      return data;
+    } else {
+      print('No ha asignado imagen');
+    }
   }
 
   getExtension() {
@@ -108,12 +120,16 @@ class GoogleDriveService extends ChangeNotifier {
 
   obtenerDocumentos(String usuarioId, String folderId) async {
     folderId = folderId == '' ? 'SinID' : folderId;
-    final datos = await this
+    final response = await this
         ._http
         .get('$_endpoint/obtenerDocumentos/$usuarioId/$folderId');
-    final response = MyResponse.fromJson(datos);
+    final data = json.decode(response.body);
 
-    return response;
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    return data;
   }
 
   imagenValida() {
@@ -125,9 +141,13 @@ class GoogleDriveService extends ChangeNotifier {
       "nombre": nombre,
       "driveId": driveId,
     };
-    final data = await this._http.post('$_endpoint/folder', body);
-    final response = MyResponse.fromJson(data);
-    notifyListeners();
-    return response;
+    final response = await this._http.post('$_endpoint/folder', body);
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    return data;
   }
 }

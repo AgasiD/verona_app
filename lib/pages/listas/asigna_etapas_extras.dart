@@ -47,8 +47,7 @@ class EtapasExtrasPage extends StatelessWidget {
                   page: false,
                 );
               } else {
-                final response = snapshot.data as MyResponse;
-                final lista = response.data as List<dynamic>;
+                final lista = snapshot.data as List<dynamic>;
                 final etapas = lista.map((e) => Etapa.fromJson(e)).toList();
                 etapas.sort(((a, b) => a.descripcion.compareTo(b.descripcion)));
                 final etapasAsignadas =
@@ -129,17 +128,17 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
 
   eliminarEtapa(etapaId, index) async {
     final _etapasService = Provider.of<EtapaService>(context, listen: false);
-    openLoadingDialog(context, mensaje: 'Eliminando subetapa...');
+    openLoadingDialog(mensaje: 'Eliminando subetapa...');
 
     try {
       final response = await _etapasService.eliminarEtapa(etapaId);
       widget.etapas.removeAt(index);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
 
       setState(() {});
     } catch (err) {
-      openAlertDialog(context, 'Error al eliminar subetapa',
-          subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog('Error al eliminar etapa', subMensaje: err.toString());
     }
   }
 
@@ -192,7 +191,7 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
         onTap: () => asignar(_obraService, snackText));
     return Dismissible(
         confirmDismiss: (direction) {
-          return openDialogConfirmationReturn(context, 'Confirme para borrar',
+          return openDialogConfirmationReturn('Confirme para borrar',
               subMensaje: 'Se borrará permanentemente de la base de datos');
         },
         background: Container(
@@ -216,28 +215,27 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
     try {
       if (!widget.asignado) {
         // Agregar tarea
-        openLoadingDialog(context, mensaje: 'Adjuntando etapa...');
-        final response = await _obraService.asignarEtapa(
+        openLoadingDialog(mensaje: 'Adjuntando etapa...');
+        final data = await _obraService.asignarEtapa(
             widget.etapa.id, _obraService.obra.id);
 
-        _obraService.obra.sumarEtapa(Etapa.fromJson(response.data['data']));
+        _obraService.obra.sumarEtapa(Etapa.fromJson(data));
         widget.asignado = true;
-        closeLoadingDialog(context);
+        closeLoadingDialog();
         loading = false;
         snackText = 'Tarea asignada';
         Helper.showSnackBar(
             context, snackText, null, Duration(milliseconds: 700), null);
       } else {
         //Quitar tarea
-        openLoadingDialog(context, mensaje: 'Quitando etapa...');
+        openLoadingDialog(mensaje: 'Quitando etapa...');
 
         final response = await _obraService.quitarEtapa(
             widget.etapa.id, _obraService.obra.id);
 
         _obraService.obra.quitarEtapa(widget.etapa.id);
         widget.asignado = false;
-        closeLoadingDialog(context);
-        loading = false;
+        closeLoadingDialog();
         Helper.showSnackBar(
             context, snackText, null, Duration(milliseconds: 700), null);
         setState(
@@ -245,8 +243,8 @@ class _CustomAddListTileState extends State<_CustomAddListTile> {
         );
       }
     } catch (err) {
-      loading == true ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, err.toString());
+      closeLoadingDialog();
+      openAlertDialog(err.toString());
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/documento.dart';
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -46,148 +47,155 @@ class ImgGalleryPage extends StatelessWidget {
               : FutureBuilder(
                   future: _driveService.obtenerDocumentos(_pref.id, _driveId),
                   builder: ((context, snapshot) {
-                    if (snapshot.data == null) {
-                      return Loading(mensaje: 'Recuperando imagenes');
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return Loading(
+                        mensaje: 'Recupernado imagenes...',
+                      );
+                    } else if (snapshot.connectionState ==
+                            ConnectionState.done &&
+                        snapshot.hasError) {
+                      return ErrorPage(
+                        errorMsg: snapshot.error.toString(),
+                      );
+                    }
+                    final response = snapshot.data as MyResponse;
+                    var files = response.data as List<dynamic>;
+
+                    // Filtro por habilitados para cliente
+                    if (_pref.role == 3) {
+                      files = files
+                          .where((file) => _obraService.obra.enabledFiles
+                              .contains(file['id']))
+                          .toList();
+                    }
+
+                    if (files.isEmpty) {
+                      return Container(
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                          child: Center(
+                            child: Text(
+                              'Aún no hay documentos disponibles ',
+                              style: TextStyle(
+                                  fontSize: 20, color: Helper.brandColors[4]),
+                            ),
+                          ));
                     } else {
-                      final response = snapshot.data as MyResponse;
-                      var files = response.data as List<dynamic>;
+                      files.sort((a, b) => a['name'].compareTo(b['name']));
+                      final imagenes = files
+                          .map(
+                            (e) => GestureDetector(
+                              onTap: () async {
+                                // if (e['mimeType'] ==
+                                //     'application/vnd.google-apps.folder') {
+                                //   Navigator.pushNamed(
+                                //       context, ImgGalleryPage.routeName,
+                                //       arguments: {"driveId": e['id']});
+                                // } else {
+                                //   Navigator.pushNamed(
+                                //       context, ImagenViewer.routeName,
+                                //       arguments: {"imagenId": e['id']});
+                                // }
 
-                      // Filtro por habilitados para cliente
-                      if (_pref.role == 3) {
-                        files = files
-                            .where((file) => _obraService.obra.enabledFiles
-                                .contains(file['id']))
-                            .toList();
-                      }
+                                // if (getType(e['mimeType']) == 'jpg') {
+                                //   Navigator.pushNamed(
+                                //       (context), ImagenViewer.routeName,
+                                //       arguments: {'imagenId': e['id']});
+                                // } else
+                                if (getType(e['mimeType']).toLowerCase() ==
+                                    'Carpeta'.toLowerCase()) {
+                                  Navigator.pushNamed(
+                                      (context), ImgGalleryPage.routeName,
+                                      arguments: {'driveId': e['id']});
+                                } else if (e['mimeType']
+                                    .toString()
+                                    .contains('shortcut')) {
+                                  Navigator.pushNamed(
+                                      (context), ImgGalleryPage.routeName,
+                                      arguments: {
+                                        'driveId': e['shortcutDetails']
+                                            ['targetId']
+                                      });
+                                } else {
+                                  final Uri _url = Uri.parse(
+                                      'https://drive.google.com/file/d/${e['id']}');
 
-                      if (files.isEmpty) {
-                        return Container(
-                            height: MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
-                            child: Center(
-                              child: Text(
-                                'Aún no hay documentos disponibles ',
-                                style: TextStyle(
-                                    fontSize: 20, color: Helper.brandColors[4]),
+                                  // var isAppInstalledResult =
+                                  //     await LaunchApp.isAppInstalled(
+                                  //   androidPackageName:
+                                  //       'net.pulsesecure.pulsesecure',
+                                  //   iosUrlScheme: 'pulsesecure://',
+                                  //   // openStore: false
+                                  // );
+                                  // var openAppResult = await LaunchApp.openApp(
+                                  //     androidPackageName:
+                                  //         'net.pulsesecure.pulsesecure',
+                                  //     iosUrlScheme: 'pulsesecure://',
+                                  //     appStoreLink:
+                                  //         'itms-apps://apps.apple.com/ar/app/google-drive-almacenamiento/id507874739'
+                                  //     // openStore: false
+                                  //     );
+
+                                  if (await canLaunchUrl(_url))
+                                    await launchUrl(_url,
+                                        mode: LaunchMode.externalApplication);
+                                  else
+                                    openAlertDialog(
+                                            'No se puede visualizar el documento');
+                                }
+                                ;
+                              },
+                              child: Column(
+                                children: [
+                                  e['mimeType'] ==
+                                              'application/vnd.google-apps.folder' ||
+                                          e['mimeType'] ==
+                                              'application/vnd.google-apps.shortcut'
+                                      ? Icon(
+                                          Icons.folder,
+                                          size: 130,
+                                          color: Helper.brandColors[3],
+                                        )
+                                      : FadeInImage(
+                                          height: 150,
+                                          imageErrorBuilder: (_, obj, st) {
+                                            return Container(
+                                                child: Image(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            .47,
+                                                    image: AssetImage(
+                                                        'assets/image.png')));
+                                          },
+                                          fadeInDuration:
+                                              Duration(milliseconds: 500),
+                                          placeholder:
+                                              AssetImage('assets/image.png'),
+                                          image: Helper.imageNetwork(
+                                              e['thumbnailLink'] ??
+                                                  'https://www.iconpacks.net/icons/2/free-file-icon-1453-thumb.png'
+                                              // 'https://drive.google.com/uc?export=view&id=${e['id']}'
+                                              )),
+                                  Text(
+                                    e['name'],
+                                    style: TextStyle(
+                                        overflow: TextOverflow.ellipsis,
+                                        fontSize: 15,
+                                        color: Helper.brandColors[3]),
+                                  )
+                                ],
                               ),
-                            ));
-                      } else {
-                        files.sort((a, b) => a['name'].compareTo(b['name']));
-                        final imagenes = files
-                            .map(
-                              (e) => GestureDetector(
-                                onTap: () async {
-                                  // if (e['mimeType'] ==
-                                  //     'application/vnd.google-apps.folder') {
-                                  //   Navigator.pushNamed(
-                                  //       context, ImgGalleryPage.routeName,
-                                  //       arguments: {"driveId": e['id']});
-                                  // } else {
-                                  //   Navigator.pushNamed(
-                                  //       context, ImagenViewer.routeName,
-                                  //       arguments: {"imagenId": e['id']});
-                                  // }
-
-                                  // if (getType(e['mimeType']) == 'jpg') {
-                                  //   Navigator.pushNamed(
-                                  //       (context), ImagenViewer.routeName,
-                                  //       arguments: {'imagenId': e['id']});
-                                  // } else
-                                  if (getType(e['mimeType']).toLowerCase() ==
-                                          'Carpeta'.toLowerCase() ) {
-                                    Navigator.pushNamed(
-                                        (context), ImgGalleryPage.routeName,
-                                        arguments: {'driveId': e['id']});
-                                          }
-                                  else if (
-                                      e['mimeType']
-                                          .toString()
-                                          .contains('shortcut')){
-                                             Navigator.pushNamed(
-                                        (context), ImgGalleryPage.routeName,
-                                        arguments: {'driveId': e['shortcutDetails']['targetId']});
-                                          
-                                  } else {
-                                    final Uri _url = Uri.parse(
-                                        'https://drive.google.com/file/d/${e['id']}');
-
-                                    // var isAppInstalledResult =
-                                    //     await LaunchApp.isAppInstalled(
-                                    //   androidPackageName:
-                                    //       'net.pulsesecure.pulsesecure',
-                                    //   iosUrlScheme: 'pulsesecure://',
-                                    //   // openStore: false
-                                    // );
-                                    // var openAppResult = await LaunchApp.openApp(
-                                    //     androidPackageName:
-                                    //         'net.pulsesecure.pulsesecure',
-                                    //     iosUrlScheme: 'pulsesecure://',
-                                    //     appStoreLink:
-                                    //         'itms-apps://apps.apple.com/ar/app/google-drive-almacenamiento/id507874739'
-                                    //     // openStore: false
-                                    //     );
-
-                                    if (await canLaunchUrl(_url))
-                                      await launchUrl(_url,
-                                          mode: LaunchMode.externalApplication);
-                                    else
-                                      openAlertDialog(context,
-                                          'No se puede visualizar el documento');
-                                  }
-                                  ;
-                                },
-                                child: Column(
-                                  children: [
-                                    e['mimeType'] ==
-                                                'application/vnd.google-apps.folder' ||
-                                            e['mimeType'] ==
-                                                'application/vnd.google-apps.shortcut'
-                                        ? Icon(
-                                            Icons.folder,
-                                            size: 130,
-                                            color: Helper.brandColors[3],
-                                          )
-                                        : FadeInImage(
-                                            height: 150,
-                                            imageErrorBuilder: (_, obj, st) {
-                                              return Container(
-                                                  child: Image(
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              .47,
-                                                      image: AssetImage(
-                                                          'assets/image.png')));
-                                            },
-                                            fadeInDuration:
-                                                Duration(milliseconds: 500),
-                                            placeholder:
-                                                AssetImage('assets/image.png'),
-                                            image: Helper.imageNetwork(
-                                                e['thumbnailLink'] ??
-                                                    'https://www.iconpacks.net/icons/2/free-file-icon-1453-thumb.png'
-                                                // 'https://drive.google.com/uc?export=view&id=${e['id']}'
-                                                )),
-                                    Text(
-                                      e['name'],
-                                      style: TextStyle(
-                                          overflow: TextOverflow.ellipsis,
-                                          fontSize: 15,
-                                          color: Helper.brandColors[3]),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            )
-                            .toList();
-                        return GridView.count(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 15,
-                          children: imagenes,
-                        );
-                      }
+                            ),
+                          )
+                          .toList();
+                      return GridView.count(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 15,
+                        children: imagenes,
+                      );
                     }
                   }),
                 )),

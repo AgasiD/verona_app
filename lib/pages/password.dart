@@ -132,16 +132,13 @@ class __FormState extends State<_Form> {
                   };
                   final data = await _usuarioService.changePassword(body);
                   final datos = data["data"];
-                  if (datos["fallo"]) {
-                    openAlertDialog(context, datos["error"]);
+                  if (datos["fallo"]) {openAlertDialog(datos["error"]);
                   } else {
                     resetForm();
-                    openAlertDialog(
-                        context, 'La contraseña se cambió correctamente');
+                    openAlertDialog('La contraseña se cambió correctamente');
                   }
                 }
-              } catch (err) {
-                openAlertDialog(context, err.toString());
+              } catch (err) {openAlertDialog( err.toString());
               }
             },
           )

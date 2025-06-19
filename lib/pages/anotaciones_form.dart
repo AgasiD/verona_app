@@ -41,7 +41,7 @@ class AnotacionForm extends StatelessWidget {
       obraId = data['obraId'];
       anotacion = new Anotacion('', obraId: obraId);
     }
-  
+
     bool changes = false;
     return GestureDetector(
         onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
@@ -85,16 +85,16 @@ class AnotacionForm extends StatelessWidget {
     try {
       if (descripcion.isEmpty) return;
       anotacion.descripcion = descripcion;
-      openLoadingDialog(context, mensaje: 'Grabando anotación...');
+      openLoadingDialog(mensaje: 'Grabando anotación...');
       await _usuarioService.modificarAnotacion(_pref.id, anotacion);
       loading = true;
       usuario.actualizarAnotacion(anotacion);
       loading = true;
 
-      closeLoadingDialog(context);
+      closeLoadingDialog();
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al grabar', subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog('Error al grabar', subMensaje: err.toString());
     }
   }
 
@@ -109,14 +109,14 @@ class AnotacionForm extends StatelessWidget {
           obraId: isUsuario ? null : obraId,
           realizado: realizado,
           tsGenerado: DateTime.now().millisecondsSinceEpoch);
-      openLoadingDialog(context, mensaje: 'Grabando anotación...');
+      openLoadingDialog(mensaje: 'Grabando anotación...');
       loading = true;
       await _usuarioService.agregarAnotacion(_pref.id, anotacion);
       usuario.agregarAnotacion(anotacion);
-      closeLoadingDialog(context);
+      closeLoadingDialog();
     } catch (err) {
-      loading ? closeLoadingDialog(context) : false;
-      openAlertDialog(context, 'Error al grabar', subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog('Error al grabar', subMensaje: err.toString());
     }
   }
 }
