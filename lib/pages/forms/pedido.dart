@@ -12,6 +12,7 @@ import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/pedido.dart';
+import 'package:verona_app/navigator_key.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/listas/pedidos.dart';
@@ -28,6 +29,7 @@ class PedidoForm extends StatelessWidget implements MyForm {
   static String nameForm = 'Nuevo pedido';
   static String alertMessage = 'Confirmar nuevo pedido';
   static const String routeName = 'pedido';
+
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context, listen: false);
@@ -602,53 +604,8 @@ class _FormState extends State<_Form> {
                                   .withOpacity(.5)
                                   .withAlpha(150),
                               text: 'Grabar',
-                              onPressed: () async {
-                                String mensaje1 = 'Creando pedido...';
-                                String mensaje2 = 'Error al crear pedido';
-                                String mensaje3 = 'Pedido creado con exito';
-                                if (widget.pedido != null) {
-                                  mensaje1 = 'Actualizando pedido...';
-                                  mensaje2 = 'Error al actualizar el pedido';
-                                  mensaje3 = 'Pedido actualizado con exito';
-                                }
-                                bool loading = true;
-
-                                // openLoadingDialog(context, mensaje: mensaje1);
-                                try {
-                                  final response = await grabarPedido(
-                                      _obraService.obra.id,
-                                      areaTxtController,
-                                      _obraService,
-                                      _driveService);
-
-                                  // closeLoadingDialog(context);
-                                  // loading = false;
-                                  if (response[0]) {
-                                    openAlertDialog(context, mensaje2,
-                                        subMensaje: response[1]);
-                                  } else {
-                                    openLoadingDialog(context,
-                                        mensaje: mensaje3);
-                                    Timer(Duration(milliseconds: 750), () {
-                                      closeLoadingDialog(context);
-                                      loading = false;
-                                      Timer(Duration(milliseconds: 750), () {
-                                        Navigator.pop(
-                                          context,
-                                          PedidosPage.routeName,
-                                        );
-                                      });
-                                    });
-                                  }
-                                } catch (err) {
-                                  loading ? closeLoadingDialog(context) : false;
-
-                                  openAlertDialog(
-                                      context, 'Error al grabar pedido',
-                                      subMensaje: err.toString());
-                                }
-                              },
-                            )
+                              onPressed: () async =>
+                                  grabar(_obraService, _driveService))
                           : Container(),
                       SecondaryButton(
                           width: 95,
@@ -665,6 +622,28 @@ class _FormState extends State<_Form> {
             ),
           ),
         ));
+  }
+
+  Future<void> grabar(_obraService, _driveService) async {
+    {
+      try {
+        openLoadingDialogG(mensaje: 'Procesando pedido...');
+        final response = await grabarPedido(_obraService.obra.id,
+            areaTxtController, _obraService, _driveService);
+        closeLoadingDialogG();
+        if (response[0]) throw new Exception(response[1]);
+
+        await openAlertDialogReturnG('Pedido guardado con éxito');
+        Navigator.pop(
+          context,
+          PedidosPage.routeName,
+        );
+      } catch (err) {
+        closeLoadingDialogG();
+        openAlertDialogG('Error al grabar pedido',
+            subMensaje: err.toString());
+      }
+    }
   }
 
   void asignaEntrega(String value) {
@@ -1087,9 +1066,7 @@ class _Custom_Dropdown extends StatelessWidget {
       onChanged: (value) {
         actionOnChange(value.toString());
       },
-      onSaved: (value) {
-        print('dsabes');
-      },
+      onSaved: (value) {},
     );
   }
 

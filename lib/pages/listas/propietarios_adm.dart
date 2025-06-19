@@ -6,7 +6,7 @@ import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/error.dart';
-import 'package:verona_app/pages/forms/miembro.dart';
+
 import 'package:verona_app/pages/forms/propietario.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -28,62 +28,57 @@ class PropietariosADM extends StatelessWidget {
           child: FutureBuilder(
               future: _usuarioService.obtenerPropietariosMiembro(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState != ConnectionState.done)
                   return Loading(mensaje: 'Cargando propietarios...');
-                } else if( snapshot.hasError ) {
-
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasError) {
                   return ErrorPage(
                     errorMsg: snapshot.error.toString(),
                     page: false,
                   );
-
-                }else
-                {
-                  var propietarios = snapshot.data as List<Miembro>;
-                  propietarios = propietarios
-                      .where((miembro) => miembro.role != 1)
-                      .toList();
-                  if (propietarios.length > 0) {
-                    final dataTile = propietarios.map((e) => {
-                          'title': '${e.nombre + ' ' + e.apellido}',
-                          'subtitle': Helper.getProfesion(e.role),
-                          'avatar': '${e.profileURL}',
-                          'id': e.id
-                        });
-
-                    return Column(
-                      children: [
-                        Container(
-                          height: MediaQuery.of(context).size.height - 160,
-                          color: Helper.brandColors[1],
-                          child: _CustomSearchListView(
-                            txtController: txtBuscador,
-                            data: dataTile.toList(),
-                            dataFiltrada: dataTile.toList(),
-                          ),
-                        )
-                      ],
-                    );
-                  } else {
-                    return Column(
-                      children: [
-                        Container(
-                            height: MediaQuery.of(context).size.height - 150,
-                            width: MediaQuery.of(context).size.width,
-                            child: Center(
-                              child: Text(
-                                'Aún no hay propietarios',
-                                style: TextStyle(
-                                    fontSize: 18, color: Helper.brandColors[4]),
-                              ),
-                            )),
-                        SizedBox(
-                          height: 10,
-                        ),
-                      ],
-                    );
-                  }
                 }
+                var propietarios = snapshot.data as List<Miembro>;
+                propietarios =
+                    propietarios.where((miembro) => miembro.role != 1).toList();
+                if (propietarios.length > 0) {
+                  final dataTile = propietarios.map((e) => {
+                        'title': '${e.nombre + ' ' + e.apellido}',
+                        'subtitle': Helper.getProfesion(e.role),
+                        'avatar': '${e.profileURL}',
+                        'id': e.id
+                      });
+
+                  return Column(
+                    children: [
+                      Container(
+                        height: MediaQuery.of(context).size.height - 160,
+                        color: Helper.brandColors[1],
+                        child: _CustomSearchListView(
+                          txtController: txtBuscador,
+                          data: dataTile.toList(),
+                          dataFiltrada: dataTile.toList(),
+                        ),
+                      )
+                    ],
+                  );
+                }
+                return Column(
+                  children: [
+                    Container(
+                        height: MediaQuery.of(context).size.height - 150,
+                        width: MediaQuery.of(context).size.width,
+                        child: Center(
+                          child: Text(
+                            'Aún no hay propietarios',
+                            style: TextStyle(
+                                fontSize: 18, color: Helper.brandColors[4]),
+                          ),
+                        )),
+                    SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                );
               }),
         ),
       ),

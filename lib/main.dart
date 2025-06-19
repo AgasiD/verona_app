@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart';
 
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Enviroment.dart';
@@ -43,7 +44,7 @@ void main() async {
 
   await dotenv.load(fileName: Environment.fileName);
 
-  runApp(AppState());
+  runApp(GetMaterialApp(home: AppState()));
 }
 
 class AppState extends StatefulWidget {
@@ -174,7 +175,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
         final tokenResponse =
             await _usuario.setTokenDevice(_pref.id, NotificationService.token!);
-        print(tokenResponse);
       }
 
     }

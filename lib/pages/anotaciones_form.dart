@@ -23,7 +23,6 @@ class AnotacionForm extends StatelessWidget {
   String text = '';
   @override
   Widget build(BuildContext context) {
-    
     final args = ModalRoute.of(context)!.settings;
     final _pref = new Preferences();
     _usuarioService = Provider.of<UsuarioService>(context, listen: false);
@@ -33,16 +32,17 @@ class AnotacionForm extends StatelessWidget {
       is_new = false;
       anotacion = data['anotacion'];
       txtTarea.text = anotacion.descripcion;
-    } else if (data['usuarioId'] != null){ 
+    } else if (data['usuarioId'] != null) {
       isUsuario = true;
       obraId = '';
       anotacion = new Anotacion('', obraId: obraId);
-    } else if (data['obraId'] != null){ 
+    } else if (data['obraId'] != null) {
       isUsuario = false;
-       obraId = data['obraId'];
+      obraId = data['obraId'];
       anotacion = new Anotacion('', obraId: obraId);
     }
-
+  
+    bool changes = false;
     return GestureDetector(
         onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
         child: WillPopScope(
@@ -63,10 +63,12 @@ class AnotacionForm extends StatelessWidget {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done)
                     return Loading(mensaje: 'Cargando...');
-                  if(snapshot.connectionState == ConnectionState.done && snapshot.hasError){
+                  if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.hasError) {
                     return ErrorPage(errorMsg: snapshot.error.toString());
                   }
-                  usuario = Miembro.fromJson(snapshot.data as Map<String,dynamic>);
+                  usuario =
+                      Miembro.fromJson(snapshot.data as Map<String, dynamic>);
                   return Action_Form(
                     txtTarea: txtTarea,
                   );
@@ -108,8 +110,8 @@ class AnotacionForm extends StatelessWidget {
           realizado: realizado,
           tsGenerado: DateTime.now().millisecondsSinceEpoch);
       openLoadingDialog(context, mensaje: 'Grabando anotación...');
-      await _usuarioService.agregarAnotacion(_pref.id, anotacion);
       loading = true;
+      await _usuarioService.agregarAnotacion(_pref.id, anotacion);
       usuario.agregarAnotacion(anotacion);
       closeLoadingDialog(context);
     } catch (err) {

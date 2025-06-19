@@ -28,11 +28,11 @@ class UsuarioService extends ChangeNotifier {
     if (response.statusCode >= 300) {
       throw new Exception('Error ${data['message']} ${response.statusCode}');
     }
-    return response;
+    return data;
   }
 
   obtenerPropietariosMiembro() async {
-    final response = await this._http.get('$_endpoint/propietario');
+    final response = await this._http.get('$_endpoint/propietarios');
     final data = json.decode(response.body);
 
     if (response.statusCode >= 300) {
@@ -43,7 +43,7 @@ class UsuarioService extends ChangeNotifier {
     return list;
   }
 
-  obtenerPersonal({roles = null}) async {
+    obtenerPersonal({roles = null}) async {
     final body = {'roles': roles};
     final response = await this._http.post('$_endpoint/profesionales', body);
     final data = json.decode(response.body);
@@ -69,13 +69,13 @@ class UsuarioService extends ChangeNotifier {
   }
 
   Future<dynamic> obtenerUsuario(id) async {
-    final response = await this._http.get('$_endpoint/obtenerUsuario/$id');
+    final response = await this._http.get('$_endpoint/usuario/$id');
     final data = json.decode(response.body);
 
     if (response.statusCode >= 300) {
       throw new Exception('Error ${data['message']} ${response.statusCode}');
     }
-    return response;
+    return data;
   }
 
   obtenerNotificaciones(usuarioId) async {
@@ -86,7 +86,7 @@ class UsuarioService extends ChangeNotifier {
     if (response.statusCode >= 300) {
       throw new Exception('Error ${data['message']} ${response.statusCode}');
     }
-    return response;
+    return data;
   }
 
   Future<dynamic> leerNotificaciones(usuarioId) async {
@@ -97,7 +97,7 @@ class UsuarioService extends ChangeNotifier {
     if (response.statusCode >= 300) {
       throw new Exception('Error ${data['message']} ${response.statusCode}');
     }
-    return response;
+    return data;
   }
 
   grabarUsuario(dynamic usuario) async {
@@ -108,7 +108,7 @@ class UsuarioService extends ChangeNotifier {
       throw new Exception('Error ${data['message']} ${response.statusCode}');
     }
     notifyListeners();
-    return response;
+    return data;
   }
 
   modificarUsuario(dynamic usuario) async {
@@ -121,7 +121,7 @@ class UsuarioService extends ChangeNotifier {
       throw new Exception('Error ${data['message']} ${response.statusCode}');
     }
     notifyListeners();
-    return response;
+    return data;
   }
 
   changePassword(Map<String, String?> usuario) async {
@@ -131,7 +131,7 @@ class UsuarioService extends ChangeNotifier {
     if (response.statusCode >= 300) {
       throw new Exception('Error ${data['message']} ${response.statusCode}');
     }
-    return response;
+    return data;
   }
 
   validarUsuario(String usuario, String password) async {
@@ -143,9 +143,8 @@ class UsuarioService extends ChangeNotifier {
       if (response.statusCode >= 300) {
         throw new Exception('Error ${data['message']} ${response.statusCode}');
       }
-      return response;
+      return data;
     } catch (err) {
-      print(err);
     }
   }
 
@@ -157,7 +156,7 @@ class UsuarioService extends ChangeNotifier {
     if (response.statusCode >= 300) {
       throw new Exception('Error ${data['message']} ${response.statusCode}');
     }
-    return response;
+    return data;
   }
 
   Future<dynamic> deleteDevice(String usuarioId, String tokenDevice) async {

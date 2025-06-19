@@ -442,7 +442,6 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
               child: TextField(
                 controller: txtDescri,
                 style: TextStyle(color: Helper.brandColors[3]),
-                onEditingComplete: () => print('lostFocus'),
                 onChanged: (text) => widget.inactividades[i].nombre = text,
                 decoration: InputDecoration(border: InputBorder.none),
               ),
@@ -452,7 +451,6 @@ class _InactividadesBDViewState extends State<_InactividadesBDView> {
               expands: false,
               controller: txtOrden,
               style: TextStyle(color: Helper.brandColors[3]),
-              onEditingComplete: () => print('lostFocus'),
               onChanged: (text) => widget.inactividades[i].nombre = text,
               decoration: InputDecoration(border: InputBorder.none),
             ),

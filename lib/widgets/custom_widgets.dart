@@ -26,6 +26,7 @@ import 'package:verona_app/services/notifications_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/socket_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
+import 'package:get/get.dart';
 
 class CustomPainterAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -951,6 +952,22 @@ openLoadingDialog(BuildContext context, {String mensaje = ''}) {
   return context;
 }
 
+void openLoadingDialogG({String mensaje = ''}) {
+  if (Platform.isAndroid) {
+    Get.dialog(
+      LoadingDialog(mensaje: mensaje),
+      barrierDismissible: false,
+    );
+  } else {
+    Get.dialog(
+      CupertinoAlertDialog(title: Text(mensaje)),
+      barrierDismissible: false,
+    );
+  }
+}
+
+
+
 void closeLoadingDialog(BuildContext context) {
   if (Platform.isAndroid) {
     Navigator.of(context, rootNavigator: true).pop();
@@ -958,6 +975,75 @@ void closeLoadingDialog(BuildContext context) {
     Navigator.of(context, rootNavigator: true).pop();
   }
 }
+
+void closeLoadingDialogG() {
+  if (Get.isDialogOpen ?? false) {
+    Get.back(); // Cierra el diálogo activo
+  }
+}
+
+Future<bool> openAlertDialogReturnG(String mensaje, {String? subMensaje}) async {
+  return await Get.dialog<bool>(
+    Platform.isAndroid
+        ? AlertDialog(
+            title: Text(mensaje),
+            content: subMensaje != null && subMensaje.isNotEmpty
+                ? Text(subMensaje!)
+                : SizedBox.shrink(),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: true),
+                child: Text('Cerrar'),
+              ),
+            ],
+          )
+        : CupertinoAlertDialog(
+            title: Text(mensaje),
+            content: subMensaje != null && subMensaje.isNotEmpty
+                ? Text(subMensaje!)
+                : SizedBox.shrink(),
+            actions: [
+              CupertinoDialogAction(
+                child: Text('Cerrar'),
+                onPressed: () => Get.back(result: true),
+              ),
+            ],
+          ),
+    barrierDismissible: false,
+  ).then((value) => value ?? false); // por si Get.back() no envía resultado
+}
+
+void openAlertDialogG(String mensaje, {String? subMensaje}) {
+  Get.dialog(
+    Platform.isAndroid
+        ? AlertDialog(
+            title: Text(mensaje),
+            content: (subMensaje != null && subMensaje.isNotEmpty)
+                ? Text(subMensaje!)
+                : SizedBox.shrink(),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text('Cerrar'),
+              ),
+            ],
+          )
+        : CupertinoAlertDialog(
+            title: Text(mensaje),
+            content: (subMensaje != null && subMensaje.isNotEmpty)
+                ? Text(subMensaje!)
+                : SizedBox.shrink(),
+            actions: [
+              CupertinoDialogAction(
+                child: Text('Cerrar'),
+                onPressed: () => Get.back(),
+              ),
+            ],
+          ),
+    barrierDismissible: false,
+  );
+}
+
 
 Future<bool> openAlertDialogReturn(BuildContext context, String mensaje,
     {String? subMensaje}) async {

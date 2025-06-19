@@ -69,7 +69,6 @@ class ImagenViewer extends StatelessWidget {
 
       return true;
     } on dynamic catch (err) {
-      print(err);
       return false;
     }
   }

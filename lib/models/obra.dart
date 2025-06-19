@@ -37,6 +37,7 @@ class Obra {
   String? ts;
   double? latitud;
   double? longitud;
+  double porcentajeRealizado;
   Obra({
     required this.barrio,
     required this.diasEstimados,
@@ -66,7 +67,8 @@ class Obra {
     this.pedidos = const [],
     this.propietarios = const [],
     this.rootDriveCliente = '',
-    ts,
+    this.ts,
+    this.porcentajeRealizado = 0,
   }) {
     this.barrio = barrio;
     this.chatE = chatE;
@@ -94,6 +96,7 @@ class Obra {
     this.nombre = nombre;
     this.pedidos = pedidos;
     this.rootDriveCliente = rootDriveCliente;
+    this.porcentajeRealizado = porcentajeRealizado;
     this.ts =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toString();
@@ -133,7 +136,10 @@ class Obra {
       longitud: (json['longitud'] == 0 ? 0.00 : json['longitud']) ?? 0.00,
       folderPedidoImages: json['folderPedidoImages'] ?? 'SinDato',
       articulosId: json['articulosId'] ?? '',
-      imageURL: json['imageURL'] ?? 'SinDato');
+      imageURL: json['imageURL'] ?? 'SinDato',
+      porcentajeRealizado: json['porcentajeRealizado'] != null ? double.parse(json['porcentajeRealizado'].toStringAsFixed(2)) ?? 0.0 : 0
+      );
+
 
   int get cantDiasInactivos {
     int dias = 0;
@@ -173,7 +179,7 @@ class Obra {
         'articulosId': this.articulosId
       };
 
-  double get porcentajeRealizado {
+  double get porcentajeRealizadoCalc {
     int cantTotalTareas = 0;
     int cantTotalTaresHechas = 0;
     int cantTotalTaresIniciadas = 0;

@@ -42,7 +42,7 @@ class _InactividadesPageState extends State<InactividadesPage> {
               ? Container(
                   child: Center(
                     child: Text(
-                      'Aún no se registraron dias inactivos ',
+                      'Aún no se registraron días inactivos ',
                       style: TextStyle(fontSize: 17, color: Colors.grey[400]),
                       maxLines: 3,
                     ),
@@ -151,7 +151,7 @@ class __InactividadTileState extends State<_InactividadTile> {
                   leading: Container(
                     padding: EdgeInsets.all(1),
                     decoration: BoxDecoration(
-                        color: !esPar ? Helper.brandColors[9] : null,
+                        color: !esPar ? Helper.brandColors[8] : null,
                         borderRadius: BorderRadius.circular(100)),
                     child: CircleAvatar(
                       backgroundColor: Helper.brandColors[0],
@@ -165,7 +165,7 @@ class __InactividadTileState extends State<_InactividadTile> {
                   subtitle: Text(
                     widget.inactividad.fecha,
                     style: TextStyle(
-                        color: Helper.brandColors[9].withOpacity(.99)),
+                        color: Helper.brandColors[8].withOpacity(.99)),
                   ),
                   trailing: Icon(
                     Icons.arrow_forward_ios_rounded,

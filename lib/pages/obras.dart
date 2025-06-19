@@ -297,7 +297,7 @@ class __SearchListViewState extends State<_SearchListView> {
                   obras = (response as List<dynamic>)
                       .map((e) => Obra.fromMap(e))
                       .toList();
-                  obrasFiltradas = obras;
+                  obrasFiltradas =  obras;
                   return _CustomObras(
                     obras: obras,
                     obrasFiltradas: obras,

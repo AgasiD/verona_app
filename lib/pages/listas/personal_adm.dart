@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/miembro.dart';
+import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/socket_service.dart';
@@ -27,9 +28,12 @@ class PersonalADM extends StatelessWidget {
           child: FutureBuilder(
               future: _usuarioService.obtenerPersonal(),
               builder: (context, snapshot) {
-                if (snapshot.data == null) {
-                  return Loading(mensaje: 'Cargando personal...');
-                } else {
+                 if (snapshot.connectionState != ConnectionState.done)
+                      return Loading(mensaje: 'Cargando documentos...');
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.hasError) {
+                      return ErrorPage(errorMsg: snapshot.error.toString());
+                    }
                   var personal = snapshot.data as List<Miembro>;
                   personal =
                       personal.where((miembro) =>  _pref.role == 1 ? true : miembro.role != 1).toList();
@@ -75,7 +79,7 @@ class PersonalADM extends StatelessWidget {
                       ],
                     );
                   }
-                }
+
               }),
         ),
       ),

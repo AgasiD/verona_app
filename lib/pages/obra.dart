@@ -98,7 +98,7 @@ class ObraPage extends StatelessWidget {
                             !esDelivery && _pref.role != 4
                                 ? _DiasView(obra: obra, obraId: obraId)
                                 : Container(),
-                            !esDelivery && _pref.role != 4
+                            false
                                 ? Container(
                                     margin: const EdgeInsets.symmetric(
                                         vertical: 25.0),

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/miembro.dart';
@@ -31,7 +31,6 @@ class PerfilPage extends StatelessWidget {
     _scaffoldKey = GlobalKey<ScaffoldState>();
     final _usuarioService = Provider.of<UsuarioService>(context);
     final _obraService = Provider.of<ObraService>(context, listen: false);
-    // final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final _pref = new Preferences();
     String textoImg = 'Cambiar imagen';
     bool sinImg = false;
@@ -96,7 +95,7 @@ class PerfilPage extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                        onPressed: uploadProfileImage(
+                        onPressed: () async => await uploadProfileImage(
                             context, usuario, _usuarioService),
                         child: Text(textoImg,
                             style: TextStyle(color: Helper.brandColors[8]))),
@@ -158,7 +157,7 @@ class PerfilPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               MainButton(
-                                  onPressed: sincNotifications(
+                                  onPressed: () async => await sincNotifications(
                                       context, _usuarioService),
                                   width: 250,
                                   height: 35,
@@ -166,7 +165,7 @@ class PerfilPage extends StatelessWidget {
                                   color: Helper.brandColors[8],
                                   text: 'Sincronizar notificaciones'),
                               MainButton(
-                                  onPressed:
+                                  onPressed: () async => 
                                       deleteDevices(context, _usuarioService),
                                   width: 250,
                                   height: 35,

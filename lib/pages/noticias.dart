@@ -34,7 +34,6 @@ class NoticiasPage extends StatelessWidget {
               return ErrorPage(errorMsg: snapshot.error.toString());
             } else {
               final noticia = snapshot.data as Map<String, dynamic>;
-              // return Container(color: Colors.red,);
               return ListView.builder(
                   itemCount: noticia['posts'].length,
                   shrinkWrap: true,
@@ -146,7 +145,7 @@ class WixService extends ChangeNotifier {
   HttpService _http = new HttpService();
   final _endpoint = 'api/wix';
 
-  Future<MyResponse> obtenerPosts() async {
+  Future<dynamic> obtenerPosts() async {
     final response = await this._http.get('$_endpoint');
     final data = json.decode(response.body);
 

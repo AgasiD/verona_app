@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
 import 'package:verona_app/models/MyResponse.dart';
+import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/services/obra_service.dart';
@@ -70,9 +71,8 @@ class _PedidosPanelControlState extends State<PedidosPanelControl>
                     snapshot.hasError) {
                   return ErrorPage(errorMsg: snapshot.error.toString());
                 }
-                final response = snapshot.data as MyResponse;
 
-                final obras = response.data;
+                final obras = snapshot.data as List;
 
                 final pendientes = obtenerPedidos(obras, 1);
                 final confirmados = obtenerPedidos(obras, 2);

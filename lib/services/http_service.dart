@@ -39,8 +39,8 @@ class HttpService extends ChangeNotifier {
 
     final response =
         await http.post(url, body: json.encode(body), headers: headers);
-    Map<String, dynamic> data = json.decode(response.body);
-    return data;
+
+    return response;
   }
 
   delete(String endpoint) async {
@@ -49,8 +49,7 @@ class HttpService extends ChangeNotifier {
         ? url = Uri.https(_baseUrl, endpoint)
         : url = Uri.http(_baseUrl, endpoint);
     final response = await http.delete(url);
-    Map<String, dynamic> data = json.decode(response.body);
-    return data;
+    return response;
   }
 
   put(String endpoint, Map<String, dynamic> body) async {
@@ -60,8 +59,7 @@ class HttpService extends ChangeNotifier {
         : url = Uri.http(_baseUrl, endpoint);
     final bodyReq = json.encode(body);
     final response = await http.put(url, body: bodyReq, headers: headers);
-    Map<String, dynamic> data = json.decode(response.body);
-    return data;
+    return response;
   }
 
   uploadImage(XFile imageFile, String endpoint) async {

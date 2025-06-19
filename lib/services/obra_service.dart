@@ -47,16 +47,16 @@ class ObraService extends ChangeNotifier {
   Future<Obra> obtenerObra(String obraId) async {
     final body = {"propietario": new Preferences().role == 3};
     final response =
-        await this._http.post('$_endpoint/obtenerObra/$obraId', body);
+        await this._http.post('$_endpoint/$obraId', body);
     final data = json.decode(response.body);
 
     if (response.statusCode >= 300) {
       throw new Exception('Error ${data['message']} ${response.statusCode}');
     }
 
-    this.obra = data;
+    this.obra = Obra.fromMap(data);
     notifyListeners();
-    return data;
+    return Obra.fromMap(data);
   }
 
   Future<Obra> obtenerEquipo(String obraId) async {
