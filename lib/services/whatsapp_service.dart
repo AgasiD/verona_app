@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/chat.dart';
 import 'package:verona_app/services/http_service.dart';
 
@@ -48,23 +48,23 @@ class WSService extends ChangeNotifier {
   //   return response;
   // }
 
-  Future<MyResponse> enviarMensaje(String phone, String mensaje) async {
-    final body = {"telefono": phone, "mensaje": mensaje};
-    final data = await this._http.post('$_endpoint', body);
-    final response = MyResponse.fromJson(data);
-    return response;
-  }
+  // Future<MyResponse> enviarMensaje(String phone, String mensaje) async {
+  //   final body = {"telefono": phone, "mensaje": mensaje};
+  //   final data = await this._http.post('$_endpoint', body);
+  //   final response = MyResponse.fromJson(data);
+  //   return response;
+  // }
 
-  Future<MyResponse> enviarMensajeGrupo(String idGrupo, String mensaje) async {
-    final body = {"idGrupo": idGrupo, "mensaje": mensaje};
-    final data = await this._http.post('$_endpoint/grupo', body);
-    final response = MyResponse.fromJson(data);
-    return response;
-  }
+  // Future<MyResponse> enviarMensajeGrupo(String idGrupo, String mensaje) async {
+  //   final body = {"idGrupo": idGrupo, "mensaje": mensaje};
+  //   final data = await this._http.post('$_endpoint/grupo', body);
+  //   final response = MyResponse.fromJson(data);
+  //   return response;
+  // }
 
-  Future<MyResponse> obtenerGrupos() async {
-    final data = await this._http.get('$_endpoint/grupos');
-    final response = MyResponse.fromJson(data);
-    return response;
-  }
+  // Future<MyResponse> obtenerGrupos() async {
+  //   final data = await this._http.get('$_endpoint/grupos');
+  //   final response = MyResponse.fromJson(data);
+  //   return response;
+  // }
 }

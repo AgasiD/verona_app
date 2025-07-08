@@ -1,138 +1,137 @@
-import 'dart:io';
+// import 'dart:io';
 
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:verona_app/helpers/Preferences.dart';
-import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
-import 'package:verona_app/services/socket_service.dart';
+// import 'package:dropdown_button2/dropdown_button2.dart';
+// import 'package:flutter/material.dart';
+// import 'package:provider/provider.dart';
+// import 'package:verona_app/helpers/Preferences.dart';
+// import 'package:verona_app/helpers/helpers.dart';
 
-import 'package:verona_app/widgets/custom_widgets.dart';
+// import 'package:verona_app/services/socket_service.dart';
 
-import '../services/whatsapp_service.dart';
+// import 'package:verona_app/widgets/custom_widgets.dart';
 
-class MensajeForm extends StatelessWidget {
-  const MensajeForm({Key? key}) : super(key: key);
-  static const String routeName = 'mensajesForm';
+// import '../services/whatsapp_service.dart';
 
-  @override
-  Widget build(BuildContext context) {
-    final _socketService = Provider.of<SocketService>(context);
-    final _pref = new Preferences();
-    _socketService.connect(_pref.id);
-    return Scaffold(
-      body: Container(
-          color: Helper.brandColors[1], child: SafeArea(child: _Form())),
-      bottomNavigationBar: CustomNavigatorFooter(),
-    );
-  }
-}
+// class MensajeForm extends StatelessWidget {
+//   const MensajeForm({Key? key}) : super(key: key);
+//   static const String routeName = 'mensajesForm';
 
-class _Form extends StatelessWidget {
-  _Form({Key? key}) : super(key: key);
-  TextEditingController txtPhone =
-      new TextEditingController(text: 'Mandos Medios');
-  TextEditingController txtMessage = new TextEditingController(text: '');
-  String selectedGroup = '120363197901233524';
+//   @override
+//   Widget build(BuildContext context) {
+//     final _socketService = Provider.of<SocketService>(context);
+//     final _pref = new Preferences();
+//     _socketService.connect(_pref.id);
+//     return Scaffold(
+//       body: Container(
+//           color: Helper.brandColors[1], child: SafeArea(child: _Form())),
+//       bottomNavigationBar: CustomNavigatorFooter(),
+//     );
+//   }
+// }
 
-  @override
-  Widget build(BuildContext context) {
-    final wsService = Provider.of<WSService>(context, listen: false);
-    List<DropdownMenuItem<String>> grupos = [];
-    return FutureBuilder(
-        future: wsService.obtenerGrupos(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return Loading(
-              mensaje: 'Recuperando grupos...',
-            );
-          }
-          final response = snapshot.data! as MyResponse;
-          (response.data as List).sort(
-              (a, b) => a['name'].toString().compareTo(b['name'].toString()));
-          grupos = (response.data as List)
-              .map((e) => DropdownMenuItem<String>(
-                  child: Text(e['name'] ?? ' Sin nombre'), value: e['id']))
-              .toList();
-          return Form(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                SizedBox(
-                    height: 80,
-                    child: DropdownButtonFormField2(
-                        value: selectedGroup,
-                        items: grupos,
-                        style: TextStyle(
-                            color: Helper.brandColors[5], fontSize: 16),
-                        decoration: getDecoration(),
-                        dropdownStyleData: DropdownStyleData(
-                            decoration: getDropdownDecoration()),
-                        onChanged: (value) {
-                          selectedGroup = value as String;
-                        })),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CustomInput(
-                    hintText: 'Escriba un mensaje',
-                    icono: Icons.message_sharp,
-                    textController: txtMessage,
-                    lines: 10,
-                  ),
-                ),
-                Expanded(child: Container()),
-                MainButton(
-                  onPressed: () async => await sendMessage(context),
-                  text: 'Enviar mensaje',
-                  color: Helper.brandColors[8],
-                )
-              ]));
-        });
-  }
+// class _Form extends StatelessWidget {
+//   _Form({Key? key}) : super(key: key);
+//   TextEditingController txtPhone =
+//       new TextEditingController(text: 'Mandos Medios');
+//   TextEditingController txtMessage = new TextEditingController(text: '');
+//   String selectedGroup = '120363197901233524';
 
-  sendMessage(context) async {
-    final wsService = Provider.of<WSService>(context, listen: false);
-    try {
-      openLoadingDialog(mensaje: 'Enviando mensaje...');
-      final text = txtMessage.text;
-      final phone = txtPhone.text;
-      if (text.trim().isEmpty) {
-        throw new Exception(['No se ingresó mensaje']);
-      }
-      await wsService.enviarMensajeGrupo(selectedGroup, text);
-      closeLoadingDialog();
-      openAlertDialog('Mensaje enviado con éxito');
-    } catch (err) {
-      closeLoadingDialog();
-      openAlertDialog( err.toString());
-    }
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     final wsService = Provider.of<WSService>(context, listen: false);
+//     List<DropdownMenuItem<String>> grupos = [];
+//     return FutureBuilder(
+//         future: wsService.obtenerGrupos(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState != ConnectionState.done) {
+//             return Loading(
+//               mensaje: 'Recuperando grupos...',
+//             );
+//           }
+//           (snapshot.data as List).sort(
+//               (a, b) => a['name'].toString().compareTo(b['name'].toString()));
+//           grupos = (snapshot.data as List)
+//               .map((e) => DropdownMenuItem<String>(
+//                   child: Text(e['name'] ?? ' Sin nombre'), value: e['id']))
+//               .toList();
+//           return Form(
+//               child: Column(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: [
+//                 SizedBox(
+//                     height: 80,
+//                     child: DropdownButtonFormField2(
+//                         value: selectedGroup,
+//                         items: grupos,
+//                         style: TextStyle(
+//                             color: Helper.brandColors[5], fontSize: 16),
+//                         decoration: getDecoration(),
+//                         dropdownStyleData: DropdownStyleData(
+//                             decoration: getDropdownDecoration()),
+//                         onChanged: (value) {
+//                           selectedGroup = value as String;
+//                         })),
+//                 Padding(
+//                   padding: const EdgeInsets.all(8.0),
+//                   child: CustomInput(
+//                     hintText: 'Escriba un mensaje',
+//                     icono: Icons.message_sharp,
+//                     textController: txtMessage,
+//                     lines: 10,
+//                   ),
+//                 ),
+//                 Expanded(child: Container()),
+//                 MainButton(
+//                   onPressed: () async => await sendMessage(context),
+//                   text: 'Enviar mensaje',
+//                   color: Helper.brandColors[8],
+//                 )
+//               ]));
+//         });
+//   }
 
-getDecoration() {
-  return InputDecoration(
-      focusColor: Helper.brandColors[9],
-      contentPadding: EdgeInsets.zero,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(7),
-        borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(7),
-        borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(7),
-        borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
-      ),
-      fillColor: Helper.brandColors[1],
-      filled: true);
-}
+//   sendMessage(context) async {
+//     final wsService = Provider.of<WSService>(context, listen: false);
+//     try {
+//       openLoadingDialog(mensaje: 'Enviando mensaje...');
+//       final text = txtMessage.text;
+//       final phone = txtPhone.text;
+//       if (text.trim().isEmpty) {
+//         throw new Exception(['No se ingresó mensaje']);
+//       }
+//       await wsService.enviarMensajeGrupo(selectedGroup, text);
+//       closeLoadingDialog();
+//       openAlertDialog('Mensaje enviado con éxito');
+//     } catch (err) {
+//       closeLoadingDialog();
+//       openAlertDialog( err.toString());
+//     }
+//   }
+// }
 
-getDropdownDecoration() {
-  return BoxDecoration(
-    borderRadius: BorderRadius.circular(15),
-    color: Helper.brandColors[2],
-  );
-}
+// getDecoration() {
+//   return InputDecoration(
+//       focusColor: Helper.brandColors[9],
+//       contentPadding: EdgeInsets.zero,
+//       enabledBorder: OutlineInputBorder(
+//         borderRadius: BorderRadius.circular(7),
+//         borderSide: BorderSide(color: Helper.brandColors[9], width: .2),
+//       ),
+//       focusedBorder: OutlineInputBorder(
+//         borderRadius: BorderRadius.circular(7),
+//         borderSide: BorderSide(color: Helper.brandColors[9], width: .5),
+//       ),
+//       border: OutlineInputBorder(
+//         borderRadius: BorderRadius.circular(7),
+//         borderSide: BorderSide(color: Helper.brandColors[9], width: 2.0),
+//       ),
+//       fillColor: Helper.brandColors[1],
+//       filled: true);
+// }
+
+// getDropdownDecoration() {
+//   return BoxDecoration(
+//     borderRadius: BorderRadius.circular(15),
+//     color: Helper.brandColors[2],
+//   );
+// }

@@ -1,18 +1,10 @@
 // ignore_for_file: prefer_function_declarations_over_variables, prefer_const_literals_to_create_immutables
-
-import 'dart:async';
-
-import 'package:dotenv/dotenv.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/miembro.dart';
-import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/error.dart';
-import 'package:verona_app/pages/listas/personal_adm.dart';
 import 'package:verona_app/pages/perfil.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/services/usuario_service.dart';
@@ -22,7 +14,8 @@ class MiembroForm extends StatefulWidget {
   static const String routeName = 'miembro';
   static String nameForm = 'Nuevo miembro';
   static String alertMessage = 'Confirmar nuevo miembro';
-  MiembroForm({Key? key}) : super(key: key);
+  late String? usuarioId;
+  MiembroForm({Key? key, required this.usuarioId}) : super(key: key);
   @override
   State<MiembroForm> createState() => _MiembroFormState();
 }
@@ -33,27 +26,29 @@ final TextEditingController _txtDNICtrl = TextEditingController();
 final TextEditingController _txtTelefonoCtrl = TextEditingController();
 final TextEditingController _txtMailCtrl = TextEditingController();
 String personalSelected = '2';
-late String? usuarioId;
+late GlobalKey<ScaffoldState> _scaffoldKey;
 
 class _MiembroFormState extends State<MiembroForm> {
   @override
   Widget build(BuildContext context) {
-    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    usuarioId = arguments['usuarioId'];
     final _usuarioService = Provider.of<UsuarioService>(context);
+    _scaffoldKey = GlobalKey<ScaffoldState>();
 
     return Scaffold(
+      key: _scaffoldKey,
       body: GestureDetector(
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-          child: usuarioId == null
+          child: widget.usuarioId == null
               ? _Form(
+                scaffoldKey: _scaffoldKey,
                   txtNombreCtrl: _txtNombreCtrl,
                   txtApellidoCtrl: _txtApellidoCtrl,
                   txtDNICtrl: _txtDNICtrl,
                   txtTelefonoCtrl: _txtTelefonoCtrl,
+                  usuarioId: widget.usuarioId,
                   txtMailCtrl: _txtMailCtrl)
               : FutureBuilder(
-                  future: _usuarioService.obtenerUsuario(usuarioId),
+                  future: _usuarioService.obtenerUsuario(widget.usuarioId),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState != ConnectionState.done) {
                       return Loading(
@@ -71,11 +66,13 @@ class _MiembroFormState extends State<MiembroForm> {
                         Miembro.fromJson(snapshot.data as Map<String, dynamic>);
                     setForm(usuario);
                     return _Form(
+                      scaffoldKey: _scaffoldKey,
                       txtNombreCtrl: _txtNombreCtrl,
                       txtApellidoCtrl: _txtApellidoCtrl,
                       txtDNICtrl: _txtDNICtrl,
                       txtTelefonoCtrl: _txtTelefonoCtrl,
                       txtMailCtrl: _txtMailCtrl,
+                      usuarioId: widget.usuarioId,
                       edit: true,
                     );
                   })),
@@ -100,10 +97,12 @@ class _Form extends StatelessWidget {
       required this.txtDNICtrl,
       required this.txtTelefonoCtrl,
       required this.txtMailCtrl,
+      required this.usuarioId,
       this.edit = false,
-      Key? key})
+      Key? key, required GlobalKey<ScaffoldState> scaffoldKey})
       : super(key: key);
 
+  String? usuarioId;
   TextEditingController txtNombreCtrl;
   TextEditingController txtApellidoCtrl;
   TextEditingController txtDNICtrl;
@@ -322,7 +321,7 @@ class _Form extends StatelessWidget {
 
     if (!isValid) {
       closeLoadingDialog();
-      openAlertDialog( 'Formulario invalido');
+      openAlertDialog('Formulario invalido');
       return;
     }
 
@@ -346,24 +345,25 @@ class _Form extends StatelessWidget {
 
       final _obraService = Provider.of<ObraService>(context, listen: false);
       _obraService.notifyListeners();
-      edit
-          ? await openAlertDialogReturn('Personal actualizado')
-          : await openAlertDialogReturn('Personal creado');
+
       resetForm();
-      edit
-          ? Navigator.pop(context)
-          : Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    PerfilPage(usuarioId: response.data['id']),
-              ));
+      if (edit) {
+        await openAlertDialogReturn('Personal actualizado');
+        Navigator.pop(_scaffoldKey.currentContext!);
+      } else {
+        await openAlertDialogReturn('Personal creado');
+        Navigator.push(
+            _scaffoldKey.currentContext!,
+            MaterialPageRoute(
+              builder: (context) => PerfilPage(usuarioId: response.data['id']),
+            ));
+      }
     } catch (err) {
       closeLoadingDialog();
       edit
-          ? openAlertDialog( 'No se pudo actualizar el personal',
+          ? openAlertDialog('No se pudo actualizar el personal',
               subMensaje: err.toString())
-          : openAlertDialog( 'No se pudo crear el personal',
+          : openAlertDialog('No se pudo crear el personal',
               subMensaje: err.toString());
     }
   }

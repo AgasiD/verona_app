@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/message.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/services/chat_service.dart';
@@ -28,7 +28,7 @@ class _Search_Message_ScreenState extends State<Search_Message_Screen> {
     final arguments = ModalRoute.of(context)!.settings.arguments as Map;
     final chatName = arguments['chatName'];
     final chatId = arguments['chatId'];
-    final _chatService = Provider.of<ChatService>(context);
+    // final _chatService = Provider.of<ChatService>(context);
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
@@ -47,29 +47,30 @@ class _Search_Message_ScreenState extends State<Search_Message_Screen> {
                         ),
                       )
                     : FutureBuilder(
-                        future:
-                            _chatService.buscarMensajes(chatId, txtCtrl.text),
+                        future: Future.delayed(Duration.zero),
+                            // _chatService.buscarMensajes(chatId, txtCtrl.text),
                         builder:
                             (BuildContext context, AsyncSnapshot snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting)
-                            return Loading(mensaje: 'Buscando mensajes...');
+                              return Container();
+                          // if (snapshot.connectionState ==
+                          //     ConnectionState.waiting)
+                          //   return Loading(mensaje: 'Buscando mensajes...');
 
-                          final response = snapshot.data as MyResponse;
-                          if (response.fallo) {
-                            return Center(
-                              child: Text(
-                                'Error al recuperar la información',
-                                style: TextStyle(
-                                    fontSize: 18, color: Helper.brandColors[4]),
-                              ),
-                            );
-                          }
-                          final mensajes = (response.data as List)
-                              .map((json) => Message.fromMap(json))
-                              .toList();
+                          // final response = snapshot.data as MyResponse;
+                          // if (response.fallo) {
+                          //   return Center(
+                          //     child: Text(
+                          //       'Error al recuperar la información',
+                          //       style: TextStyle(
+                          //           fontSize: 18, color: Helper.brandColors[4]),
+                          //     ),
+                          //   );
+                          // }
+                          // final mensajes = (response.data as List)
+                          //     .map((json) => Message.fromMap(json))
+                          //     .toList();
 
-                          return _Messages_List(mensajes: mensajes);
+                          // return _Messages_List(mensajes: mensajes);
                         },
                       ),
               ),

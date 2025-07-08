@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
 import 'package:verona_app/pages/obra.dart';
@@ -125,10 +125,13 @@ class _CustomListViewState extends State<_CustomListView> {
 
                 String route = '';
                 Map<String, dynamic> arg = {};
+                Widget Function(BuildContext) mybuilder =
+                    (route) => PedidoForm(pedidoId: notificacion['route']);
+                ;
                 switch (notificacion['type']) {
                   case 'obra':
                     if (notificacion['route'] != '') {
-                      route = ObraPage.routeName;
+                      mybuilder = (route) => ObraPage();
                       arg = {'obraId': notificacion['route']};
                     } else {
                       route = '';
@@ -137,7 +140,9 @@ class _CustomListViewState extends State<_CustomListView> {
                     break;
                   case 'pedido':
                     if (notificacion['route'] != '') {
-                      route = PedidoForm.routeName;
+                      mybuilder = ((route) => PedidoForm(
+                            pedidoId: notificacion['route'],
+                          ));
                       arg = {'pedidoId': notificacion['route']};
                     } else {
                       route = '';
@@ -151,12 +156,12 @@ class _CustomListViewState extends State<_CustomListView> {
                           Helper.getURLByPlatform(), context);
                     };
                 }
-                if (route == '' && notificacion['type'] != 'update_app') {
+
+                if (notificacion['type'] == 'update_app') {
                   actionOnTap = null;
-                } else if (route != '' &&
-                    notificacion['type'] != 'update_app') {
-                  actionOnTap = () =>
-                      Navigator.pushNamed((context), route, arguments: arg);
+                } else {
+                  actionOnTap = () => Navigator.push(
+                      (context), MaterialPageRoute(builder: mybuilder));
                 }
 
                 return _CustomListTile(
@@ -180,7 +185,7 @@ class _CustomListViewState extends State<_CustomListView> {
 
 // Notificaciones HOY
     final notificacionesNoLeidas =
-        widget.data.where((notif) => !notif['leido']);
+        widget.data.where((notif) => !notif['leido']).toList();
 
     if (notificacionesNoLeidas.length > 0) {
       notificaciones.add(Container(
@@ -341,13 +346,6 @@ class _CustomListTile extends StatelessWidget {
                       ),
                     ),
               onTap: actionOnTap,
-
-              // trailing: actionOnTap == null
-              //     ? null
-              //     : Icon(
-              //         Icons.arrow_forward_ios_rounded,
-              //         color: Helper.brandColors[3],
-              //       ),
             ),
           ),
         ],

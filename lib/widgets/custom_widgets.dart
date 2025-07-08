@@ -794,12 +794,18 @@ class SecondaryButton extends StatelessWidget {
   }
 }
 
-void openBottomSheet(
-    BuildContext context, String titulo, String subtitulo, List actions) {
+
+void cerrarBottomSheet(){
+   if (Get.isBottomSheetOpen!){
+    Get.back();
+   }
+
+}
+void openBottomSheetWithGetX(String titulo, String subtitulo, List actions) {
   if (Platform.isIOS) {
-    var botones = actions.map((accion) {
+    var botones = actions.map<CupertinoActionSheetAction>((accion) {
       return CupertinoActionSheetAction(
-        isDefaultAction: accion['default'],
+        isDefaultAction: accion['default'] ?? false,
         onPressed: accion['accion'],
         child: Text(accion['text']),
       );
@@ -807,49 +813,50 @@ void openBottomSheet(
 
     botones.add(CupertinoActionSheetAction(
       isDestructiveAction: true,
-      onPressed: () {
-        Navigator.pop(context);
-      },
+      onPressed: () => Get.back(),
       child: const Text('Cancelar'),
     ));
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
+
+    Get.bottomSheet(
+      CupertinoActionSheet(
         title: Text(titulo),
         message: Text(subtitulo),
         actions: botones,
       ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     );
   } else {
-    var botones = actions.map((accion) {
+    var botones = actions.map<Widget>((accion) {
       return SecondaryButton(
         onPressed: accion['accion'],
         text: accion['text'],
         color: Helper.brandColors[2],
-        width: MediaQuery.of(context).size.width,
+        width: Get.width,
       );
     }).toList();
 
-    botones.add(SecondaryButton(
-      onPressed: () => Navigator.pop(context),
-      text: 'Cancelar',
-      color: Helper.brandColors[1],
-      width: MediaQuery.of(context).size.width,
-    ));
+    botones.add(
+      SecondaryButton(
+        onPressed: () => Get.back(),
+        text: 'Cancelar',
+        color: Helper.brandColors[1],
+        width: Get.width,
+      ),
+    );
 
-    showBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(color: Helper.brandColors[2]),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: botones,
-          ),
-        );
-      },
+    Get.bottomSheet(
+      Container(
+        width: Get.width,
+        decoration: BoxDecoration(color: Helper.brandColors[2]),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: botones,
+        ),
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
     );
   }
 }
@@ -1220,7 +1227,7 @@ class CustomNavigatorFooter extends StatefulWidget {
 class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
   @override
   Widget build(BuildContext context) {
-    final _chatService = Provider.of<ChatService>(context);
+    // final _chatService = Provider.of<ChatService>(context);
     final _socketService = Provider.of<SocketService>(context);
     return Container(
       decoration: BoxDecoration(color: Helper.brandColors[1]),
@@ -1256,7 +1263,7 @@ class _CustomNavigatorFooterState extends State<CustomNavigatorFooter> {
             accion: () {
               final name = ModalRoute.of(context)!.settings.name;
               if (name != NoticiasPage.routeName) {
-                _chatService.tieneMensaje = false;
+                // _chatService.tieneMensaje = false;
                 // Navigator.pushNamed(context, ChatList.routeName);
                 Navigator.of(context).pushNamedAndRemoveUntil(
                     NoticiasPage.routeName, (Route<dynamic> route) => true);
@@ -1482,11 +1489,11 @@ class _CustomSearchListViewState extends State<CustomSearchListView> {
                           bold:
                               (dataFiltrada[index]['cantMsgSinLeer'] as int) > 0
                                   ? true
-                                  : false,
-                          actionOnTap: () => Navigator.pushNamed(
-                              context, ChatPage.routeName,
-                              arguments: arg),
-                        );
+                                  : false);
+                        //   actionOnTap: () => Navigator.pushNamed(
+                        //       context, ChatPage.routeName,
+                        //       arguments: arg),
+                        // );
                       })),
                 )
         ],
@@ -1616,11 +1623,11 @@ class _ChatsListState extends State<ChatsList> {
                                 (dataFiltrada[index]['cantMsgSinLeer'] as int) >
                                         0
                                     ? true
-                                    : false,
-                            actionOnTap: () => Navigator.pushNamed(
-                                context, ChatPage.routeName,
-                                arguments: arg),
-                          ),
+                                    : false)
+                            // actionOnTap: () => Navigator.pushNamed(
+                            //     context, ChatPage.routeName,
+                            //     arguments: arg),
+                          // ),
                         );
                       })),
                 )

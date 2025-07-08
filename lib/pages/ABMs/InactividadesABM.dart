@@ -1,15 +1,11 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
 import 'package:verona_app/models/inactividadBD.dart';
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/inactividadesBD.dart';
 import 'package:verona_app/pages/forms/inactividades_masiva.dart';
-import 'package:verona_app/pages/obra.dart';
 import 'package:verona_app/services/inactividad_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -43,25 +39,8 @@ class _InactividadesABMState extends State<InactividadesABM>
           appBar: AppBar(
             title: Text('Control de inactividades'),
             backgroundColor: Helper.brandColors[2],
-            // bottom: TabBar(
-            //   controller: _tabCtrl,
-            //   splashFactory: NoSplash.splashFactory,
-            //   dividerColor: Helper.brandColors[8],
-            //   indicatorColor: Helper.brandColors[8],
-            //   tabs: [
-            //     Tab(
-            //         child: Text(
-            //       'Por obras',
-            //       style: TextStyle(color: Helper.brandColors[8]),
-            //     )),
-            //     //   Tab(
-            //     //       child: Text(
-            //     //     'Inactividades',
-            //     //     style: TextStyle(color: Helper.brandColors[8]),
-            //     //   )),
-            //   ],
-            // ),
-          ),
+       
+         ),
           body: FutureBuilder(
               future: _obraService.obtenerControlInactividades(),
               builder: (context, snapshot) {

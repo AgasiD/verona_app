@@ -52,7 +52,7 @@ class _ObrasPageState extends State<ObrasPage> {
     try {
       final response = await _obras.obtenerObrasByUser(_pref.id);
       this.obras =
-          (response.data as List<dynamic>).map((e) => Obra.fromMap(e)).toList();
+          (response as List<dynamic>).map((e) => Obra.fromMap(e)).toList();
       this.obrasFiltradas = obras;
       setState(() {});
       _refreshController.refreshCompleted();
@@ -85,10 +85,10 @@ class _ObrasPageState extends State<ObrasPage> {
         final type = notif!.data['type'];
         switch (type) {
           case 'message':
-            Navigator.pushNamed(context, ChatPage.routeName, arguments: {
-              "chatId": notif.data["chatId"],
-              "chatName": notif.data["chatName"]
-            });
+            // Navigator.pushNamed(context, ChatPage.routeName, arguments: {
+            //   "chatId": notif.data["chatId"],
+            //   "chatName": notif.data["chatName"]
+            // });
             break;
           case 'new-obra':
             //Si es una nueva obra
@@ -108,10 +108,15 @@ class _ObrasPageState extends State<ObrasPage> {
               // final obra = await _obraService.obtenerObra(notif.data['obraId']);
               // _obraService.obra = obra;
             }
-            Navigator.pushNamed(context, PedidoForm.routeName, arguments: {
-              'pedidoId': notif.data['pedidoId'],
-              'obraId': notif.data['obraId'],
-            });
+
+            Navigator.push(
+                context,
+                // Create the SelectionScreen in the next step.
+                MaterialPageRoute(
+                    builder: (context) => PedidoForm(
+                          pedidoId: notif.data['pedidoId'],
+                          obraId: notif.data['obraId'],
+                        )));
             break;
         }
       }

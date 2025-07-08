@@ -73,9 +73,11 @@ class __FormState extends State<_Form> {
   final passCtrl = TextEditingController();
   String text = 'Ingresar';
 
+  late UsuarioService _usuario;
   @override
   Widget build(BuildContext context) {
     final _notification = Provider.of<NotificationService>(context);
+    _usuario = Provider.of<UsuarioService>(context);
 
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 50),
@@ -100,25 +102,22 @@ class __FormState extends State<_Form> {
           MainButton(
             color: Helper.brandColors[8],
             text: text,
-            onPressed: login,
+            onPressed: () => login(),
           )
         ]));
   }
 
   login() async {
-    final _usuario = Provider.of<UsuarioService>(context);
-
-    text = 'Cargando...';
-    setState(() {});
+    // setState(() {});
+    openLoadingDialog(mensaje: 'Iniciando...');
+    try {
     final response =
         await _usuario.validarUsuario(emailCtrl.text, passCtrl.text);
 
-    _usuario.usuario = Miembro.fromJson(response.data);
+    _usuario.usuario = Miembro.fromJson(response);
     final token = '';
-    // response.data['token'];
 
     guardarUserData(_usuario.usuario, token);
-    try {
       final tokenResponse = await _usuario.setTokenDevice(
           _usuario.usuario.id, NotificationService.token!);
       final _pref = new Preferences();
@@ -126,9 +125,11 @@ class __FormState extends State<_Form> {
       Navigator.pushReplacementNamed(context, ObrasPage.routeName);
 
       text = 'Ingresar';
+      closeLoadingDialog();
       setState(() {});
     } catch (err) {
-      openAlertDialog('No fue posible guardar el dispositivo utilizado');
+      closeLoadingDialog();
+      openAlertDialog('Error al iniciar sesión', subMensaje: err.toString());
     }
   }
 

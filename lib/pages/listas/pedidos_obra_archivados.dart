@@ -119,46 +119,47 @@ class _PedidosByEstado extends StatelessWidget {
                 shrinkWrap: true,
                 itemBuilder: (BuildContext context, int index) {
                   final esPar = index % 2 == 0;
-                  final arg = {
-                    'pedidoId': pedidos[index]['id'],
-                    'obraId': _obraService.obra.id
-                  };
                   final textSubtitle = pedidos[index]['fechaEstimada'] == ''
                       ? "${("Fecha deseada").toUpperCase()} ${pedidos[index]['fechaDeseada']}"
                       : "${("Fecha de entrega").toUpperCase()} ${pedidos[index]['fechaEstimada']}";
                   return Column(
                     children: [
                       _CustomListTile(
-                        esNovedad: _tieneNovedad(_obraService.obra.id,
-                            pedidos[index]['id'], _socketService),
-                        esPar: false,
-                        title:
-                            "${pedidos[index]['titulo'].toString().toUpperCase()}",
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              textSubtitle.toUpperCase(),
-                              style: TextStyle(
-                                  color: Helper.brandColors[8].withOpacity(.8)),
-                            ),
-                            Text(
-                              ('Por: ${pedidos[index]['usuario']['nombre'] ?? 'Sin nombre'} ${pedidos[index]['usuario']['apellido'] ?? ''}')
-                                  .toUpperCase(),
-                              style: TextStyle(
-                                  color: Helper.brandColors[8].withOpacity(.8)),
-                            ),
-                          ],
-                        ),
-                        avatar: pedidos[index]['prioridad']
-                            .toString()
-                            .toUpperCase(),
-                        fontSize: 18,
-                        onTap: true,
-                        actionOnTap: () => Navigator.pushNamed(
-                            context, PedidoForm.routeName,
-                            arguments: arg),
-                      ),
+                          esNovedad: _tieneNovedad(_obraService.obra.id,
+                              pedidos[index]['id'], _socketService),
+                          esPar: false,
+                          title:
+                              "${pedidos[index]['titulo'].toString().toUpperCase()}",
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                textSubtitle.toUpperCase(),
+                                style: TextStyle(
+                                    color:
+                                        Helper.brandColors[8].withOpacity(.8)),
+                              ),
+                              Text(
+                                ('Por: ${pedidos[index]['usuario']['nombre'] ?? 'Sin nombre'} ${pedidos[index]['usuario']['apellido'] ?? ''}')
+                                    .toUpperCase(),
+                                style: TextStyle(
+                                    color:
+                                        Helper.brandColors[8].withOpacity(.8)),
+                              ),
+                            ],
+                          ),
+                          avatar: pedidos[index]['prioridad']
+                              .toString()
+                              .toUpperCase(),
+                          fontSize: 18,
+                          onTap: true,
+                          actionOnTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (route) => PedidoForm(
+                                        pedidoId: pedidos[index]['id'],
+                                        obraId: _obraService.obra.id)),
+                              )),
                       index != pedidos.length - 1
                           ? Divider(
                               color: Helper.brandColors[8],

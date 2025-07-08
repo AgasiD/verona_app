@@ -140,16 +140,14 @@ class UsuarioService extends ChangeNotifier {
   }
 
   validarUsuario(String usuario, String password) async {
-    try {
       final body = {"username": usuario, "password": password};
-      final response = await this._http.post('$_endpoint/autenticar', body);
+      final response = await this._http.post('api/auth/login', body);
       final data = json.decode(response.body);
 
       if (response.statusCode >= 300) {
         throw new Exception('Error ${data['message']} ${response.statusCode}');
       }
       return data;
-    } catch (err) {}
   }
 
   setTokenDevice(String usuarioId, String tokenDevice) async {
@@ -203,9 +201,8 @@ class UsuarioService extends ChangeNotifier {
         await this._http.delete('$_endpoint/desactivarUsuario/$id');
     final data = json.decode(response.body);
 
-    if (response.statusCode >= 300) {
-      throw new Exception('Error ${data['message']} ${response.statusCode}');
-    }
+    if (response.statusCode >= 300) throw new Exception('Error ${data['message']} ${response.statusCode}');
+    
     notifyListeners();
     return data;
   }

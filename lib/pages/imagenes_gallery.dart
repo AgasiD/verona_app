@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/documento.dart';
 import 'package:verona_app/services/google_drive_service.dart';
@@ -58,8 +58,8 @@ class ImgGalleryPage extends StatelessWidget {
                         errorMsg: snapshot.error.toString(),
                       );
                     }
-                    final response = snapshot.data as MyResponse;
-                    var files = response.data as List<dynamic>;
+                    
+                    var files = snapshot.data as List<dynamic>;
 
                     // Filtro por habilitados para cliente
                     if (_pref.role == 3) {

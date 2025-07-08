@@ -5,14 +5,12 @@ import 'package:verona_app/pages/ABMs/PedidosPanelControl.dart';
 import 'package:verona_app/pages/ABMs/centro_notificaciones.dart';
 import 'package:verona_app/pages/Form.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
-import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/anotaciones_general.dart';
 import 'package:verona_app/pages/asignar_equipo.dart';
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/envio_reportes.dart';
 import 'package:verona_app/pages/error.dart';
 
-import 'package:verona_app/pages/forms/inactividades_masiva.dart';
 import 'package:verona_app/pages/forms/notificaciones.dart';
 import 'package:verona_app/pages/forms/notificaciones_edit.dart';
 import 'package:verona_app/pages/forms/semanario_message.dart';
@@ -68,7 +66,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   AnotacionesGeneralPage.routeName: (_) => AnotacionesGeneralPage(),
   AsignarEquipoPage.routeName: (_) => AsignarEquipoPage(),
   ChatList.routeName: (_) => ChatList(),
-  ChatPage.routeName: (_) => ChatPage(),
   ContactsPage.routeName: (_) => ContactsPage(),
   ControlObraABM.routeName: (_) =>ControlObraABM(),
   DocumentoForm.routeName: (_) => DocumentoForm(),
@@ -88,7 +85,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   InactividadesPage.routeName: (_) => InactividadesPage(),
   LoginPage.routeName: (_) => LoginPage(),
   MapCoordenates .routeName: (_) =>MapCoordenates(),
-  MiembroForm.routeName: (_) => MiembroForm(),
+  MiembroForm.routeName: (_) => MiembroForm(usuarioId: null,),
   NotificacionesPage.routeName: (_) => NotificacionesPage(),
   ObraForm.routeName: (_) => ObraForm(),
   ObraPage.routeName: (_) => ObraPage(),
@@ -118,7 +115,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   ErrorPage.routeName: (_) => ErrorPage(),
   NoticiasPage.routeName: (_) => NoticiasPage(),
   NoticiaView.routeName: (_) => NoticiaView(),
-  MensajeForm.routeName: (_) => MensajeForm(),
   SettingsPage.routeName: (_) => SettingsPage(),
   EnvioReporteSemanal.routeName: (_) => EnvioReporteSemanal(),
 AnotacionForm.routeName: (_) => AnotacionForm(),

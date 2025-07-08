@@ -101,10 +101,10 @@ class _AppStateState extends State<AppState> {
           create: (_) => NotificationService(),
           lazy: false,
         ),
-        ChangeNotifierProvider(
-          create: (_) => ChatService(),
-          lazy: false,
-        ),
+        // ChangeNotifierProvider(
+        //   create: (_) => ChatService(),
+        //   lazy: false,
+        // ),
         ChangeNotifierProvider(
           create: (_) => AuthService(),
         ),
@@ -199,7 +199,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final _pref = new Preferences();
     late String initalRoute;
     initalRoute = !_pref.logged ? LoginPage.routeName : ObrasPage.routeName;
-    final _chatService = Provider.of<ChatService>(context, listen: false);
+    // final _chatService = Provider.of<ChatService>(context, listen: false);
     final _socket = Provider.of<SocketService>(context, listen: false);
 
     if (_pref.logged) {
@@ -227,19 +227,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         // final snackBar = _initSnackMessage(data, navigatorKey);
 
         Navigator.of(navigatorKey.currentContext!).popUntil((route) {
-          if (route.settings.name! != ChatPage.routeName) {
+          // if (route.settings.name! != ChatPage.routeName) {
             // messengerKey.currentState?.showSnackBar(snackBar);
-            if (data['individual'] ?? true) {
-              _socket.tieneMensaje = true;
-            }
-          }
+            // if (data['individual'] ?? true) {
+            //   _socket.tieneMensaje = true;
+            // }
+          // }
           return true;
         });
-        _chatService.notifyListeners();
+        // _chatService.notifyListeners();
       });
 
       _socket.socket.on('actualizarChatList', ((data) {
-        _chatService.notifyListeners();
+        // _chatService.notifyListeners();
       }));
 
       _socket.socket.on('message', (data) {
@@ -282,18 +282,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 }
 
-SnackBar _initSnackMessage(data, navigatorKey) {
-  return SnackBar(
-    duration: Duration(seconds: 3),
-    action: SnackBarAction(
-        label: 'Ver',
-        onPressed: () => navigatorKey.currentState!.pushNamed(
-            ChatPage.routeName,
-            arguments: {'chatId': data['chatId'], 'chatName': data['name']})),
-    content: Text(
-      'Nuevo mensaje de ${data['name']}',
-      // textAlign: TextAlign.center,
-      // style: style,
-    ),
-  );
-}
+// SnackBar _initSnackMessage(data, navigatorKey) {
+//   return SnackBar(
+//     duration: Duration(seconds: 3),
+//     action: SnackBarAction(
+//         label: 'Ver',
+//         onPressed: () => navigatorKey.currentState!.pushNamed(
+//             ChatPage.routeName,
+//             arguments: {'chatId': data['chatId'], 'chatName': data['name']})),
+//     content: Text(
+//       'Nuevo mensaje de ${data['name']}',
+//       // textAlign: TextAlign.center,
+//       // style: style,
+//     ),
+//   );
+// }

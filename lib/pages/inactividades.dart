@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/pages/forms/inactividad.dart';
 import 'package:verona_app/services/obra_service.dart';

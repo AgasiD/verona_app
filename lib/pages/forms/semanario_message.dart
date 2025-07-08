@@ -177,11 +177,11 @@ class _Form extends StatelessWidget {
   enviarMensaje(context) async {
     try {
       openLoadingDialog(mensaje: 'Enviando mensaje...');
-      final _chatService = Provider.of<ChatService>(context, listen: false);
+      // final _chatService = Provider.of<ChatService>(context, listen: false);
       final _obraService = Provider.of<ObraService>(context, listen: false);
       final _pref = new Preferences();
-      final response = await _chatService.enviarMensajeChatGroup(
-          _obraService.obra.id, _pref.id, txtCtrl.text);
+      // final response = await _chatService.enviarMensajeChatGroup(
+      //     _obraService.obra.id, _pref.id, txtCtrl.text);
       closeLoadingDialog();
       openAlertDialog('Mensaje enviado');
     } catch (err) {

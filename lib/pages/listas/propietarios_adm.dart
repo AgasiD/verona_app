@@ -20,7 +20,7 @@ class PropietariosADM extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
+    final _usuarioService = Provider.of<UsuarioService>(context);
     return Scaffold(
       body: Container(
         color: Helper.brandColors[1],

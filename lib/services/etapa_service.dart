@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/services/http_service.dart';
 

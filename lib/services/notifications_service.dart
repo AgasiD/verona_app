@@ -134,10 +134,10 @@ class NotificationService extends ChangeNotifier {
       /* Si entra a la app por una notificacion */
       switch (type) {
         case 'message':
-          navigatorKey.currentState!.pushNamed(ChatPage.routeName, arguments: {
-            "chatId": notif.data["chatId"],
-            "chatName": notif.data["chatName"]
-          });
+          // navigatorKey.currentState!.pushNamed(ChatPage.routeName, arguments: {
+          //   "chatId": notif.data["chatId"],
+          //   "chatName": notif.data["chatName"]
+          // });
 
           break;
         case 'new-obra':
@@ -157,11 +157,16 @@ class NotificationService extends ChangeNotifier {
             final obra = await _obraService.obtenerObra(notif.data['obraId']);
             _obraService.obra = obra;
           }
-          navigatorKey.currentState!
-              .pushNamed(PedidoForm.routeName, arguments: {
-            'pedidoId': notif.data['pedidoId'],
-            'obraId': notif.data['obraId'],
-          });
+          Navigator.push(
+            navigatorKey.currentContext!,
+            // Create the SelectionScreen in the next step.
+            MaterialPageRoute(
+              builder: (context) => PedidoForm(
+                  pedidoId: notif.data['pedidoId'],
+                  obraId: notif.data['obraId']),
+            ),
+          );
+
           break;
         case 'authNotif':
           navigatorKey.currentState!
@@ -170,7 +175,7 @@ class NotificationService extends ChangeNotifier {
           });
           break;
         case 'update_app':
-        await Helper.launchWeb(Helper.getURLByPlatform(), context);
+          await Helper.launchWeb(Helper.getURLByPlatform(), context);
       }
     } else {
       /* Si la notificacion llega estando dentro de la app  */
@@ -180,8 +185,8 @@ class NotificationService extends ChangeNotifier {
         final currentPage = route.settings.name ?? '';
 
         switch (currentPage) {
-          case ChatPage.routeName:
-            break;
+          // case ChatPage.routeName:
+          //   break;
           case ChatList.routeName:
             switch (type) {
               case "pedido":
@@ -189,11 +194,16 @@ class NotificationService extends ChangeNotifier {
                   content: Text(notif.notification!.title ?? 'Sin titulo'),
                   action: SnackBarAction(
                       label: 'Ver',
-                      onPressed: () => navigatorKey.currentState!
-                              .pushNamed(PedidoForm.routeName, arguments: {
-                            'pedidoId': notif.data['pedidoId'],
-                            'obraId': notif.data['obraId']
-                          })),
+                      onPressed: () => Navigator.push(
+                            navigatorKey.currentContext!,
+                            // Create the SelectionScreen in the next step.
+                            MaterialPageRoute(
+                                builder: (context) => PedidoForm(
+                                      pedidoId: notif.data['pedidoId'],
+                                      obraId: notif.data['obraId'],
+                                    ),
+                               ),
+                          )),
                 );
                 break;
             }
@@ -202,26 +212,26 @@ class NotificationService extends ChangeNotifier {
           default:
             switch (type) {
               case 'message':
-                final detalleGrupo = notif.data['individual'] == 'false'
-                    ? notif.data['externo'] == 'true'
-                        ? ' (externo)'
-                        : ' (interno)'
-                    : '';
-                snackBar = SnackBar(
-                  duration: Duration(seconds: 3),
-                  action: SnackBarAction(
-                      label: 'Ver',
-                      onPressed: () => navigatorKey.currentState!
-                              .pushNamed(ChatPage.routeName, arguments: {
-                            'chatId': notif.data['chatId'],
-                            'chatName': notif.data['chatName']
-                          })),
-                  content: Text(
-                    'Nuevo mensaje de ${notif.data['chatName']} $detalleGrupo',
-                    // textAlign: TextAlign.center,
-                    // style: style,
-                  ),
-                );
+                // final detalleGrupo = notif.data['individual'] == 'false'
+                //     ? notif.data['externo'] == 'true'
+                //         ? ' (externo)'
+                //         : ' (interno)'
+                //     : '';
+                // snackBar = SnackBar(
+                //   duration: Duration(seconds: 3),
+                //   action: SnackBarAction(
+                //       label: 'Ver',
+                //       onPressed: () => navigatorKey.currentState!
+                //               .pushNamed(ChatPage.routeName, arguments: {
+                //             'chatId': notif.data['chatId'],
+                //             'chatName': notif.data['chatName']
+                //           })),
+                //   content: Text(
+                //     'Nuevo mensaje de ${notif.data['chatName']} $detalleGrupo',
+                //     // textAlign: TextAlign.center,
+                //     // style: style,
+                //   ),
+                // );
                 break;
               case 'pedido':
                 snackBar = SnackBar(
@@ -247,7 +257,6 @@ class NotificationService extends ChangeNotifier {
                               })),
                 );
                 break;
-                
             }
 
             break;
@@ -276,10 +285,10 @@ class NotificationService extends ChangeNotifier {
       //Si es un nuevo mensaje o cambios en obra
       final _usuarioService =
           Provider.of<UsuarioService>(context, listen: false);
-      final _chatService = Provider.of<ChatService>(context, listen: false);
+      // final _chatService = Provider.of<ChatService>(context, listen: false);
       if (type == 'message') {
         _usuarioService.notifyListeners();
-        _chatService.notifyListeners();
+        // _chatService.notifyListeners();
       }
       //Si es una nueva obra
       if (type == 'new-obra') {

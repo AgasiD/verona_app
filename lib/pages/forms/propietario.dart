@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/miembro.dart';
 import 'package:verona_app/models/propietario.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
@@ -18,7 +18,10 @@ class PropietarioForm extends StatefulWidget {
   static const String routeName = 'Propietario';
   static String nameForm = 'Nuevo propietario';
   static String alertMessage = 'Confirmar nuevo propietario';
-  const PropietarioForm({Key? key}) : super(key: key);
+  String? usuarioId;
+  String pageFrom;
+
+  PropietarioForm({Key? key, this.usuarioId, this.pageFrom = 'menu'}) : super(key: key);
   @override
   State<PropietarioForm> createState() => _PropietarioFormState();
 }
@@ -28,14 +31,7 @@ class _PropietarioFormState extends State<PropietarioForm> {
   @override
   Widget build(BuildContext context) {
     final _usuarioService = Provider.of<UsuarioService>(context, listen: false);
-    String? _usuarioId;
-    String _pageFrom = 'menu';
-    if (ModalRoute.of(context)!.settings.arguments != null) {
-      final arguments = ModalRoute.of(context)!.settings.arguments as Map;
-      _usuarioId = arguments['usuarioId'] ?? null;
-      _pageFrom = arguments['pageFrom'] ?? 'menu';
-    }
-    if (_usuarioId != null) edit = true;
+    if (widget.usuarioId != null) edit = true;
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -66,7 +62,7 @@ class _PropietarioFormState extends State<PropietarioForm> {
                     ),
                     edit
                         ? FutureBuilder(
-                            future: _usuarioService.obtenerUsuario(_usuarioId),
+                            future: _usuarioService.obtenerUsuario(widget.usuarioId),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState !=
                                   ConnectionState.done)
@@ -84,11 +80,11 @@ class _PropietarioFormState extends State<PropietarioForm> {
                               final propietario = Miembro.fromJson(response);
 
                               return _Form(
-                                  from: _pageFrom, propietario: propietario);
+                                  from:widget.pageFrom, propietario: propietario);
                             },
                           )
                         : _Form(
-                            from: _pageFrom,
+                            from: widget.pageFrom,
                           ),
                   ],
                 ),
@@ -283,7 +279,7 @@ class _FormState extends State<_Form> {
           telefono: txtTelefonoCtrl.text,
           email: txtMailCtrl.text);
           
-      final response = await _service.modificarUsuario(prop) as MyResponse;
+      final response = await _service.modificarUsuario(prop);
       closeLoadingDialog();
       loading = false;
       await openAlertDialogReturn('Propietario actualizado')

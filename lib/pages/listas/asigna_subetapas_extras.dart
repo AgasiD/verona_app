@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/etapa.dart';
 import 'package:verona_app/models/subetapa.dart';
 import 'package:verona_app/pages/error.dart';
@@ -55,8 +55,7 @@ class SubetapasExtrasPage extends StatelessWidget {
                   errorMsg: snapshot.error.toString(),
                 );
               }
-              final response = snapshot.data as MyResponse;
-              final lista = response.data as List<dynamic>;
+              final lista = snapshot.data as List<dynamic>;
               subetapas = lista.map((e) => Subetapa.fromJson(e)).toList();
               subetapas
                   .sort(((a, b) => a.descripcion.compareTo(b.descripcion)));

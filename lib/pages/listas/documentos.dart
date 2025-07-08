@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/pages/chat.dart';
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/documento.dart';
@@ -54,8 +54,7 @@ class _DocumentosList extends StatelessWidget {
               snapshot.hasError) {
             return ErrorPage(errorMsg: snapshot.error.toString());
           }
-          final response = snapshot.data as MyResponse;
-          List<dynamic> documentos = response.data;
+          List<dynamic> documentos = snapshot.data as List;
           if (documentos.length > 0) {
             return Container(
                 margin: EdgeInsets.only(top: 15),

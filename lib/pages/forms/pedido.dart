@@ -26,17 +26,19 @@ import 'package:verona_app/widgets/custom_widgets.dart';
 import 'package:open_file/open_file.dart';
 
 class PedidoForm extends StatelessWidget implements MyForm {
+  PedidoForm({Key? key, this.pedidoId = '', this.obraId = ''})
+      : super(key: key);
+
   static String nameForm = 'Nuevo pedido';
   static String alertMessage = 'Confirmar nuevo pedido';
   static const String routeName = 'pedido';
+  String obraId;
+  String pedidoId;
 
   @override
   Widget build(BuildContext context) {
     final _obraService = Provider.of<ObraService>(context, listen: false);
     final _socketService = Provider.of<SocketService>(context, listen: false);
-    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    final pedidoId = arguments['pedidoId'] ?? '';
-    final obraId = arguments['obraId'] ?? _obraService.obra.id;
     bool edit = pedidoId != '';
     quitarNovedad(pedidoId, _socketService, obraId);
     return GestureDetector(
@@ -54,11 +56,10 @@ class PedidoForm extends StatelessWidget implements MyForm {
                             ConnectionState.done &&
                         snapshot.hasError) {
                       return ErrorPage(errorMsg: snapshot.error.toString());
-                    } else {
-                      final pedido = Pedido.fromJson(
-                          snapshot.data as Map<String, dynamic>);
-                      return _Form(pedido: pedido);
                     }
+                    final pedido =
+                        Pedido.fromJson(snapshot.data as Map<String, dynamic>);
+                    return _Form(pedido: pedido);
                   },
                 )
               : _Form(
@@ -132,23 +133,22 @@ class _FormState extends State<_Form> {
       tieneImagen = false,
       entregaExterna = false;
 
-  List<DropdownMenuItem<int>> PRIORIDADES = <DropdownMenuItem<int>>[
-    DropdownMenuItem(
-      value: 1,
-      child: Text('Prioridad baja'.toUpperCase()),
-    ),
-    DropdownMenuItem(
-      value: 2,
-      child: Text('Prioridad media'.toUpperCase()),
-    ),
-    DropdownMenuItem(
-      value: 3,
-      child: Text('Prioridad alta'.toUpperCase()),
-    )
+  late List<DropdownMenuItem<String>> PRIORIDADES;
+  List prioridades = [
+    {"value": '1', "description": 'Prioridad baja'},
+    {"value": '2', "description": 'Prioridad media'},
+    {"value": '3', "description": 'Prioridad alta'},
   ];
 
   @override
   void initState() {
+    PRIORIDADES = prioridades
+        .map((priori) => new DropdownMenuItem(
+              value: priori['value'].toString(),
+              child: Text(priori['description'].toUpperCase()),
+            ))
+        .toList();
+
     super.initState();
     cargarObra();
     final _obraService = Provider.of<ObraService>(context, listen: false);
@@ -293,20 +293,10 @@ class _FormState extends State<_Form> {
                           Theme(
                               data: Theme.of(context).copyWith(
                                   disabledColor: Helper.brandColors[3]),
-                              child: DropdownButtonFormField2(
-                                value: prioridad,
-                                items: PRIORIDADES,
-                                style: TextStyle(
-                                    color: Helper.brandColors[5], fontSize: 16),
-                                decoration: getDecoration(),
-                                dropdownStyleData: DropdownStyleData(
-                                    decoration: getDropdownDecoration()),
-                                onChanged: (habilitaEdicion())
-                                    ? (value) {
-                                        prioridad = value as int;
-                                      }
-                                    : null,
-                              )),
+                              child: _Custom_Dropdown(
+                                  valorId: prioridad.toString(),
+                                  valores: PRIORIDADES,
+                                  actionOnChange: (a) => {})),
                           SizedBox(
                             height: 20,
                           ),
@@ -640,8 +630,7 @@ class _FormState extends State<_Form> {
         );
       } catch (err) {
         closeLoadingDialog();
-        openAlertDialog('Error al grabar pedido',
-            subMensaje: err.toString());
+        openAlertDialog('Error al grabar pedido', subMensaje: err.toString());
       }
     }
   }
@@ -687,8 +676,8 @@ class _FormState extends State<_Form> {
               "accion": await imagenFromCamera
             },
           ];
-          openBottomSheet(
-              context, 'Subir documento', 'Seleccionar método', acciones);
+          openBottomSheetWithGetX(
+              'Subir documento', 'Seleccionar método', acciones);
         } else {
           await imagenFromCamera();
         }
@@ -697,7 +686,7 @@ class _FormState extends State<_Form> {
             arguments: {'imagenId': widget.pedido!.imagenId[0]});
       }
     } catch (e) {
-      openAlertDialog( e.toString());
+      openAlertDialog(e.toString());
     }
   }
 
@@ -888,19 +877,18 @@ class _FormState extends State<_Form> {
   }
 
   abrirChat() async {
-    final _chatService = Provider.of<ChatService>(context, listen: false);
+    // final _chatService = Provider.of<ChatService>(context, listen: false);
     // Generar Chat
     try {
-      final response =
-          await _chatService.crearChat(_pref.id, widget.pedido!.idUsuario);
+      // final response =
+      //     await _chatService.crearChat(_pref.id, widget.pedido!.idUsuario);
 
-      Navigator.pushNamed(context, ChatPage.routeName, arguments: {
-        'chatId': response.data['chatId'],
-        'chatName': response.data['chatName'],
-      });
+      // Navigator.pushNamed(context, ChatPage.routeName, arguments: {
+      //   'chatId': response.data['chatId'],
+      //   'chatName': response.data['chatName'],
+      // });
     } catch (err) {
-      openAlertDialog( 'Error al crear el chat',
-          subMensaje: err.toString());
+      openAlertDialog('Error al crear el chat', subMensaje: err.toString());
     }
   }
 
@@ -922,7 +910,7 @@ class _FormState extends State<_Form> {
     if (images != null && images.length > 0) {
       tieneImagen = true;
       _driveService.guardarImagenPedido(images);
-      Navigator.pop(context);
+      cerrarBottomSheet();
       setState(() {
         // imagenSelected = true;
         imgButtonText = 'Imagenes seleccionadas (${images.length})';
@@ -939,7 +927,7 @@ class _FormState extends State<_Form> {
     if (image != null) {
       tieneImagen = true;
       _driveService.guardarImagenPedido([image]);
-      Navigator.pop(context);
+      cerrarBottomSheet();
       setState(() {
         // imagenSelected = true;
         imgButtonText = 'Imagen selecciona';
@@ -970,7 +958,7 @@ class _FormState extends State<_Form> {
           ));
     } catch (err) {
       closeLoadingDialog();
-      openAlertDialog( 'No se pudo descargar archivo',
+      openAlertDialog('No se pudo descargar archivo',
           subMensaje: err.toString());
     }
   }
@@ -987,6 +975,8 @@ class _FormState extends State<_Form> {
 
     try {
       final response = await _obraService.nuevoPedido(ped);
+      _obraService.obra.pedidos.add(Pedido.fromJson(response).id);
+
       return [false, response];
     } catch (err) {
       return [true, err.toString()];
@@ -1004,6 +994,8 @@ class _FormState extends State<_Form> {
       if (_driveService.imgsPedido!.length > 0) {
         final idsImagenes =
             await subirImagenesPedido(_driveService, _obraService, idDrive);
+        if (idsImagenes.isEmpty) return [true, 'Error al subir imagenes'];
+        ;
         loading = false;
         widget.pedido = pedido_aux;
         widget.pedido!.imagenId = idsImagenes;
@@ -1022,19 +1014,25 @@ class _FormState extends State<_Form> {
       GoogleDriveService _driveService, _obraService, idDrive) async {
     int index = 1;
     List<String> idsImagenes = [];
-    for (var img in _driveService.imgsPedido!) {
-      final tituloImg =
-          'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)';
-      openLoadingDialog(
-          mensaje:
-              'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
-      final idImagen =
-          await _driveService.grabarImagenPedido(tituloImg, idDrive!, img!);
-      idsImagenes.add(idImagen);
-      index++;
+    try {
+      for (var img in _driveService.imgsPedido!) {
+        final tituloImg =
+            'Pedido-${widget.pedido!.titulo}-${_obraService.obra.nombre}($index)';
+        openLoadingDialog(
+            mensaje:
+                'Subiendo ${_driveService.imgsPedido!.length} imagenes... ($index)');
+        final idImagen =
+            await _driveService.grabarImagenPedido(tituloImg, idDrive!, img!);
+        idsImagenes.add(idImagen);
+        index++;
+        closeLoadingDialog();
+      }
+      return idsImagenes;
+    } catch (err) {
       closeLoadingDialog();
+      openAlertDialog('Error al cargar imagen', subMensaje: err.toString());
+      return [];
     }
-    return idsImagenes;
   }
 }
 

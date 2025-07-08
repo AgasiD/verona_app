@@ -16,7 +16,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/form.dart';
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/addpropietarios.dart';
@@ -517,10 +517,11 @@ class _FormState extends State<_Form> {
           'driveFolderId': widget.obra!.driveFolderId,
           'imageURL': widget.obra!.imageURL,
         });
-        final obraResponse = Obra.fromMap(response["response"]);
+        final obraResponse = Obra.fromMap(response);
         _imageService.descartarImagen();
         closeLoadingDialog();
         loading = true;
+        _service.obra = obraResponse;
         await openAlertDialogReturn('Obra modificada con éxito');
 
         Navigator.pop(context);

@@ -125,20 +125,24 @@ class __FormState extends State<_Form> {
               try {
                 final formValid = validarFormulario();
                 if (formValid) {
+                  openLoadingDialog(mensaje: 'Actualizando contraseña...');
                   final body = {
                     "usuarioId": usuarioId,
                     "password": passCtrl.text,
                     "newpass": newPassCtrl.text
                   };
                   final data = await _usuarioService.changePassword(body);
-                  final datos = data["data"];
-                  if (datos["fallo"]) {openAlertDialog(datos["error"]);
-                  } else {
-                    resetForm();
-                    openAlertDialog('La contraseña se cambió correctamente');
-                  }
+                  final datos = data;
+
+                  resetForm();
+                  closeLoadingDialog();
+                  await openAlertDialogReturn('La contraseña se cambió correctamente');
+                  Navigator.pop(context);
+
                 }
-              } catch (err) {openAlertDialog( err.toString());
+              } catch (err) {
+                closeLoadingDialog();
+                openAlertDialog(err.toString());
               }
             },
           )

@@ -84,9 +84,8 @@ class HttpService extends ChangeNotifier {
     }
     // listen for response
     String responseBody = await response.stream.bytesToString();
-    var jsonData = json.decode(responseBody);
 
-    return jsonData['id'] ?? ''; // Assuming the response contains an 'id' field
+    return responseBody;
   }
 
   uploadDocument(FilePickerResult file, String endpoint) async {

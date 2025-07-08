@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/listas/contactos.dart';
 import 'package:verona_app/services/chat_service.dart';
@@ -24,7 +24,7 @@ class _ChatListState extends State<ChatList> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final _chatService = Provider.of<ChatService>(context);
+    // final _chatService = Provider.of<ChatService>(context);
     final _socketService = Provider.of<SocketService>(context, listen: false);
     final _pref = new Preferences();
     _socketService.connect(_pref.id);
@@ -33,7 +33,7 @@ class _ChatListState extends State<ChatList> with RouteAware {
         color: Helper.brandColors[1],
         child: SafeArea(
           child: FutureBuilder(
-              future: _chatService.obtenerChats(_pref.id),
+              future: Future.delayed(Duration.zero),//.obtenerChats(_pref.id),
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return Loading(mensaje: 'Cargando chats');
@@ -41,8 +41,7 @@ class _ChatListState extends State<ChatList> with RouteAware {
                   return ErrorPage(
                       errorMsg: snapshot.error.toString(), page: false);
                 } else {
-                  final response = snapshot.data as MyResponse;
-                  final chats = response.data as List;
+                  final chats = snapshot.data as List;
                   if (chats.length > 0) {
                     return _UsuariosChats(
                         chats: chats, txtController: txtController);

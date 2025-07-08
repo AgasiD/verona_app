@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/services/google_drive_service.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -61,7 +61,6 @@ class _FormState extends State<_Form> {
           openDialogConfirmation(context, (context) async {
             String msg = 'Subiendo imagenes...';
             openLoadingDialog(mensaje: msg);
-            MyResponse response;
             try {
               final res = await _driveService.grabarImagenes(
                   driveId, txtCtrlName.text == '' ? null : txtCtrlName.text);

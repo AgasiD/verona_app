@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/services/http_service.dart';
 
 class GoogleDriveService extends ChangeNotifier {
@@ -40,20 +40,17 @@ class GoogleDriveService extends ChangeNotifier {
   }
 
   grabarImagenPedido(String fileName, String driveFolderId, XFile image) async {
+    if(driveFolderId.isEmpty) throw new Exception('Carpeta de imágenes no asignada') ;
     if (imgsPedido != null) {
       final idFolder = driveFolderId;
-      final response = await this
+      final responseBody = await this
           ._http
           .uploadImage(image, _endpoint + "/$fileName/jpg/$idFolder");
-      final data = json.decode(response.body);
-
-      if (response.statusCode >= 300) {
-        throw new Exception('Error ${data['message']} ${response.statusCode}');
-      }
-
-      return data;
+      Map<String, dynamic> data = jsonDecode(responseBody);
+      final fileId = data['id'];
+      return fileId;
     } else {
-      print('No se asigno imagen');
+      throw new Exception('Imagen sin asignar');
     }
   }
 
@@ -120,9 +117,8 @@ class GoogleDriveService extends ChangeNotifier {
 
   obtenerDocumentos(String usuarioId, String folderId) async {
     folderId = folderId == '' ? 'SinID' : folderId;
-    final response = await this
-        ._http
-        .get('$_endpoint/obtenerDocumentos/$usuarioId/$folderId');
+    final response =
+        await this._http.get('$_endpoint/documentos/$usuarioId/$folderId');
     final data = json.decode(response.body);
 
     if (response.statusCode >= 300) {

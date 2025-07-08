@@ -26,7 +26,11 @@ class Pedido {
       this.indicaciones = '',
       this.estado = 0,
       this.nombreUsuario = '',
-      this.entregaExterna = false});
+      this.entregaExterna = false}){
+        if( this.ts == 0){
+          this.ts = DateTime.now().millisecondsSinceEpoch;
+        }
+      }
 
   String id;
   String idUsuario;

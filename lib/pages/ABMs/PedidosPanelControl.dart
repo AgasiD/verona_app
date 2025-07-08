@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/error.dart';
 import 'package:verona_app/pages/forms/pedido.dart';
@@ -140,6 +140,8 @@ class _PendientesViewState extends State<_PendientesView> {
             itemBuilder: (context, i) {
               final obra = widget.pendientes[i];
 
+              var listTileTitle = Text(
+                  '${obra['nombre'].toString().toUpperCase()} | ${obra['barrio'].toString().toUpperCase()} ');
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -152,8 +154,7 @@ class _PendientesViewState extends State<_PendientesView> {
                       color: Helper.brandColors[0],
                     ),
                     child: ListTile(
-                      title: Text(
-                          '${obra['nombre'].toString().toUpperCase()} | ${obra['barrio'].toString().toUpperCase()} '),
+                      title: listTileTitle,
                       textColor: Helper.brandColors[5],
                     ),
                   ),
@@ -191,70 +192,80 @@ class _PendientesViewState extends State<_PendientesView> {
                             return Column(
                               children: [
                                 _CustomListTile(
-                                  esNovedad: _tieneNovedad(
-                                      obra['obraId'], pedido['id']),
-                                  esPar: false,
-                                  title:
-                                      "${pedido['titulo'].toString().toUpperCase()}",
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            'PRIORIDAD ' +
-                                                Helper.toTextPrioridad(
-                                                        pedido['prioridad'])
-                                                    .toString()
-                                                    .toUpperCase(),
-                                            style: TextStyle(
-                                                color: Helper.brandColors[8]
-                                                    .withOpacity(.8)),
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          badges.Badge(
-                                            badgeStyle: badges.BadgeStyle(
-                                              // padding: EdgeInsets.symmetric(horizontal: 2)
-                                              badgeColor: colorPrioridad,
+                                    esNovedad: _tieneNovedad(
+                                        obra['obraId'], pedido['id']),
+                                    esPar: false,
+                                    title:
+                                        "${pedido['titulo'].toString().toUpperCase()}",
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              'PRIORIDAD ' +
+                                                  Helper.toTextPrioridad(
+                                                          pedido['prioridad'])
+                                                      .toString()
+                                                      .toUpperCase(),
+                                              style: TextStyle(
+                                                  color: Helper.brandColors[8]
+                                                      .withOpacity(.8)),
                                             ),
-                                            badgeContent: Padding(
-                                              padding: const EdgeInsets.all(0),
-                                              // child: Text(badgeData.toString()),
+                                            SizedBox(
+                                              width: 10,
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      Text(
-                                        txtFecha.toUpperCase(),
-                                        style: TextStyle(
-                                            color: Helper.brandColors[8]
-                                                .withOpacity(.8)),
-                                      ),
-                                      Text(
-                                        textSubtitle.toUpperCase(),
-                                        style: TextStyle(
-                                            color: Helper.brandColors[8]
-                                                .withOpacity(.8)),
-                                      ),
-                                      // Text(
-                                      //   ('Por: ${pedido['usuario']} ${pedido['usuario']}')
-                                      //       .toUpperCase(),
-                                      //   style: TextStyle(
-                                      //       color: Helper.brandColors[8]
-                                      //           .withOpacity(.8)),
-                                      // ),
-                                    ],
-                                  ),
-                                  avatar: pedido['prioridad'].toString(),
-                                  fontSize: 18,
-                                  onTap: true,
-                                  actionOnTap: () => Navigator.pushNamed(
-                                      context, PedidoForm.routeName,
-                                      arguments: arg),
-                                ),
+                                            badges.Badge(
+                                              badgeStyle: badges.BadgeStyle(
+                                                // padding: EdgeInsets.symmetric(horizontal: 2)
+                                                badgeColor: colorPrioridad,
+                                              ),
+                                              badgeContent: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(0),
+                                                // child: Text(badgeData.toString()),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Text(
+                                          txtFecha.toUpperCase(),
+                                          style: TextStyle(
+                                              color: Helper.brandColors[8]
+                                                  .withOpacity(.8)),
+                                        ),
+                                        Text(
+                                          textSubtitle.toUpperCase(),
+                                          style: TextStyle(
+                                              color: Helper.brandColors[8]
+                                                  .withOpacity(.8)),
+                                        ),
+                                        // Text(
+                                        //   ('Por: ${pedido['usuario']} ${pedido['usuario']}')
+                                        //       .toUpperCase(),
+                                        //   style: TextStyle(
+                                        //       color: Helper.brandColors[8]
+                                        //           .withOpacity(.8)),
+                                        // ),
+                                      ],
+                                    ),
+                                    avatar: pedido['prioridad'].toString(),
+                                    fontSize: 18,
+                                    onTap: true,
+                                    actionOnTap: () {
+                                      final id = pedido['id'];
+                                      final idObra = pedido['idObra'];
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PedidoForm(
+                                                        pedidoId: id,
+                                                        obraId:
+                                                            idObra,
+                                                      )));
+                                        }),
                                 index != obra['pedidos'].length - 1
                                     ? Divider(
                                         color: Helper.brandColors[8],

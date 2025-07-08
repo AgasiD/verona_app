@@ -150,9 +150,10 @@ class __SearchListGroupViewState extends State<_SearchListGroupView> {
                             color: Helper.brandColors[3],
                           ),
                           onPressed: () {
-                            Navigator.pushReplacementNamed(
-                                context, MiembroForm.routeName,
-                                arguments: {"usuarioId": null});
+                            Navigator.pushReplacement(
+                                context, 
+                                MaterialPageRoute(builder: (e) => MiembroForm(usuarioId: null,))
+                            );
                           },
                         ),
                   textController: _txtPersonalCtrl,

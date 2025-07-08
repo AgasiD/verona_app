@@ -34,7 +34,7 @@ class Obra {
   String placeHolderImage = 'https://via.placeholder.com/300x150';
   String folderPedidoImages;
   String? driveFolderId;
-  String? ts;
+  int? ts;
   double? latitud;
   double? longitud;
   double porcentajeRealizado;
@@ -98,8 +98,7 @@ class Obra {
     this.rootDriveCliente = rootDriveCliente;
     this.porcentajeRealizado = porcentajeRealizado;
     this.ts =
-        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
-            .toString();
+        (DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).millisecondsSinceEpoch;
   }
 
   factory Obra.fromMap(Map<String, dynamic> json) => Obra(
@@ -118,17 +117,15 @@ class Obra {
       equipo: json["equipo"] == null ? [] : (json["equipo"] as List<dynamic>)
           .map((e) => Miembro.fromJson(e))
           .toList(),
-      etapas: (json["etapas"] as List).map((e) => Etapa.fromJson(e)).toList(),
+      // etapas: (json["etapas"] as List).map((e) => Etapa.fromJson(e)).toList(),
       imageId: json['imageId'] ?? '',
       lote: json["lote"] ?? '',
-      ts: json["ts"] ?? 0,
-      propietarios: (json["propietarios"] as List<dynamic>)
+      // ts: json["ts"] ?? 0,
+      propietarios: json["propietarios"] == null ?  [] : (json["propietarios"] as List<dynamic>)
           .map((e) => Propietario.fromJson(e))
-          .toList(),
+          .toList() ?? [],
       pedidos: json["pedidos"] ?? [],
-
-      
-      enabledFiles: (json["enabledFiles"] as List<dynamic>) ?? [],
+      enabledFiles: json["enabledFiles"] == null ? [] : (json["enabledFiles"] as List<dynamic>) ,
       folderImages: json['folderImages'] ?? 'SinDato',
       rootDriveCliente: json['rootDriveCliente'] ?? 'SinDato',
       folderImagesCliente: json['folderImagesCliente'] ?? 'SinDato',

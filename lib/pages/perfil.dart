@@ -130,15 +130,18 @@ class PerfilPage extends StatelessWidget {
                     _pref.role == 1
                         ? TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(
-                                  context,
-                                  usuario.role == 3
-                                      ? PropietarioForm.routeName
-                                      : MiembroForm.routeName,
-                                  arguments: {
-                                    "usuarioId": usuario.id,
-                                    "pageFrom": 'profile'
-                                  });
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (e) {
+                                return usuario.role == 3
+                                    ? PropietarioForm(
+                                        usuarioId: usuario.id,
+                                        pageFrom: 'profile')
+                                    : MiembroForm(usuarioId: usuario.id);
+                              })
+                                  // arguments: {
+
+                                  // }
+                                  );
                             },
                             child: Text('Editar usuario',
                                 style: TextStyle(
@@ -216,21 +219,19 @@ class PerfilPage extends StatelessWidget {
   }
 
   deleteDevices(context, _usuarioService) async {
-    final deleteDevices = () async {
-      openLoadingDialog(mensaje: 'Desasociando dispositivos...');
-      try {
-        final response = await _usuarioService.deleteAllDevice(usuarioId!);
-        Navigator.pop(_scaffoldKey.currentContext!);
-        openAlertDialog('Dispositivo sincronizado con éxito');
-      } catch (err) {
-        openAlertDialog('Error al sincronizar dispositivo',
-            subMensaje: err.toString());
-        return;
-      }
-    };
-
-    final confirm = openDialogConfirmation(
-        _scaffoldKey.currentContext!, deleteDevices, 'Confirmar desasociacion');
+    if (!await openDialogConfirmationReturn('Confirmar desasociación')) return;
+    openLoadingDialog(mensaje: 'Desasociando dispositivos...');
+    try {
+      final response = await _usuarioService.deleteAllDevice(usuarioId!);
+      closeLoadingDialog();
+      await openAlertDialogReturn('Dispositivo sincronizado con éxito');
+      Navigator.pop(_scaffoldKey.currentContext!);
+    } catch (err) {
+      closeLoadingDialog();
+      openAlertDialog('Error al sincronizar dispositivo',
+          subMensaje: err.toString());
+      return;
+    }
   }
 
   sincNotifications(context, _usuarioService) async {
@@ -238,10 +239,11 @@ class PerfilPage extends StatelessWidget {
       openLoadingDialog(mensaje: 'Sincronizando...');
       final response = await _usuarioService.setTokenDevice(
           usuarioId!, NotificationService.token!);
-      closeLoadingDialog();openAlertDialog('Dispositivo sincronizado con éxito');
+      closeLoadingDialog();
+      openAlertDialog('Dispositivo sincronizado con éxito');
     } catch (err) {
       closeLoadingDialog();
-  openAlertDialog('Error al sincronizar dispositivo',
+      openAlertDialog('Error al sincronizar dispositivo',
           subMensaje: err.toString());
       return;
     }
@@ -261,7 +263,8 @@ class PerfilPage extends StatelessWidget {
             .grabarImagen('${usuario.nombre} ${usuario.apellido}');
 
         if (!dataImage['success']) {
-          closeLoadingDialog();openAlertDialog('No se pudo cargar imagen');
+          closeLoadingDialog();
+          openAlertDialog('No se pudo cargar imagen');
           return;
         }
 
@@ -273,7 +276,7 @@ class PerfilPage extends StatelessWidget {
         openAlertDialog('Imagen subida con éxito');
       } catch (err) {
         closeLoadingDialog();
-       openAlertDialog('Error al subir imagen', subMensaje: err.toString());
+        openAlertDialog('Error al subir imagen', subMensaje: err.toString());
       }
     }
   }
@@ -282,9 +285,10 @@ class PerfilPage extends StatelessWidget {
       context, UsuarioService _usuarioService, ObraService _obraService) async {
     try {
       if (!await openDialogConfirmationReturn(
-           'Confirmar para eliminar personal')) return;
+          'Confirmar para eliminar personal')) return;
 
-      openLoadingDialog(mensaje: 'Eliminando personal, puede demorar...',
+      openLoadingDialog(
+        mensaje: 'Eliminando personal, puede demorar...',
       );
 
       final response = await _usuarioService.deleteUsuario(usuarioId!);
@@ -292,9 +296,11 @@ class PerfilPage extends StatelessWidget {
       await openAlertDialogReturn('Usuario desactivado con éxito');
       _obraService.notifyListeners();
 
-      Navigator.pop(context);
+      Navigator.pop(_scaffoldKey.currentContext!);
     } catch (err) {
-      openAlertDialog('Error al desactivar usuario', subMensaje: err.toString());
+      closeLoadingDialog();
+      openAlertDialog('Error al desactivar usuario',
+          subMensaje: err.toString());
       return;
     }
   }

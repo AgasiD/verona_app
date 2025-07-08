@@ -184,7 +184,7 @@ class __ContactTileState extends State<_ContactTile> {
 
   @override
   Widget build(BuildContext context) {
-    final _chat = Provider.of<ChatService>(context);
+    // final _chat = Provider.of<ChatService>(context);
     final _color = esPar ? Helper.brandColors[2] : Helper.brandColors[1];
     _socketService = Provider.of<SocketService>(context);
     isConnected = usuarioConectado(widget.personal.id);
@@ -239,15 +239,15 @@ class __ContactTileState extends State<_ContactTile> {
                 openLoadingDialog(mensaje: 'Creando chat...');
                 // Generar Chat
                 try {
-                  final response =
-                      await _chat.crearChat(_pref.id, widget.personal.id);
+                  // final response =
+                  //     await _chat.crearChat(_pref.id, widget.personal.id);
                   closeLoadingDialog();
 
                   closeLoadingDialog();
-                  Navigator.pushNamed(context, ChatPage.routeName, arguments: {
-                    'chatId': response.data['chatId'],
-                    'chatName': response.data['chatName'],
-                  });
+                  // Navigator.pushNamed(context, ChatPage.routeName, arguments: {
+                  //   'chatId': response.data['chatId'],
+                  //   'chatName': response.data['chatName'],
+                  // });
                 } catch (err) {
                   closeLoadingDialog();
                 }

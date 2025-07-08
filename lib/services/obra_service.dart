@@ -15,10 +15,13 @@ class ObraService extends ChangeNotifier {
 
   obtenerObras() async {
     final response = await this._http.get(_endpoint);
-    final lista = response["obras"];
-    final listObras =
-        (lista as List<dynamic>).map((json) => Obra.fromMap(json)).toList();
-    return listObras;
+    final data = json.decode(response.body);
+
+    if (response.statusCode >= 300) {
+      throw new Exception('Error ${data['message']} ${response.statusCode}');
+    }
+
+    return data;
   }
 
   Future<dynamic> obtenerObrasByUser(String userId) async {
@@ -46,8 +49,7 @@ class ObraService extends ChangeNotifier {
 
   Future<Obra> obtenerObra(String obraId) async {
     final body = {"propietario": new Preferences().role == 3};
-    final response =
-        await this._http.post('$_endpoint/$obraId', body);
+    final response = await this._http.post('$_endpoint/$obraId', body);
     final data = json.decode(response.body);
 
     if (response.statusCode >= 300) {

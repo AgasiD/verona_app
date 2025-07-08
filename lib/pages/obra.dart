@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/obra.dart';
 import 'package:verona_app/pages/anotaciones.dart';
 import 'package:verona_app/pages/chat.dart';
@@ -111,11 +111,11 @@ class ObraPage extends StatelessWidget {
                                             ? CustomNavigatorButton(
                                                 icono: Icons.groups_outlined,
                                                 accion: () {
-                                                  Navigator.pushNamed(context,
-                                                      ChatPage.routeName,
-                                                      arguments: {
-                                                        'chatId': obra.chatI
-                                                      });
+                                                  // Navigator.pushNamed(context,
+                                                  //     ChatPage.routeName,
+                                                  //     arguments: {
+                                                  //       'chatId': obra.chatI
+                                                  //     });
                                                 },
                                                 showNotif: tieneMensajeSinLeer(
                                                     obra.nombre, obra.chatI),
@@ -127,18 +127,19 @@ class ObraPage extends StatelessWidget {
                                             _pref.role != 3
                                                 ? openDialogConfirmation(
                                                     context, (ctx) {
-                                                    Navigator.pushNamed(
-                                                        ctx, ChatPage.routeName,
-                                                        arguments: {
-                                                          'chatId': obra.chatE
-                                                        });
+                                                    // Navigator.pushNamed(
+                                                    //     ctx, ChatPage.routeName,
+                                                    //     arguments: {
+                                                    //       'chatId': obra.chatE
+                                                    //     });
                                                   },
                                                     'Abrirá chat con propietarios')
-                                                : Navigator.pushNamed(
-                                                    context, ChatPage.routeName,
-                                                    arguments: {
-                                                        'chatId': obra.chatE
-                                                      });
+                                                : null
+                                              // pushNamed(
+                                              //       context, ChatPage.routeName,
+                                              //       arguments: {
+                                              //           'chatId': obra.chatE
+                                              //         });
                                             ;
                                           },
                                           showNotif: tieneMensajeSinLeer(
@@ -517,9 +518,9 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
               final _obraService =
                   Provider.of<ObraService>(context, listen: false);
               final response = await _obraService
-                  .obtenerObraArticuloFile(obra.id) as MyResponse;
+                  .obtenerObraArticuloFile(obra.id);
               closeLoadingDialog();
-              final file = response.data;
+              final file = response;
               Uri _url;
               switch (file["mimeType"]) {
                 case "application/vnd.google-apps.document":
@@ -533,6 +534,7 @@ class _CaracteristicaObraState extends State<CaracteristicaObra> {
               }
               await lanzarUrl(_url);
             } catch (err) {
+              closeLoadingDialog();
               openAlertDialog('Hubo en error al cargar el archivo.',
                   subMensaje: err.toString());
               return;
@@ -871,8 +873,8 @@ class _ObraBigrafy extends StatelessWidget {
         };
       }).toList();
 
-      openBottomSheet(
-          context, 'Abrir mapa', 'Seleccionar aplicacion', acciones);
+      openBottomSheetWithGetX(
+          'Abrir mapa', 'Seleccionar aplicacion', acciones);
     } else {
       await availableMaps.first.showMarker(
         coords: Coords(_obraService.obra.latitud!, _obraService.obra.longitud!),

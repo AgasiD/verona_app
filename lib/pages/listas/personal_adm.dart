@@ -145,10 +145,10 @@ class __CustomSearchListViewState extends State<_CustomSearchListView> {
                 : IconButton(
                     color: Helper.brandColors[4],
                     icon: _pref.role == 1 ? Icon(Icons.add) : Container(),
-                    onPressed: () => Navigator.pushNamed(
-                        context, MiembroForm.routeName,
-                        arguments: {}),
-                  ),
+                    onPressed: () => Navigator.push(
+                         context, 
+                         MaterialPageRoute(builder: (e) => MiembroForm(usuarioId: null,))),
+                ),
             textController: widget.txtController,
             onChange: (text) {
               widget.dataFiltrada = widget.data;

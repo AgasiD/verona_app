@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:verona_app/helpers/Preferences.dart';
 import 'package:verona_app/helpers/helpers.dart';
-import 'package:verona_app/models/MyResponse.dart';
+
 import 'package:verona_app/models/inactividad.dart';
 import 'package:verona_app/services/obra_service.dart';
 import 'package:verona_app/widgets/custom_widgets.dart';
@@ -82,8 +82,7 @@ class _FormState extends State<_Form> {
           if (!confirm) return;
           openLoadingDialog(mensaje: 'Actualizando inactividad...');
           loading = true;
-          MyResponse response;
-          response = await _obraService.editInactividad(obraId, inactividad);
+          final response = await _obraService.editInactividad(obraId, inactividad);
           closeLoadingDialog();
           loading = false;
           _obraService.obra.diasInactivos[index] = inactividad.toMap();
@@ -113,8 +112,7 @@ class _FormState extends State<_Form> {
                 fileName: txtCtrlFile.text,
                 usuarioId: _pref.id,
                 privado: esPrivado);
-            MyResponse response;
-            response = await _obraService.nuevaInactividad(obraId, inactividad);
+            final response = await _obraService.nuevaInactividad(obraId, inactividad);
             closeLoadingDialog();
             loading = false;
             openAlertDialog('Inactividad generada');
