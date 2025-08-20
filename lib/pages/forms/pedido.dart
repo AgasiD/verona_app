@@ -296,7 +296,11 @@ class _FormState extends State<_Form> {
                               child: _Custom_Dropdown(
                                   valorId: prioridad.toString(),
                                   valores: PRIORIDADES,
-                                  actionOnChange: (a) => {})),
+                                  actionOnChange: (a) => {
+                                    setState(() {
+                                      prioridad = int.parse(a!);
+                                    })
+                                  })),
                           SizedBox(
                             height: 20,
                           ),

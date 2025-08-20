@@ -241,13 +241,13 @@ class _PendientesViewState extends State<_PendientesView> {
                                               color: Helper.brandColors[8]
                                                   .withOpacity(.8)),
                                         ),
-                                        // Text(
-                                        //   ('Por: ${pedido['usuario']} ${pedido['usuario']}')
-                                        //       .toUpperCase(),
-                                        //   style: TextStyle(
-                                        //       color: Helper.brandColors[8]
-                                        //           .withOpacity(.8)),
-                                        // ),
+                                        Text(
+                                          ('Por: ${pedido['usuario']['nombre']} ${pedido['usuario']['apellido']}')
+                                              .toUpperCase(),
+                                          style: TextStyle(
+                                              color: Helper.brandColors[8]
+                                                  .withOpacity(.8)),
+                                        ),
                                       ],
                                     ),
                                     avatar: pedido['prioridad'].toString(),

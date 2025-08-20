@@ -135,14 +135,14 @@ class _ListaTareaState extends State<ListaTarea> {
           newIndex -= 1;
         }
         try {
+          final Tarea item = widget.tareas.removeAt(oldIndex);
+          widget.tareas.insert(newIndex, item);
+          setState(() {});
           final response = await _obraService.actualizarOrdenTareas(
               _obraService.obra.id,
               widget.etapaId,
               widget.tareas[newIndex].subetapa,
               widget.tareas);
-          final Tarea item = widget.tareas.removeAt(oldIndex);
-          widget.tareas.insert(newIndex, item);
-          setState(() {});
         } catch (err) {
           openAlertDialog('Error al ordenar',
               subMensaje: err.toString());
